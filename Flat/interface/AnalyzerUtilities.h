@@ -1,6 +1,7 @@
 // PandaProd Objects
 #include "PandaProd/Objects/interface/PEvent.h"
 #include "PandaProd/Objects/interface/PMET.h"
+#include "PandaProd/Objects/interface/PPhoton.h"
 #include "PandaProd/Objects/interface/PMuon.h"
 #include "PandaProd/Objects/interface/PElectron.h"
 #include "PandaProd/Objects/interface/PTau.h"
@@ -15,7 +16,7 @@
 bool MuonIsolation(double pt, double eta, double iso, panda::PMuon::MuonID isoType) {
   float maxIso=0;
   float abseta = TMath::Abs(eta);
-  maxIso = (isoType == kTight) ? 0.15 : 0.25;
+  maxIso = (isoType == panda::PMuon::kTight) ? 0.15 : 0.25;
   return (iso < pt*maxIso);
 }
 
@@ -23,16 +24,16 @@ bool ElectronIsolation(double pt, double eta, double iso, panda::PElectron::Elec
   float maxIso=0;
   float abseta = TMath::Abs(eta);
   switch (isoType) {
-    case kVeto:
+    case panda::PElectron::kVeto:
       maxIso = (abseta<=1.479) ? 0.126 : 0.144;
       break;
-    case kLoose:
+    case panda::PElectron::kLoose:
       maxIso = (abseta<=1.479) ? 0.0893 : 0.121;
       break;
-    case kMedium:
+    case panda::PElectron::kMedium:
       maxIso = (abseta<=1.479) ? 0.0766 : 0.0678;
       break;
-    case kTight:
+    case panda::PElectron::kTight:
       maxIso = (abseta<=1.479) ? 0.0354 : 0.0646;
       break;
     default:
