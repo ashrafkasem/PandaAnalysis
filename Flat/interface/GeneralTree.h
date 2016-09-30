@@ -796,7 +796,7 @@ void GeneralTree::WriteTree(TTree *t) {
       treePtr = t;
     	treePtr->Branch("runNumber",&runNumber,"runNumber/I");
 	treePtr->Branch("lumiNumber",&lumiNumber,"lumiNumber/I");
-	treePtr->Branch("eventNumber",&eventNumber,"eventNumber/Ulong64_t");
+	treePtr->Branch("eventNumber",&eventNumber,"eventNumber/l");
 	treePtr->Branch("npv",&npv,"npv/I");
 	treePtr->Branch("mcWeight",&mcWeight,"mcWeight/F");
 	treePtr->Branch("trigger",&trigger,"trigger/I");
