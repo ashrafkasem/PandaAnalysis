@@ -9,6 +9,10 @@ using namespace panda;
 using namespace std;
 
 PandaAnalyzer::PandaAnalyzer() {
+  gt = new GeneralTree();
+  betas = gt->get_betas(); 
+  Ns = gt->get_Ns(); 
+  orders = gt->get_orders(); 
 }
 
 PandaAnalyzer::~PandaAnalyzer() {
@@ -47,7 +51,7 @@ void PandaAnalyzer::Init(TTree *t, TTree *infotree)
   if (!isData) {
     t->SetBranchAddress("gen",&genparts);  
     TH1F *hDTotalMCWeight = new TH1F("hDTotalMCWeight","hDTotalMCWeight",4,-2,2);
-    TString val("fabs(info.mcWeight)/(info.mcWeight)")
+    TString val("fabs(info.mcWeight)/(info.mcWeight)");
     infotree->Draw(val+">>hDTotalMCWeight",val);
     fOut->WriteTObject(hDTotalMCWeight,"hDTotalMCWeight");
   }
@@ -72,7 +76,6 @@ PGenParticle *PandaAnalyzer::MatchToGen(double eta, double phi, double radius) {
 
 void PandaAnalyzer::Terminate() {
   fOut->WriteTObject(tIn);
-  fOut->WriteTObject(hDTotalMCWeight);
   fOut->Close();
 
   fEleTrigB->Close();
@@ -86,8 +89,6 @@ void PandaAnalyzer::Terminate() {
   fMuSFTrack->Close();
   fPU->Close();
   fKFactor->Close();
-  fHFNew->Close();
-  fLFNew->Close();
 
   delete btagCalib;
   delete hfReader;
@@ -187,7 +188,7 @@ bool PandaAnalyzer::PassPreselection() {
   if (preselBits==0)
     return true;
   bool isGood=false;
-  if (preselBits & kMonotopCA15) {
+  if (preselBits & kMonotop) {
     if (gt->nFatjet==1 && gt->fj1Pt>250) { 
       if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
             (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
@@ -288,12 +289,371 @@ void PandaAnalyzer::Run() {
     gt->npv = event->npv;
     gt->metFilter = (event->metfilters->at(0)) ? 1 : 0;
     if (!isData) 
-      gt->sf_pu = getVal(hPUWeight,bound(npv,sf_puMin,sf_puMax));
+      gt->sf_pu = getVal(hPUWeight,bound(gt->npv,sf_puMin,sf_puMax));
+    bool passTrigger=true;
+    for (auto iT : metTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
+    if (passTrigger) { gt->trigger |= kMETTrig; }
+    passTrigger=true;
+    for (auto iT : eleTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
+    if (passTrigger) { gt->trigger |= kSingleEleTrig; }
+    passTrigger=true;
+    for (auto iT : phoTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
+    if (passTrigger) { gt->trigger |= kSinglePhoTrig; }
+
 
     tr.TriggerEvent("initialize");
 
+    // met
+    gt->pfmet = pfmet->pt;
+    gt->pfmetphi = pfmet->phi;
+    gt->puppimet = puppimet->pt;
+    gt->puppimetphi = puppimet->phi;
+    TLorentzVector vPFMET, vPuppiMET;
+    vPFMET.SetPtEtaPhiM(gt->pfmet,0,gt->pfmetphi,0); 
+    vPuppiMET.SetPtEtaPhiM(gt->puppimet,0,gt->puppimetphi,0); 
+    TVector2 vMETNoMu; vMETNoMu.SetMagPhi(gt->pfmet,gt->pfmetphi); //  for trigger eff
+
+    tr.TriggerEvent("met");
+
+    //electrons
+    std::vector<PObject*> looseLeps, tightLeps;
+    for (PElectron *ele : *electrons) {
+      float pt = ele->pt; float eta = ele->eta; float aeta = fabs(eta);
+      if (pt<10 || aeta>2.5 || (aeta>1.4442 && aeta<1.566))
+        continue;
+      if ((ele->id&PElectron::kVeto)==0)
+        continue;
+      if (!ElectronIsolation(pt,eta,ele->iso,PElectron::kVeto))
+        continue;
+      looseLeps.push_back(ele);
+      gt->nLooseElectron++;
+    } 
+
+    // muons
+    for (PMuon *mu : *muons) {
+      float pt = mu->pt; float eta = mu->eta; float aeta = fabs(eta);
+      if (pt<10 || aeta>2.4)
+        continue;
+      if ((mu->id&PMuon::kLoose)==0)
+        continue;
+      if (!MuonIsolation(pt,eta,mu->iso,PMuon::kLoose))
+        continue;
+      looseLeps.push_back(mu);
+      gt->nLooseMuon++;
+      TVector2 vMu; vMu.SetMagPhi(pt,mu->phi);
+      vMETNoMu += vMu;
+    } 
+    gt->pfmetnomu = vMETNoMu.Mod();
+
+    // now consider all leptons
+    gt->nLooseLep = looseLeps.size();
+    std::partial_sort(looseLeps.begin(),looseLeps.begin()+3,looseLeps.end(),SortPObjects);
+    int lep_counter=1;
+    for (PObject *lep : looseLeps) {
+      if (lep_counter==1) {
+        gt->looseLep1Pt = lep->pt;
+        gt->looseLep1Eta = lep->eta;
+        gt->looseLep1Phi = lep->phi;
+      } else if (lep_counter==2) {
+        gt->looseLep2Pt = lep->pt;
+        gt->looseLep2Eta = lep->eta;
+        gt->looseLep2Phi = lep->phi;
+      } else {
+        break;
+      }
+      // now specialize lepton types
+      PMuon *mu = dynamic_cast<PMuon*>(lep);
+      if (mu!=NULL) {
+        bool isTight = ( (mu->id&PMuon::kTight)!=0 &&
+                          MuonIsolation(mu->pt,mu->eta,mu->iso,PMuon::kTight) &&
+                          mu->pt>20 && fabs(mu->eta)<2.4 );
+        if (lep_counter==1) {
+          gt->looseLep1PdgId = mu->q*13;
+          if (isTight) {
+            gt->nTightMuon++;
+            gt->looseLep1IsTight = 1;
+            matchLeps.push_back(lep);
+          }
+        } else if (lep_counter==2) {
+          gt->looseLep2PdgId = mu->q*13;
+          if (isTight) {
+            gt->nTightMuon++;
+            gt->looseLep2IsTight = 1;
+          }
+          if (isTight || gt->looseLep1IsTight)
+            matchLeps.push_back(lep);
+        }
+      } else {
+        PElectron *ele = dynamic_cast<PElectron*>(lep);
+        bool isTight = ( (ele->id&PElectron::kTight)!=0 &&
+                          ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&
+                          ele->pt>40 && fabs(ele->eta)<2.5 );
+        if (lep_counter==1) {
+          gt->looseLep1PdgId = mu->q*11;
+          if (isTight) {
+            gt->nTightMuon++;
+            gt->looseLep1IsTight = 1;
+            matchLeps.push_back(lep);
+            matchEles.push_back(lep);
+          }
+        } else if (lep_counter==2) {
+          gt->looseLep2PdgId = mu->q*11;
+          if (isTight) {
+            gt->nTightMuon++;
+            gt->looseLep2IsTight = 1;
+          }
+          if (isTight || gt->looseLep1IsTight) {
+            matchLeps.push_back(lep);
+            matchEles.push_back(lep);
+          }
+        }
+      }
+      ++lep_counter;
+    }
+    gt->nTightLep = gt->nTightElectron + gt->nTightMuon;
+    if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
+      TLorentzVector v1,v2;
+      PObject *lep1=looseLeps[0], *lep2=looseLeps[1];
+      v1.SetPtEtaPhiM(lep1->pt,lep1->eta,lep1->phi,lep1->m);
+      v2.SetPtEtaPhiM(lep2->pt,lep2->eta,lep2->phi,lep2->m);
+      gt->diLepMass = (v1+v2).M();
+    } else {
+      gt->diLepMass = -1;
+    }
+
+    tr.TriggerEvent("leptons"); 
+
+    // photons
+    std::vector<panda::PPhoton*> loosePhos;
+    for (PPhoton *pho : *photons) {
+      if ((pho->id&PPhoton::kLoose)==0)
+        continue;
+      float pt = pho->pt;
+      if (pt<1) continue;
+      float eta = pho->eta, phi = pho->phi;
+      if (pt<15 || fabs(eta)>2.5)
+        continue;
+      if (IsMatched(&matchEles,0.16,eta,phi))
+        continue;
+      loosePhos.push_back(pho);
+      gt->nLoosePhoton++;
+      if (gt->nLoosePhoton==1) {
+        gt->loosePho1Pt = pt;
+        gt->loosePho1Eta = eta;
+        gt->loosePho1Phi = phi;
+      }
+      if ( (pho->id&PPhoton::kTight)!=0 &&
+            pt>175 && fabs(eta)<1.4442 ) {
+        if (gt->nLoosePhoton==1)
+          gt->loosePho1IsTight=1;
+        gt->nTightPhoton++;
+        matchPhos.push_back(pho);
+      }
+    }
+
+    if (isData && gt->nLoosePhoton>0) {
+      if (gt->loosePho1Pt>=175 && gt->loosePho1Pt<200)
+        gt->sf_phoPurity = 0.04802;
+      else if (gt->loosePho1Pt>=200 && gt->loosePho1Pt<250)
+        gt->sf_phoPurity = 0.04241;
+      else if (gt->loosePho1Pt>=250 && gt->loosePho1Pt<300)
+        gt->sf_phoPurity = 0.03641;
+      else if (gt->loosePho1Pt>=300 && gt->loosePho1Pt<350)
+        gt->sf_phoPurity = 0.0333;
+      else if (gt->loosePho1Pt>=350)
+        gt->sf_phoPurity = 0.02544;
+    }
+
+    tr.TriggerEvent("photons");
+
+    // trigger efficiencies
+    gt->sf_eleTrig=1; gt->sf_metTrig=1; gt->sf_phoTrig=1;
+    if (!isData) {
+      gt->sf_metTrig = getVal(hMetTrig,bound(gt->pfmetnomu,0,1000));
+
+      if (gt->nLooseElectron>0 && abs(gt->looseLep1PdgId)==1
+          && gt->looseLep1IsTight==1 && gt->nLooseMuon==0) {
+        float eff1=0, eff2=0;
+        if (gt->looseLep1Pt<100) {
+          eff1 = getVal(hEleTrigLow,
+                        bound(gt->looseLep1Eta,-1.*sf_eleEtaMax,sf_eleEtaMax),
+                        bound(gt->looseLep1Pt,0,sf_elePtMax));
+        } else {
+          if (fabs(gt->looseLep1Eta)<1.4442) {
+            eff1 = getVal(hEleTrigB,bound(gt->looseLep1Pt,0,1000));
+          }
+          if (1.5660<fabs(gt->looseLep1Eta) && fabs(gt->looseLep1Eta)<2.5) {
+            eff1 = getVal(hEleTrigE,bound(gt->looseLep1Pt,0,1000));
+          }
+        }
+        if (gt->nLooseElectron>1 && fabs(gt->looseLep2PdgId)==11) {
+          if (gt->looseLep2Pt<100) {
+            eff2 = getVal(hEleTrigLow,
+                          bound(gt->looseLep2Eta,-1.*sf_eleEtaMax,sf_eleEtaMax),
+                          bound(gt->looseLep2Pt,0,sf_elePtMax));
+          } else {
+            if (fabs(gt->looseLep2Eta)<1.4442) {
+              eff2 = getVal(hEleTrigB,bound(gt->looseLep2Pt,0,1000));
+            }
+            if (1.5660<fabs(gt->looseLep2Eta) && fabs(gt->looseLep2Eta)<2.5) {
+              eff2 = getVal(hEleTrigE,bound(gt->looseLep2Pt,0,1000));
+            }
+          }
+        }
+        gt->sf_eleTrig = 1 - (1-eff1)*(1-eff2);
+      } // done with ele trig SF
+
+      if (gt->nLoosePhoton>0 && gt->loosePho1IsTight)
+        gt->sf_phoTrig = getVal(hPhoTrig,bound(gt->loosePho1Pt,160,1000));
+    } 
+
+    tr.TriggerEvent("triggers");
+
+    // recoil!
+    TLorentzVector vObj1, vObj2;
+    TLorentzVector vUW, vUZ, vUA;
+    TLorentzVector vpfUW, vpfUZ, vpfUA;
+    if (gt->nLooseLep>0) {
+      PObject *lep1 = looseLeps.at(0);
+      vObj1.SetPtEtaPhiM(lep1->pt,lep1->eta,lep1->phi,lep1->m);
+
+      // one lep => W
+      vUW = vPuppiMET+vObj1; gt->UWmag=vUW.Pt(); gt->UWphi=vUW.Phi();
+      vpfUW = vPFMET+vObj1; gt->pfUWmag=vpfUW.Pt(); gt->pfUWphi=vpfUW.Phi();
+
+      if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
+        // two OS lep => Z
+        PObject *lep2 = looseLeps.at(1);
+        vObj2.SetPtEtaPhiM(lep2->pt,lep2->eta,lep2->phi,lep2->m);
+
+        vUZ=vUW+vObj2; gt->UZmag=vUZ.Pt(); gt->UZphi=vUZ.Phi();
+        vpfUZ=vpfUW+vObj2; gt->pfUZmag=vpfUZ.Pt(); gt->pfUZphi=vpfUZ.Phi();
+      }
+    }
+    if (gt->nLoosePhoton>0) {
+      PPhoton *pho = loosePhos.at(0);
+      vObj1.SetPtEtaPhiM(pho->pt,pho->eta,pho->phi,pho->m);
+
+      vUA=vPuppiMET+vObj1; gt->UAmag=vUA.Pt(); gt->UAphi=vUA.Phi();
+      vpfUA=vPFMET+vObj1; gt->pfUAmag=vpfUA.Pt(); gt->pfUAphi=vpfUA.Phi();
+    }
+
+    tr.TriggerEvent("recoils");
+
+    PFatJet *fj1=0;
+    gt->nFatjet=0;
+    for (PFatJet *fj : *fatjets) {
+      float pt = fj->pt;
+      float rawpt = fj->rawPt;
+      float eta = fj->eta;
+      float ptcut = 250;
+      if (pt<ptcut || rawpt<ptcut || fabs(eta)>2.4)
+        continue;
+      float phi = fj->phi;
+      if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi))
+        continue;
+      gt->nFatjet++;
+      if (gt->nFatjet==1) {
+        fj1 = fj;
+        gt->fj1Pt = pt;
+        gt->fj1Eta = eta;
+        gt->fj1Phi = phi;
+        gt->fj1MSD = fj->mSD;
+        gt->fj1Tau32 = clean(fj->tau3/fj->tau2);
+        gt->fj1Tau32SD = clean(fj->tau3SD/fj->tau2SD);
+        gt->fj1Tau21 = clean(fj->tau2/fj->tau1);
+        gt->fj1Tau21SD = clean(fj->tau2SD/fj->tau1SD);
+        gt->fj1RawPt = rawpt;
+
+        for (unsigned int iB=0; iB!=betas.size(); ++iB) {
+          float beta = betas.at(iB);
+          for (auto N : Ns) {
+            for (auto order : orders) {
+              gt->fj1ECFNs[makeECFString(order,N,beta)] = fj->get_ecf(order,N,iB); 
+            }
+          }
+        } //loop over betas
+
+        VJet *subjets = fj->subjets;
+        std::sort(subjets->begin(),subjets->end(),SortPJetByCSV);
+        gt->fj1MaxCSV = subjets->at(0)->csv; 
+        gt->fj1MinCSV = subjets->back()->csv; 
+      }
+    }
+
+    tr.TriggerEvent("fatjet");
+
+    // first identify interesting jets
+    vector<PJet*> cleanedJets, isoJets;
+    TLorentzVector vJet;
+    PJet *jet1=0, *jet2=0;
+    gt->dphipuppimet=999; gt->dphipfmet=999;
+    for (PJet *jet : *jets) {
+      if (jet->pt<30 || abs(jet->eta)>4.5) // loose ID should go here
+        continue;
+      if (IsMatched(&matchLeps,0.16,jet->eta,jet->phi) ||
+          IsMatched(&matchPhos,0.16,jet->eta,jet->phi))
+        continue;
+      cleanedJets.push_back(jet);
+      float csv = (fabs(jet->eta)<2.5) ? jet->csv : -1;
+      if (cleanedJets.size()==1) {
+        jet1 = jet;
+        gt->jet1Pt = jet->pt;
+        gt->jet1Eta = jet->eta;
+        gt->jet1Phi = jet->phi;
+        gt->jet1CSV = csv; 
+      } else if (cleanedJets.size()==2) {
+        jet2 = jet;
+        gt->jet2Pt = jet->pt;
+        gt->jet2Eta = jet->eta;
+        gt->jet2Phi = jet->phi;
+        gt->jet2CSV = csv; 
+      } 
+      // compute dphi wrt mets
+      vJet.SetPtEtaPhiM(jet->pt,jet->eta,jet->phi,jet->m);
+      gt->dphipuppimet = std::min(fabs(vJet.DeltaPhi(vPuppiMET)),(double)gt->dphipuppimet);
+      gt->dphipfmet = std::min(fabs(vJet.DeltaPhi(vPFMET)),(double)gt->dphipfmet);
+      // btags
+      if (csv>0.460) ++gt->jetNBtags;
+      if (gt->nFatjet>0 && fabs(jet->eta)<2.5
+          && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet->eta,jet->phi)>2.25) {
+        isoJets.push_back(jet);
+        if (csv>0.460) ++gt->isojetNBtags;
+      }
+    }
+    gt->nJet = cleanedJets.size();
+    if (gt->nJet>1) {
+      gt->jet12DEta = fabs(jet1->eta-jet2->eta);
+      TLorentzVector vj1, vj2; 
+      vj1.SetPtEtaPhiM(jet1->pt,jet1->eta,jet1->phi,jet1->m);
+      vj2.SetPtEtaPhiM(jet2->pt,jet2->eta,jet2->phi,jet2->m);
+      gt->jet12Mass = (vj1+vj2).M();
+    }
+
+    tr.TriggerEvent("jets");
+
+    for (PTau *tau : *taus) {
+      if ((tau->id&PTau::kDecayModeFinding)==0 ||
+          (tau->id&PTau::kDecayModeFindingNewDMs)==0) 
+        continue;
+      if (tau->isoDeltaBetaCorr>5)
+        continue; 
+      if (tau->pt<10 || fabs(tau->eta)>2.3)
+        continue;
+      if (IsMatched(&matchLeps,0.16,tau->eta,tau->phi))
+        continue;
+      gt->nTau++;
+    } 
+
+    tr.TriggerEvent("taus");
+
+    if (!PassPreselection())
+      continue;
+
+    tr.TriggerEvent("presel");
+
     // identify interesting gen particles for fatjet matching
-    if (processType>kTT) {
+    if (!isData && processType>=kTT) {
       std::vector<int> targets;
 
       int nGen = genparts->size();
@@ -301,7 +661,7 @@ void PandaAnalyzer::Run() {
         PGenParticle *part = genparts->at(iG);
         int pdgid = part->pdgid;
         unsigned int abspdgid = TMath::Abs(pdgid);
-        bool good= (  (processType==kTop && abspdgid==6) ||
+        bool good= (  ((processType==kTop||processType==kTT) && abspdgid==6) ||
                       (processType==kV && (abspdgid==23 || abspdgid==24)) ||
                       (processType==kH && (abspdgid==25))
                     );
@@ -409,458 +769,263 @@ void PandaAnalyzer::Run() {
 
     tr.TriggerEvent("gen matching");
 
-    // met
-    gt->pfmet = pfmet->pt;
-    gt->pfmetphi = pfmet->phi;
-    gt->puppimet = puppimet->pt;
-    gt->puppimetphi = puppimet->phi;
-    TLorentzVector vPFMET, vPuppiMET;
-    vPFMET.SetPtEtaPhiM(gt->pfmet,0,gt->pfmetphi,0); 
-    vPuppiMET.SetPtEtaPhiM(gt->puppimet,0,gt->puppimetphi,0); 
-
-    tr.TriggerEvent("met");
-
-    //electrons
-    std::vector<PObject*> looseLeps, tightLeps;
-    for (PElectron *ele : electrons) {
-      float pt = ele->pt; float eta = ele->eta; float aeta = fabs(eta);
-      if (pt<10 || aeta>2.5 || (aeta>1.4442 && aeta<1.566))
-        continue;
-      if ((ele->id&PElectron::kVeto)==0)
-        continue;
-      if (!ElectronIsolation(pt,eta,ele->iso,PElectron::kVeto))
-        continue;
-      looseLeps.push_back(ele);
-      gt->nLooseElectron++;
-    } 
-
-    // muons
-    for (PMuon *mu : muons) {
-      float pt = mu->pt; float eta = mu->eta; float aeta = fabs(eta);
-      if (pt<10 || aeta>2.4)
-        continue;
-      if ((mu->id&PMuon::kLoose)==0)
-        continue;
-      if (!MuonIsolation(pt,eta,mu->iso,PMuon::kLoose))
-        continue;
-      looseLeps.push_back(mu);
-      gt->nLooseMuon++;
-    } 
-
-    // now consider all leptons
-    gt->nLooseLep = looseLeps.size();
-    std::partial_sort(looseLeps.begin(),looseLeps.begin()+3,looseLeps.end(),SortPObjects);
-    int lep_counter=1;
-    for (PObject *lep : looseLeps) {
-      if (lep_counter==1) {
-        gt->looseLep1Pt = lep->pt;
-        gt->looseLep1Eta = lep->eta;
-        gt->looseLep1Phi = lep->phi;
-      } else if (lep_counter==2) {
-        gt->looseLep2Pt = lep->pt;
-        gt->looseLep2Eta = lep->eta;
-        gt->looseLep2Phi = lep->phi;
+    // do gen matching now that presel is passed
+    if (!isData && gt->nFatjet>0) {
+      // first see if jet is matched
+      PGenParticle *matched = MatchToGen(fj1->eta,fj1->phi,1.5);
+      if (matched!=NULL) {
+        gt->fj1IsMatched = 1;
+        gt->fj1GenPt = matched->pt;
+        gt->fj1GenSize = genObjects[matched];
       } else {
-        break;
+        gt->fj1IsMatched = 0;
       }
-      // now specialize lepton types
-      PMuon *mu = dyanmic_cast<PMuon*>(lep);
-      if (mu!=NULL) {
-        bool isTight = ( (mu->id&PMuon::kTight)!=0 &&
-                          MuonIsolation(mu->pt,mu->eta,mu->iso,PMuon::kTight) &&
-                          mu->pt>20 && fabs(mu->eta)<2.4 );
-        if (lep_counter==1) {
-          gt->looseLep1PdgId = mu->q*13;
-          if (isTight) {
-            gt->nTightMuon++;
-            gt->looseLep1IsTight = 1;
-            matchLeps.push_back(lep);
-          }
-        } else if (lep_counter==2) {
-          gt->looseLep2PdgId = mu->q*13;
-          if (isTight) {
-            gt->nTightMuon++;
-            gt->looseLep2IsTight = 1;
-          }
-          if (isTight || gt->looseLep1IsTight)
-            matchLeps.push_back(lep);
-        }
-      } else {
-        PElectron *ele = dyanmic_cast<PElectron*>(lep);
-        bool isTight = ( (ele->id&PElectron::kTight)!=0 &&
-                          ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&
-                          ele->pt>40 && fabs(ele->eta)<2.5 );
-        if (lep_counter==1) {
-          gt->looseLep1PdgId = mu->q*11;
-          if (isTight) {
-            gt->nTightMuon++;
-            gt->looseLep1IsTight = 1;
-            matchLeps.push_back(lep);
-            matchEles.push_back(lep);
-          }
-        } else if (lep_counter==2) {
-          gt->looseLep2PdgId = mu->q*11;
-          if (isTight) {
-            gt->nTightMuon++;
-            gt->looseLep2IsTight = 1;
-          }
-          if (isTight || gt->looseLep1IsTight) {
-            matchLeps.push_back(lep);
-            matchEles.push_back(lep);
-          }
-        }
-      }
-      ++lep_counter;
-    }
-    gt->nTightLep = gt->nTightElectron + gt->nTightMuon;
-    if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId=0) {
-      TLorentzVector v1,v2;
-      PObject *lep1=looseLeps[0], *lep2=looseLeps[1];
-      v1.SetPtEtaPhiM(lep1->pt,lep1->eta,lep1->phi,lep1->m);
-      v2.SetPtEtaPhiM(lep2->pt,lep2->eta,lep2->phi,lep2->m);
-      gt->diLepMass = (v1+v2).M();
-    } else {
-      gt->diLepMass = -1;
-    }
 
-    tr.TriggerEvent("leptons") 
-
-    std::vector<panda::PPhoton*> loosePhos;
-    for (PPhoton *pho : photons) {
-      if ((pho->id&PPhoton::kLoose)==0)
-        continue;
-      float pt = pho->pt;
-      if (pt<1) continue;
-      float eta = pho->eta, phi = pho->phi;
-      if (pt<15 || fabs(eta)>2.5)
-        continue;
-      if (IsMatched(&matchEles,0,0.16,eta,phi))
-        continue;
-      loosePhos.push_back(pho);
-      gt->nLoosePhoton++;
-      if (gt->nLoosePhoton==1) {
-        gt->loosePho1Pt = pt;
-        gt->loosePho1Eta = eta;
-        gt->loosePho1Phi = phi;
-      }
-      if ( (pho->id&PPhoton::kTight)!=0 &&
-            pt>175 && fabs(eta)<1.4442 ) {
-        if (gt->nLoosePhoton==1)
-          gt->loosePho1IsTight=1;
-        gt->nTightPhoton++;
-        matchPhos.push_back(pho);
-      }
-    }
-
-    if (isData && gt->nLoosePhoton>0) {
-      if (gt->loosePho1Pt>=175 && gt->loosePho1Pt<200)
-        gt->sf_phoPurity = 0.04802;
-      else if (gt->loosePho1Pt>=200 && gt->loosePho1Pt<250)
-        gt->sf_phoPurity = 0.04241;
-      else if (gt->loosePho1Pt>=250 && gt->loosePho1Pt<300)
-        gt->sf_phoPurity = 0.03641;
-      else if (gt->loosePho1Pt>=300 && gt->loosePho1Pt<350)
-        gt->sf_phoPurity = 0.0333;
-      else if (gt->loosePho1Pt>=350)
-        gt->sf_phoPurity = 0.02544;
-    }
-
-    tr.TriggerEvent("photons");
-
-    //HERE I AM - do recol next
-
-    // these are ak4 jets stored in the tree
-    for (auto *anajet : anajets) {
-      JetWriter *outjet = anajet->outjet;
-      VJet *injets = anajet->injets;
-
-      int nJets = injets->size();
-      for (int iJ=0; iJ!=nJets; ++iJ) {
-        outjet->reset();
-        PJet *pjet = injets->at(iJ);
-        outjet->read(pjet);
-        outjet->idx = iJ;
-        anajet->outtree->Fill();
-      } // loop over jets
-    } // loop over jet collections
-
-    tr.TriggerEvent("jets");
-
-    // these are fat jets stored in the tree
-    // much more complicated!
-    for (auto *anafatjet : anafatjets) {
-      FatJetWriter *outjet = anafatjet->outjet;
-      VFatJet *injets = anafatjet->injets;
-
-      int nJets = injets->size();
-      for (int iJ=0; iJ!=nJets; ++iJ) {
-        outjet->reset();
-        if (maxJets>=0 && iJ==maxJets)
-          break;
-        PFatJet *pfatjet = injets->at(iJ);
-        if (pfatjet->pt<minFatJetPt)
-          continue;
-        outjet->read(pfatjet);
-        outjet->idx = iJ;
-
-        PGenParticle *matched = Match(pfatjet->eta,pfatjet->phi,anafatjet->radius);
-        if (matched!=NULL) {
-          outjet->matched = 1;
-          outjet->genpt = matched->pt;
-          outjet->gensize = genObjects[matched];
-        } else { 
-          outjet->matched = 0; 
-        }
-
-        tr.TriggerSubEvent("gen matching");
-
-        /////// fastjet ////////
-        VPseudoJet vpj = ConvertFatJet(pfatjet,anafatjet->pfcands,0.1);
-
-        fastjet::ClusterSequenceArea seqCA(vpj, *(anafatjet->jetDefCA), *areaDef);
-        fastjet::ClusterSequenceArea seqAK(vpj, *(anafatjet->jetDefAK), *areaDef);
-
-        VPseudoJet alljetsCA(seqCA.inclusive_jets(0.));
-        fastjet::PseudoJet *leadingJetCA=0; 
-        for (auto &jet : alljetsCA) {
-          if (!leadingJetCA || jet.perp2()>leadingJetCA->perp2())
-            leadingJetCA = &jet;
-        }
-
-        VPseudoJet alljetsAK(seqAK.inclusive_jets(0.));
-        fastjet::PseudoJet *leadingJetAK=0;
-        for (auto &jet : alljetsAK) {
-          if (!leadingJetAK || jet.perp2()>leadingJetAK->perp2())
-            leadingJetAK = &jet;
-        }
-        
-        tr.TriggerSubEvent("clustering");
-
-        if (leadingJetCA!=NULL || leadingJetAK!=NULL) {
-          fastjet::PseudoJet sdJetCA = (*anafatjet->sd)(*leadingJetCA);
-          fastjet::PseudoJet sdJetAK = (*anafatjet->sd)(*leadingJetAK);
-          
-          VPseudoJet sdsubjets = fastjet::sorted_by_pt(sdJetCA.exclusive_subjets_up_to(3));
-
-          // get the constituents and sort them
-          VPseudoJet sdConstituentsCA = sdJetCA.constituents();
-          std::sort(sdConstituentsCA.begin(),sdConstituentsCA.end(),orderPseudoJet);
-
-          VPseudoJet sdConstituentsAK = sdJetAK.constituents();
-          std::sort(sdConstituentsAK.begin(),sdConstituentsAK.end(),orderPseudoJet);
-
-          tr.TriggerSubEvent("soft drop");
-
-          /////////// let's calculate ECFs! ///////////
-
-          // filter the constituents
-          int nFilter;
-          nFilter = TMath::Min(100,(int)sdConstituentsCA.size());
-          VPseudoJet sdConstituentsCAFiltered(sdConstituentsCA.begin(),sdConstituentsCA.begin()+nFilter);
-          
-          if (doECF) {
-            for (auto beta : betas) {
-              calcECFN(beta,sdConstituentsCAFiltered,ecfnmanager);
-              for (auto N : Ns) {
-                for (auto o : orders) {
-                  outjet->ecfns["ecfN_"+makeECFString(o,N,beta)] = ecfnmanager->ecfns[TString::Format("%i_%i",N,o)];
-                }
-              }
-            }
-            for (auto beta : betas) {
-              calcECFN(beta,sdConstituentsCAFiltered,ecfnmanager,false);
-              for (auto N : Ns) {
-                for (auto o : orders) {
-                  outjet->ecfns["maxecfN_"+makeECFString(o,N,beta)] = ecfnmanager->ecfns[TString::Format("%i_%i",N,o)];
-                }
-              }
-            }
-
-            tr.TriggerSubEvent("ecfns");
-
-            // now we calculate ECFs for the subjets
-            unsigned int nS = sdsubjets.size();
-            for (auto beta : betas) {
-              if (beta<2.0)
-                continue; // speed things up for now
-              for (unsigned int iS=0; iS!=nS; ++iS) {
-                VPseudoJet subconstituents = sdsubjets[iS].constituents();
-                nFilter = TMath::Min(80,(int)subconstituents.size());
-                std::sort(subconstituents.begin(),subconstituents.end(),orderPseudoJet);
-                VPseudoJet subconstituentsFiltered(subconstituents.begin(),subconstituents.begin()+nFilter);
-
-                calcECFN(beta,subconstituentsFiltered,subecfnmanager);
-                outjet->subecfns["min_secfN_"+makeECFString(1,3,beta)] = TMath::Min(
-                    (double)subecfnmanager->ecfns[TString::Format("%i_%i",3,1)],
-                    (double)outjet->subecfns["min_secfN_"+makeECFString(1,3,beta)]);
-                outjet->subecfns["min_secfN_"+makeECFString(2,3,beta)] = TMath::Min(
-                    (double)subecfnmanager->ecfns[TString::Format("%i_%i",3,2)],
-                    (double)outjet->subecfns["min_secfN_"+makeECFString(2,3,beta)]);
-                outjet->subecfns["min_secfN_"+makeECFString(3,3,beta)] = TMath::Min(
-                    (double)subecfnmanager->ecfns[TString::Format("%i_%i",3,3)],
-                    (double)outjet->subecfns["min_secfN_"+makeECFString(3,3,beta)]);
-                outjet->subecfns["sum_secfN_"+makeECFString(1,3,beta)] += subecfnmanager->ecfns[TString::Format("%i_%i",3,1)];
-                outjet->subecfns["sum_secfN_"+makeECFString(2,3,beta)] += subecfnmanager->ecfns[TString::Format("%i_%i",3,2)];
-                outjet->subecfns["sum_secfN_"+makeECFString(3,3,beta)] += subecfnmanager->ecfns[TString::Format("%i_%i",3,3)];
-              }
-              outjet->subecfns["avg_secfN_"+makeECFString(1,3,beta)] = outjet->subecfns["sum_secfN_"+makeECFString(1,3,beta)]/nS;
-              outjet->subecfns["avg_secfN_"+makeECFString(2,3,beta)] = outjet->subecfns["sum_secfN_"+makeECFString(2,3,beta)]/nS;
-              outjet->subecfns["avg_secfN_"+makeECFString(3,3,beta)] = outjet->subecfns["sum_secfN_"+makeECFString(3,3,beta)]/nS;
-            }
-
-            tr.TriggerSubEvent("subecfns");
-
-          }
-
-          //////////// now let's do groomed tauN! /////////////
-          double tau3 = anafatjet->tau->getTau(3,sdConstituentsCA);
-          double tau2 = anafatjet->tau->getTau(2,sdConstituentsCA);
-          double tau1 = anafatjet->tau->getTau(1,sdConstituentsCA);
-          outjet->tau32SD = clean(tau3/tau2);
-          outjet->tau21SD = clean(tau2/tau1);
-
-          tr.TriggerSubEvent("tauSD");
-
-          //////////// Q-jet quantities ////////////////
-          if (doQjets) {
-            std::vector<qjetwrapper> q_jets = getQjets(vpj,qplugin,qdef,qcounter++,15,anafatjet->tau);
-            //std::vector<qjetwrapper> q_jets = getQjets(vpj,qplugin,qdef,qcounter++,10);
-
-            JetQuantity getmass = [](qjetwrapper w) { return w.jet.m(); };
-            outjet->qmass = clean(qVolQuantity(q_jets,getmass));
-
-            JetQuantity getpt= [](qjetwrapper w) { return w.jet.pt(); };
-            outjet->qpt = clean(qVolQuantity(q_jets,getpt));
-
-            JetQuantity gettau32 = [](qjetwrapper w) { return w.tau32; };
-            outjet->qtau32 = clean(qVolQuantity(q_jets,gettau32));
-
-            JetQuantity gettau21 = [](qjetwrapper w) { return w.tau21; };
-            outjet->qtau21 = clean(qVolQuantity(q_jets,gettau21));
-
-            tr.TriggerSubEvent("qvol");
-          }
-
-          //////////// heat map! ///////////////
-          if (doHeatMap) {
-            outjet->hmap = HeatMap(sdJetCA.eta(),sdJetCA.phi(),sdConstituentsCA,1.5,20,20);
-
-            tr.TriggerSubEvent("heat map");
-          }
-
-          //////////// subjet kinematics! /////////
-          VJet *subjets = pfatjet->subjets;
-          outjet->nsubjets=subjets->size();
-          std::vector<sjpair> sjpairs;
-          if (outjet->nsubjets>1) {
-            // first set up the pairs
-            double dR2 = DeltaR2(subjets->at(0),subjets->at(1));
-            double mW = Mjj(subjets->at(0),subjets->at(1));
-            double sumqg = subjets->at(0)->qgl + subjets->at(1)->qgl;
-            sjpairs.emplace_back(dR2,mW,sumqg);
-            outjet->sumqg=sumqg;
-            outjet->minqg = TMath::Min(subjets->at(0)->qgl,subjets->at(1)->qgl);
-            if (outjet->nsubjets>2) {
-              dR2 = DeltaR2(subjets->at(0),subjets->at(2));
-              mW = Mjj(subjets->at(0),subjets->at(2));
-              sumqg = subjets->at(0)->qgl + subjets->at(2)->qgl;
-              sjpairs.emplace_back(dR2,mW,sumqg);
-
-              dR2 = DeltaR2(subjets->at(1),subjets->at(2));
-              mW = Mjj(subjets->at(1),subjets->at(2));
-              sumqg = subjets->at(1)->qgl + subjets->at(2)->qgl;
-              sjpairs.emplace_back(dR2,mW,sumqg);
-
-              // now order by dR
-              std::sort(sjpairs.begin(),sjpairs.end(),orderByDR);
-              outjet->dR2_minDR=sjpairs[0].dR2;
-              outjet->mW_minDR=sjpairs[0].mW;
-
-              // now by mW
-              std::sort(sjpairs.begin(),sjpairs.end(),orderByMW);
-              outjet->mW_best=sjpairs[0].mW;
-              
-              // now sumqg
-              std::sort(sjpairs.begin(),sjpairs.end(),orderByQG);
-              outjet->mW_qg=sjpairs[0].mW;
-              outjet->sumqg += subjets->at(2)->qgl;
-              outjet->minqg = TMath::Min(outjet->minqg,subjets->at(2)->qgl);
+      // now get the subjet btag SFs
+      vector<btagcand> sj_btagcands;
+      vector<double> sj_sf_cent, sj_sf_bUp, sj_sf_bDown, sj_sf_mUp, sj_sf_mDown;
+      unsigned int nSJ = fj1->subjets->size();
+      for (unsigned int iSJ=0; iSJ!=nSJ; ++iSJ) {
+        PJet *subjet = fj1->subjets->at(iSJ);
+        int flavor=0;
+        for (PGenParticle *gen : *genparts) {
+          int apdgid = abs(gen->pdgid);
+          if (apdgid==0 || (apdgid>5 && apdgid!=21)) // light quark or gluon
+            continue;
+          double dr2 = DeltaR2(subjet->eta,subjet->phi,gen->eta,gen->phi);
+          if (dr2<0.09) {
+            if (apdgid==4 || apdgid==5) {
+              flavor=apdgid;
+              break;
             } else {
-              outjet->dR2_minDR=sjpairs[0].dR2;
-              outjet->mW_minDR=subjets->at(0)->m;
-              outjet->mW_best = (TMath::Abs(subjets->at(0)->m-WMASS)<TMath::Abs(subjets->at(1)->m-WMASS)) ? subjets->at(0)->m : subjets->at(1)->m;
-              outjet->mW_qg=sjpairs[0].mW;
-            }
-            outjet->avgqg = outjet->sumqg/outjet->nsubjets;
-          }
-
-          tr.TriggerSubEvent("subjet kinematics");
-
-          //////////// kinematic fit! ///////////
-          if (doKinFit) {
-            PJet *sj1=0, *sj2=0, *sjb=0;
-            if (subjets->size()>=3) {
-              VJet leadingSubjets(subjets->begin(),subjets->begin()+3);
-              std::sort(leadingSubjets.begin(),leadingSubjets.end(),orderByCSV);
-              PerformKinFit(fitter,fitresults,leadingSubjets[1],leadingSubjets[2],leadingSubjets[0]); 
-              outjet->fitconv = (fitresults->converged) ? 1 : 0;
-              if (fitresults->converged) {
-                outjet->fitprob = fitresults->prob;
-                outjet->fitchi2 = fitresults->chisq;
-                outjet->fitmass = fitresults->fitmass;
-                outjet->fitmassW = fitresults->fitmassW;
-              }
-            }
-            tr.TriggerSubEvent("kinematic fit");
-
-          }
-          
-          ////// pull angles! ///////
-          unsigned int nS=sdsubjets.size();
-          std::vector<TVector2> pulls; pulls.reserve(3);
-          if (nS>0) {
-            pulls.push_back(GetPull(sdsubjets[0]));
-            outjet->betapull1 = GetPullBeta(pulls[0]);
-            if (nS>1) {
-              pulls.push_back(GetPull(sdsubjets[1]));
-              outjet->betapull2 = GetPullBeta(pulls[1]);
-              // 0:01, 1:02, 2:12
-              outjet->alphapull1 = GetPullAlpha(sdsubjets[0],sdsubjets[1],pulls[0]);
-              if (nS>2) {
-                pulls.push_back(GetPull(sdsubjets[2]));
-                outjet->betapull3 = GetPullBeta(pulls[2]);
-                outjet->alphapull2 = GetPullAlpha(sdsubjets[0],sdsubjets[2],pulls[0]);
-                outjet->alphapull3 = GetPullAlpha(sdsubjets[1],sdsubjets[2],pulls[1]);
-
-                outjet->minpullangle = TMath::Abs(outjet->alphapull1); outjet->mW_minalphapull = Mjj(sdsubjets[0],sdsubjets[1]);
-                if (TMath::Abs(outjet->alphapull2) < outjet->minpullangle) {
-                  outjet->minpullangle = TMath::Abs(outjet->alphapull2);
-                  outjet->mW_minalphapull = Mjj(sdsubjets[0],sdsubjets[2]);
-                }
-                if (TMath::Abs(outjet->alphapull3) < outjet->minpullangle) {
-                  outjet->minpullangle = TMath::Abs(outjet->alphapull3);
-                  outjet->mW_minalphapull = Mjj(sdsubjets[1],sdsubjets[2]);
-                }
-              }
-              outjet->mW_minalphapull = sdsubjets[0].m();
+              flavor=0;
             }
           }
-          tr.TriggerSubEvent("pulls");
-
-          /////// shower deco ///////
-          // TODO 
-
-          /////// fill ////////
-          anafatjet->outtree->Fill();
-        } else {
-          //???
-          PError("PandaAnalyzer::Run","No jet was clustered???");
+        } // finding the subjet flavor
+        float sjPtMax = (flavor<4) ? 1000. : 450.;
+        float pt = subjet->pt;
+        float btagUncFactor = 1;
+        if (pt>sjPtMax) {
+          btagUncFactor = 2;
+          pt = sjPtMax;
         }
+        float eta = subjet->eta;
+        double eff,sf,sfUp,sfDown;
+        unsigned int bin = btagpt.bin(pt);
+        if (flavor==5) {
+          eff = beff[bin];
+          sf = sj_hfReader->eval(BTagEntry::FLAV_B,eta,pt,0);
+          sfUp = sj_hfUpReader->eval(BTagEntry::FLAV_B,eta,pt,0);
+          sfDown = sj_hfDownReader->eval(BTagEntry::FLAV_B,eta,pt,0);
+        } else if (flavor==4) {
+          eff = ceff[bin];
+          sf = sj_hfReader->eval(BTagEntry::FLAV_C,eta,pt,0);
+          sfUp = sj_hfUpReader->eval(BTagEntry::FLAV_C,eta,pt,0);
+          sfDown = sj_hfDownReader->eval(BTagEntry::FLAV_C,eta,pt,0);
+        } else {
+          eff = lfeff[bin];
+          sf = sj_lfReader->eval(BTagEntry::FLAV_UDSG,eta,pt,0);
+          sfUp = sj_lfUpReader->eval(BTagEntry::FLAV_UDSG,eta,pt,0);
+          sfDown = sj_lfDownReader->eval(BTagEntry::FLAV_UDSG,eta,pt,0);
+        }
+        sfUp = btagUncFactor*(sfUp-sf)+sf;
+        sfDown = btagUncFactor*(sfDown-sf)+sf;
+        sj_btagcands.push_back(btagcand(iSJ,flavor,eff,sf,sfUp,sfDown));
+        sj_sf_cent.push_back(sf);
+        if (flavor>0) {
+          sj_sf_bUp.push_back(sfUp); sj_sf_bDown.push_back(sfDown);
+          sj_sf_mUp.push_back(sf); sj_sf_mDown.push_back(sf);
+        } else {
+          sj_sf_bUp.push_back(sf); sj_sf_bDown.push_back(sf);
+          sj_sf_mUp.push_back(sfUp); sj_sf_mDown.push_back(sfDown);
+        }
+      } // loop over subjets
+      EvalBtagSF(sj_btagcands,sj_sf_cent,
+                  gt->sf_sjbtag0,gt->sf_sjbtag1,gt->sf_sjbtag2);
+      EvalBtagSF(sj_btagcands,sj_sf_bUp,
+                  gt->sf_sjbtag0BUp,gt->sf_sjbtag1BUp,gt->sf_sjbtag2BUp);
+      EvalBtagSF(sj_btagcands,sj_sf_bDown,
+                  gt->sf_sjbtag0BDown,gt->sf_sjbtag1BDown,gt->sf_sjbtag2BDown);
+      EvalBtagSF(sj_btagcands,sj_sf_mUp,
+                  gt->sf_sjbtag0MUp,gt->sf_sjbtag1MUp,gt->sf_sjbtag2MUp);
+      EvalBtagSF(sj_btagcands,sj_sf_mDown,
+                  gt->sf_sjbtag0MDown,gt->sf_sjbtag1MDown,gt->sf_sjbtag2MDown);
 
-        tr.TriggerEvent("fat jet",false);
+    }
+
+    tr.TriggerEvent("fatjet gen-matching");
+
+    if (!isData) {
+      // now get the subjet btag SFs
+      vector<btagcand> btagcands;
+      vector<double> sf_cent, sf_bUp, sf_bDown, sf_mUp, sf_mDown;
+      unsigned int nJ = isoJets.size();
+      for (unsigned int iJ=0; iJ!=nJ; ++iJ) {
+        PJet *jet = isoJets.at(iJ);
+        int flavor=0;
+        for (PGenParticle *gen : *genparts) {
+          int apdgid = abs(gen->pdgid);
+          if (apdgid==0 || (apdgid>5 && apdgid!=21)) // light quark or gluon
+            continue;
+          double dr2 = DeltaR2(jet->eta,jet->phi,gen->eta,gen->phi);
+          if (dr2<0.09) {
+            if (apdgid==4 || apdgid==5) {
+              flavor=apdgid;
+              break;
+            } else {
+              flavor=0;
+            }
+          }
+        } // finding the jet flavor
+        float jPtMax = 670.;
+        float pt = jet->pt;
+        float btagUncFactor = 1;
+        if (pt>jPtMax) {
+          btagUncFactor = 2;
+          pt = jPtMax;
+        }
+        float eta = jet->eta;
+        double eff,sf,sfUp,sfDown;
+        unsigned int bin = btagpt.bin(pt);
+        if (flavor==5) {
+          eff = beff[bin];
+          sf = hfReader->eval(BTagEntry::FLAV_B,eta,pt,0);
+          sfUp = hfUpReader->eval(BTagEntry::FLAV_B,eta,pt,0);
+          sfDown = hfDownReader->eval(BTagEntry::FLAV_B,eta,pt,0);
+        } else if (flavor==4) {
+          eff = ceff[bin];
+          sf = hfReader->eval(BTagEntry::FLAV_C,eta,pt,0);
+          sfUp = hfUpReader->eval(BTagEntry::FLAV_C,eta,pt,0);
+          sfDown = hfDownReader->eval(BTagEntry::FLAV_C,eta,pt,0);
+        } else {
+          eff = lfeff[bin];
+          sf = lfReader->eval(BTagEntry::FLAV_UDSG,eta,pt,0);
+          sfUp = lfUpReader->eval(BTagEntry::FLAV_UDSG,eta,pt,0);
+          sfDown = lfDownReader->eval(BTagEntry::FLAV_UDSG,eta,pt,0);
+        }
+        sfUp = btagUncFactor*(sfUp-sf)+sf;
+        sfDown = btagUncFactor*(sfDown-sf)+sf;
+        btagcands.push_back(btagcand(iJ,flavor,eff,sf,sfUp,sfDown));
+        sf_cent.push_back(sf);
+        if (flavor>0) {
+          sf_bUp.push_back(sfUp); sf_bDown.push_back(sfDown);
+          sf_mUp.push_back(sf); sf_mDown.push_back(sf);
+        } else {
+          sf_bUp.push_back(sf); sf_bDown.push_back(sf);
+          sf_mUp.push_back(sfUp); sf_mDown.push_back(sfDown);
+        }
       } // loop over jets
-    } // loop over jet collections
+      EvalBtagSF(btagcands,sf_cent,
+                  gt->sf_btag0,gt->sf_btag1);
+      EvalBtagSF(btagcands,sf_bUp,
+                  gt->sf_btag0BUp,gt->sf_btag1BUp);
+      EvalBtagSF(btagcands,sf_bDown,
+                  gt->sf_btag0BDown,gt->sf_btag1BDown);
+      EvalBtagSF(btagcands,sf_mUp,
+                  gt->sf_btag0MUp,gt->sf_btag1MUp);
+      EvalBtagSF(btagcands,sf_mDown,
+                  gt->sf_btag0MDown,gt->sf_btag1MDown);
+    }
 
+    tr.TriggerEvent("ak4 gen-matching");
+
+    // ttbar pT weight
+    gt->sf_tt = 1;
+    gt->sf_tt_ext = 1;
+    if (!isData && processType==kTT) {
+      float pt_t=0, pt_tbar=0;
+      for (auto *gen : *genparts) {
+        if (abs(gen->pdgid)!=6)
+          continue;
+        if (gen->parent>=0 && genparts->at(gen->parent)->pdgid==gen->pdgid)
+          continue; // must be first copy
+        if (gen->pdgid>0)
+          pt_t = gen->pt;
+        else
+          pt_tbar = gen->pt;
+        if (pt_t>0 && pt_tbar>0)
+          break;
+      }
+      if (pt_t>0 && pt_tbar>0) {
+        gt->sf_tt_ext = TMath::Sqrt( TMath::Exp(0.156-0.00137*pt_t) * TMath::Exp(0.156-0.00137*pt_tbar) ); // extend the fit past 400
+        pt_t = bound(pt_t,0,400);
+        pt_tbar = bound(pt_tbar,0,400);
+        gt->sf_tt = TMath::Sqrt( TMath::Exp(0.156-0.00137*pt_t) * TMath::Exp(0.156-0.00137*pt_tbar) ); // bound at 400
+      }
+    } 
+
+    tr.TriggerEvent("tt SFs");
+
+    // derive ewk/qcd weights
+    gt->sf_qcdV=1; gt->sf_ewkV=1;
+    if (!isData) {
+      bool found = processType!=kA && processType!=kZ && processType!=kW;
+      int target=24;
+      if (processType==kZ) target=23;
+      if (processType==kA) target=22;
+      for (PGenParticle *gen : *genparts) {
+        if (found) break;
+        int apdgid = abs(gen->pdgid);
+        if (apdgid==target)  {
+          if (gen->parent>=0 && genparts->at(gen->parent)->pdgid==gen->pdgid)
+            continue;
+          if (processType==kZ) {
+            gt->trueGenBosonPt = gen->pt;
+            gt->genBosonPt = bound(gen->pt,genBosonPtMin,genBosonPtMax);
+            gt->sf_qcdV = getVal(hZNLO,gt->genBosonPt);
+            gt->sf_ewkV = getVal(hZEWK,gt->genBosonPt);
+            found=true;
+          } else if (processType==kW) {
+            gt->trueGenBosonPt = gen->pt;
+            gt->genBosonPt = bound(gen->pt,genBosonPtMin,genBosonPtMax);
+            gt->sf_qcdV = getVal(hWNLO,gt->genBosonPt);
+            gt->sf_ewkV = getVal(hWEWK,gt->genBosonPt);
+            found=true;
+          } else if (processType==kA) {
+            // take the highest pT
+            if (gen->pt > gt->trueGenBosonPt) {
+              gt->trueGenBosonPt = gen->pt;
+              gt->genBosonPt = bound(gen->pt,genBosonPtMin,genBosonPtMax);
+              gt->sf_qcdV = getVal(hANLO,gt->genBosonPt);
+              gt->sf_ewkV = getVal(hAEWK,gt->genBosonPt);
+            }
+          }
+        } // target matches
+      }
+    }
+
+    tr.TriggerEvent("qcd/ewk SFs");
+
+    //lepton SFs
+    gt->sf_lep=1; gt->sf_lepTrack=1;
+    if (!isData) {
+      for (unsigned int iL=0; iL!=TMath::Min(gt->nLooseLep,2); ++iL) {
+        PObject *lep = looseLeps.at(iL);
+        float pt = lep->pt, eta = lep->eta;
+        bool isTight = (iL==0 && gt->looseLep1IsTight) || (iL==1 && gt->looseLep2IsTight);
+        PMuon *mu = dynamic_cast<PMuon*>(lep);
+        if (mu!=NULL) {
+          pt = bound(pt,sf_muPtMin,sf_muPtMax);
+          eta = bound(eta,0,sf_muEtaMax);
+          if (isTight)
+            gt->sf_lep *= getVal(hMuTight,eta,pt);
+          else
+            gt->sf_lep *= getVal(hMuLoose,eta,pt);
+          gt->sf_lepTrack *= getVal(hMuTrack,bound(gt->npv,0,50));
+        } else {
+          PElectron *ele = dynamic_cast<PElectron*>(lep);
+          pt = bound(pt,sf_elePtMin,sf_elePtMax);
+          eta = bound(eta,0,sf_eleEtaMax);
+          if (isTight)
+            gt->sf_lep *= getVal(hEleTight,eta,pt);
+          else
+            gt->sf_lep *= getVal(hEleVeto,eta,pt);
+          gt->sf_lepTrack *= getVal(hEleTrack,bound(ele->eta,-2.5,2.5),bound(gt->npv,0,50));
+        }
+      }
+    }
+
+    tr.TriggerEvent("lepton SFs");
 
   } // entry loop
 
