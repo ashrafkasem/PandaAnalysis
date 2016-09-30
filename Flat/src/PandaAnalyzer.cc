@@ -290,15 +290,17 @@ void PandaAnalyzer::Run() {
     gt->metFilter = (event->metfilters->at(0)) ? 1 : 0;
     if (!isData) 
       gt->sf_pu = getVal(hPUWeight,bound(gt->npv,sf_puMin,sf_puMax));
-    bool passTrigger=true;
-    for (auto iT : metTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
-    if (passTrigger) { gt->trigger |= kMETTrig; }
-    passTrigger=true;
-    for (auto iT : eleTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
-    if (passTrigger) { gt->trigger |= kSingleEleTrig; }
-    passTrigger=true;
-    for (auto iT : phoTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
-    if (passTrigger) { gt->trigger |= kSinglePhoTrig; }
+    if (isData) {
+      bool passTrigger=true;
+      for (auto iT : metTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
+      if (passTrigger) { gt->trigger |= kMETTrig; }
+      passTrigger=true;
+      for (auto iT : eleTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
+      if (passTrigger) { gt->trigger |= kSingleEleTrig; }
+      passTrigger=true;
+      for (auto iT : phoTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
+      if (passTrigger) { gt->trigger |= kSinglePhoTrig; }
+    }
 
 
     tr.TriggerEvent("initialize");
@@ -347,7 +349,10 @@ void PandaAnalyzer::Run() {
 
     // now consider all leptons
     gt->nLooseLep = looseLeps.size();
-    std::partial_sort(looseLeps.begin(),looseLeps.begin()+3,looseLeps.end(),SortPObjects);
+    if (gt->nLooseLep>0) {
+      int nToSort = TMath::Min(3,gt->nLooseLep);
+      std::partial_sort(looseLeps.begin(),looseLeps.begin()+nToSort,looseLeps.end(),SortPObjects);
+    }
     int lep_counter=1;
     for (PObject *lep : looseLeps) {
       if (lep_counter==1) {
@@ -389,17 +394,17 @@ void PandaAnalyzer::Run() {
                           ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&
                           ele->pt>40 && fabs(ele->eta)<2.5 );
         if (lep_counter==1) {
-          gt->looseLep1PdgId = mu->q*11;
+          gt->looseLep1PdgId = ele->q*11;
           if (isTight) {
-            gt->nTightMuon++;
+            gt->nTightElectron++;
             gt->looseLep1IsTight = 1;
             matchLeps.push_back(lep);
             matchEles.push_back(lep);
           }
         } else if (lep_counter==2) {
-          gt->looseLep2PdgId = mu->q*11;
+          gt->looseLep2PdgId = ele->q*11;
           if (isTight) {
-            gt->nTightMuon++;
+            gt->nTightElectron++;
             gt->looseLep2IsTight = 1;
           }
           if (isTight || gt->looseLep1IsTight) {
