@@ -16,6 +16,11 @@
 
 #include "AnalyzerUtilities.h"
 #include "GeneralTree.h"
+
+#include "CondFormats/BTauObjects/interface/BTagEntry.h"
+#include "CondFormats/BTauObjects/interface/BTagCalibration.h"
+#include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
+#include "BTagCalibrationStandalone.h"
 // JEC
 //#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 //#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
@@ -53,10 +58,10 @@ public :
   };
 
   enum TriggerBits {
-    kMET       =(1<<0),
-    kSingleEle =(1<<1),
-    kSinglePho =(1<<2),
-    kSingleMu  =(1<<3)
+    kMETTrig       =(1<<0),
+    kSingleEleTrig =(1<<1),
+    kSinglePhoTrig =(1<<2),
+    kSingleMuTrig  =(1<<3)
   };
 
   //////////////////////////////////////////////////////////////////////////////////////
@@ -128,9 +133,9 @@ private:
   // IO for the analyzer
   TFile *fOut;   // output file is owned by PandaAnalyzer
   TTree *tOut;
-  GenericTree *gt; // essentially a wrapper around tOut
+  GeneralTree *gt; // essentially a wrapper around tOut
   TTree *tIn=0;  // input tree to read
-
+  unsigned int preselBits=0;
 
   // objects to read from the tree
   panda::PEvent *event=0;                        // event object
@@ -141,7 +146,7 @@ private:
   panda::VMuon *muons=0;
   panda::VTau *taus=0;
   panda::VPhoton *photons=0;
-  panda::PMET *pfmet=0, puppimet=0;
+  panda::PMET *pfmet=0, *puppimet=0;
 
   // configuration read from output tree
   std::vector<double> betas;

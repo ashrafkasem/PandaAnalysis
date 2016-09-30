@@ -12,6 +12,9 @@ class GeneralTree : public genericTree {
 		std::vector<double> betas = {0.5, 1.0, 2.0, 4.0};
 		std::vector<int> Ns = {1,2,3,4}; 
 		std::vector<int> orders = {1,2,3};
+    TString makeECFString(int order, int N, float beta) {
+      return TString::Format("ECFN_%i_%i_%.2i",order,N,int(10*beta));
+    }
 
   public:
     GeneralTree();
@@ -22,8 +25,8 @@ class GeneralTree : public genericTree {
     void Reset();
 
     std::vector<double> get_betas() const { return betas; }
-    std::vector<double> get_Ns() const { return Ns; }
-    std::vector<double> get_orders() const { return orders; }
+    std::vector<int> get_Ns() const { return Ns; }
+    std::vector<int> get_orders() const { return orders; }
     
 	int runNumber=0;
 	int lumiNumber=0;
@@ -66,6 +69,7 @@ class GeneralTree : public genericTree {
 	float sf_metTrig=0;
 	float sf_pu=0;
 	float sf_tt=0;
+  float sf_tt_ext=0;
 	float sf_phoPurity=0;
 	float finalWeight=0;
 	float pfmet=0;
@@ -128,6 +132,8 @@ class GeneralTree : public genericTree {
 	int nFatjet=0;
 	float fj1Tau32=0;
 	float fj1Tau21=0;
+  float fj1Tau32SD=0;
+  float fj1Tau21SD=0;
 	float fj1MSD=0;
 	float fj1Pt=0;
 	float fj1Phi=0;
@@ -180,41 +186,42 @@ GeneralTree::GeneralTree() {
 	mcWeight=0;
 	trigger=0;
 	metFilter=0;
-	sf_ewkV=0;
-	sf_qcdV=0;
-	sf_lep=0;
-	sf_lepTrack=0;
-	sf_btag0=0;
-	sf_btag0BUp=0;
-	sf_btag0BDown=0;
-	sf_btag0MUp=0;
-	sf_btag0MDown=0;
-	sf_btag1=0;
-	sf_btag1BUp=0;
-	sf_btag1BDown=0;
-	sf_btag1MUp=0;
-	sf_btag1MDown=0;
-	sf_sjbtag0=0;
-	sf_sjbtag0BUp=0;
-	sf_sjbtag0BDown=0;
-	sf_sjbtag0MUp=0;
-	sf_sjbtag0MDown=0;
-	sf_sjbtag1=0;
-	sf_sjbtag1BUp=0;
-	sf_sjbtag1BDown=0;
-	sf_sjbtag1MUp=0;
-	sf_sjbtag1MDown=0;
-	sf_sjbtag2=0;
-	sf_sjbtag2BUp=0;
-	sf_sjbtag2BDown=0;
-	sf_sjbtag2MUp=0;
-	sf_sjbtag2MDown=0;
-	sf_eleTrig=0;
-	sf_phoTrig=0;
-	sf_metTrig=0;
-	sf_pu=0;
-	sf_tt=0;
-	sf_phoPurity=0;
+  sf_ewkV=1;
+  sf_qcdV=1;
+  sf_lep=1;
+  sf_lepTrack=1;
+  sf_btag0=1;
+  sf_btag0BUp=1;
+  sf_btag0BDown=1;
+  sf_btag0MUp=1;
+  sf_btag0MDown=1;
+  sf_btag1=1;
+  sf_btag1BUp=1;
+  sf_btag1BDown=1;
+  sf_btag1MUp=1;
+  sf_btag1MDown=1;
+  sf_sjbtag0=1;
+  sf_sjbtag0BUp=1;
+  sf_sjbtag0BDown=1;
+  sf_sjbtag0MUp=1;
+  sf_sjbtag0MDown=1;
+  sf_sjbtag1=1;
+  sf_sjbtag1BUp=1;
+  sf_sjbtag1BDown=1;
+  sf_sjbtag1MUp=1;
+  sf_sjbtag1MDown=1;
+  sf_sjbtag2=1;
+  sf_sjbtag2BUp=1;
+  sf_sjbtag2BDown=1;
+  sf_sjbtag2MUp=1;
+  sf_sjbtag2MDown=1;
+  sf_eleTrig=1;
+  sf_phoTrig=1;
+  sf_metTrig=1;
+  sf_pu=1;
+  sf_tt=1;
+  sf_tt_ext=1;
+  sf_phoPurity=1;
 	finalWeight=0;
 	pfmet=0;
 	pfmetphi=0;
@@ -276,6 +283,8 @@ GeneralTree::GeneralTree() {
 	nFatjet=0;
 	fj1Tau32=0;
 	fj1Tau21=0;
+  fj1Tau32SD=0;
+  fj1Tau21SD=0;
 	fj1MSD=0;
 	fj1Pt=0;
 	fj1Phi=0;
@@ -339,41 +348,42 @@ void GeneralTree::Reset() {
 	mcWeight = -1;
 	trigger = 0;
 	metFilter = 0;
-	sf_ewkV = -1;
-	sf_qcdV = -1;
-	sf_lep = -1;
-	sf_lepTrack = -1;
-	sf_btag0 = -1;
-	sf_btag0BUp = -1;
-	sf_btag0BDown = -1;
-	sf_btag0MUp = -1;
-	sf_btag0MDown = -1;
-	sf_btag1 = -1;
-	sf_btag1BUp = -1;
-	sf_btag1BDown = -1;
-	sf_btag1MUp = -1;
-	sf_btag1MDown = -1;
-	sf_sjbtag0 = -1;
-	sf_sjbtag0BUp = -1;
-	sf_sjbtag0BDown = -1;
-	sf_sjbtag0MUp = -1;
-	sf_sjbtag0MDown = -1;
-	sf_sjbtag1 = -1;
-	sf_sjbtag1BUp = -1;
-	sf_sjbtag1BDown = -1;
-	sf_sjbtag1MUp = -1;
-	sf_sjbtag1MDown = -1;
-	sf_sjbtag2 = -1;
-	sf_sjbtag2BUp = -1;
-	sf_sjbtag2BDown = -1;
-	sf_sjbtag2MUp = -1;
-	sf_sjbtag2MDown = -1;
-	sf_eleTrig = -1;
-	sf_phoTrig = -1;
-	sf_metTrig = -1;
-	sf_pu = -1;
-	sf_tt = -1;
-	sf_phoPurity = -1;
+  sf_ewkV = 1;
+  sf_qcdV = 1;
+  sf_lep = 1;
+  sf_lepTrack = 1;
+  sf_btag0 = 1;
+  sf_btag0BUp = 1;
+  sf_btag0BDown = 1;
+  sf_btag0MUp = 1;
+  sf_btag0MDown = 1;
+  sf_btag1 = 1;
+  sf_btag1BUp = 1;
+  sf_btag1BDown = 1;
+  sf_btag1MUp = 1;
+  sf_btag1MDown = 1;
+  sf_sjbtag0 = 1;
+  sf_sjbtag0BUp = 1;
+  sf_sjbtag0BDown = 1;
+  sf_sjbtag0MUp = 1;
+  sf_sjbtag0MDown = 1;
+  sf_sjbtag1 = 1;
+  sf_sjbtag1BUp = 1;
+  sf_sjbtag1BDown = 1;
+  sf_sjbtag1MUp = 1;
+  sf_sjbtag1MDown = 1;
+  sf_sjbtag2 = 1;
+  sf_sjbtag2BUp = 1;
+  sf_sjbtag2BDown = 1;
+  sf_sjbtag2MUp = 1;
+  sf_sjbtag2MDown = 1;
+  sf_eleTrig = 1;
+  sf_phoTrig = 1;
+  sf_metTrig = 1;
+  sf_pu = 1;
+  sf_tt = 1;
+  sf_tt_ext = 1;
+  sf_phoPurity = 1;
 	finalWeight = -1;
 	pfmet = -1;
 	pfmetphi = -1;
@@ -435,6 +445,8 @@ void GeneralTree::Reset() {
 	nFatjet = 0;
 	fj1Tau32 = -1;
 	fj1Tau21 = -1;
+  fj1Tau32SD = -1;
+  fj1Tau21SD = -1;
 	fj1MSD = -1;
 	fj1Pt = -1;
 	fj1Phi = -1;
@@ -571,6 +583,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("sf_pu",&sf_pu);
 	treePtr->SetBranchStatus("sf_tt",1);
 	treePtr->SetBranchAddress("sf_tt",&sf_tt);
+  treePtr->SetBranchStatus("sf_tt_ext",1);
+  treePtr->SetBranchAddress("sf_tt_ext",&sf_tt_ext);
 	treePtr->SetBranchStatus("sf_phoPurity",1);
 	treePtr->SetBranchAddress("sf_phoPurity",&sf_phoPurity);
 	treePtr->SetBranchStatus("finalWeight",1);
@@ -695,6 +709,10 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("fj1Tau32",&fj1Tau32);
 	treePtr->SetBranchStatus("fj1Tau21",1);
 	treePtr->SetBranchAddress("fj1Tau21",&fj1Tau21);
+  treePtr->SetBranchStatus("fj1Tau32SD",1);
+  treePtr->SetBranchAddress("fj1Tau32SD",&fj1Tau32SD);
+  treePtr->SetBranchStatus("fj1Tau21SD",1);
+  treePtr->SetBranchAddress("fj1Tau21SD",&fj1Tau21SD);
 	treePtr->SetBranchStatus("fj1MSD",1);
 	treePtr->SetBranchAddress("fj1MSD",&fj1MSD);
 	treePtr->SetBranchStatus("fj1Pt",1);
@@ -817,6 +835,7 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("sf_metTrig",&sf_metTrig,"sf_metTrig/F");
 	treePtr->Branch("sf_pu",&sf_pu,"sf_pu/F");
 	treePtr->Branch("sf_tt",&sf_tt,"sf_tt/F");
+  treePtr->Branch("sf_tt_ext",&sf_tt_ext,"sf_tt_ext/F");
 	treePtr->Branch("sf_phoPurity",&sf_phoPurity,"sf_phoPurity/F");
 	treePtr->Branch("finalWeight",&finalWeight,"finalWeight/F");
 	treePtr->Branch("pfmet",&pfmet,"pfmet/F");
@@ -879,6 +898,8 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("nFatjet",&nFatjet,"nFatjet/I");
 	treePtr->Branch("fj1Tau32",&fj1Tau32,"fj1Tau32/F");
 	treePtr->Branch("fj1Tau21",&fj1Tau21,"fj1Tau21/F");
+  treePtr->Branch("fj1Tau32SD",&fj1Tau32SD,"fj1Tau32SD/F");
+  treePtr->Branch("fj1Tau21SD",&fj1Tau21SD,"fj1Tau21SD/F");
 	treePtr->Branch("fj1MSD",&fj1MSD,"fj1MSD/F");
 	treePtr->Branch("fj1Pt",&fj1Pt,"fj1Pt/F");
 	treePtr->Branch("fj1Phi",&fj1Phi,"fj1Phi/F");
@@ -921,7 +942,7 @@ void GeneralTree::WriteTree(TTree *t) {
     for (auto N : Ns) {
       for (auto order : orders) {
         TString ecfn(makeECFString(order,N,beta));
-        treePtr->Branch("fj"+ecfn,&(fj1ECFNs[ecfn]),"fj"+ecfn+"/F");
+        treePtr->Branch("fj1"+ecfn,&(fj1ECFNs[ecfn]),"fj1"+ecfn+"/F");
       }
     }
   }
