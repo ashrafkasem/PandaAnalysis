@@ -75,7 +75,7 @@ PGenParticle *PandaAnalyzer::MatchToGen(double eta, double phi, double radius) {
 }
 
 void PandaAnalyzer::Terminate() {
-  fOut->WriteTObject(tIn);
+  fOut->WriteTObject(tOut);
   fOut->Close();
 
   fEleTrigB->Close();
@@ -1031,6 +1031,8 @@ void PandaAnalyzer::Run() {
     }
 
     tr.TriggerEvent("lepton SFs");
+
+    gt->Fill();
 
   } // entry loop
 
