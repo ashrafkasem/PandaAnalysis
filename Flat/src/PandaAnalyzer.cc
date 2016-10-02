@@ -291,15 +291,24 @@ void PandaAnalyzer::Run() {
     if (!isData) 
       gt->sf_pu = getVal(hPUWeight,bound(gt->npv,sf_puMin,sf_puMax));
     if (isData) {
-      bool passTrigger=true;
-      for (auto iT : metTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
-      if (passTrigger) { gt->trigger |= kMETTrig; }
-      passTrigger=true;
-      for (auto iT : eleTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
-      if (passTrigger) { gt->trigger |= kSingleEleTrig; }
-      passTrigger=true;
-      for (auto iT : phoTriggers) {   passTrigger = passTrigger && event->tiggers->at(iT);  }
-      if (passTrigger) { gt->trigger |= kSinglePhoTrig; }
+      for (auto iT : metTriggers) {   
+        if (event->tiggers->at(iT)) {
+          gt->trigger |= kMETTrig;
+          break;
+        }
+      }
+      for (auto iT : eleTriggers) {   
+        if (event->tiggers->at(iT)) {
+          gt->trigger |= kSingleEleTrig;
+          break;
+        }
+      }
+      for (auto iT : phoTriggers) {   
+        if (event->tiggers->at(iT)) {
+          gt->trigger |= kSinglePhoTrig;
+          break;
+        }
+      }
     }
 
 
