@@ -143,6 +143,9 @@ class GeneralTree : public genericTree {
 	float fj1GenPt=0;
 	float fj1GenSize=0;
 	int fj1IsMatched=0;
+  float fj1GenWPt=0;
+  float fj1GenWSize=0;
+  int fj1IsWMatched=0;
 	int fj1IsTight=0;
 	int fj1IsLoose=0;
 	float fj1RawPt=0;
@@ -294,6 +297,9 @@ GeneralTree::GeneralTree() {
 	fj1GenPt=0;
 	fj1GenSize=0;
 	fj1IsMatched=0;
+  fj1GenWPt=0;
+  fj1GenWSize=0;
+  fj1IsWMatched=0;
 	fj1IsTight=0;
 	fj1IsLoose=0;
 	fj1RawPt=0;
@@ -456,6 +462,9 @@ void GeneralTree::Reset() {
 	fj1GenPt = -1;
 	fj1GenSize = -1;
 	fj1IsMatched = 0;
+  fj1GenWPt = -1;
+  fj1GenWSize = -1;
+  fj1IsWMatched = 0;
 	fj1IsTight = 0;
 	fj1IsLoose = 0;
 	fj1RawPt = -1;
@@ -909,6 +918,9 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("fj1GenPt",&fj1GenPt,"fj1GenPt/F");
 	treePtr->Branch("fj1GenSize",&fj1GenSize,"fj1GenSize/F");
 	treePtr->Branch("fj1IsMatched",&fj1IsMatched,"fj1IsMatched/I");
+  treePtr->Branch("fj1GenWPt",&fj1GenWPt,"fj1GenWPt/F");
+  treePtr->Branch("fj1GenWSize",&fj1GenWSize,"fj1GenWSize/F");
+  treePtr->Branch("fj1IsWMatched",&fj1IsWMatched,"fj1IsWMatched/I");
 	treePtr->Branch("fj1IsTight",&fj1IsTight,"fj1IsTight/I");
 	treePtr->Branch("fj1IsLoose",&fj1IsLoose,"fj1IsLoose/I");
 	treePtr->Branch("fj1RawPt",&fj1RawPt,"fj1RawPt/F");

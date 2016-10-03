@@ -58,15 +58,18 @@ void PandaAnalyzer::Init(TTree *t, TTree *infotree)
 
 }
 
-PGenParticle *PandaAnalyzer::MatchToGen(double eta, double phi, double radius) {
+PGenParticle *PandaAnalyzer::MatchToGen(double eta, double phi, double radius, int pdgid) {
   PGenParticle *found=NULL;
   double r2 = radius*radius;
+  pdgid = abs(pdgid);
 
   unsigned int counter=0;
   for (map<PGenParticle*,float>::iterator iG=genObjects.begin();
         iG!=genObjects.end(); ++iG) {
     if (found!=NULL)
       break;
+    if (pdgid!=0 && abs(iG->first->pdgid)!=pdgid)
+      continue;
     if (DeltaR2(eta,phi,iG->first->eta,iG->first->phi)<r2) 
       found = iG->first;
   }
@@ -667,19 +670,32 @@ void PandaAnalyzer::Run() {
     tr.TriggerEvent("presel");
 
     // identify interesting gen particles for fatjet matching
+    unsigned int pdgidTarget=0;
     if (!isData && processType>=kTT) {
+      switch(processType) {
+        case kTop:
+        case kTT:
+          pdgidTarget=6;
+          break;
+        case kV:
+          pdgidTarget=24;
+          break;
+        case kH:
+          pdgidTarget=25;
+          break;
+        default:
+          // processType>=kTT means we should never get here
+          PError("PandaAnalyzer::Run","Reached an unknown process type");
+      }
+
       std::vector<int> targets;
 
       int nGen = genparts->size();
       for (int iG=0; iG!=nGen; ++iG) {
         PGenParticle *part = genparts->at(iG);
         int pdgid = part->pdgid;
-        unsigned int abspdgid = TMath::Abs(pdgid);
-        bool good= (  ((processType==kTop||processType==kTT) && abspdgid==6) ||
-                      (processType==kV && (abspdgid==23 || abspdgid==24)) ||
-                      (processType==kH && (abspdgid==25))
-                    );
-        if (good)
+        unsigned int abspdgid = abs(pdgid);
+        if (abspdgid == pdgidTarget)
           targets.push_back(iG);
       } //looking for targets
 
@@ -698,7 +714,7 @@ void PandaAnalyzer::Run() {
           continue;
         
         // (a) check it is a hadronic decay and if so, (b) calculate the size
-        if (processType==kTop) {
+        if (processType==kTop||processType==kTT) {
           
           // first look for a W whose parent is the top at iG, or a W further down the chain
           int iW=-1;
@@ -713,12 +729,15 @@ void PandaAnalyzer::Run() {
               }
             }
           } // looking for W
+          if (iW<0) {// ???
+            PDebug("","Could not find W");
+            continue;
+          }
+          PGenParticle *partW = genparts->at(iW);
 
           // now look for b or W->qq
           int iB=-1, iQ1=-1, iQ2=-1;
-          if (iW<0) // ???
-            continue;
-          double size=0;
+          double size=0, sizeW=0;
           for (int jG=0; jG!=nGen; ++jG) {
             PGenParticle *partQ = genparts->at(jG);
             int pdgidQ = partQ->pdgid;
@@ -733,9 +752,11 @@ void PandaAnalyzer::Run() {
               if (iQ1<0) {
                 iQ1 = jG;
                 size = TMath::Max(DeltaR2(part->eta,part->phi,partQ->eta,partQ->phi),size);
+                sizeW = TMath::Max(DeltaR2(partW->eta,partW->phi,partQ->eta,partQ->phi),sizeW);
               } else if (iQ2<0) {
                 iQ2 = jG;
                 size = TMath::Max(DeltaR2(part->eta,part->phi,partQ->eta,partQ->phi),size);
+                sizeW = TMath::Max(DeltaR2(partW->eta,partW->phi,partQ->eta,partQ->phi),sizeW);
               }
             }
             if (iB>=0 && iQ1>=0 && iQ2>=0)
@@ -743,10 +764,12 @@ void PandaAnalyzer::Run() {
           } // looking for quarks
 
           bool isHadronic = (iB>=0 && iQ1>=0 && iQ2>=0); // all 3 quarks were found
-
-          // add to collection
           if (isHadronic)
             genObjects[part] = size;
+
+          bool isHadronicW = (iQ1>=0 && iQ2>=0);
+          if (isHadronicW)
+            genObjects[partW] = size;
 
         } else { // these are W,Z,H - 2 prong decays
 
@@ -786,13 +809,23 @@ void PandaAnalyzer::Run() {
     // do gen matching now that presel is passed
     if (!isData && gt->nFatjet>0) {
       // first see if jet is matched
-      PGenParticle *matched = MatchToGen(fj1->eta,fj1->phi,1.5);
+      PGenParticle *matched = MatchToGen(fj1->eta,fj1->phi,1.5,pdgidTarget);
       if (matched!=NULL) {
         gt->fj1IsMatched = 1;
         gt->fj1GenPt = matched->pt;
         gt->fj1GenSize = genObjects[matched];
       } else {
         gt->fj1IsMatched = 0;
+      }
+      if (pdgidTarget==6) { // matched to top; try for W
+        PGenParticle *matchedW = MatchToGen(fj1->eta,fj1->phi,1.5,24);
+        if (matchedW!=NULL) {
+          gt->fj1IsWMatched = 1;
+          gt->fj1GenWPt = matchedW->pt;
+          gt->fj1GenWSize = genObjects[matchedW];
+        } else {
+          gt->fj1IsWMatched = 0;
+        }
       }
 
       // now get the subjet btag SFs
