@@ -16,8 +16,8 @@ if __name__ == "__main__":
     skimmer = root.PandaAnalyzer()
    
     skimmer.firstEvent=0
-    skimmer.lastEvent=100
-    skimmer.isData=True
+    skimmer.lastEvent=10
+    skimmer.isData=False
     skimmer.applyJson=False
     skimmer.processType = root.PandaAnalyzer.kTT
     fin = root.TFile.Open(fullPath)
