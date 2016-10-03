@@ -38,6 +38,7 @@ if __name__ == "__main__":
     skimmer = root.PandaAnalyzer()
     skimmer.isData=isData
     skimmer.applyJson=False
+    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
       if 'ZJets' in fullPath or 'DY' in fullPath:
@@ -50,9 +51,12 @@ if __name__ == "__main__":
         processType=root.PandaAnalyzer.kTT
     skimmer.processType=processType 
 
-    fin = root.TFile.Open('input.root')
-    tree = fin.FindObjectAny("events")
-    infotree = fin.FindObjectAny("all")
+    try:
+      fin = root.TFile.Open('input.root')
+      tree = fin.FindObjectAny("events")
+      infotree = fin.FindObjectAny("all")
+    except:
+      exit(2) # file open error => xrootd?
 
     skimmer.SetDataDir(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/')
     skimmer.SetOutputFile('output.root')
