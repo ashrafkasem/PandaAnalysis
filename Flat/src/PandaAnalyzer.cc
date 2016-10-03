@@ -189,7 +189,7 @@ bool PandaAnalyzer::PassPreselection() {
     return true;
   bool isGood=false;
   if (preselBits & kMonotop) {
-    if (gt->nFatjet==1 && gt->fj1Pt>250) { 
+    if (gt->nFatjet>=1 && gt->fj1Pt>250) { 
       if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
             (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
             isGood = true;
@@ -698,7 +698,7 @@ void PandaAnalyzer::Run() {
           continue;
         
         // (a) check it is a hadronic decay and if so, (b) calculate the size
-        if (processType==kTop) {
+        if (processType==kTop||processType==kTT) {
           
           // first look for a W whose parent is the top at iG, or a W further down the chain
           int iW=-1;
@@ -742,11 +742,13 @@ void PandaAnalyzer::Run() {
               break;
           } // looking for quarks
 
+
           bool isHadronic = (iB>=0 && iQ1>=0 && iQ2>=0); // all 3 quarks were found
 
           // add to collection
-          if (isHadronic)
+          if (isHadronic) {
             genObjects[part] = size;
+          }
 
         } else { // these are W,Z,H - 2 prong decays
 
