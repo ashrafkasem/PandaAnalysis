@@ -19,6 +19,7 @@ if __name__ == "__main__":
     skimmer.lastEvent=10
     skimmer.isData=False
     skimmer.applyJson=False
+#    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     skimmer.processType = root.PandaAnalyzer.kTT
     fin = root.TFile.Open(fullPath)
 
