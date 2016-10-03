@@ -50,7 +50,7 @@ plot.AddLumiLabel()
 if plotlabel:
   plot.AddPlotLabel(plotlabel,.18,.77,False,42,.04)
 
-weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_sjbtag1*sf_btag1*sf_tt'%lumi
+weight = '0.1*%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_sjbtag1*sf_btag1*sf_tt'%lumi
 plot.SetMCWeight(weight)
 
 ### DEFINE PROCESSES ###
