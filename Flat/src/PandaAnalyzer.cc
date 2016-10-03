@@ -767,11 +767,10 @@ void PandaAnalyzer::Run() {
           bool isHadronic = (iB>=0 && iQ1>=0 && iQ2>=0); // all 3 quarks were found
           if (isHadronic)
             genObjects[part] = size;
-          }
 
           bool isHadronicW = (iQ1>=0 && iQ2>=0);
           if (isHadronicW)
-            genObjects[partW] = size;
+            genObjects[partW] = sizeW;
 
         } else { // these are W,Z,H - 2 prong decays
 
