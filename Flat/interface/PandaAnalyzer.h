@@ -94,7 +94,7 @@ public :
 private:
 
   std::map<panda::PGenParticle*,float> genObjects;                      // particles we want to match the jets to, and the 'size' of the daughters
-  panda::PGenParticle *MatchToGen(double eta, double phi, double r2);    // private function to match a jet; returns NULL if not found
+  panda::PGenParticle *MatchToGen(double eta, double phi, double r2, int pdgid=0);    // private function to match a jet; returns NULL if not found
   std::vector<panda::PObject*> matchPhos, matchEles, matchLeps;
   
   // CMSSW-provided utilities

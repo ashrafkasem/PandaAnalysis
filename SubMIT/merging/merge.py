@@ -38,7 +38,7 @@ def hadd(inpath,outpath):
   if type(inpath)==type('str'):
     infiles = glob(inpath)
     PInfo(sname,'hadding %s into %s'%(inpath,outpath))
-    cmd = 'hadd -ff -n 100 -f %s %s > /dev/null'%(outpath,inpath)
+    cmd = 'hadd -k -ff -n 100 -f %s %s > /dev/null'%(outpath,inpath)
     system(cmd)
     return
   else:
@@ -49,7 +49,7 @@ def hadd(inpath,outpath):
   elif len(infiles)==1:
     cmd = 'cp %s %s'%(infiles[0],outpath)
   else:
-    cmd = 'hadd -ff -n 100 -f %s '%outpath
+    cmd = 'hadd -k -ff -n 100 -f %s '%outpath
     for f in infiles:
       if path.isfile(f):
         cmd += '%s '%f
