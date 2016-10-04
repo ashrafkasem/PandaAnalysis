@@ -27,7 +27,7 @@ requirements = ( \
                   isUndefined(IS_GLIDEIN) || \
                   ( OSGVO_OS_STRING == "RHEL 6" && HAS_CVMFS_cms_cern_ch == True ) || \
                   GLIDEIN_REQUIRED_OS == "rhel6" || \
-                  ( OpSysAndVer == "SL6" && HasCVMFS == True ) \
+                  ( OpSysAndVer == "SL6" && HAS_CVMFS_cms_cern_ch == True ) \
                 ) && \
                 ( \
                   isUndefined(GLIDEIN_Entry_Name) || \

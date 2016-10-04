@@ -23,6 +23,7 @@ for line in subprocess.Popen(cmd,shell=True,stdout=subprocess.PIPE).stdout.readl
   foundfiles.append(line.strip())
 
 infile = open(args.infile)
+nmissing=0
 if args.outfile:
   outfile = open(args.outfile,'w')
 else:
@@ -35,8 +36,9 @@ for line in infile:
       found=True
       break
   if not found:
+    nmissing+=1
     outfile.write(line)
-
+print 'Missing:',nmissing
 outfile.close()
 infile.close()
 
