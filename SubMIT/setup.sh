@@ -2,7 +2,7 @@
 
 export PANDA_PROD="${EOS2}/pandaprod/v4/" # can have multiple paths, separated by : 
 export PANDA_CFG="http://snarayan.web.cern.ch/snarayan/eoscatalog/20161001.cfg"
-export PANDA_FLATDIR="${HOME}/home000/panda/v0/"
+export PANDA_FLATDIR="${HOME}/home000/panda/v1/"
 
 #export SUBMIT_CFG="test"
 export SUBMIT_CFG="prod"
