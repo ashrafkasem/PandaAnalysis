@@ -16,11 +16,11 @@ if __name__ == "__main__":
     skimmer = root.PandaAnalyzer()
    
     skimmer.firstEvent=0
-    skimmer.lastEvent=10
-    skimmer.isData=False
+    skimmer.lastEvent=1000
+    skimmer.isData=True
     skimmer.applyJson=False
 #    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
-    skimmer.processType = root.PandaAnalyzer.kTT
+#    skimmer.processType = root.PandaAnalyzer.kTT
     fin = root.TFile.Open(fullPath)
 
     print fullPath
@@ -31,7 +31,7 @@ if __name__ == "__main__":
     print tree,infotree
 
     skimmer.SetDataDir(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/')
-    skimmer.SetOutputFile('/tmp/%s/testskim.root'%getenv('USER'))
+    skimmer.SetOutputFile('testskim.root')
     skimmer.Init(tree,infotree)
 
     skimmer.Run()
