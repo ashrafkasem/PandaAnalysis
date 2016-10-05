@@ -46,6 +46,7 @@ cfgFile = open(args.outfile,'w')
 
 couldNotFind = []
 
+file_counter=0
 for f in sorted(listOfFiles):
   if stat(f).st_size==0:
     continue
@@ -78,7 +79,9 @@ for f in sorted(listOfFiles):
     properties = ('UNKNOWN','UNKNOWN',-1)
     continue
   if checkDS(nickname,args.include,args.exclude):
+    nickname += '_%i'%(file_counter)
     cfgFile.write('{0:<25} {2:<10} {3:<15} {1:<180}\n'.format(nickname,fileName,properties[1],properties[2])) 
+    file_counter += 1
 
 if len(couldNotFind)>0: 
   print 'could not find:'
