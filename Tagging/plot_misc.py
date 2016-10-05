@@ -26,7 +26,9 @@ Load('Drawers','PlotUtility')
 ### SET GLOBAL VARIABLES ###
 lumi = 12918.
 logy=False
-cut = 'nFatjet==1 && fj1Pt>250 && fj1MaxCSV>0.46 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && isojetNBtags==1'
+#cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && fj1MaxCSV<0.46'
+cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && fj1MaxCSV>0.46'
+#cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250'
 if not args.cut:
   label = 'noCut_'
   plotlabel = '40 GeV < m_{SD}'
@@ -39,6 +41,10 @@ elif args.cut=='massW':
   cut = tAND(cut,'fj1MSD>50 && fj1MSD<100')
   label = 'massWCut_'
   plotlabel = '50 < m_{SD} < 100 GeV'
+elif args.cut=='massWBtag':
+  cut = tAND(cut,'fj1MSD>50 && fj1MSD<100 && fj1MaxCSV>0.46')
+  label = 'massWBtagCut_'
+  plotlabel = '#splitline{50 < m_{SD} < 100 GeV}{subjet b-tag}'
 
 ### LOAD PLOTTING UTILITY ###
 plot = root.PlotUtility()
@@ -56,8 +62,7 @@ plot.AddLumiLabel()
 if plotlabel:
   plot.AddPlotLabel(plotlabel,.18,.77,False,42,.04)
 
-weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_btag1*sf_tt'%lumi
-#weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_sjbtag1*sf_btag1*sf_tt'%lumi
+weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt'%lumi
 plot.SetMCWeight(weight)
 
 ### DEFINE PROCESSES ###
@@ -84,6 +89,13 @@ processes.append(data)
 for p in processes:
   plot.AddProcess(p)
 
+plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
+
+plot.AddDistribution(root.Distribution('top_ecf_bdt',-0.5,.5,20,'Top ECF BDT','Events'))
+
+'''
+plot.AddDistribution(root.Distribution('fj1MaxCSV',0,1,20,'Max subjet CSV','Events'))
+
 plot.AddDistribution(root.Distribution('jet1Pt',15,500,20,'leading jet p_{T} [GeV]','Events'))
 
 plot.AddDistribution(root.Distribution('nJet',-0.5,8.5,9,'N_{jet}','Events'))
@@ -93,10 +105,8 @@ plot.AddDistribution(root.Distribution('UWmag',250,500,20,'W recoil [GeV]','Even
 plot.AddDistribution(root.Distribution('puppimet',0,750,20,'MET [GeV]','Events/37.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1Pt',250,1000,20,'fatjet p_{T} [GeV]','Events/37.5 GeV'))
-
-plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
-
 '''
+
 plot.AddDistribution(root.Distribution('fj1ECFN_1_4_10/pow(fj1ECFN_1_3_05,2)',0.5,1.25,20,'_{1}e_{4}^{1.}/(_{1}e_{3}^{0.5})^{2}','Events',999,-999,'input0'))
 
 plot.AddDistribution(root.Distribution('fj1ECFN_2_4_20/pow(fj1ECFN_1_3_20,2)',0.25,2.5,20,'_{2}e_{4}^{2.}/(_{1}e_{3}^{02.})^{2}','Events',999,-999,'input1'))
@@ -116,7 +126,7 @@ plot.AddDistribution(root.Distribution('fj1ECFN_1_3_10/fj1ECFN_2_3_05',0.25,1.,2
 plot.AddDistribution(root.Distribution('fj1ECFN_3_3_10/pow(fj1ECFN_3_3_20,.5)',0.,.5,20,'_{3}e_{3}^{1.}/(_{3}e_{3}^{2.})^{1/2}','Events',999,-999,'input8'))
 
 plot.AddDistribution(root.Distribution('fj1ECFN_3_3_05/pow(fj1ECFN_1_2_05,3.)',1.,2.,20,'_{3}e_{3}^{0.5}/(_{1}e_{2}^{0.5})^{3}','Events',999,-999,'input9'))
-'''
+
 '''
 plot.AddDistribution(root.Distribution('fj1ECFN_2_4_20/pow(fj1ECFN_1_3_20,2)',0.25,2.5,20,'N_{3}(#beta=2.0)','Events',999,-999,'N3_20'))
 
@@ -125,9 +135,9 @@ plot.AddDistribution(root.Distribution('fj1ECFN_2_4_10/pow(fj1ECFN_1_3_10,2)',0.
 plot.AddDistribution(root.Distribution('fj1ECFN_2_4_40/pow(fj1ECFN_1_3_40,2)',0,2,20,'N_{3}(#beta=4.0)','Events',999,-999,'N3_40'))
 '''
 
-# plot.AddDistribution(root.Distribution('fj1Tau32SD',0,1,20,'Groomed #tau_{32}','Events',999,-999,'tau32SD'))
+plot.AddDistribution(root.Distribution('fj1Tau32SD',0,1,20,'Groomed #tau_{32}','Events',999,-999,'tau32SD'))
 
-# plot.AddDistribution(root.Distribution('fj1Tau32',0,1,20,'#tau_{32}','Events',999,-999,'tau32'))
+plot.AddDistribution(root.Distribution('fj1Tau32',0,1,20,'#tau_{32}','Events',999,-999,'tau32'))
 
 ### DRAW AND CATALOGUE ###
 plot.DrawAll(figsdir+'/'+label)
