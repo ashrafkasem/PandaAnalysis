@@ -564,11 +564,16 @@ void PandaAnalyzer::Run() {
       float rawpt = fj->rawPt;
       float eta = fj->eta;
       float ptcut = 250;
-      if (pt<ptcut || rawpt<ptcut || fabs(eta)>2.4)
+      if (pt<ptcut || fabs(eta)>2.4)
         continue;
       float phi = fj->phi;
-      if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi))
-        continue;
+      if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi)) {
+        if (gt->nFatjet==0) {
+          break;
+        } else {
+          continue;
+        }
+      }
       gt->nFatjet++;
       if (gt->nFatjet==1) {
         fj1 = fj;
