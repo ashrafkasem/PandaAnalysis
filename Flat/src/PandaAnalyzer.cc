@@ -568,11 +568,14 @@ void PandaAnalyzer::Run() {
         continue;
       float phi = fj->phi;
       if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi)) {
+        continue;
+        /*
         if (gt->nFatjet==0) {
           break;
         } else {
           continue;
         }
+        */
       }
       gt->nFatjet++;
       if (gt->nFatjet==1) {
