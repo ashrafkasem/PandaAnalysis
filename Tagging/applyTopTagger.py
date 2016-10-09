@@ -3,7 +3,8 @@
 from os import getenv
 from sys import argv
 
-import cfgTop as cfg
+import cfgModeled as cfg
+#import cfgTopModeled as cfg
 
 sample = argv[1]
 argv=[]
@@ -18,6 +19,8 @@ workdir = getenv('PANDA_FLATDIR')
 
 ba = root.TMVABranchAdder()
 ba.treename='events'
+ba.defaultValue=-0.5
+ba.presel='fj1ECFN_2_4_20>0'
 
 for v in cfg.variables:
   ba.AddVariable(v[0],v[2])
@@ -28,7 +31,7 @@ for v in cfg.formulae:
 for s in cfg.spectators:
   ba.AddSpectator(s[0])
 
-ba.BookMVA('top_ecf_bdt',workdir+'/training/top_ecfbdt_small_BDT.weights.xml')
+ba.BookMVA('top_ecfv5_bdt',workdir+'/training/top_ecfbdt_v5_BDT.weights.xml')
 
 ba.RunFile(workdir+'/'+sample+'.root')
 
