@@ -108,7 +108,7 @@ d = {
   'DoubleEG'            : ['DoubleEG'],
   'SinglePhoton'        : ['SinglePhoton'],
   'ZJets_nlo'           : ['ZJets_nlo'],
-  'WJets_nlo'           : ['WJets_nlo'],
+  'WJets_nlo'           : ['WJets_pt%sto%s'%(str(x[0]),str(x[1])) for x in [(100,250),(250,400),(400,600),(600,'inf')] ],
 }
 
 args = {}
