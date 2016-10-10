@@ -21,7 +21,7 @@ fi
 wget -O $WD/local.cfg $PANDA_CFG
 
 cd ${CMSSW_BASE}/src/PandaAnalysis/SubMIT/inputs/
-sed "s?XXXX?${SUBMIT_OUTDIR}?g" skim_tmpl.py > skim.py
+sed "s?XXXX?${SUBMIT_OUTDIR}?g" ${SUBMIT_TMPL} > skim.py
 cp skim.py $WD
 chmod 775 ${WD}/skim.py
 
