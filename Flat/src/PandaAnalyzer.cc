@@ -40,7 +40,8 @@ void PandaAnalyzer::Init(TTree *t, TTree *infotree)
   if (!t) return;
   tIn = t;
   t->SetBranchAddress("event",&event);
-  t->SetBranchAddress("puppiCA15",&fatjets);
+  if (doFatjet)
+    t->SetBranchAddress("puppiCA15",&fatjets);
   t->SetBranchAddress("puppiAK4",&jets);
   t->SetBranchAddress("electron",&electrons);
   t->SetBranchAddress("muon",&muons);
@@ -195,6 +196,14 @@ bool PandaAnalyzer::PassPreselection() {
     if (gt->nFatjet>=1 && gt->fj1Pt>250) { 
       if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
             (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
+            isGood = true;
+      }
+    }
+  }
+  if (preselBits & kMonojet) {
+    if (gt->nJet>=1 && gt->jet1Pt>40) { 
+      if ( (gt->puppimet>180 || gt->UZmag>180 || gt->UWmag>180 || gt->UAmag>180) ||
+            (gt->pfmet>180 || gt->pfUZmag>180 || gt->pfUWmag>180 || gt->pfUAmag>180) ) {
             isGood = true;
       }
     }
@@ -559,47 +568,52 @@ void PandaAnalyzer::Run() {
 
     PFatJet *fj1=0;
     gt->nFatjet=0;
-    for (PFatJet *fj : *fatjets) {
-      float pt = fj->pt;
-      float rawpt = fj->rawPt;
-      float eta = fj->eta;
-      float ptcut = 250;
-      if (pt<ptcut || fabs(eta)>2.4)
-        continue;
-      float phi = fj->phi;
-      if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi)) {
-        if (gt->nFatjet==0) {
-          break;
-        } else {
+    if (doFatjet) {
+      for (PFatJet *fj : *fatjets) {
+        float pt = fj->pt;
+        float rawpt = fj->rawPt;
+        float eta = fj->eta;
+        float ptcut = 250;
+        if (pt<ptcut || fabs(eta)>2.4)
           continue;
-        }
-      }
-      gt->nFatjet++;
-      if (gt->nFatjet==1) {
-        fj1 = fj;
-        gt->fj1Pt = pt;
-        gt->fj1Eta = eta;
-        gt->fj1Phi = phi;
-        gt->fj1MSD = fj->mSD;
-        gt->fj1Tau32 = clean(fj->tau3/fj->tau2);
-        gt->fj1Tau32SD = clean(fj->tau3SD/fj->tau2SD);
-        gt->fj1Tau21 = clean(fj->tau2/fj->tau1);
-        gt->fj1Tau21SD = clean(fj->tau2SD/fj->tau1SD);
-        gt->fj1RawPt = rawpt;
-
-        for (unsigned int iB=0; iB!=betas.size(); ++iB) {
-          float beta = betas.at(iB);
-          for (auto N : Ns) {
-            for (auto order : orders) {
-              gt->fj1ECFNs[makeECFString(order,N,beta)] = fj->get_ecf(order,N,iB); 
-            }
+        float phi = fj->phi;
+        if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi)) {
+          continue;
+          /*
+          if (gt->nFatjet==0) {
+            break;
+          } else {
+            continue;
           }
-        } //loop over betas
+          */
+        }
+        gt->nFatjet++;
+        if (gt->nFatjet==1) {
+          fj1 = fj;
+          gt->fj1Pt = pt;
+          gt->fj1Eta = eta;
+          gt->fj1Phi = phi;
+          gt->fj1MSD = fj->mSD;
+          gt->fj1Tau32 = clean(fj->tau3/fj->tau2);
+          gt->fj1Tau32SD = clean(fj->tau3SD/fj->tau2SD);
+          gt->fj1Tau21 = clean(fj->tau2/fj->tau1);
+          gt->fj1Tau21SD = clean(fj->tau2SD/fj->tau1SD);
+          gt->fj1RawPt = rawpt;
 
-        VJet *subjets = fj->subjets;
-        std::sort(subjets->begin(),subjets->end(),SortPJetByCSV);
-        gt->fj1MaxCSV = subjets->at(0)->csv; 
-        gt->fj1MinCSV = subjets->back()->csv; 
+          for (unsigned int iB=0; iB!=betas.size(); ++iB) {
+            float beta = betas.at(iB);
+            for (auto N : Ns) {
+              for (auto order : orders) {
+                gt->fj1ECFNs[makeECFString(order,N,beta)] = fj->get_ecf(order,N,iB); 
+              }
+            }
+          } //loop over betas
+
+          VJet *subjets = fj->subjets;
+          std::sort(subjets->begin(),subjets->end(),SortPJetByCSV);
+          gt->fj1MaxCSV = subjets->at(0)->csv; 
+          gt->fj1MinCSV = subjets->back()->csv; 
+        }
       }
     }
 
@@ -909,7 +923,7 @@ void PandaAnalyzer::Run() {
     tr.TriggerEvent("fatjet gen-matching");
 
     if (!isData) {
-      // now get the subjet btag SFs
+      // now get the jet btag SFs
       vector<btagcand> btagcands;
       vector<double> sf_cent, sf_bUp, sf_bDown, sf_mUp, sf_mDown;
       unsigned int nJ = isoJets.size();
