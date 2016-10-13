@@ -83,7 +83,7 @@ processes.append(data)
 for p in processes:
   plot.AddProcess(p)
 
-plot.AddDistribution(root.Distribution('top_ecfv5_bdt',-0.5,.5,20,'Top ECF BDT v5','Events'))
+plot.AddDistribution(root.Distribution('top_ecfv6fixed_bdt',-1.,1.,20,'Top ECF BDT v6','Events'))
 
 '''
 plot.AddDistribution(root.Distribution('top_ecf_bdt',-0.5,.5,20,'Top ECF BDT','Events'))
