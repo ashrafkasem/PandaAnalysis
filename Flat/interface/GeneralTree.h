@@ -146,6 +146,8 @@ class GeneralTree : public genericTree {
   float fj1GenWPt=0;
   float fj1GenWSize=0;
   int fj1IsWMatched=0;
+  int fj1HighestPtGen=0;
+  float fj1HighestPtGenPt=-1;
 	int fj1IsTight=0;
 	int fj1IsLoose=0;
 	float fj1RawPt=0;
@@ -300,6 +302,8 @@ GeneralTree::GeneralTree() {
   fj1GenWPt=0;
   fj1GenWSize=0;
   fj1IsWMatched=0;
+  fj1HighestPtGen=0;
+  fj1HighestPtGenPt=-1;
 	fj1IsTight=0;
 	fj1IsLoose=0;
 	fj1RawPt=0;
@@ -465,6 +469,8 @@ void GeneralTree::Reset() {
   fj1GenWPt = -1;
   fj1GenWSize = -1;
   fj1IsWMatched = 0;
+  fj1HighestPtGen=0;
+  fj1HighestPtGenPt=-1;
 	fj1IsTight = 0;
 	fj1IsLoose = 0;
 	fj1RawPt = -1;
@@ -740,6 +746,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("fj1GenSize",&fj1GenSize);
 	treePtr->SetBranchStatus("fj1IsMatched",1);
 	treePtr->SetBranchAddress("fj1IsMatched",&fj1IsMatched);
+  treePtr->SetBranchAddress("fj1HighestPtGen",&fj1HighestPtGen);
+  treePtr->SetBranchAddress("fj1HighestPtGenPt",&fj1HighestPtGenPt);
 	treePtr->SetBranchStatus("fj1IsTight",1);
 	treePtr->SetBranchAddress("fj1IsTight",&fj1IsTight);
 	treePtr->SetBranchStatus("fj1IsLoose",1);
@@ -921,6 +929,8 @@ void GeneralTree::WriteTree(TTree *t) {
   treePtr->Branch("fj1GenWPt",&fj1GenWPt,"fj1GenWPt/F");
   treePtr->Branch("fj1GenWSize",&fj1GenWSize,"fj1GenWSize/F");
   treePtr->Branch("fj1IsWMatched",&fj1IsWMatched,"fj1IsWMatched/I");
+  treePtr->Branch("fj1HighestPtGen",&fj1HighestPtGen,"fj1HighestPtGen/I");
+  treePtr->Branch("fj1HighestPtGenPt",&fj1HighestPtGenPt,"fj1HighestPtGenPt/F");
 	treePtr->Branch("fj1IsTight",&fj1IsTight,"fj1IsTight/I");
 	treePtr->Branch("fj1IsLoose",&fj1IsLoose,"fj1IsLoose/I");
 	treePtr->Branch("fj1RawPt",&fj1RawPt,"fj1RawPt/F");

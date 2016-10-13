@@ -848,6 +848,17 @@ void PandaAnalyzer::Run() {
           gt->fj1IsWMatched = 0;
         }
       }
+      
+      // now get the highest pT gen particle inside the jet cone
+      for (PGenParticle *gen : *genparts) {
+        float pt = gen->pt;
+        int pdgid = gen->pdgid;
+        if (pt>(gt->fj1HighestPtGenPt) 
+            && DeltaR2(gen->eta,gen->phi,fj1->eta,fj1->phi)<2.25) {
+          gt->fj1HighestPtGenPt = pt;
+          gt->fj1HighestPtGen = pdgid;
+        }
+      }
 
       // now get the subjet btag SFs
       vector<btagcand> sj_btagcands;

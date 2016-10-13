@@ -143,7 +143,7 @@ private:
   panda::PEvent *event=0;                        // event object
   panda::VGenParticle *genparts=0;               // gen particle objects
   panda::VFatJet *fatjets=0;                     // CA15 fat jets
-  panda::VJet *jets=0;                          // AK4 fat jets
+  panda::VJet *jets=0;                           // AK4 narrow jets
   panda::VElectron *electrons=0;
   panda::VMuon *muons=0;
   panda::VTau *taus=0;
