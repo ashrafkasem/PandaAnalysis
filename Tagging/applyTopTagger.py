@@ -19,7 +19,7 @@ workdir = getenv('PANDA_FLATDIR')
 
 ba = root.TMVABranchAdder()
 ba.treename='events'
-ba.defaultValue=-0.5
+ba.defaultValue=-1.2
 ba.presel='fj1ECFN_2_4_20>0'
 
 for v in cfg.variables:
@@ -31,7 +31,7 @@ for v in cfg.formulae:
 for s in cfg.spectators:
   ba.AddSpectator(s[0])
 
-ba.BookMVA('top_ecfv5_bdt',workdir+'/training/top_ecfbdt_v5_BDT.weights.xml')
+ba.BookMVA('top_ecfv6fixed_bdt',workdir+'/training/top_ecfbdt_v6_BDT.weights.xml')
 
 ba.RunFile(workdir+'/'+sample+'.root')
 
