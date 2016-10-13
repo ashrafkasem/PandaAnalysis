@@ -1,7 +1,7 @@
 #!/bin/bash
 
 export PANDA_PROD="${EOS2}/pandaprod/v5/" # can have multiple paths, separated by : 
-export PANDA_CFG="http://snarayan.web.cern.ch/snarayan/eoscatalog/vbf_20161009.cfg"
+export PANDA_CFG="http://snarayan.web.cern.ch/snarayan/eoscatalog/vbf_20161010.cfg"
 export PANDA_FLATDIR="${HOME}/home000/panda/vbf_v0/"
 
 #export SUBMIT_CFG="test"

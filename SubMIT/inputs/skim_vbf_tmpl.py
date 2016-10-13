@@ -39,6 +39,7 @@ if __name__ == "__main__":
     skimmer.isData=isData
     skimmer.applyJson=False
     skimmer.doFatjet=False
+    skimmer.usePuppi=False
     #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonojet)
     processType=root.PandaAnalyzer.kNone
     if not isData:

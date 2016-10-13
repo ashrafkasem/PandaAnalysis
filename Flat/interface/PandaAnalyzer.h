@@ -87,6 +87,7 @@ public :
   // public configuration
   bool doFatjet=true;
   bool isData=false;                         // to do gen matching, etc
+  bool usePuppi=true;
   bool applyEventFilters=false;              // apply json and filters. if false, use MET filters in tree
   int firstEvent=-1;
   int lastEvent=-1;                          // max events to process; -1=>all

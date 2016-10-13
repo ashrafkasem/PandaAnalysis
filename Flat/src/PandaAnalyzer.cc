@@ -40,9 +40,10 @@ void PandaAnalyzer::Init(TTree *t, TTree *infotree)
   if (!t) return;
   tIn = t;
   t->SetBranchAddress("event",&event);
+  TString jetname = (usePuppi) ? "puppi" : "chs";
   if (doFatjet)
-    t->SetBranchAddress("puppiCA15",&fatjets);
-  t->SetBranchAddress("puppiAK4",&jets);
+    t->SetBranchAddress(jetname+"CA15",&fatjets);
+  t->SetBranchAddress(jetname+"AK4",&jets);
   t->SetBranchAddress("electron",&electrons);
   t->SetBranchAddress("muon",&muons);
   t->SetBranchAddress("tau",&taus);
