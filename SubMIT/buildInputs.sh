@@ -19,6 +19,7 @@ if [[ $doTar == 1 ]]; then
 fi
 
 wget -O $WD/local.cfg $PANDA_CFG
+cp $WD/local.cfg $WD/local_all.cfg # useful for cataloging
 
 cd ${CMSSW_BASE}/src/PandaAnalysis/SubMIT/inputs/
 sed "s?XXXX?${SUBMIT_OUTDIR}?g" ${SUBMIT_TMPL} > skim.py
