@@ -1,11 +1,11 @@
 <use   name="root"/>
+<use   name="roottmva"/>
 <use   name="roofit"/>
+<use   root=""/>
 <use   name="PandaProd/Objects"/>
 <use   name="PandaCore/Tools"/>
 <use   name="CondFormats/BTauObjects"/>
-<use   root=""/>
 <export>
   <lib   name="1"/>
 </export>
 <flags CXXFLAGS="-g -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable  -Os"/>
-
