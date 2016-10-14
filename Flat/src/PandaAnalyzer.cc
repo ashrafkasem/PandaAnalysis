@@ -575,10 +575,12 @@ void PandaAnalyzer::Run() {
         float rawpt = fj->rawPt;
         float eta = fj->eta;
         float ptcut = 250;
+        PDebug("",TString::Format("Considering fatjet with pt=%.3f, eta=%.3f",pt,eta));
         if (pt<ptcut || fabs(eta)>2.4)
           continue;
         float phi = fj->phi;
         if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi)) {
+          PDebug("",TString::Format("Rejecting fatjet with leps=%i, phos=%i",int(IsMatched(&matchLeps,2.25,eta,phi)),int(IsMatched(&matchPhos,2.25,eta,phi))));
           continue;
           /*
           if (gt->nFatjet==0) {
