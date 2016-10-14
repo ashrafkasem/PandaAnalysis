@@ -87,7 +87,7 @@ for p in processes:
 
 #plot.AddDistribution(root.Distribution('UWmag',250,500,20,'W recoil [GeV]','Events'))
 
-plot.AddDistribution(root.Distribution('top_ecfv6fixed_bdt',-1.,1.,20,'Top ECF BDT v6','Events'))
+plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.2,1.,20,'Top ECF BDT v7','Events'))
 
 '''
 plot.AddDistribution(root.Distribution('top_ecf_bdt_v2',-0.5,.5,20,'Top ECF BDT v2','Events'))

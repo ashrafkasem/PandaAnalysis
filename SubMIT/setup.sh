@@ -3,7 +3,7 @@
 export PANDA="${CMSSW_BASE}/src/PandaAnalysis"
 export PANDA_PROD="${EOS2}/pandaprod/v5/" # can have multiple paths, separated by : 
 export PANDA_CFG="http://snarayan.web.cern.ch/snarayan/eoscatalog/20161013.cfg"
-export PANDA_FLATDIR="${HOME}/home000/panda/v5/"
+export PANDA_FLATDIR="${HOME}/home000/panda/v6/"
 
 #export SUBMIT_CFG="test"
 export SUBMIT_CFG="prod"
