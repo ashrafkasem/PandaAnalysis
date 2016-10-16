@@ -61,18 +61,20 @@ weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_sjbtag0*sf_btag0*s
 plot.SetMCWeight(weight)
 
 ### DEFINE PROCESSES ###
-wjets     = root.Process('W+jets',root.kWjets)
+wjetsq     = root.Process('W+q',root.kWjets); wjetsq.additionalCut = root.TCut('abs(fj1HighestPtGen)!=21')
+wjetsg     = root.Process('W+g',root.kExtra2); wjetsg.additionalCut = root.TCut('abs(fj1HighestPtGen)==21')
 diboson   = root.Process('Diboson',root.kDiboson)
 ttbar     = root.Process('t#bar{t} [matched]',root.kTTbar); ttbar.additionalCut = root.TCut('(fj1IsMatched==1&&fj1GenSize<1.44)')
 ttbarunmatched     = root.Process('t#bar{t} [unmatched]',root.kExtra1); ttbarunmatched.additionalCut = root.TCut('(fj1IsMatched==0||fj1GenSize>1.44)')
 singletop = root.Process('Single t',root.kST)
 qcd       = root.Process("QCD",root.kQCD)
 data      = root.Process("Data",root.kData); data.additionalCut = root.TCut('(trigger&1)!=0')
-processes = [diboson,singletop,wjets,ttbarunmatched,ttbar]
+processes = [diboson,singletop,wjetsg,wjetsq,ttbarunmatched,ttbar]
 
 ### ASSIGN FILES TO PROCESSES ###
 #wjets.AddFile(basedir+'WJets_nlo.root')
-wjets.AddFile(basedir+'WJets.root')
+wjetsq.AddFile(basedir+'WJets.root')
+wjetsg.AddFile(basedir+'WJets.root')
 diboson.AddFile(basedir+'Diboson.root')
 ttbar.AddFile(basedir+'TTbar.root')
 ttbarunmatched.AddFile(basedir+'TTbar.root')
@@ -89,8 +91,7 @@ for p in processes:
 
 plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.2,1.,20,'Top ECF BDT v7','Events'))
 
-'''
-plot.AddDistribution(root.Distribution('top_ecf_bdt_v2',-0.5,.5,20,'Top ECF BDT v2','Events'))
+#plot.AddDistribution(root.Distribution('top_ecf_bdt_v2',-0.5,.5,20,'Top ECF BDT v2','Events'))
 
 plot.AddDistribution(root.Distribution('fj1Tau32SD',0,1,20,'Groomed #tau_{32}','Events',999,-999,'tau32SD'))
 
@@ -107,6 +108,7 @@ plot.AddDistribution(root.Distribution('puppimet',0,750,20,'MET [GeV]','Events/3
 plot.AddDistribution(root.Distribution('fj1Pt',250,1000,20,'fatjet p_{T} [GeV]','Events/37.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
+'''
 
 plot.AddDistribution(root.Distribution('fj1ECFN_1_4_10/pow(fj1ECFN_1_3_05,2)',0.6,1.5,20,'_{1}e_{4}^{1.}/(_{1}e_{3}^{0.5})^{2}','Events',999,-999,'input0'))
 
