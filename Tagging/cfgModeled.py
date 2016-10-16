@@ -46,7 +46,7 @@ formulae = [ (x,'F',x.replace('ecfN','fj1ECFN')) for x in
 #            'ecfN_2_4_20/pow(ecfN_2_4_40,0.50)',
     ]
 ]
-formulae.append(['tau32SD','F','fj1Tau32SD'])
+#formulae.append(['tau32SD','F','fj1Tau32SD'])
 
 spectators = [
 #          ('tau32','F'),
