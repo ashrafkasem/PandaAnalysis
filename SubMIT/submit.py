@@ -24,10 +24,9 @@ output = {1}/$(Cluster)_$(Process).out
 error = {1}/$(Cluster)_$(Process).err
 log = {1}/$(Cluster)_$(Process).log
 requirements = ( \ 
-                  isUndefined(IS_GLIDEIN) || \
-                  ( OSGVO_OS_STRING == "RHEL 6" && HAS_CVMFS_cms_cern_ch == True ) || \
+                  (OSGVO_OS_STRING == "RHEL 6" && HAS_CVMFS_cms_cern_ch) || \
                   GLIDEIN_REQUIRED_OS == "rhel6" || \
-                  ( OpSysAndVer == "SL6" && HAS_CVMFS_cms_cern_ch == True ) \
+                  (GLIDEIN_Site == "MIT_CampusFactory" && (BOSCOGroup == "paus" || BOSCOGroup == "bosco_cms") && HAS_CVMFS_cms_cern_ch) \
                 ) && \
                 ( \
                   isUndefined(GLIDEIN_Entry_Name) || \

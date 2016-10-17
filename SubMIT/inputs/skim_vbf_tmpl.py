@@ -40,7 +40,7 @@ if __name__ == "__main__":
     skimmer.applyJson=False
     skimmer.doFatjet=False
     skimmer.usePuppi=False
-    #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonojet)
+    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonojet)
     processType=root.PandaAnalyzer.kNone
     if not isData:
       if 'ZJets' in fullPath or 'DY' in fullPath:
