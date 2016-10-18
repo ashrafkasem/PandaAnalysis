@@ -1,4 +1,3 @@
-
 #include "TFile.h"
 #include "TTree.h"
 #include "TH1F.h"
@@ -49,6 +48,26 @@ class GeneralTree : public genericTree {
 	float sf_btag1BDown=0;
 	float sf_btag1MUp=0;
 	float sf_btag1MDown=0;
+	float sf_btag2=0;
+	float sf_btag2BUp=0;
+	float sf_btag2BDown=0;
+	float sf_btag2MUp=0;
+	float sf_btag2MDown=0;
+	float sf_btag0_alt=0;
+	float sf_btag0BUp_alt=0;
+	float sf_btag0BDown_alt=0;
+	float sf_btag0MUp_alt=0;
+	float sf_btag0MDown_alt=0;
+	float sf_btag1_alt=0;
+	float sf_btag1BUp_alt=0;
+	float sf_btag1BDown_alt=0;
+	float sf_btag1MUp_alt=0;
+	float sf_btag1MDown_alt=0;
+	float sf_btag2_alt=0;
+	float sf_btag2BUp_alt=0;
+	float sf_btag2BDown_alt=0;
+	float sf_btag2MUp_alt=0;
+	float sf_btag2MDown_alt=0;
 	float sf_sjbtag0=0;
 	float sf_sjbtag0BUp=0;
 	float sf_sjbtag0BDown=0;
@@ -138,11 +157,18 @@ class GeneralTree : public genericTree {
 	float fj1Pt=0;
 	float fj1Phi=0;
 	float fj1Eta=0;
+	float fj1M=0;
 	float fj1MaxCSV=0;
 	float fj1MinCSV=0;
 	float fj1GenPt=0;
 	float fj1GenSize=0;
 	int fj1IsMatched=0;
+	float fj1sjPt[2];
+	float fj1sjEta[2];
+	float fj1sjPhi[2];
+	float fj1sjM[2];
+	float fj1sjCSV[2];
+	float fj1sjQGL[2];
   float fj1GenWPt=0;
   float fj1GenWSize=0;
   int fj1IsWMatched=0;
@@ -177,7 +203,19 @@ class GeneralTree : public genericTree {
 	float looseLep2Phi=0;
 	float diLepMass=0;
 	int nTau=0;
-
+	float jetPt[20];
+	float jetEta[20];
+	float jetPhi[20];
+	float jetE[20];
+	float jetCSV[20];
+	float jetIso[20];
+	float jetQGL[20];
+	float hbbpt;
+	float hbbeta;
+	float hbbphi;
+	float hbbm;
+	int hbbjtidx[2];
+	  
 	std::map<TString,float> fj1ECFNs;
 
 //ENDDEF
@@ -205,6 +243,26 @@ GeneralTree::GeneralTree() {
   sf_btag1BDown=1;
   sf_btag1MUp=1;
   sf_btag1MDown=1;
+  sf_btag2=1;
+  sf_btag2BUp=1;
+  sf_btag2BDown=1;
+  sf_btag2MUp=1;
+  sf_btag2MDown=1;
+  sf_btag0_alt=1;
+  sf_btag0BUp_alt=1;
+  sf_btag0BDown_alt=1;
+  sf_btag0MUp_alt=1;
+  sf_btag0MDown_alt=1;
+  sf_btag1_alt=1;
+  sf_btag1BUp_alt=1;
+  sf_btag1BDown_alt=1;
+  sf_btag1MUp_alt=1;
+  sf_btag1MDown_alt=1;
+  sf_btag2_alt=1;
+  sf_btag2BUp_alt=1;
+  sf_btag2BDown_alt=1;
+  sf_btag2MUp_alt=1;
+  sf_btag2MDown_alt=1;
   sf_sjbtag0=1;
   sf_sjbtag0BUp=1;
   sf_sjbtag0BDown=1;
@@ -294,6 +352,7 @@ GeneralTree::GeneralTree() {
 	fj1Pt=0;
 	fj1Phi=0;
 	fj1Eta=0;
+	fj1M=0;
 	fj1MaxCSV=0;
 	fj1MinCSV=0;
 	fj1GenPt=0;
@@ -333,6 +392,12 @@ GeneralTree::GeneralTree() {
 	looseLep2Phi=0;
 	diLepMass=0;
 	nTau=0;
+	hbbpt=0;
+	hbbeta=0;
+	hbbphi=0;
+	hbbm=0;
+	
+>>>>>>> remotes/bmaier/master
 
   for (auto beta : betas) {
     for (auto N : Ns) {
@@ -372,6 +437,26 @@ void GeneralTree::Reset() {
   sf_btag1BDown = 1;
   sf_btag1MUp = 1;
   sf_btag1MDown = 1;
+  sf_btag2 = 1;
+  sf_btag2BUp = 1;
+  sf_btag2BDown = 1;
+  sf_btag2MUp = 1;
+  sf_btag2MDown = 1;
+  sf_btag0_alt = 1;
+  sf_btag0BUp_alt = 1;
+  sf_btag0BDown_alt = 1;
+  sf_btag0MUp_alt = 1;
+  sf_btag0MDown_alt = 1;
+  sf_btag1_alt = 1;
+  sf_btag1BUp_alt = 1;
+  sf_btag1BDown_alt = 1;
+  sf_btag1MUp_alt = 1;
+  sf_btag1MDown_alt = 1;
+  sf_btag2_alt = 1;
+  sf_btag2BUp_alt = 1;
+  sf_btag2BDown_alt = 1;
+  sf_btag2MUp_alt = 1;
+  sf_btag2MDown_alt = 1;
   sf_sjbtag0 = 1;
   sf_sjbtag0BUp = 1;
   sf_sjbtag0BDown = 1;
@@ -461,6 +546,7 @@ void GeneralTree::Reset() {
 	fj1Pt = -1;
 	fj1Phi = -1;
 	fj1Eta = -1;
+	fj1M = -1;
 	fj1MaxCSV = -1;
 	fj1MinCSV = -1;
 	fj1GenPt = -1;
@@ -500,6 +586,10 @@ void GeneralTree::Reset() {
 	looseLep2Phi = -1;
 	diLepMass = -1;
 	nTau = 0;
+	hbbpt = -1;
+	hbbeta = -1;
+	hbbphi = -1;
+	hbbm = -1;
 
   for (auto beta : betas) {
     for (auto N : Ns) {
@@ -558,6 +648,46 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("sf_btag1MUp",&sf_btag1MUp);
 	treePtr->SetBranchStatus("sf_btag1MDown",1);
 	treePtr->SetBranchAddress("sf_btag1MDown",&sf_btag1MDown);
+	treePtr->SetBranchStatus("sf_btag2",1);
+	treePtr->SetBranchAddress("sf_btag2",&sf_btag2);
+	treePtr->SetBranchStatus("sf_btag2BUp",1);
+	treePtr->SetBranchAddress("sf_btag2BUp",&sf_btag2BUp);
+	treePtr->SetBranchStatus("sf_btag2BDown",1);
+	treePtr->SetBranchAddress("sf_btag2BDown",&sf_btag2BDown);
+	treePtr->SetBranchStatus("sf_btag2MUp",1);
+	treePtr->SetBranchAddress("sf_btag2MUp",&sf_btag2MUp);
+	treePtr->SetBranchStatus("sf_btag2MDown",1);
+	treePtr->SetBranchAddress("sf_btag2MDown",&sf_btag2MDown);
+	treePtr->SetBranchStatus("sf_btag0_alt",1);
+	treePtr->SetBranchAddress("sf_btag0_alt",&sf_btag0_alt);
+	treePtr->SetBranchStatus("sf_btag0BUp_alt",1);
+	treePtr->SetBranchAddress("sf_btag0BUp_alt",&sf_btag0BUp_alt);
+	treePtr->SetBranchStatus("sf_btag0BDown_alt",1);
+	treePtr->SetBranchAddress("sf_btag0BDown_alt",&sf_btag0BDown_alt);
+	treePtr->SetBranchStatus("sf_btag0MUp_alt",1);
+	treePtr->SetBranchAddress("sf_btag0MUp_alt",&sf_btag0MUp_alt);
+	treePtr->SetBranchStatus("sf_btag0MDown_alt",1);
+	treePtr->SetBranchAddress("sf_btag0MDown_alt",&sf_btag0MDown_alt);
+	treePtr->SetBranchStatus("sf_btag1_alt",1);
+	treePtr->SetBranchAddress("sf_btag1_alt",&sf_btag1_alt);
+	treePtr->SetBranchStatus("sf_btag1BUp_alt",1);
+	treePtr->SetBranchAddress("sf_btag1BUp_alt",&sf_btag1BUp_alt);
+	treePtr->SetBranchStatus("sf_btag1BDown_alt",1);
+	treePtr->SetBranchAddress("sf_btag1BDown_alt",&sf_btag1BDown_alt);
+	treePtr->SetBranchStatus("sf_btag1MUp_alt",1);
+	treePtr->SetBranchAddress("sf_btag1MUp_alt",&sf_btag1MUp_alt);
+	treePtr->SetBranchStatus("sf_btag1MDown_alt",1);
+	treePtr->SetBranchAddress("sf_btag1MDown_alt",&sf_btag1MDown_alt);
+	treePtr->SetBranchStatus("sf_btag2_alt",1);
+	treePtr->SetBranchAddress("sf_btag2_alt",&sf_btag2_alt);
+	treePtr->SetBranchStatus("sf_btag2BUp_alt",1);
+	treePtr->SetBranchAddress("sf_btag2BUp_alt",&sf_btag2BUp_alt);
+	treePtr->SetBranchStatus("sf_btag2BDown_alt",1);
+	treePtr->SetBranchAddress("sf_btag2BDown_alt",&sf_btag2BDown_alt);
+	treePtr->SetBranchStatus("sf_btag2MUp_alt",1);
+	treePtr->SetBranchAddress("sf_btag2MUp_alt",&sf_btag2MUp_alt);
+	treePtr->SetBranchStatus("sf_btag2MDown_alt",1);
+	treePtr->SetBranchAddress("sf_btag2MDown_alt",&sf_btag2MDown_alt);
 	treePtr->SetBranchStatus("sf_sjbtag0",1);
 	treePtr->SetBranchAddress("sf_sjbtag0",&sf_sjbtag0);
 	treePtr->SetBranchStatus("sf_sjbtag0BUp",1);
@@ -718,6 +848,20 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("jetNBtags",&jetNBtags);
 	treePtr->SetBranchStatus("isojetNBtags",1);
 	treePtr->SetBranchAddress("isojetNBtags",&isojetNBtags);
+	treePtr->SetBranchStatus("jetPt",1);
+	treePtr->SetBranchAddress("jetPt",jetPt);
+	treePtr->SetBranchStatus("jetEta",1);
+	treePtr->SetBranchAddress("jetEta",jetEta);
+	treePtr->SetBranchStatus("jetPhi",1);
+	treePtr->SetBranchAddress("jetPhi",jetPhi);
+	treePtr->SetBranchStatus("jetE",1);
+	treePtr->SetBranchAddress("jetE",jetE);
+	treePtr->SetBranchStatus("jetCSV",1);
+	treePtr->SetBranchAddress("jetCSV",jetCSV);
+	treePtr->SetBranchStatus("jetIso",1);
+	treePtr->SetBranchAddress("jetIso",jetIso);
+	treePtr->SetBranchStatus("jetQGL",1);
+	treePtr->SetBranchAddress("jetQGL",jetQGL);
 	treePtr->SetBranchStatus("nFatjet",1);
 	treePtr->SetBranchAddress("nFatjet",&nFatjet);
 	treePtr->SetBranchStatus("fj1Tau32",1);
@@ -736,6 +880,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("fj1Phi",&fj1Phi);
 	treePtr->SetBranchStatus("fj1Eta",1);
 	treePtr->SetBranchAddress("fj1Eta",&fj1Eta);
+	treePtr->SetBranchStatus("fj1M",1);
+	treePtr->SetBranchAddress("fj1M",&fj1M);
 	treePtr->SetBranchStatus("fj1MaxCSV",1);
 	treePtr->SetBranchAddress("fj1MaxCSV",&fj1MaxCSV);
 	treePtr->SetBranchStatus("fj1MinCSV",1);
@@ -758,6 +904,18 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("fj1IsHF",&fj1IsHF);
 	treePtr->SetBranchStatus("isHF",1);
 	treePtr->SetBranchAddress("isHF",&isHF);
+	treePtr->SetBranchStatus("fj1sjPt",1);
+	treePtr->SetBranchAddress("fj1sjPt",fj1sjPt);
+	treePtr->SetBranchStatus("fj1sjEta",1);
+	treePtr->SetBranchAddress("fj1sjEta",fj1sjEta);
+	treePtr->SetBranchStatus("fj1sjPhi",1);
+	treePtr->SetBranchAddress("fj1sjPhi",fj1sjPhi);
+	treePtr->SetBranchStatus("fj1sjM",1);
+	treePtr->SetBranchAddress("fj1sjM",fj1sjM);
+	treePtr->SetBranchStatus("fj1sjCSV",1);
+	treePtr->SetBranchAddress("fj1sjCSV",fj1sjCSV);
+	treePtr->SetBranchStatus("fj1sjQGL",1);
+	treePtr->SetBranchAddress("fj1sjQGL",fj1sjQGL);
 	treePtr->SetBranchStatus("nLoosePhoton",1);
 	treePtr->SetBranchAddress("nLoosePhoton",&nLoosePhoton);
 	treePtr->SetBranchStatus("nTightPhoton",1);
@@ -806,6 +964,17 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("diLepMass",&diLepMass);
 	treePtr->SetBranchStatus("nTau",1);
 	treePtr->SetBranchAddress("nTau",&nTau);
+	treePtr->SetBranchStatus("hbbpt",1);
+	treePtr->SetBranchAddress("hbbpt",&hbbpt);
+	treePtr->SetBranchStatus("hbbeta",1);
+	treePtr->SetBranchAddress("hbbeta",&hbbeta);
+	treePtr->SetBranchStatus("hbbphi",1);
+	treePtr->SetBranchAddress("hbbphi",&hbbphi);
+	treePtr->SetBranchStatus("hbbm",1);
+	treePtr->SetBranchAddress("hbbm",&hbbm);
+	treePtr->SetBranchStatus("hbbjtidx",1);
+	treePtr->SetBranchAddress("hbbjtidx",hbbjtidx);
+
 //ENDREAD
 }
 
@@ -832,6 +1001,26 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("sf_btag1BDown",&sf_btag1BDown,"sf_btag1BDown/F");
 	treePtr->Branch("sf_btag1MUp",&sf_btag1MUp,"sf_btag1MUp/F");
 	treePtr->Branch("sf_btag1MDown",&sf_btag1MDown,"sf_btag1MDown/F");
+	treePtr->Branch("sf_btag2",&sf_btag2,"sf_btag2/F");
+	treePtr->Branch("sf_btag2BUp",&sf_btag2BUp,"sf_btag2BUp/F");
+	treePtr->Branch("sf_btag2BDown",&sf_btag2BDown,"sf_btag2BDown/F");
+	treePtr->Branch("sf_btag2MUp",&sf_btag2MUp,"sf_btag2MUp/F");
+	treePtr->Branch("sf_btag2MDown",&sf_btag2MDown,"sf_btag2MDown/F");
+	treePtr->Branch("sf_btag0_alt",&sf_btag0_alt,"sf_btag0_alt/F");
+	treePtr->Branch("sf_btag0BUp_alt",&sf_btag0BUp_alt,"sf_btag0BUp_alt/F");
+	treePtr->Branch("sf_btag0BDown_alt",&sf_btag0BDown_alt,"sf_btag0BDown_alt/F");
+	treePtr->Branch("sf_btag0MUp_alt",&sf_btag0MUp_alt,"sf_btag0MUp_alt/F");
+	treePtr->Branch("sf_btag0MDown_alt",&sf_btag0MDown_alt,"sf_btag0MDown_alt/F");
+	treePtr->Branch("sf_btag1_alt",&sf_btag1_alt,"sf_btag1_alt/F");
+	treePtr->Branch("sf_btag1BUp_alt",&sf_btag1BUp_alt,"sf_btag1BUp_alt/F");
+	treePtr->Branch("sf_btag1BDown_alt",&sf_btag1BDown_alt,"sf_btag1BDown_alt/F");
+	treePtr->Branch("sf_btag1MUp_alt",&sf_btag1MUp_alt,"sf_btag1MUp_alt/F");
+	treePtr->Branch("sf_btag1MDown_alt",&sf_btag1MDown_alt,"sf_btag1MDown_alt/F");
+	treePtr->Branch("sf_btag2_alt",&sf_btag2_alt,"sf_btag2_alt/F");
+	treePtr->Branch("sf_btag2BUp_alt",&sf_btag2BUp_alt,"sf_btag2BUp_alt/F");
+	treePtr->Branch("sf_btag2BDown_alt",&sf_btag2BDown_alt,"sf_btag2BDown_alt/F");
+	treePtr->Branch("sf_btag2MUp_alt",&sf_btag2MUp_alt,"sf_btag2MUp_alt/F");
+	treePtr->Branch("sf_btag2MDown_alt",&sf_btag2MDown_alt,"sf_btag2MDown_alt/F");
 	treePtr->Branch("sf_sjbtag0",&sf_sjbtag0,"sf_sjbtag0/F");
 	treePtr->Branch("sf_sjbtag0BUp",&sf_sjbtag0BUp,"sf_sjbtag0BUp/F");
 	treePtr->Branch("sf_sjbtag0BDown",&sf_sjbtag0BDown,"sf_sjbtag0BDown/F");
@@ -912,6 +1101,13 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("jet12DEta",&jet12DEta,"jet12DEta/F");
 	treePtr->Branch("jetNBtags",&jetNBtags,"jetNBtags/I");
 	treePtr->Branch("isojetNBtags",&isojetNBtags,"isojetNBtags/I");
+	treePtr->Branch("jetPt",jetPt,"jetPt[nJet]/F");
+	treePtr->Branch("jetEta",jetEta,"jetEta[nJet]/F");
+	treePtr->Branch("jetPhi",jetPhi,"jetPhi[nJet]/F");
+	treePtr->Branch("jetE",jetE,"jetE[nJet]/F");
+	treePtr->Branch("jetCSV",jetCSV,"jetCSV[nJet]/F");
+	treePtr->Branch("jetIso",jetIso,"jetIso[nJet]/F");
+	treePtr->Branch("jetQGL",jetQGL,"jetQGL[nJet]/F");
 	treePtr->Branch("nFatjet",&nFatjet,"nFatjet/I");
 	treePtr->Branch("fj1Tau32",&fj1Tau32,"fj1Tau32/F");
 	treePtr->Branch("fj1Tau21",&fj1Tau21,"fj1Tau21/F");
@@ -921,6 +1117,13 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("fj1Pt",&fj1Pt,"fj1Pt/F");
 	treePtr->Branch("fj1Phi",&fj1Phi,"fj1Phi/F");
 	treePtr->Branch("fj1Eta",&fj1Eta,"fj1Eta/F");
+	treePtr->Branch("fj1M",&fj1M,"fj1M/F");
+	treePtr->Branch("fj1sjPt",&fj1sjPt,"fj1sjPt/F");
+	treePtr->Branch("fj1sjPhi",&fj1sjPhi,"fj1sjPhi/F");
+	treePtr->Branch("fj1sjEta",&fj1sjEta,"fj1sjEta/F");
+	treePtr->Branch("fj1sjM",&fj1sjM,"fj1sjM/F");
+	treePtr->Branch("fj1sjCSV",&fj1sjCSV,"fj1sjCSV/F");
+	treePtr->Branch("fj1sjQGL",&fj1sjQGL,"fj1sjQGL/F");
 	treePtr->Branch("fj1MaxCSV",&fj1MaxCSV,"fj1MaxCSV/F");
 	treePtr->Branch("fj1MinCSV",&fj1MinCSV,"fj1MinCSV/F");
 	treePtr->Branch("fj1GenPt",&fj1GenPt,"fj1GenPt/F");
@@ -960,6 +1163,12 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("looseLep2Phi",&looseLep2Phi,"looseLep2Phi/F");
 	treePtr->Branch("diLepMass",&diLepMass,"diLepMass/F");
 	treePtr->Branch("nTau",&nTau,"nTau/I");
+	treePtr->Branch("hbbpt",&hbbpt,"hbbpt/F");
+	treePtr->Branch("hbbeta",&hbbeta,"hbbeta/F");
+	treePtr->Branch("hbbphi",&hbbphi,"hbbphi/F");
+	treePtr->Branch("hbbm",&hbbm,"hbbm/F");
+	treePtr->Branch("hbbjtidx",hbbjtidx,"hbbjtidx/F");
+
   for (auto beta : betas) {
     for (auto N : Ns) {
       for (auto order : orders) {

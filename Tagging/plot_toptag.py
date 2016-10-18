@@ -74,8 +74,6 @@ plot.SetMCWeight(weight)
 ### DEFINE PROCESSES ###
 wjetsq     = root.Process('W+q',root.kWjets); wjetsq.additionalCut = root.TCut('abs(fj1HighestPtGen)!=21')
 wjetsg     = root.Process('W+g',root.kExtra2); wjetsg.additionalCut = root.TCut('abs(fj1HighestPtGen)==21')
-#wjetsq     = root.Process('W+q',root.kWjets); wjetsq.additionalCut = root.TCut('1==1')
-#wjetsg     = root.Process('W+g',root.kExtra2); wjetsg.additionalCut = root.TCut('1!=1')
 diboson   = root.Process('Diboson',root.kDiboson)
 ttbar     = root.Process('t#bar{t} [matched]',root.kTTbar); ttbar.additionalCut = root.TCut('(fj1IsMatched==1&&fj1GenSize<1.44)')
 ttbarunmatched     = root.Process('t#bar{t} [unmatched]',root.kExtra1); ttbarunmatched.additionalCut = root.TCut('(fj1IsMatched==0||fj1GenSize>1.44)')
