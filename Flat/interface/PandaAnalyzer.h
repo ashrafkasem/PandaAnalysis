@@ -86,6 +86,7 @@ public :
 
   // public configuration
   bool doFatjet=true;
+  bool addMonoHiggs=true;
   bool isData=false;                         // to do gen matching, etc
   bool usePuppi=true;
   bool applyEventFilters=false;              // apply json and filters. if false, use MET filters in tree
@@ -106,6 +107,10 @@ private:
   BTagCalibration *btagCalib=0;
   BTagCalibrationReader *hfReader=0, *hfUpReader=0, *hfDownReader=0;
   BTagCalibrationReader *lfReader=0, *lfUpReader=0, *lfDownReader=0;
+
+  BTagCalibration *btagCalib_alt=0;
+  BTagCalibrationReader *hfReader_alt=0, *hfUpReader_alt=0, *hfDownReader_alt=0;
+  BTagCalibrationReader *lfReader_alt=0, *lfUpReader_alt=0, *lfDownReader_alt=0;
 
   BTagCalibration *sj_btagCalib;
   BTagCalibrationReader *sj_hfReader=0, *sj_hfUpReader=0, *sj_hfDownReader=0;
