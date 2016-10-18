@@ -16,7 +16,7 @@ if __name__ == "__main__":
     skimmer = root.PandaAnalyzer()
    
     skimmer.firstEvent=0
-    skimmer.lastEvent=1000
+    skimmer.lastEvent=100
     skimmer.isData=True
     skimmer.applyJson=False
     skimmer.doFatjet=False

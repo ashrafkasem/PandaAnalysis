@@ -21,7 +21,7 @@ fi
 wget -O $WD/local.cfg $PANDA_CFG
 cp $WD/local.cfg $WD/local_all.cfg # useful for cataloging
 
-cd ${CMSSW_BASE}/src/PandaAnalysis/SubMIT/inputs/
+cd ${CMSSW_BASE}/src/PandaAnalysis/T3/inputs/
 sed "s?XXXX?${SUBMIT_OUTDIR}?g" ${SUBMIT_TMPL} > skim.py
 cp skim.py $WD
 chmod 775 ${WD}/skim.py
@@ -29,6 +29,6 @@ chmod 775 ${WD}/skim.py
 voms-proxy-init -voms cms
 cp /tmp/x509up_u$UID $WD/x509up
 
-cp ${CMSSW_BASE}/src/PandaAnalysis/SubMIT/inputs/exec.sh $WD
+cp ${CMSSW_BASE}/src/PandaAnalysis/T3/inputs/exec.sh $WD
 
 # input files for submission: 8011.tgz, skim.py, x509up, local.cfg. exec.sh is the executable

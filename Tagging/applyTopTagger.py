@@ -31,8 +31,8 @@ for v in cfg.formulae:
 for s in cfg.spectators:
   ba.AddSpectator(s[0])
 
-#ba.BookMVA('top_ecfv7_bdt',workdir+'/training/top_ecfbdt_v7_BDT.weights.xml')
-ba.BookMVA('top_ecfv6_bdt',workdir+'/training/top_ecfbdt_v6_BDT.weights.xml')
+ba.BookMVA('top_ecfv7_bdt',workdir+'/training/top_ecfbdt_v7_BDT.weights.xml')
+#ba.BookMVA('top_ecfv6_bdt',workdir+'/training/top_ecfbdt_v6_BDT.weights.xml')
 
 ba.RunFile(workdir+'/'+sample+'.root')
 

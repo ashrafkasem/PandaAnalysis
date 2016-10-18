@@ -11,6 +11,7 @@ parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--indir',metavar='indir',type=str,default=basedir)
 parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--wrt',metavar='wrt',type=str,default=None)
+parser.add_argument('--sel',metavar='sel',type=str,default='inc') # inc, tag, mistag
 args = parser.parse_args()
 
 figsdir = args.outdir
@@ -39,11 +40,20 @@ nBins=50
 tmc = root.TChain('events')
 tmc.AddFile(basedir+'/TTbar.root')
 tmc.AddFile(basedir+'/WJets.root')
+fdata = root.TFile(basedir+'/MET.root')
+tdata = fdata.Get('events')
+
 cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && fj1MSD>110 && fj1MSD<210'
 weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt'%lumi
 label = ''
-fdata = root.TFile(basedir+'/MET.root')
-tdata = fdata.Get('events')
+if args.sel=='tag':
+  cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && fj1MSD>110 && fj1MSD<210 && fj1MaxCSV>0.46 && isojetNBtags==1'
+  weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_btag1*sf_sjbtag1*sf_tt'%lumi
+  label = 'tag_'
+elif args.sel=='mistag':
+  cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && fj1MSD>110 && fj1MSD<210 && fj1MaxCSV<0.46 && isojetNBtags==0'
+  weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_btag0*sf_sjbtag0*sf_tt'%lumi
+  label = 'mistag_'
 
 if args.wrt=='npv':
   wrtvar='npv'
