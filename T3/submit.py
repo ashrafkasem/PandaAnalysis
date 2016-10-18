@@ -11,6 +11,7 @@ uid=getuid()
 cfgpath = workpath+'/local.cfg'
 cfgfile = open(cfgpath)
 njobs = len(list(cfgfile))
+#njobs = 100
 
 classad='''
 universe = vanilla

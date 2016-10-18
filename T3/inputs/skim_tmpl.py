@@ -65,7 +65,7 @@ if __name__ == "__main__":
     skimmer.Run()
     skimmer.Terminate()
 
-    mvargs = '$PWD/output.root XXXX%s'%outfilename
+    mvargs = 'mv $PWD/output.root XXXX%s'%outfilename
     system(mvargs)
     system('rm input.root')
 
