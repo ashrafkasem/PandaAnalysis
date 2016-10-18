@@ -89,7 +89,7 @@ ecfns = [
     ('fj1ECFN_1_2_10',0,.6),
     ('fj1ECFN_1_2_20',0,.8),
     ('fj1ECFN_1_2_40',0,1),
-    ('fj1ECFN_1_3_05',0,.2),
+    ('fj1ECFN_1_3_05',0,.12),
     ('fj1ECFN_1_3_10',0,.1),
     ('fj1ECFN_1_3_20',0,.1),
     ('fj1ECFN_1_3_40',0,.15),
@@ -105,16 +105,21 @@ ecfns = [
     ('fj1ECFN_1_4_10',0,.05),
     ('fj1ECFN_1_4_20',0,.05),
     ('fj1ECFN_1_4_40',0,.05),
-    ('fj1ECFN_2_4_05',0,.05),
+    ('fj1ECFN_2_4_05',0,.02),
     ('fj1ECFN_2_4_10',0,.05),
     ('fj1ECFN_2_4_20',0,.05),
     ('fj1ECFN_2_4_40',0,.05),
   ]
+
+def convert(f):
+  f_ = f.replace('fj1ECFN_','').split('_')
+  return 'e(%s,%s,%.1f)'%(f_[0],f_[1],float(f_[2])/10.)
+
 for ecfn in ecfns:
   var = ecfn[0]
   lo = ecfn[1]
   hi = ecfn[2]
-  plot.AddDistribution(root.Distribution(var,lo,hi,20,var,'Events'))
+  plot.AddDistribution(root.Distribution(var,lo,hi,20,convert(var),'Events'))
 
 ### DRAW AND CATALOGUE ###
 plot.DrawAll(figsdir+'/'+label)
