@@ -397,8 +397,6 @@ GeneralTree::GeneralTree() {
 	hbbphi=0;
 	hbbm=0;
 	
->>>>>>> remotes/bmaier/master
-
   for (auto beta : betas) {
     for (auto N : Ns) {
       for (auto order : orders) {
