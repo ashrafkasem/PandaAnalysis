@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from os import system,mkdir,getenv
-from sys import argv
+from sys import argv,exit
 import argparse
 
 basedir = getenv('PANDA_FLATDIR')
@@ -27,17 +27,18 @@ Load('Drawers','PlotUtility')
 ### SET GLOBAL VARIABLES ###
 lumi = 12918.
 logy=False
+nlo = 'sf_ewkV' # *sf_qcdV
 if args.sel=='mistag':
   cut = 'nFatjet==1 && fj1Pt>250 && fj1MaxCSV<0.46 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && isojetNBtags==0'
-  weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_sjbtag0*sf_btag0*sf_tt*sf_metTrig'%lumi
+  weight = '%f*normalizedWeight*sf_pu*sf_lep*%s*sf_sjbtag0*sf_btag0*sf_tt*sf_metTrig'%(lumi,nlo)
   label = 'mistag_'
-if args.sel=='photon':
+elif args.sel=='photon':
   cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==0 && nLoosePhoton==1 && loosePho1IsTight==1 && nTau==0 && UAmag>250'
-  weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt*sf_phoTrig'%lumi
+  weight = '%f*normalizedWeight*sf_pu*sf_lep*%s*sf_tt*sf_phoTrig'%(lumi,nlo)
   label = 'photon_'
 else:
   cut = 'nFatjet==1 && fj1Pt>250 && fj1MaxCSV>0.46 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && isojetNBtags==1'
-  weight = '%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_sjbtag1*sf_btag1*sf_tt*sf_metTrig'%lumi
+  weight = '%f*normalizedWeight*sf_pu*sf_lep*%s*sf_sjbtag1*sf_btag1*sf_tt*sf_metTrig'%(lumi,nlo)
   label = 'tag_'
 
 if not args.cut:
@@ -115,10 +116,20 @@ for p in processes:
   plot.AddProcess(p)
 
 
-plot.AddDistribution(root.Distribution('UAmag',250,500,20,'#gamma recoil [GeV]','Events'))
+#plot.AddDistribution(root.Distribution('UWmag',250,500,20,'W recoil [GeV]','Events'))
 
-plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.2,1.,20,'Top ECF+#tau_{32}^{SD} BDT','Events'))
-plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1.2,1.,20,'Top ECF BDT','Events'))
+#plot.AddDistribution(root.Distribution('UAmag',250,500,20,'#gamma recoil [GeV]','Events'))
+
+plot.AddDistribution(root.Distribution('npv',0,50,25,'npv','Events'))
+
+'''
+plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
+#plot.AddDistribution(root.Distribution('top_ecfv8_bdt',-1.3,1.,1,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
+#plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.3,1.,1,'Top ECF+#tau_{32}^{SD} BDT','Events'))
+#plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1.3,1.,1,'Top ECF BDT','Events'))
+plot.AddDistribution(root.Distribution('top_ecfv8_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
+plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD} BDT','Events'))
+plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1.3,1.,23,'Top ECF BDT','Events'))
 
 #plot.AddDistribution(root.Distribution('top_ecf_bdt',-0.5,.5,20,'Top ECF BDT','Events'))
 
@@ -130,14 +141,15 @@ plot.AddDistribution(root.Distribution('jet1Pt',15,500,20,'leading jet p_{T} [Ge
 
 plot.AddDistribution(root.Distribution('nJet',-0.5,8.5,9,'N_{jet}','Events'))
 
-plot.AddDistribution(root.Distribution('UWmag',250,500,20,'W recoil [GeV]','Events'))
-
 plot.AddDistribution(root.Distribution('puppimet',0,750,20,'MET [GeV]','Events/37.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1Pt',250,1000,20,'fatjet p_{T} [GeV]','Events/37.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
 
+plot.AddDistribution(root.Distribution('fj1HTTMass',40,450,20,'fatjet m_{HTT} [GeV]','Events/12.5 GeV'))
+
+plot.AddDistribution(root.Distribution('fj1HTTFRec',0,1,20,'HTT f_{rec}','Events'))
 
 plot.AddDistribution(root.Distribution('fj1ECFN_1_2_20/pow(fj1ECFN_1_2_10,2.00)',2,10,20,'e(1,2,2)/e(1,2,1)^{2}','Events',999,-999,'input0'))
 plot.AddDistribution(root.Distribution('fj1ECFN_1_3_40/fj1ECFN_2_3_20',0,1,20,'e(1,3,4)/e(2,3,2)','Events',999,-999,'input1'))
@@ -146,11 +158,14 @@ plot.AddDistribution(root.Distribution('fj1ECFN_3_3_10/pow(fj1ECFN_2_3_20,.75)',
 plot.AddDistribution(root.Distribution('fj1ECFN_3_3_20/pow(fj1ECFN_3_3_40,.5)',0,.25,20,'e(3,3,2)/e(3,3,4)^{1/2}','Events',999,-999,'input4'))
 plot.AddDistribution(root.Distribution('fj1ECFN_1_4_20/pow(fj1ECFN_1_3_10,2)',0,2,20,'e(1,4,2)/e(1,3,1)^{2}','Events',999,-999,'input5'))
 plot.AddDistribution(root.Distribution('fj1ECFN_1_4_40/pow(fj1ECFN_1_3_20,2)',0,2.5,20,'e(1,4,4)/e(1,3,2)^{2}','Events',999,-999,'input6'))
-plot.AddDistribution(root.Distribution('fj1ECFN_2_4_05/pow(fj1ECFN_1_3_05,2)',1,3,20,'e(2,4,0.5)/e(1,3,0.5)^{2}','Events',999,-999,'input7'))
+'''
+plot.AddDistribution(root.Distribution('fj1ECFN_2_4_05/pow(fj1ECFN_1_3_05,2)',1.25,2.5,20,'e(2,4,0.5)/e(1,3,0.5)^{2}','Events',999,-999,'input7'))
+'''
 plot.AddDistribution(root.Distribution('fj1ECFN_2_4_10/pow(fj1ECFN_1_3_10,2)',1,4,20,'e(2,4,1)/e(1,3,1)^{2}','Events',999,-999,'input8'))
 plot.AddDistribution(root.Distribution('fj1ECFN_2_4_10/pow(fj1ECFN_2_3_05,2)',0,1.5,20,'e(2,4,1)/e(2,3,0.5)^{2}','Events',999,-999,'input9'))
 plot.AddDistribution(root.Distribution('fj1ECFN_2_4_20/pow(fj1ECFN_1_3_20,2)',0,5,20,'e(2,4,2)/e(1,3,2)^{2}','Events',999,-999,'input10'))
 
+'''
 
 '''
 plot.AddDistribution(root.Distribution('fj1ECFN_1_4_10/pow(fj1ECFN_1_3_05,2)',0.6,1.5,20,'_{1}e_{4}^{1.}/(_{1}e_{3}^{0.5})^{2}','Events',999,-999,'input0'))
