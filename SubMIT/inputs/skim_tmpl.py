@@ -99,7 +99,7 @@ if __name__ == "__main__":
   cfg.close()
 
   for line in lines_:
-    ll = lines.split()
+    ll = line.split()
     shortname = ll[0]
     isData = (ll[1]!="MC")
     xsec = float(ll[2])
