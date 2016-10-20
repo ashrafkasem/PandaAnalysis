@@ -6,6 +6,10 @@
 #include "TString.h"
 #include "genericTree.h"
 #include <map>
+
+#define NJET 20
+#define NSUBJET 2
+
 class GeneralTree : public genericTree {
 	private:
 		std::vector<double> betas = {0.5, 1.0, 2.0, 4.0};
@@ -16,6 +20,7 @@ class GeneralTree : public genericTree {
     }
 
   public:
+    bool monohiggs=false, monojet=false, fatjet=true;
     GeneralTree();
     ~GeneralTree();
     void ReadTree(TTree *t);
@@ -163,12 +168,12 @@ class GeneralTree : public genericTree {
 	float fj1GenPt=0;
 	float fj1GenSize=0;
 	int fj1IsMatched=0;
-	float fj1sjPt[2];
-	float fj1sjEta[2];
-	float fj1sjPhi[2];
-	float fj1sjM[2];
-	float fj1sjCSV[2];
-	float fj1sjQGL[2];
+	float fj1sjPt[NSUBJET];
+	float fj1sjEta[NSUBJET];
+	float fj1sjPhi[NSUBJET];
+	float fj1sjM[NSUBJET];
+	float fj1sjCSV[NSUBJET];
+	float fj1sjQGL[NSUBJET];
   float fj1GenWPt=0;
   float fj1GenWSize=0;
   int fj1IsWMatched=0;
@@ -203,13 +208,13 @@ class GeneralTree : public genericTree {
 	float looseLep2Phi=0;
 	float diLepMass=0;
 	int nTau=0;
-	float jetPt[20];
-	float jetEta[20];
-	float jetPhi[20];
-	float jetE[20];
-	float jetCSV[20];
-	float jetIso[20];
-	float jetQGL[20];
+  float jetPt[NJET];
+  float jetEta[NJET];
+  float jetPhi[NJET];
+  float jetE[NJET];
+  float jetCSV[NJET];
+  float jetIso[NJET];
+  float jetQGL[NJET];
 	float hbbpt;
 	float hbbeta;
 	float hbbphi;
@@ -406,6 +411,24 @@ GeneralTree::GeneralTree() {
     }
   }
 
+  for (unsigned int iSJ=0; iSJ!=NSUBJET; ++iSJ) {
+    fj1sjPt[iSJ] = -1;
+    fj1sjEta[iSJ] = -1;
+    fj1sjPhi[iSJ] = -1;
+    fj1sjM[iSJ] = -1;
+    fj1sjCSV[iSJ] = -1;
+    fj1sjQGL[iSJ] = -1;
+  }
+  for (unsigned int iJ=0; iJ!=NJET; ++iJ) {
+    jetPt[iJ] = -1;
+    jetEta[iJ] = -1;
+    jetPhi[iJ] = -1;
+    jetE[iJ] = -1;
+    jetCSV[iJ] = -1;
+    jetIso[iJ] = -1;
+    jetQGL[iJ] = -1;
+  }
+
 //ENDCONST
 }
 
@@ -596,6 +619,24 @@ void GeneralTree::Reset() {
         fj1ECFNs[ecfn]=-1;
       }
     }
+  }
+
+  for (unsigned int iSJ=0; iSJ!=NSUBJET; ++iSJ) {
+    fj1sjPt[iSJ] = -1;
+    fj1sjEta[iSJ] = -1;
+    fj1sjPhi[iSJ] = -1;
+    fj1sjM[iSJ] = -1;
+    fj1sjCSV[iSJ] = -1;
+    fj1sjQGL[iSJ] = -1;
+  }
+  for (unsigned int iJ=0; iJ!=NJET; ++iJ) {
+    jetPt[iJ] = -1;
+    jetEta[iJ] = -1;
+    jetPhi[iJ] = -1;
+    jetE[iJ] = -1;
+    jetCSV[iJ] = -1;
+    jetIso[iJ] = -1;
+    jetQGL[iJ] = -1;
   }
 
 //ENDRESET
@@ -846,20 +887,22 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("jetNBtags",&jetNBtags);
 	treePtr->SetBranchStatus("isojetNBtags",1);
 	treePtr->SetBranchAddress("isojetNBtags",&isojetNBtags);
-	treePtr->SetBranchStatus("jetPt",1);
-	treePtr->SetBranchAddress("jetPt",jetPt);
-	treePtr->SetBranchStatus("jetEta",1);
-	treePtr->SetBranchAddress("jetEta",jetEta);
-	treePtr->SetBranchStatus("jetPhi",1);
-	treePtr->SetBranchAddress("jetPhi",jetPhi);
-	treePtr->SetBranchStatus("jetE",1);
-	treePtr->SetBranchAddress("jetE",jetE);
-	treePtr->SetBranchStatus("jetCSV",1);
-	treePtr->SetBranchAddress("jetCSV",jetCSV);
-	treePtr->SetBranchStatus("jetIso",1);
-	treePtr->SetBranchAddress("jetIso",jetIso);
-	treePtr->SetBranchStatus("jetQGL",1);
-	treePtr->SetBranchAddress("jetQGL",jetQGL);
+  if (monohiggs) {
+    treePtr->SetBranchStatus("jetPt",1);
+    treePtr->SetBranchAddress("jetPt",jetPt);
+    treePtr->SetBranchStatus("jetEta",1);
+    treePtr->SetBranchAddress("jetEta",jetEta);
+    treePtr->SetBranchStatus("jetPhi",1);
+    treePtr->SetBranchAddress("jetPhi",jetPhi);
+    treePtr->SetBranchStatus("jetE",1);
+    treePtr->SetBranchAddress("jetE",jetE);
+    treePtr->SetBranchStatus("jetCSV",1);
+    treePtr->SetBranchAddress("jetCSV",jetCSV);
+    treePtr->SetBranchStatus("jetIso",1);
+    treePtr->SetBranchAddress("jetIso",jetIso);
+    treePtr->SetBranchStatus("jetQGL",1);
+    treePtr->SetBranchAddress("jetQGL",jetQGL);
+  }
 	treePtr->SetBranchStatus("nFatjet",1);
 	treePtr->SetBranchAddress("nFatjet",&nFatjet);
 	treePtr->SetBranchStatus("fj1Tau32",1);
@@ -902,18 +945,20 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("fj1IsHF",&fj1IsHF);
 	treePtr->SetBranchStatus("isHF",1);
 	treePtr->SetBranchAddress("isHF",&isHF);
-	treePtr->SetBranchStatus("fj1sjPt",1);
-	treePtr->SetBranchAddress("fj1sjPt",fj1sjPt);
-	treePtr->SetBranchStatus("fj1sjEta",1);
-	treePtr->SetBranchAddress("fj1sjEta",fj1sjEta);
-	treePtr->SetBranchStatus("fj1sjPhi",1);
-	treePtr->SetBranchAddress("fj1sjPhi",fj1sjPhi);
-	treePtr->SetBranchStatus("fj1sjM",1);
-	treePtr->SetBranchAddress("fj1sjM",fj1sjM);
-	treePtr->SetBranchStatus("fj1sjCSV",1);
-	treePtr->SetBranchAddress("fj1sjCSV",fj1sjCSV);
-	treePtr->SetBranchStatus("fj1sjQGL",1);
-	treePtr->SetBranchAddress("fj1sjQGL",fj1sjQGL);
+  if (monohiggs) {
+  	treePtr->SetBranchStatus("fj1sjPt",1);
+  	treePtr->SetBranchAddress("fj1sjPt",fj1sjPt);
+  	treePtr->SetBranchStatus("fj1sjEta",1);
+  	treePtr->SetBranchAddress("fj1sjEta",fj1sjEta);
+  	treePtr->SetBranchStatus("fj1sjPhi",1);
+  	treePtr->SetBranchAddress("fj1sjPhi",fj1sjPhi);
+  	treePtr->SetBranchStatus("fj1sjM",1);
+  	treePtr->SetBranchAddress("fj1sjM",fj1sjM);
+  	treePtr->SetBranchStatus("fj1sjCSV",1);
+  	treePtr->SetBranchAddress("fj1sjCSV",fj1sjCSV);
+  	treePtr->SetBranchStatus("fj1sjQGL",1);
+  	treePtr->SetBranchAddress("fj1sjQGL",fj1sjQGL);
+  }
 	treePtr->SetBranchStatus("nLoosePhoton",1);
 	treePtr->SetBranchAddress("nLoosePhoton",&nLoosePhoton);
 	treePtr->SetBranchStatus("nTightPhoton",1);
@@ -962,17 +1007,18 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("diLepMass",&diLepMass);
 	treePtr->SetBranchStatus("nTau",1);
 	treePtr->SetBranchAddress("nTau",&nTau);
-	treePtr->SetBranchStatus("hbbpt",1);
-	treePtr->SetBranchAddress("hbbpt",&hbbpt);
-	treePtr->SetBranchStatus("hbbeta",1);
-	treePtr->SetBranchAddress("hbbeta",&hbbeta);
-	treePtr->SetBranchStatus("hbbphi",1);
-	treePtr->SetBranchAddress("hbbphi",&hbbphi);
-	treePtr->SetBranchStatus("hbbm",1);
-	treePtr->SetBranchAddress("hbbm",&hbbm);
-	treePtr->SetBranchStatus("hbbjtidx",1);
-	treePtr->SetBranchAddress("hbbjtidx",hbbjtidx);
-
+  if (monohiggs) {
+      treePtr->SetBranchStatus("hbbpt",1);
+      treePtr->SetBranchAddress("hbbpt",&hbbpt);
+      treePtr->SetBranchStatus("hbbeta",1);
+      treePtr->SetBranchAddress("hbbeta",&hbbeta);
+      treePtr->SetBranchStatus("hbbphi",1);
+      treePtr->SetBranchAddress("hbbphi",&hbbphi);
+      treePtr->SetBranchStatus("hbbm",1);
+      treePtr->SetBranchAddress("hbbm",&hbbm);
+      treePtr->SetBranchStatus("hbbjtidx",1);
+      treePtr->SetBranchAddress("hbbjtidx",hbbjtidx);
+  }
 //ENDREAD
 }
 
@@ -1099,13 +1145,15 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("jet12DEta",&jet12DEta,"jet12DEta/F");
 	treePtr->Branch("jetNBtags",&jetNBtags,"jetNBtags/I");
 	treePtr->Branch("isojetNBtags",&isojetNBtags,"isojetNBtags/I");
-	treePtr->Branch("jetPt",jetPt,"jetPt[nJet]/F");
-	treePtr->Branch("jetEta",jetEta,"jetEta[nJet]/F");
-	treePtr->Branch("jetPhi",jetPhi,"jetPhi[nJet]/F");
-	treePtr->Branch("jetE",jetE,"jetE[nJet]/F");
-	treePtr->Branch("jetCSV",jetCSV,"jetCSV[nJet]/F");
-	treePtr->Branch("jetIso",jetIso,"jetIso[nJet]/F");
-	treePtr->Branch("jetQGL",jetQGL,"jetQGL[nJet]/F");
+  if (monohiggs) {
+    treePtr->Branch("jetPt",jetPt,"jetPt[nJet]/F");
+    treePtr->Branch("jetEta",jetEta,"jetEta[nJet]/F");
+    treePtr->Branch("jetPhi",jetPhi,"jetPhi[nJet]/F");
+    treePtr->Branch("jetE",jetE,"jetE[nJet]/F");
+    treePtr->Branch("jetCSV",jetCSV,"jetCSV[nJet]/F");
+    treePtr->Branch("jetIso",jetIso,"jetIso[nJet]/F");
+    treePtr->Branch("jetQGL",jetQGL,"jetQGL[nJet]/F");
+  }
 	treePtr->Branch("nFatjet",&nFatjet,"nFatjet/I");
 	treePtr->Branch("fj1Tau32",&fj1Tau32,"fj1Tau32/F");
 	treePtr->Branch("fj1Tau21",&fj1Tau21,"fj1Tau21/F");
@@ -1116,6 +1164,14 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("fj1Phi",&fj1Phi,"fj1Phi/F");
 	treePtr->Branch("fj1Eta",&fj1Eta,"fj1Eta/F");
 	treePtr->Branch("fj1M",&fj1M,"fj1M/F");
+  if (monohiggs) {
+    treePtr->Branch("fj1sjPt",fj1sjPt,"fj1sjPt[2]/F");
+    treePtr->Branch("fj1sjPhi",fj1sjPhi,"fj1sjPhi[2]/F");
+    treePtr->Branch("fj1sjEta",fj1sjEta,"fj1sjEta[2]/F");
+    treePtr->Branch("fj1sjM",fj1sjM,"fj1sjM[2]/F");
+    treePtr->Branch("fj1sjCSV",fj1sjCSV,"fj1sjCSV[2]/F");
+    treePtr->Branch("fj1sjQGL",fj1sjQGL,"fj1sjQGL[2]/F");
+  }
 	treePtr->Branch("fj1sjPt",&fj1sjPt,"fj1sjPt/F");
 	treePtr->Branch("fj1sjPhi",&fj1sjPhi,"fj1sjPhi/F");
 	treePtr->Branch("fj1sjEta",&fj1sjEta,"fj1sjEta/F");
@@ -1161,11 +1217,13 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("looseLep2Phi",&looseLep2Phi,"looseLep2Phi/F");
 	treePtr->Branch("diLepMass",&diLepMass,"diLepMass/F");
 	treePtr->Branch("nTau",&nTau,"nTau/I");
-	treePtr->Branch("hbbpt",&hbbpt,"hbbpt/F");
-	treePtr->Branch("hbbeta",&hbbeta,"hbbeta/F");
-	treePtr->Branch("hbbphi",&hbbphi,"hbbphi/F");
-	treePtr->Branch("hbbm",&hbbm,"hbbm/F");
-	treePtr->Branch("hbbjtidx",hbbjtidx,"hbbjtidx/F");
+  if (monohiggs) {
+    treePtr->Branch("hbbpt",&hbbpt,"hbbpt/F");
+    treePtr->Branch("hbbeta",&hbbeta,"hbbeta/F");
+    treePtr->Branch("hbbphi",&hbbphi,"hbbphi/F");
+    treePtr->Branch("hbbm",&hbbm,"hbbm/F");
+    treePtr->Branch("hbbjtidx",hbbjtidx,"hbbjtidx/F");
+  }
 
   for (auto beta : betas) {
     for (auto N : Ns) {
