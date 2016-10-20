@@ -34,6 +34,9 @@ void PandaAnalyzer::SetOutputFile(TString fOutName) {
   fOut = new TFile(fOutName,"RECREATE");
   tOut = new TTree("events","events");
 
+  gt->monohiggs = flags["monohiggs"];
+  gt->monojet   = flags["monojet"];
+  gt->fatjet    = flags["fatjet"];
   gt->Reset(); // to be extra safe and fill the map before setting addresses
   gt->WriteTree(tOut);
 
