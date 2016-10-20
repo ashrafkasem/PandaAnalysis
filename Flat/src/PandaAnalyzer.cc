@@ -570,7 +570,9 @@ void PandaAnalyzer::Run() {
     PFatJet *fj1=0;
     gt->nFatjet=0;
     if (doFatjet) {
+      int fatjet_counter=-1;
       for (PFatJet *fj : *fatjets) {
+        ++fatjet_counter;
         float pt = fj->pt;
         float rawpt = fj->rawPt;
         float eta = fj->eta;
@@ -591,6 +593,10 @@ void PandaAnalyzer::Run() {
         gt->nFatjet++;
         if (gt->nFatjet==1) {
           fj1 = fj;
+          if (fatjet_counter==0)
+            gt->fj1IsClean = 1;
+          else
+            gt->fj1IsClean = 0;
           gt->fj1Pt = pt;
           gt->fj1Eta = eta;
           gt->fj1Phi = phi;
@@ -605,7 +611,10 @@ void PandaAnalyzer::Run() {
             float beta = betas.at(iB);
             for (auto N : Ns) {
               for (auto order : orders) {
-                gt->fj1ECFNs[makeECFString(order,N,beta)] = fj->get_ecf(order,N,iB); 
+                if (gt->fj1IsClean)
+                  gt->fj1ECFNs[makeECFString(order,N,beta)] = fj->get_ecf(order,N,iB); 
+                else
+                  gt->fj1ECFNs[makeECFString(order,N,beta)] = -1; 
               }
             }
           } //loop over betas
