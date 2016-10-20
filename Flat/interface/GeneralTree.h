@@ -152,6 +152,8 @@ class GeneralTree : public genericTree {
 	int fj1IsLoose=0;
 	float fj1RawPt=0;
 	int fj1IsHF=0;
+  float fj1HTTMass=0;
+  float fj1HTTFRec=0;
 	int isHF=0;
 	int nLoosePhoton=0;
 	int nTightPhoton=0;
@@ -308,6 +310,8 @@ GeneralTree::GeneralTree() {
 	fj1IsLoose=0;
 	fj1RawPt=0;
 	fj1IsHF=0;
+  fj1HTTMass=0;
+  fj1HTTFRec=0;
 	isHF=0;
 	nLoosePhoton=0;
 	nTightPhoton=0;
@@ -475,6 +479,8 @@ void GeneralTree::Reset() {
 	fj1IsLoose = 0;
 	fj1RawPt = -1;
 	fj1IsHF = 0;
+  fj1HTTMass = -1;
+  fj1HTTFRec = -1;
 	isHF = 0;
 	nLoosePhoton = 0;
 	nTightPhoton = 0;
@@ -756,6 +762,10 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("fj1RawPt",&fj1RawPt);
 	treePtr->SetBranchStatus("fj1IsHF",1);
 	treePtr->SetBranchAddress("fj1IsHF",&fj1IsHF);
+	treePtr->SetBranchStatus("fj1HTTMass",1);
+	treePtr->SetBranchAddress("fj1HTTMass",&fj1HTTMass);
+	treePtr->SetBranchStatus("fj1HTTFRec",1);
+	treePtr->SetBranchAddress("fj1HTTFRec",&fj1HTTFRec);
 	treePtr->SetBranchStatus("isHF",1);
 	treePtr->SetBranchAddress("isHF",&isHF);
 	treePtr->SetBranchStatus("nLoosePhoton",1);
@@ -935,6 +945,8 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("fj1IsLoose",&fj1IsLoose,"fj1IsLoose/I");
 	treePtr->Branch("fj1RawPt",&fj1RawPt,"fj1RawPt/F");
 	treePtr->Branch("fj1IsHF",&fj1IsHF,"fj1IsHF/I");
+	treePtr->Branch("fj1HTTMass",&fj1HTTMass,"fj1HTTMass/F");
+	treePtr->Branch("fj1HTTFRec",&fj1HTTFRec,"fj1HTTFRec/F");
 	treePtr->Branch("isHF",&isHF,"isHF/I");
 	treePtr->Branch("nLoosePhoton",&nLoosePhoton,"nLoosePhoton/I");
 	treePtr->Branch("nTightPhoton",&nTightPhoton,"nTightPhoton/I");
