@@ -11,9 +11,11 @@ uid=getuid()
 cfgpath = workpath+'/local.cfg'
 cfgfile = open(cfgpath)
 njobs = len(list(cfgfile))
-nper = 1
+nper = 2
 njobs = njobs/nper+1
 
+
+                  #(GLIDEIN_Site == "MIT_CampusFactory" && (BOSCOGroup == "paus" || BOSCOGroup == "bosco_cms") && HAS_CVMFS_cms_cern_ch) \
 classad='''
 universe = vanilla
 executable = {0}/exec.sh
@@ -28,7 +30,6 @@ log = {1}/$(Cluster)_$(Process).log
 requirements = ( \ 
                   (OSGVO_OS_STRING == "RHEL 6" && HAS_CVMFS_cms_cern_ch) || \
                   GLIDEIN_REQUIRED_OS == "rhel6" || \
-                  #(GLIDEIN_Site == "MIT_CampusFactory" && (BOSCOGroup == "paus" || BOSCOGroup == "bosco_cms") && HAS_CVMFS_cms_cern_ch) \
                   (GLIDEIN_Site == "MIT_CampusFactory" && (BOSCOGroup == "bosco_cms") && HAS_CVMFS_cms_cern_ch) \
                 ) && \
                 ( isUndefined(GLIDEIN_Entry_Name) || \
