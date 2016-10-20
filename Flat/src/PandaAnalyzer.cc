@@ -609,6 +609,8 @@ void PandaAnalyzer::Run() {
               }
             }
           } //loop over betas
+          gt->fj1HTTMass = fj->htt_mass;
+          gt->fj1HTTFRec = fj->htt_frec;
 
           VJet *subjets = fj->subjets;
           std::sort(subjets->begin(),subjets->end(),SortPJetByCSV);
