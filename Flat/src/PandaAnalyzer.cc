@@ -1136,16 +1136,16 @@ void PandaAnalyzer::Run() {
         float eta = jet->eta;
         double eff(1),sf(1),sfUp(1),sfDown(1);
         unsigned int bin = btagpt.bin(pt);
-        if (isIsoJet){
-          if (flavor==5) {
-            eff = beff[bin];
-          }
-          else if (flavor==4) {
-            eff = ceff[bin];
-          }
-          else {
-            eff = lfeff[bin];
-          }
+        if (flavor==5) {
+	  eff = beff[bin];
+	}
+	else if (flavor==4) {
+	  eff = ceff[bin];
+	}
+	else {
+	  eff = lfeff[bin];
+	}
+	if (isIsoJet){
           calcBJetSFs("jet_L",flavor,eta,pt,eff,btagUncFactor,sf,sfUp,sfDown);
           btagcands.push_back(btagcand(iJ,flavor,eff,sf,sfUp,sfDown));
           sf_cent.push_back(sf);
