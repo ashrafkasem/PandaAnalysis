@@ -121,7 +121,7 @@ void EvalBtagSF(std::vector<btagcand> cands, std::vector<double> sfs, float &sf0
     }
   }
 
-  if (nC>0) {
+  if (nC>1) {
     sf2 = prob_data2/prob_mc2;
   }
 }
