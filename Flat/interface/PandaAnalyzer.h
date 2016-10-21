@@ -85,15 +85,15 @@ public :
   }
 
   // public configuration
-  bool doFatjet=true;
+  void SetFlag(TString flag, bool b) { flags[flag]=b; }
   bool isData=false;                         // to do gen matching, etc
-  bool usePuppi=true;
-  bool applyEventFilters=false;              // apply json and filters. if false, use MET filters in tree
   int firstEvent=-1;
   int lastEvent=-1;                          // max events to process; -1=>all
   ProcessType processType=kNone;             // determine what to do the jet matching to
 
 private:
+
+  std::map<TString,bool> flags;
 
   std::map<panda::PGenParticle*,float> genObjects;                      // particles we want to match the jets to, and the 'size' of the daughters
   panda::PGenParticle *MatchToGen(double eta, double phi, double r2, int pdgid=0);    // private function to match a jet; returns NULL if not found
@@ -103,13 +103,21 @@ private:
 //  JetCorrectorParameters *ak8jec=0;
 //  JetCorrectionUncertainty *ak8unc=0;
 
+  void calcBJetSFs(TString readername, int flavor, double eta, double pt, double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
   BTagCalibration *btagCalib=0;
-  BTagCalibrationReader *hfReader=0, *hfUpReader=0, *hfDownReader=0;
-  BTagCalibrationReader *lfReader=0, *lfUpReader=0, *lfDownReader=0;
-
+  BTagCalibration *btagCalib_alt=0;
   BTagCalibration *sj_btagCalib;
-  BTagCalibrationReader *sj_hfReader=0, *sj_hfUpReader=0, *sj_hfDownReader=0;
-  BTagCalibrationReader *sj_lfReader=0, *sj_lfUpReader=0, *sj_lfDownReader=0;
+
+  std::map<TString,BTagCalibrationReader*> btagReaders;
+  
+  // BTagCalibrationReader *hfReader=0, *hfUpReader=0, *hfDownReader=0;
+  // BTagCalibrationReader *lfReader=0, *lfUpReader=0, *lfDownReader=0;
+
+  // BTagCalibrationReader *hfReader_alt=0, *hfUpReader_alt=0, *hfDownReader_alt=0;
+  // BTagCalibrationReader *lfReader_alt=0, *lfUpReader_alt=0, *lfDownReader_alt=0;
+
+  // BTagCalibrationReader *sj_hfReader=0, *sj_hfUpReader=0, *sj_hfDownReader=0;
+  // BTagCalibrationReader *sj_lfReader=0, *sj_lfUpReader=0, *sj_lfDownReader=0;
 
   // files and histograms containing weights
   TFile *fEleSF=0, *fEleSFTight=0;
