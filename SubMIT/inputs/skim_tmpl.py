@@ -45,7 +45,9 @@ if __name__ == "__main__":
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
-      if 'ZJets' in fullPath or 'DY' in fullPath:
+      if 'ST_' in fullPath:
+        processType=root.PandaAnalyzer.kTop
+      elif 'ZJets' in fullPath or 'DY' in fullPath:
         processType=root.PandaAnalyzer.kZ
       elif 'WJets' in fullPath:
         processType=root.PandaAnalyzer.kW
