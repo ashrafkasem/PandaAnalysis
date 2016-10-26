@@ -9,7 +9,9 @@ ftemplate = root.TFile('~/public_html/figs/toptagging/datavalidation/v7/template
 hdata = ftemplate.Get('h_fj1MSD_Data')
 hmatched = ftemplate.Get('h_fj1MSD_tt_matched')
 hunmatched = ftemplate.Get('h_fj1MSD_tt_unmatched')
+hothers = ftemplate.Get('h_fj1MSD_others')
 hW = ftemplate.Get('h_fj1MSD_W')
+hdata.Add(hothers,-1)
 
 mass = root.RooRealVar("m","m_{SD} [GeV]",40,450)
 
@@ -17,8 +19,8 @@ normbound=0.5
 
 norm_ = hunmatched.Integral()
 ttu_norm = root.RooRealVar('ttu_norm','ttu_norm',norm_,(1-normbound)*norm_,(1+normbound)*norm_)
-ttu_mu = root.RooRealVar('ttu_mu','mean ttu',92,92,92)
-ttu_sigma = root.RooRealVar('ttu_sigma','sigma ttu',25,25,25)
+ttu_mu = root.RooRealVar('ttu_mu','mean ttu',92,80,100)
+ttu_sigma = root.RooRealVar('ttu_sigma','sigma ttu',25,20,30)
 ttu = root.RooLandau('ttu','ttu',mass,ttu_mu,ttu_sigma)
 
 norm_ = hmatched.Integral()
@@ -50,11 +52,14 @@ model.plotOn(frame)
 for c,l in [('ttm',root.RooFit.LineColor(root.kOrange)),('ttu',root.RooFit.LineColor(6)),('W',root.RooFit.LineColor(8))]:
   model.plotOn(frame,root.RooFit.Components(c),l)
 
-c = root.TCanvas()
+c = root.TCanvas('c','c',600,600)
 frame.Draw()
-hmatched.SetLineWidth(3); hmatched.SetLineColor(root.kOrange); hmatched.Draw('samehist')
-hunmatched.SetLineWidth(3); hunmatched.SetLineColor(6); hunmatched.Draw('samehist')
-hW.SetLineWidth(3); hW.SetLineColor(8); hW.Draw('samehist')
+for h in [hmatched,hunmatched,hW]:
+  h.SetLineWidth(2)
+  h.SetLineStyle(2)
+hmatched.SetLineColor(root.kOrange); hmatched.Draw('samehist')
+hunmatched.SetLineColor(6); hunmatched.Draw('samehist')
+hW.SetLineColor(8); hW.Draw('samehist')
 
 for ext in ['pdf','png']:
   c.SaveAs('~/public_html/figs/toptagging/datavalidation/v7/templates/simplefit.'+ext)
