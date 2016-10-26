@@ -135,6 +135,7 @@ class GeneralTree : public genericTree {
   float fj1Tau32SD=0;
   float fj1Tau21SD=0;
 	float fj1MSD=0;
+  float fj1MSDL2L3=0;
 	float fj1Pt=0;
 	float fj1Phi=0;
 	float fj1Eta=0;
@@ -294,6 +295,7 @@ GeneralTree::GeneralTree() {
   fj1Tau32SD=0;
   fj1Tau21SD=0;
 	fj1MSD=0;
+  fj1MSDL2L3=0;
 	fj1Pt=0;
 	fj1Phi=0;
 	fj1Eta=0;
@@ -464,6 +466,7 @@ void GeneralTree::Reset() {
   fj1Tau32SD = -1;
   fj1Tau21SD = -1;
 	fj1MSD = -1;
+  fj1MSDL2L3 = -1;
 	fj1Pt = -1;
 	fj1Phi = -1;
 	fj1Eta = -1;
@@ -739,6 +742,8 @@ void GeneralTree::ReadTree(TTree *t) {
   treePtr->SetBranchAddress("fj1Tau21SD",&fj1Tau21SD);
 	treePtr->SetBranchStatus("fj1MSD",1);
 	treePtr->SetBranchAddress("fj1MSD",&fj1MSD);
+  treePtr->SetBranchStatus("fj1MSDL2L3",1);
+  treePtr->SetBranchAddress("fj1MSDL2L3",&fj1MSDL2L3);
 	treePtr->SetBranchStatus("fj1Pt",1);
 	treePtr->SetBranchAddress("fj1Pt",&fj1Pt);
 	treePtr->SetBranchStatus("fj1Phi",1);
@@ -931,6 +936,7 @@ void GeneralTree::WriteTree(TTree *t) {
   treePtr->Branch("fj1Tau32SD",&fj1Tau32SD,"fj1Tau32SD/F");
   treePtr->Branch("fj1Tau21SD",&fj1Tau21SD,"fj1Tau21SD/F");
 	treePtr->Branch("fj1MSD",&fj1MSD,"fj1MSD/F");
+  treePtr->Branch("fj1MSDL2L3",&fj1MSDL2L3,"fj1MSDL2L3/F");
 	treePtr->Branch("fj1Pt",&fj1Pt,"fj1Pt/F");
 	treePtr->Branch("fj1Phi",&fj1Phi,"fj1Phi/F");
 	treePtr->Branch("fj1Eta",&fj1Eta,"fj1Eta/F");

@@ -103,6 +103,9 @@ void PandaAnalyzer::Terminate() {
   delete hfDownReader;
   delete lfDownReader;
 
+  delete ak8MCCorrector;
+  delete ak8DataCorrector;
+
 //  delete ak8jec;
 //  delete ak8unc;
 }
@@ -177,6 +180,18 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   sj_hfDownReader = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"lt","down");
   sj_lfDownReader = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"incl","down");
 
+  // load only L2L3 JEC
+  std::string jecPath = (dirPath+"/jec/").Data();
+  std::vector<JetCorrectorParameters> mcParams;
+  std::vector<JetCorrectorParameters> dataParams;
+  mcParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_MC_L2Relative_AK8PFPuppi.txt"));
+  mcParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_MC_L3Absolute_AK8PFPuppi.txt"));
+  mcParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_MC_L2L3Residual_AK8PFPuppi.txt"));
+  dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L2Relative_AK8PFPuppi.txt"));
+  dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L3Absolute_AK8PFPuppi.txt"));
+  dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L2L3Residual_AK8PFPuppi.txt"));
+  ak8MCCorrector = new FactorizedJetCorrector(mcParams);
+  ak8DataCorrector = new FactorizedJetCorrector(dataParams);
 //  ak8jec = new JetCorrectorParameters((dirPath+"/Spring16_25nsV6_MC_Uncertainty_AK8PFPuppi.txt").Data());
 //  ak8unc = new JetCorrectionUncertainty(*ak8jec);
 }
@@ -262,6 +277,10 @@ void PandaAnalyzer::Run() {
 
     genBosonPtMin = hZNLO->GetBinCenter(1); genBosonPtMax = hZNLO->GetBinCenter(hZNLO->GetNbinsX());
   }
+
+  // jet corrector
+  FactorizedJetCorrector *ak8Corrector = 0;
+  ak8Corrector = (isData) ? ak8DataCorrector : ak8MCCorrector;
 
   // these are bins of b-tagging eff in pT
   std::vector<double> vbtagpt {50,70,100,140,200,300,670};
@@ -582,13 +601,6 @@ void PandaAnalyzer::Run() {
         float phi = fj->phi;
         if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi)) {
           continue;
-          /*
-          if (gt->nFatjet==0) {
-            break;
-          } else {
-            continue;
-          }
-          */
         }
         gt->nFatjet++;
         if (gt->nFatjet==1) {
@@ -601,17 +613,39 @@ void PandaAnalyzer::Run() {
           gt->fj1Eta = eta;
           gt->fj1Phi = phi;
           gt->fj1MSD = fj->mSD;
+          gt->fj1RawPt = rawpt;
+
+          // note - if we switch from rawPt to L1L2L3-corr pt, then
+          //        must replace fj->m with fj->m*pt/rawPt.
+          //        unless the upstream behavior is changed and fj->m is L1L2L3-corr, 
+          //        in which case using rawPt means replacing fj->m with fj->m*rawPt/pt
+          // this will never ever cause confusion or a bug in the future
+          double energy = sqrt(pow(fj->m,2) + 
+                               pow(rawpt,2) / ( 1 - pow(TMath::TanH(eta),2) )
+                              );
+
+          // compute L2L3 for mSD
+          ak8Corrector->setJetPt(rawpt);
+          ak8Corrector->setJetEta(eta);
+          ak8Corrector->setJetPhi(phi);
+          ak8Corrector->setJetE(energy);
+          ak8Corrector->setRho(0);
+          ak8Corrector->setJetA(0);
+          ak8Corrector->setJetEMF(-99.);
+          float l2l3corr = ak8Corrector->getCorrection();
+          gt->fj1MSDL2L3 = l2l3corr*fj->mSD;
+          
+          // now we do substructure
           gt->fj1Tau32 = clean(fj->tau3/fj->tau2);
           gt->fj1Tau32SD = clean(fj->tau3SD/fj->tau2SD);
           gt->fj1Tau21 = clean(fj->tau2/fj->tau1);
           gt->fj1Tau21SD = clean(fj->tau2SD/fj->tau1SD);
-          gt->fj1RawPt = rawpt;
 
           for (unsigned int iB=0; iB!=betas.size(); ++iB) {
             float beta = betas.at(iB);
             for (auto N : Ns) {
               for (auto order : orders) {
-                if (gt->fj1IsClean)
+                if (gt->fj1IsClean || true)
                   gt->fj1ECFNs[makeECFString(order,N,beta)] = fj->get_ecf(order,N,iB); 
                 else
                   gt->fj1ECFNs[makeECFString(order,N,beta)] = -1; 

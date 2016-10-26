@@ -5,6 +5,7 @@
 #include "vector"
 #include "map"
 #include <string>
+#include <cmath>
 
 // ROOT
 #include <TTree.h>
@@ -17,14 +18,16 @@
 #include "AnalyzerUtilities.h"
 #include "GeneralTree.h"
 
+// btag
 #include "CondFormats/BTauObjects/interface/BTagEntry.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibration.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 #include "BTagCalibrationStandalone.h"
+
 // JEC
-//#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
-//#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
-//#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // some misc definitions
@@ -100,6 +103,7 @@ private:
   std::vector<panda::PObject*> matchPhos, matchEles, matchLeps;
   
   // CMSSW-provided utilities
+  FactorizedJetCorrector *ak8MCCorrector=0, *ak8DataCorrector=0; 
 //  JetCorrectorParameters *ak8jec=0;
 //  JetCorrectionUncertainty *ak8unc=0;
 
