@@ -5,6 +5,7 @@
 <use   name="PandaProd/Objects"/>
 <use   name="PandaCore/Tools"/>
 <use   name="CondFormats/BTauObjects"/>
+<use   name="CondFormats/JetMETObjects"/>
 <export>
   <lib   name="1"/>
 </export>
