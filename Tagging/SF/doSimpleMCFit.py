@@ -9,11 +9,13 @@ ftemplate = root.TFile('~/public_html/figs/toptagging/datavalidation/v7/template
 hdata = ftemplate.Get('h_fj1MSD_Data')
 hmatched = ftemplate.Get('h_fj1MSD_tt_matched')
 hunmatched = ftemplate.Get('h_fj1MSD_tt_unmatched')
+hothers = ftemplate.Get('h_fj1MSD_others')
 hW = ftemplate.Get('h_fj1MSD_W')
+hdata.Add(hothers,-1)
 
 mass = root.RooRealVar("m","m_{SD} [GeV]",40,450)
 
-normbound=0.2
+normbound=0.5
 
 norm_ = hunmatched.Integral()
 ttu_norm = root.RooRealVar('ttu_norm','ttu_norm',norm_,(1-normbound)*norm_,(1+normbound)*norm_)
@@ -45,10 +47,10 @@ model.plotOn(frame)
 for c,l in [('ttm',root.RooFit.LineColor(root.kOrange)),('ttu',root.RooFit.LineColor(6)),('W',root.RooFit.LineColor(8))]:
   model.plotOn(frame,root.RooFit.Components(c),l)
 
-c = root.TCanvas()
+c = root.TCanvas('c','c',600,600)
 frame.Draw()
 for h in [hmatched,hunmatched,hW]:
-  h.SetLineWidth(1)
+  h.SetLineWidth(2)
   h.SetLineStyle(2)
 hmatched.SetLineColor(root.kOrange); hmatched.Draw('samehist')
 hunmatched.SetLineColor(6); hunmatched.Draw('samehist')
