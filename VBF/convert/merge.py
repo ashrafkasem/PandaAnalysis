@@ -107,7 +107,7 @@ d = {
   'EWKZJets'            : ['EWKZ2Jets_ZToLL_M-50_13TeV'],
   'EWKWJets'            : ['EWKW%s2Jets_WToLNu_M-50_13TeV'%(x) for x in ['Plus','Minus']],
   'SingleTop'           : ['ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8','ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8','ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8','ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8'],
-  'QCD'                 : ['QCD_HT%sto%s'%(str(x[0]),str(x[1])) for x in [(200,300),(300,500),(500,700),(700,1000),(1000,1500),(1500,2000),(2000,'Info')]],
+  'QCD'                 : ['QCD_HT%sto%s'%(str(x[0]),str(x[1])) for x in [(200,300),(300,500),(500,700),(700,1000),(1000,1500),(1500,2000),(2000,'Inf')]],
   'GJets'               : ['GJets_HT-%sTo%s'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,'Inf')]],
 }
 
