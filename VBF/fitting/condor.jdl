@@ -1,10 +1,10 @@
 Executable = scanCut.sh
 Universe  = vanilla
 requirements = UidDomain == \"mit.edu\" && Arch == \"X86_64\" && OpSysAndVer == \"SL6\"
-Error = /data/t3home000/snarayan/vbffit/scans//logs/99.err
-Output  = /data/t3home000/snarayan/vbffit/scans//logs/99.out
-Log = /data/t3home000/snarayan/vbffit/scans//logs/99.log
-Arguments = 'jjDEta>4.50&&jjDPhi<3.14' /data/t3serv014/snarayan/CMSSW_7_4_7/ /data/t3home000/snarayan/vbffit/scans/
+Error = /data/t3serv014/snarayan/vbffit/scans//logs/44.err
+Output  = /data/t3serv014/snarayan/vbffit/scans//logs/44.out
+Log = /data/t3serv014/snarayan/vbffit/scans//logs/44.log
+Arguments = 'jot1Pt>160.00&&jot2Pt>120.00' /data/t3serv014/snarayan/CMSSW_7_4_7/ /data/t3serv014/snarayan/vbffit/scans/
 should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 GetEnv = True
