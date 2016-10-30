@@ -22,6 +22,7 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
+#import PandaAnalysis.VBF.TightSelection as sel
 import PandaAnalysis.VBF.Selection as sel
 Load('Drawers','PlotUtility')
 
@@ -92,15 +93,15 @@ if 'signal' in region:
   vbf.AddFile(baseDir+'VBF_H125.root')
   processes += [vbf]
 if region in  ['signal','zmm','wmn']:
-  data.additionalCut = root.TCut(sel.triggers['met'])
+  data.additionalCut = root.TCut(tAND(sel.triggers['met'],'runNum<=276811'))
   data.AddFile(baseDir+'MET.root')
   lep='#mu'
 elif region in ['zee','wen']:
-  data.additionalCut = root.TCut(sel.triggers['ele'])
+  data.additionalCut = root.TCut(tAND(sel.triggers['ele'],'runNum<=276811'))
   data.AddFile(baseDir+'SingleElectron.root')
   lep='e'
 elif region=='pho':
-  data.additionalCut = root.TCut(sel.triggers['pho'])
+  data.additionalCut = root.TCut(tAND(sel.triggers['pho'],'runNum<=276811'))
   data.AddFile(baseDir+'SinglePhoton.root')
 processes.append(data)
 
@@ -119,13 +120,9 @@ else:
 if not (region in ['signal','pho']):
   plot.AddDistribution(root.Distribution("lep1Pt",0,500,20,"lep 1 p_{T} [GeV]","Events/25 GeV",minval,maxval))
   plot.AddDistribution(root.Distribution("lep1Eta",-2.5,2.5,20,"lep 1 #eta","Events",minval,maxval))
-  plot.AddDistribution(root.Distribution("DeltaR2(lep1Eta,lep1Phi,jot1Eta,jot1Phi)",0,1,20,"#DeltaR(jet 1,lep 1)","Events",minval,maxval,"dRJet1Lep"))
-  plot.AddDistribution(root.Distribution("DeltaR2(lep1Eta,lep1Phi,jot2Eta,jot2Phi)",0,1,20,"#DeltaR(jet 2,lep 1)","Events",minval,maxval,"dRJet2Lep"))
 if region in ['pho']:
   plot.AddDistribution(root.Distribution("photonPt",175,675,20,"photon 1 p_{T} [GeV]","Events/25 GeV",minval,maxval))
   plot.AddDistribution(root.Distribution("photonEta",-1.4442,1.4442,20,"photon 1 #eta","Events",minval,maxval))
-  plot.AddDistribution(root.Distribution("DeltaR2(photonEta,photonPhi,jot1Eta,jot1Phi)",0,1,20,"#DeltaR(jet 1,photon)","Events",minval,maxval,"dRJet1Photon"))
-  plot.AddDistribution(root.Distribution("DeltaR2(photonEta,photonPhi,jot2Eta,jot2Phi)",0,1,20,"#DeltaR(jet 2,photon)","Events",minval,maxval,"dRJet2Photon"))
 if region in ['wmn','wen']:
   plot.AddDistribution(root.Distribution('trueMet',0,500,20,'true MET [GeV]','Events/25 GeV',minval,maxval))
   plot.AddDistribution(root.Distribution('mt',0,160,20,'M_{T} [GeV]','Events/8 GeV',minval,maxval))
@@ -135,7 +132,7 @@ plot.AddDistribution(root.Distribution(sel.fixedmjj,0,4000,20,"Dijet mass [GeV]"
 plot.AddDistribution(root.Distribution("jjDEta",0,10,20,"Delta #eta leading jets","Events",minval,maxval))
 plot.AddDistribution(root.Distribution("jot1Pt",40,760,24,"Jet 1 p_{T} [GeV]","Events/30 GeV",minval,maxval))
 plot.AddDistribution(root.Distribution("jot2Pt",40,760,24,"Jet 2 p_{T} [GeV]","Events/30 GeV",minval,maxval))
-plot.AddDistribution(root.Distribution("jot1Eta",-2.5,2.5,20,"Jet 1 #eta","Events",minval,maxval))
+plot.AddDistribution(root.Distribution("jot1Eta",-5,5,20,"Jet 2 #eta","Events",minval,maxval))
 plot.AddDistribution(root.Distribution("jot2Eta",-5,5,20,"Jet 2 #eta","Events",minval,maxval))
 plot.AddDistribution(root.Distribution("fabs(SignedDeltaPhi(jot1Phi,jot2Phi))",0,3.142,20,"#Delta #phi leading jets","Events",minval,maxval,'jjDPhi'))
 
