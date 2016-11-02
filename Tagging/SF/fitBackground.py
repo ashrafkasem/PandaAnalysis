@@ -18,10 +18,10 @@ plot.AddCMSLabel()
 plot.SetLumi(12.9); plot.AddLumiLabel(True)
 plot.InitLegend()
 
-masscorr = 'L2L3'
-#masscorr = ''
+#masscorr = 'L2L3'
+masscorr = ''
 
-ftemplate = root.TFile('~/public_html/figs/toptagging/datavalidation/v8/templates/tag_top_ecfv8_bdt_pass_hists.root')
+ftemplate = root.TFile('~/public_html/figs/toptagging/datavalidation/v8/templates/tag_top_ecfv8_bdt_fail_hists.root')
 hdata = ftemplate.Get('h_fj1MSD%s_Data'%masscorr)
 hprong = {}; dhprong = {}; pdfprong = {}; norm = {}; smeared = {}; smear = {}; mu = {}
 hprong[3] = ftemplate.Get('h_fj1MSD%s_3-prong'%masscorr)
@@ -106,7 +106,7 @@ hprefit.SetLineStyle(2)
 hprefit.SetLineColor(root.kBlue+2)
 plot.AddAdditional(hprefit,'hist','Pre-fit')
 
-plot.Draw('~/public_html/figs/toptagging/datavalidation/v8/templates/','simplefit%s'%masscorr)
+plot.Draw('~/public_html/figs/toptagging/datavalidation/v8/templates/','fail_simplefit%s'%masscorr)
 
 # mass.setVal(175)
 # print pdfprong[iP].getVal(root.RooArgSet(mass))
