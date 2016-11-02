@@ -106,8 +106,8 @@ prong3.AddFile(basedir+'SingleTop.root')
 for p in processes:
   plot.AddProcess(p)
 
-plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
-plot.AddDistribution(root.Distribution('fj1MSDL2L3',40,450,20,'L2L3-corr fatjet m_{SD} [GeV]','Events/12.5 GeV'))
+plot.AddDistribution(root.Distribution('fj1MSD',50,450,40,'fatjet m_{SD} [GeV]','Events/10 GeV'))
+plot.AddDistribution(root.Distribution('fj1MSDL2L3',50,450,40,'L2L3-corr fatjet m_{SD} [GeV]','Events/10 GeV'))
 
 ### DRAW AND CATALOGUE ###
 plot.DrawAll(figsdir+'/'+label)
