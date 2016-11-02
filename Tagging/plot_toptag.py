@@ -34,7 +34,7 @@ if args.sel=='mistag':
   label = 'mistag_'
 elif args.sel=='photon':
   cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==0 && nLoosePhoton==1 && loosePho1IsTight==1 && nTau==0 && UAmag>250'
-  weight = '%f*normalizedWeight*sf_pu*sf_lep*%s*sf_tt*sf_phoTrig'%(lumi,nlo)
+  weight = '%f*normalizedWeight*sf_pu*sf_lep*%s*sf_tt*sf_phoTrig*0.93'%(lumi,nlo)
   label = 'photon_'
 else:
   cut = 'nFatjet==1 && fj1Pt>250 && fj1MaxCSV>0.46 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && isojetNBtags==1'
@@ -75,12 +75,10 @@ plot.SetMCWeight(weight)
 ### DEFINE PROCESSES ###
 wjetsq     = root.Process('W+q',root.kWjets); wjetsq.additionalCut = root.TCut('abs(fj1HighestPtGen)!=21')
 wjetsg     = root.Process('W+g',root.kExtra2); wjetsg.additionalCut = root.TCut('abs(fj1HighestPtGen)==21')
-#wjetsq     = root.Process('W+q',root.kWjets); wjetsq.additionalCut = root.TCut('1==1')
-#wjetsg     = root.Process('W+g',root.kExtra2); wjetsg.additionalCut = root.TCut('1!=1')
 diboson   = root.Process('Diboson',root.kDiboson)
-ttbar     = root.Process('t#bar{t} [matched]',root.kTTbar); ttbar.additionalCut = root.TCut('(fj1IsMatched==1&&fj1GenSize<1.44)')
-ttbarunmatched     = root.Process('t#bar{t} [unmatched]',root.kExtra1); ttbarunmatched.additionalCut = root.TCut('(fj1IsMatched==0||fj1GenSize>1.44)')
-singletop = root.Process('Single t',root.kST)
+ttbar     = root.Process('Top [matched]',root.kTTbar); ttbar.additionalCut = root.TCut('(fj1IsMatched==1&&fj1GenSize<1.44)')
+ttbarunmatched     = root.Process('Top [unmatched]',root.kExtra1); ttbarunmatched.additionalCut = root.TCut('(fj1IsMatched==0||fj1GenSize>1.44)')
+#singletop = root.Process('Single t',root.kST)
 qcd       = root.Process("QCD",root.kQCD)
 data      = root.Process("Data",root.kData)
 gjetsq    = root.Process('#gamma+q',root.kGjets); gjetsq.additionalCut = root.TCut('abs(fj1HighestPtGen)!=21')
@@ -93,7 +91,7 @@ if args.sel=='photon':
   processes = [qcd,gjetsg,gjetsq]
 else:
   data.additionalCut = root.TCut('(trigger&1)!=0')
-  processes = [diboson,singletop,wjetsg,wjetsq,ttbarunmatched,ttbar]
+  processes = [diboson,wjetsg,wjetsq,ttbarunmatched,ttbar]
 
 ### ASSIGN FILES TO PROCESSES ###
 if args.sel=='photon':
@@ -108,13 +106,19 @@ else:
   wjetsg.AddFile(basedir+'WJets.root')
   diboson.AddFile(basedir+'Diboson.root')
   ttbar.AddFile(basedir+'TTbar.root')
+  ttbar.AddFile(basedir+'SingleTop.root')
   ttbarunmatched.AddFile(basedir+'TTbar.root')
-  singletop.AddFile(basedir+'SingleTop.root')
+  ttbarunmatched.AddFile(basedir+'SingleTop.root')
+#  singletop.AddFile(basedir+'SingleTop.root')
 processes.append(data)
 
 for p in processes:
   plot.AddProcess(p)
 
+
+plot.AddDistribution(root.Distribution('fj1MSDL2L3',40,450,20,'L3L3-corr fatjet m_{SD} [GeV]','Events/12.5 GeV'))
+
+plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
 
 plot.AddDistribution(root.Distribution('UWmag',250,500,20,'W recoil [GeV]','Events'))
 
@@ -122,11 +126,8 @@ plot.AddDistribution(root.Distribution('UWmag',250,500,20,'W recoil [GeV]','Even
 
 #plot.AddDistribution(root.Distribution('npv',0,50,25,'npv','Events'))
 
-#plot.AddDistribution(root.Distribution('top_ecfv8_bdt',-1.3,1.,1,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
-#plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.3,1.,1,'Top ECF+#tau_{32}^{SD} BDT','Events'))
-#plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1.3,1.,1,'Top ECF BDT','Events'))
 plot.AddDistribution(root.Distribution('top_ecfv8_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
-plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD} BDT','Events'))
+#plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD} BDT','Events'))
 plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1.3,1.,23,'Top ECF BDT','Events'))
 
 #plot.AddDistribution(root.Distribution('top_ecf_bdt',-0.5,.5,20,'Top ECF BDT','Events'))
@@ -142,8 +143,6 @@ plot.AddDistribution(root.Distribution('nJet',-0.5,8.5,9,'N_{jet}','Events'))
 plot.AddDistribution(root.Distribution('puppimet',0,750,20,'MET [GeV]','Events/37.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1Pt',250,1000,20,'fatjet p_{T} [GeV]','Events/37.5 GeV'))
-
-plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1HTTMass',40,450,20,'fatjet m_{HTT} [GeV]','Events/12.5 GeV'))
 

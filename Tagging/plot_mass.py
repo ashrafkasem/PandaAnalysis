@@ -10,7 +10,7 @@ figsdir = basedir+'/figs'
 parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--indir',metavar='indir',type=str,default=basedir)
 parser.add_argument('--outdir',metavar='outdir',type=str,default=figsdir)
-parser.add_argument('--disc',metavar='disc',type=str,default='top_ecfv7_bdt')
+parser.add_argument('--disc',metavar='disc',type=str,default='top_ecfv8_bdt')
 parser.add_argument('--tagged',metavar='tagged',type=str,default='True')
 parser.add_argument('--sel',metavar='sel',type=str,default='tag')
 parser.add_argument('--cut',metavar='cut',type=float,default=0.5)
@@ -36,7 +36,7 @@ if args.sel=='mistag':
   label = 'mistag_'
 elif args.sel=='photon':
   cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==0 && nLoosePhoton==1 && loosePho1IsTight==1 && nTau==0 && UAmag>250'
-  weight = '%f*normalizedWeight*sf_pu*sf_lep*%s*sf_tt*sf_phoTrig'%(lumi,nlo)
+  weight = '%f*normalizedWeight*sf_pu*sf_lep*%s*sf_tt*sf_phoTrig*0.93'%(lumi,nlo)
   label = 'photon_'
 else:
   cut = 'nFatjet==1 && fj1Pt>250 && fj1MaxCSV>0.46 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && isojetNBtags==1'
@@ -89,9 +89,9 @@ plot.SetMCWeight(weight)
 wjetsq     = root.Process('W+q',root.kWjets); wjetsq.additionalCut = root.TCut('abs(fj1HighestPtGen)!=21')
 wjetsg     = root.Process('W+g',root.kExtra2); wjetsg.additionalCut = root.TCut('abs(fj1HighestPtGen)==21')
 diboson   = root.Process('Diboson',root.kDiboson)
-ttbar     = root.Process('t#bar{t} [matched]',root.kTTbar); ttbar.additionalCut = root.TCut('(fj1IsMatched==1&&fj1GenSize<1.44)')
-ttbarunmatched     = root.Process('t#bar{t} [unmatched]',root.kExtra1); ttbarunmatched.additionalCut = root.TCut('(fj1IsMatched==0||fj1GenSize>1.44)')
-singletop = root.Process('Single t',root.kST)
+ttbar     = root.Process('Top [matched]',root.kTTbar); ttbar.additionalCut = root.TCut('(fj1IsMatched==1&&fj1GenSize<1.44)')
+ttbarunmatched     = root.Process('Top [unmatched]',root.kExtra1); ttbarunmatched.additionalCut = root.TCut('(fj1IsMatched==0||fj1GenSize>1.44)')
+#singletop = root.Process('Single t',root.kST)
 qcd       = root.Process("QCD",root.kQCD)
 data      = root.Process("Data",root.kData)
 gjetsq    = root.Process('#gamma+q',root.kGjets); gjetsq.additionalCut = root.TCut('abs(fj1HighestPtGen)!=21')
@@ -104,7 +104,7 @@ if args.sel=='photon':
   processes = [qcd,gjetsg,gjetsq]
 else:
   data.additionalCut = root.TCut('(trigger&1)!=0')
-  processes = [diboson,singletop,wjetsg,wjetsq,ttbarunmatched,ttbar]
+  processes = [diboson,wjetsg,wjetsq,ttbarunmatched,ttbar]
 
 ### ASSIGN FILES TO PROCESSES ###
 if args.sel=='photon':
@@ -119,14 +119,17 @@ else:
   wjetsg.AddFile(basedir+'WJets.root')
   diboson.AddFile(basedir+'Diboson.root')
   ttbar.AddFile(basedir+'TTbar.root')
+  ttbar.AddFile(basedir+'SingleTop.root')
   ttbarunmatched.AddFile(basedir+'TTbar.root')
-  singletop.AddFile(basedir+'SingleTop.root')
+  ttbarunmatched.AddFile(basedir+'SingleTop.root')
+#  singletop.AddFile(basedir+'SingleTop.root')
 processes.append(data)
 
 for p in processes:
   plot.AddProcess(p)
 
 plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
+plot.AddDistribution(root.Distribution('fj1MSDL2L3',40,450,20,'L2L3-corr fatjet m_{SD} [GeV]','Events/12.5 GeV'))
 
 ### DRAW AND CATALOGUE ###
 plot.DrawAll(figsdir+'/'+label)
