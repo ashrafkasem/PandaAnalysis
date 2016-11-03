@@ -18,8 +18,8 @@ plot.AddCMSLabel()
 plot.SetLumi(12.9); plot.AddLumiLabel(True)
 plot.InitLegend()
 
-masscorr = 'L2L3'
-#masscorr = ''
+#masscorr = 'L2L3'
+masscorr = ''
 
 ftemplate = root.TFile('~/public_html/figs/toptagging/datavalidation/v8/templates/tag_top_ecfv8_bdt_pass_hists.root')
 hdata = ftemplate.Get('h_fj1MSD%s_Data'%masscorr)
@@ -28,7 +28,7 @@ hprong[3] = ftemplate.Get('h_fj1MSD%s_3-prong'%masscorr)
 hprong[2] = ftemplate.Get('h_fj1MSD%s_2-prong'%masscorr)
 hprong[1] = ftemplate.Get('h_fj1MSD%s_1-prong'%masscorr)
 
-mass = root.RooRealVar("m","m_{SD} [GeV]",40,450)
+mass = root.RooRealVar("m","m_{SD} [GeV]",50,450)
 
 for iP in xrange(1,4):
   dhprong[iP] = root.RooDataHist('dh%i'%iP,'dh%i'%iP,root.RooArgList(mass),hprong[iP]) 
@@ -43,7 +43,7 @@ for iP in [1,2,3]:
   if iP<3: 
     smeared[iP] = pdfprong[iP]
   else:
-    mu[iP] = root.RooRealVar('mu%i'%iP,'mu%i'%iP,0,-25,25)
+    mu[iP] = root.RooRealVar('mu%i'%iP,'mu%i'%iP,10,-25,25)
     smear[iP] = root.RooGaussian('gauss%i'%iP,'gauss%i'%iP,mass,mu[iP],dummy)
     smeared[iP] = root.RooFFTConvPdf('conv%i'%iP,'conv%i'%iP,mass,pdfprong[iP],smear[iP])
 
