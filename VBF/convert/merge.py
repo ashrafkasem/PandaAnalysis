@@ -69,9 +69,10 @@ def normalizeFast(fpath,opt):
   if xsec<0:
     PError(sname,'could not find xsec, skipping %s!'%opt)
     return
-  PInfo(sname,'normalizing %s (%s) ...'%(fpath,opt))
+  PInfo(sname,'normalizing %s (%s) ...'%(fpath,xsec))
   n = root.Normalizer()
   n.histName = 'htotal'
+  print opt,xsec
   n.NormalizeTree(fpath,xsec)
 
 def merge(shortnames,mergedname):
@@ -96,6 +97,7 @@ def merge(shortnames,mergedname):
 d = {
   'Diboson'             : ['WW','WZ','ZZ'],
   'VBF_H125'            : ['VBF_HToInvisible_M125_13TeV_powheg_pythia8'],
+  'GGF_H125'            : ['Glu_HToInvisible_M125_13TeV_powheg_pythia8'],
   'ZJets'               : ['DYJetsToLL_M-50_HT-%sto%s'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,'Inf')]],
   'ZtoNuNu'             : ['ZJetsToNuNu_HT-%sTo%s_13TeV'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,800),(800,1200),(1200,2500),(2500,'Inf')]],
   'WJets'               : ['WJetsToLNu_Pt-%sTo%s'%(str(x[0]),str(x[1])) for x in [(100,250),(250,400),(400,600),(600,'Inf')]],
