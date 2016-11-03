@@ -7,19 +7,22 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 Load('Drawers','HistogramDrawer')
 
-plot = root.HistogramDrawer()
-plot.Ratio(1)
-plot.FixRatio(.5)
-plot.DrawMCErrors(False)
-plot.Stack(True)
-plot.DrawEmpty(True)
-plot.SetTDRStyle()
-plot.AddCMSLabel()
-plot.SetLumi(12.9); plot.AddLumiLabel(True)
-plot.InitLegend()
+plot = {}
+for iC in [0,1]:
+  plot[iC] = root.HistogramDrawer()
+  plot[iC].Ratio(1)
+  plot[iC].FixRatio(.5)
+  plot[iC].DrawMCErrors(False)
+  plot[iC].Stack(True)
+  plot[iC].DrawEmpty(True)
+  plot[iC].SetTDRStyle()
+  plot[iC].AddCMSLabel()
+  plot[iC].SetLumi(12.9); plot[iC].AddLumiLabel(True)
+  plot[iC].InitLegend()
 
-#masscorr = 'L2L3'
+# masscorr = 'L2L3'
 masscorr = ''
+
 hprong = {}; dhprong = {}; pdfprong = {}; norm = {}; smeared = {}; smear = {}; mu = {}; hdata = {}; dh_data={}
 mass = root.RooRealVar("m","m_{SD} [GeV]",50,450)
 
@@ -127,49 +130,54 @@ labels = {
   2:'Unmatched top/VV',
   3:'Matched top',
 }
-# for iP in [1,2,3]:
-#   h = smeared[iP].createHistogram('h%i'%iP,mass,root.RooFit.Binning(40))
-#   h.SetLineWidth(3)
-#   h.SetLineStyle(1)
-#   h.SetLineColor(colors[iP])
-#   h.Scale(norm[iP].getVal()/h.Integral())
-#   plot.AddAdditional(h,'hist',labels[iP])
 
-# hprong[3].SetLineColor(colors[3]); 
-# hprong[2].SetLineColor(colors[2]); 
-# hprong[1].SetLineColor(colors[1]); 
-# for h in [hprong[x] for x in [3,2,1]]:
-#   h.SetLineWidth(2)
-#   h.SetLineStyle(2)
-#   plot.AddAdditional(h,'hist')
+for iC in [0,1]:
+  for iP in [1,2,3]:
+    cat = (iP,iC)
+    h = smeared[cat].createHistogram('h%i%i'%cat,mass,root.RooFit.Binning(40))
+    h.SetLineWidth(3)
+    h.SetLineStyle(1)
+    h.SetLineColor(colors[iP])
+    h.Scale(norm[cat].getVal()/h.Integral())
+    plot[iC].AddAdditional(h,'hist',labels[iP])
+    
+  hprefit = hprong[(1,0)].Clone('prefit')
+  hprefit.Reset()
+  for jP in [1,2,3]:
+    hprefit.Add(hprong[(jP,iC)])
+  hprefit.SetLineWidth(2)
+  hprefit.SetLineStyle(2)
+  hprefit.SetLineColor(root.kBlue+2)
+  plot[iC].AddAdditional(hprefit,'hist','Pre-fit')
 
-# hdata.SetLineColor(root.kBlack)
-# hdata.SetMarkerStyle(20);
-# plot.AddHistogram(hdata,'Data',root.kData)
+  for iP in [1,2,3]:
+    cat = (iP,iC)
+    hprong[cat].SetLineColor(colors[iP])
+    hprong[cat].SetLineWidth(2)
+    hprong[cat].SetLineStyle(2)
+    plot[iC].AddAdditional(hprong[cat],'hist')
 
-# hmodel_ = model.createHistogram('hmodel',mass,root.RooFit.Binning(40))
-# hmodel = root.TH1D(); hmodel_.Copy(hmodel)
-# hmodel.SetLineWidth(3);
-# hmodel.SetLineColor(root.kBlue+10)
-# if masscorr=='':
-#   hmodel.GetXaxis().SetTitle('fatjet m_{SD} [GeV]')
-# else:
-#   hmodel.GetXaxis().SetTitle('L2L3-corr fatjet m_{SD} [GeV]')
-# hmodel.GetYaxis().SetTitle('Events/10.25 GeV')
-# hmodel.Scale(sum([x.getVal() for x in norm.values()])/hmodel.Integral())
-# plot.AddHistogram(hmodel,'Post-fit',root.kExtra5)
-# plot.AddAdditional(hmodel,'hist')
+  hdata[iC].SetLineColor(root.kBlack)
+  hdata[iC].SetMarkerStyle(20);
+  plot[iC].AddHistogram(hdata[iC],'Data',root.kData)
 
-# hprefit = hprong[1].Clone('prefit')
-# hprefit.Reset()
-# for iP in [1,2,3]:
-#   hprefit.Add(hprong[iP])
-# hprefit.SetLineWidth(2)
-# hprefit.SetLineStyle(2)
-# hprefit.SetLineColor(root.kBlue+2)
-# plot.AddAdditional(hprefit,'hist','Pre-fit')
+  hmodel_ = model[iC].createHistogram('hmodel%i'%iC,mass,root.RooFit.Binning(40))
+  hmodel = root.TH1D(); hmodel_.Copy(hmodel)
+  hmodel.SetLineWidth(3);
+  hmodel.SetLineColor(root.kBlue+10)
+  if masscorr=='':
+    hmodel.GetXaxis().SetTitle('fatjet m_{SD} [GeV]')
+  else:
+    hmodel.GetXaxis().SetTitle('L2L3-corr fatjet m_{SD} [GeV]')
+  hmodel.GetYaxis().SetTitle('Events/10 GeV')
+  hmodel.Scale(sum([norm[(x,iC)].getVal() for x in [1,2,3]])/hmodel.Integral())
+  plot[iC].AddHistogram(hmodel,'Post-fit',root.kExtra5)
+  plot[iC].AddAdditional(hmodel,'hist')
 
-# plot.Draw('~/public_html/figs/toptagging/datavalidation/v8/templates/','simplefit%s'%masscorr)
+plot[1].AddPlotLabel('Pass category',.18,.77,False,42,.04)
+plot[0].AddPlotLabel('Fail category',.18,.77,False,42,.04)
+plot[1].Draw('~/public_html/figs/toptagging/datavalidation/v8/templates/','pass%s'%masscorr)
+plot[0].Draw('~/public_html/figs/toptagging/datavalidation/v8/templates/','fail%s'%masscorr)
 
 # # mass.setVal(175)
 # # print pdfprong[iP].getVal(root.RooArgSet(mass))
