@@ -60,6 +60,7 @@ tMET,fMET = getTree('MET')
 tSingleEle,fSEle = getTree('SingleElectron')
 tSinglePho,fSPho = getTree('SinglePhoton')
 tVBF,fVBF = getTree('VBF_H125')
+tGGF,fGGF = getTree('GGF_H125')
 
 factory.cd()
 regions = {}
@@ -107,6 +108,7 @@ if enable('signal'):
     root.Process('Diboson',tVV,vm,cut,weight),
     root.Process('QCD',tQCD,vm,cut,weight),
     root.Process('VBF_H125',tVBF,vm,cut,weight),
+    root.Process('GGF_H125',tGGF,vm,cut,weight),
   ]
 
   for p in processes['signal']:
