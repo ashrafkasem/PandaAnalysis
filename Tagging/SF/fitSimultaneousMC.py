@@ -7,6 +7,9 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 Load('Drawers','HistogramDrawer')
 
+def imp(w_):
+  return getattr(w_,'import')
+
 plot = {}
 for iC in [0,1]:
   plot[iC] = root.HistogramDrawer()
@@ -22,13 +25,14 @@ for iC in [0,1]:
 
 # masscorr = 'L2L3'
 masscorr = ''
+basedir = '~/public_html/figs/toptagging/datavalidation/v8/templates/'
 
 hprong = {}; dhprong = {}; pdfprong = {}; norm = {}; smeared = {}; smear = {}; mu = {}; hdata = {}; dh_data={}
 mass = root.RooRealVar("m","m_{SD} [GeV]",50,450)
 
 ftemplate = {
-      'pass' : root.TFile('~/public_html/figs/toptagging/datavalidation/v8/templates/tag_top_ecfv8_bdt_pass_hists.root'),
-      'fail' : root.TFile('~/public_html/figs/toptagging/datavalidation/v8/templates/tag_top_ecfv8_bdt_fail_hists.root')
+      'pass' : root.TFile(basedir+'tag_top_ecfv8_bdt_pass_hists.root'),
+      'fail' : root.TFile(basedir+'tag_top_ecfv8_bdt_fail_hists.root')
     }
 
 # get histograms
@@ -54,10 +58,10 @@ for iC in [0,1]:
     norm[cat] = root.RooRealVar('norm%i%i'%cat,'norm%i%i'%cat,norm_,0.01*norm_,100*norm_)
 
 # smear pdfs
-dummy = root.RooRealVar('dummy','dummy',0.1,0.1,10)
+sigma = root.RooRealVar('sigma','sigma',0.1,0.1,10)
 for iP in [1,2,3]:
   mu[iP] = root.RooRealVar('mu%i'%iP,'mu%i'%iP,10,-25,25)
-  smear[iP] = root.RooGaussian('gauss%i'%iP,'gauss%i'%iP,mass,mu[iP],dummy)
+  smear[iP] = root.RooGaussian('gauss%i'%iP,'gauss%i'%iP,mass,mu[iP],sigma)
   for iC in [0,1]:
     cat = (iP,iC)
     if iP<3:
@@ -109,15 +113,6 @@ mass.setRange('MASSWINDOW',masslo,masshi)
 massint = smeared[(3,1)].createIntegral(root.RooArgSet(mass),root.RooArgSet(mass),'MASSWINDOW')
 effMass = massint.getVal(); effMassErr = massint.getPropagatedError(fitresult)
 
-print 'Tagging cut:'
-print '\tPre-fit efficiency was %f'%(eff_)
-print '\tPost-fit efficiency is %f +%.5g -%.5g'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo()))
-print 'Tagging+mass cut:'
-print '\tPre-fit mass efficiency was %f'%(effMass_)
-print '\tPost-fit mass efficiency is %f +/-%.5g'%(effMass,effMassErr)
-print '\tPre-fit mass+tag efficiency was %f'%(effMass_*eff_)
-print '\tPost-fit mass+tag efficiency is %f +%.5g -%.5g'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo()))
-
 # make nice plots
 
 colors = {
@@ -132,7 +127,7 @@ labels = {
 }
 
 for iC in [0,1]:
-  for iP in [1,2,3]:
+  for iP in [3,2,1]:
     cat = (iP,iC)
     h = smeared[cat].createHistogram('h%i%i'%cat,mass,root.RooFit.Binning(40))
     h.SetLineWidth(3)
@@ -143,7 +138,7 @@ for iC in [0,1]:
     
   hprefit = hprong[(1,0)].Clone('prefit')
   hprefit.Reset()
-  for jP in [1,2,3]:
+  for jP in [3,2,1]:
     hprefit.Add(hprong[(jP,iC)])
   hprefit.SetLineWidth(2)
   hprefit.SetLineStyle(2)
@@ -173,13 +168,40 @@ for iC in [0,1]:
   hmodel.Scale(sum([norm[(x,iC)].getVal() for x in [1,2,3]])/hmodel.Integral())
   plot[iC].AddHistogram(hmodel,'Post-fit',root.kExtra5)
   plot[iC].AddAdditional(hmodel,'hist')
+  plot[iC].AddPlotLabel('#varepsilon_{tag} = %.3g^{+%.2g}_{-%.2g}'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo())),
+                        .6,.44,False,42,.04)
+  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD} = %.3g^{+%.2g}_{-%.2g}'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo())),
+                        .6,.34,False,42,.04)
 
-plot[1].AddPlotLabel('Pass category',.18,.77,False,42,.04)
-plot[0].AddPlotLabel('Fail category',.18,.77,False,42,.04)
-plot[1].Draw('~/public_html/figs/toptagging/datavalidation/v8/templates/','pass%s'%masscorr)
-plot[0].Draw('~/public_html/figs/toptagging/datavalidation/v8/templates/','fail%s'%masscorr)
+plot[1].AddPlotLabel('Pass category',.18,.77,False,42,.05)
+plot[0].AddPlotLabel('Fail category',.18,.77,False,42,.05)
+plot[1].Draw(basedir+'mcshape/','pass%s'%masscorr)
+plot[0].Draw(basedir+'mcshape/','fail%s'%masscorr)
 
-# # mass.setVal(175)
-# # print pdfprong[iP].getVal(root.RooArgSet(mass))
-# # print smear[iP].getVal(root.RooArgSet(mass))
-# # print smeared[iP].getVal(root.RooArgSet(mass))
+# save outpuat
+w = root.RooWorkspace('w','workspace')
+w.imp = imp(w)
+w.imp(mass)
+for x in [nsigtotal,eff,sigma,sample,datacomb,simult]:
+  w.imp(x)
+for iC in [0,1]:
+  w.imp(normsig[iC])
+  w.imp(dh_data[iC])
+  w.imp(model[iC])
+  for iP in [1,2,3]:
+    cat = (iP,iC)
+    w.imp(smear[iP]); w.imp(mu[iP])
+    w.imp(dhprong[cat])
+    w.imp(pdfprong[cat])
+    w.imp(norm[cat])
+    w.imp(smeared[cat])
+w.writeToFile(basedir+'mcshape/wspace.root')
+
+print 'Tagging cut:'
+print '\tPre-fit efficiency was %f'%(eff_)
+print '\tPost-fit efficiency is %f +%.5g -%.5g'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo()))
+print 'Tagging+mass cut:'
+print '\tPre-fit mass efficiency was %f'%(effMass_)
+print '\tPost-fit mass efficiency is %f +/-%.5g'%(effMass,effMassErr)
+print '\tPre-fit mass+tag efficiency was %f'%(effMass_*eff_)
+print '\tPost-fit mass+tag efficiency is %f +%.5g -%.5g'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo()))
