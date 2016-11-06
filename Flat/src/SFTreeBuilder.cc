@@ -13,8 +13,6 @@ SFTreeBuilder::SFTreeBuilder() {
 SFTreeBuilder::~SFTreeBuilder() {
   delete weightTF;
   delete cutTF;
-  for (auto *p : processes)
-    delete p;
   for (auto *t : taggerTFs)
     delete t;
   delete taggerVals;
@@ -89,9 +87,9 @@ void SFTreeBuilder::Run() {
     tIn->SetBranchAddress("runNumber",&runNumber);
     tIn->SetBranchAddress("lumiNumber",&lumiNumber);
     tIn->SetBranchAddress("npv",&npv);
-    tIn->SetBranchAddress("pt",&pt);
-    tIn->SetBranchAddress("eta",&eta);
-    tIn->SetBranchAddress("mSD",&mSD);
+    tIn->SetBranchAddress("fj1Pt",&pt);
+    tIn->SetBranchAddress("fj1Eta",&eta);
+    tIn->SetBranchAddress("fj1MSD",&mSD);
 
     // INITIALIZE --------------------------------------------------------------------------  
     unsigned int nEvents = tIn->GetEntries();
