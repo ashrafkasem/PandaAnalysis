@@ -1054,7 +1054,7 @@ void PandaAnalyzer::Run() {
           }
         } // finding the subjet flavor
   
-        float sjPtMax = (flavor<4) ? 1000. : 450.;
+        float sjPtMax = (flavor<4) ? 1000. : 449.;
         float pt = subjet->pt;
         float btagUncFactor = 1;
         if (pt>sjPtMax) {
@@ -1126,7 +1126,7 @@ void PandaAnalyzer::Run() {
             }
           }
         } // finding the jet flavor
-        float jPtMax = 670.;
+        float jPtMax = 669.;
         float pt = jet->pt;
         float btagUncFactor = 1;
         if (pt>jPtMax) {
