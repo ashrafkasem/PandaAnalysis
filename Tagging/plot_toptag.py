@@ -12,6 +12,7 @@ parser.add_argument('--indir',metavar='indir',type=str,default=basedir)
 parser.add_argument('--outdir',metavar='outdir',type=str,default=figsdir)
 parser.add_argument('--cut',metavar='cut',type=str,default=None)
 parser.add_argument('--sel',metavar='sel',type=str,default='tag')
+parser.add_argument('--pt',metavar='pt',type=str,default='inc')
 args = parser.parse_args()
 
 figsdir = args.outdir
@@ -54,13 +55,24 @@ elif args.cut=='massW':
   label += 'massWCut_'
   plotlabel = '50 < m_{SD} < 100 GeV'
 
+if args.pt=='inc':
+  pass
+elif args.pt=='lo':
+  figsdir += '/lo/'
+  cut = tAND(cut,'250 < fj1Pt && fj1Pt<450')
+  plotlabel = '#splitline{%s}{250 < p_{T} < 450 GeV}'%plotlabel
+elif args.pt=='med':
+  figsdir += '/med/'
+  cut = tAND(cut,'450 < fj1Pt && fj1Pt<1000')
+  plotlabel = '#splitline{%s}{450 < p_{T} < 1000 GeV}'%plotlabel
+
 ### LOAD PLOTTING UTILITY ###
 plot = root.PlotUtility()
 plot.Stack(True)
 plot.InitLegend()
 plot.SetCut(tcut(cut))
 plot.Ratio(1) 
-plot.FixRatio(.5)
+plot.FixRatio(.25)
 plot.SetLumi(lumi/1000)
 plot.DrawMCErrors(True)
 plot.SetTDRStyle()
@@ -122,13 +134,19 @@ plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]',
 
 plot.AddDistribution(root.Distribution('UWmag',250,500,20,'W recoil [GeV]','Events'))
 
-#plot.AddDistribution(root.Distribution('UAmag',250,500,20,'#gamma recoil [GeV]','Events'))
+plot.AddDistribution(root.Distribution('UAmag',250,500,20,'#gamma recoil [GeV]','Events'))
 
 #plot.AddDistribution(root.Distribution('npv',0,50,25,'npv','Events'))
 
-plot.AddDistribution(root.Distribution('top_ecfv8_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
+#plot.AddDistribution(root.Distribution('top_allv2_bdt',-1.3,1,23,'Top 50ECF BDT','Events'))
+
+plot.AddDistribution(root.Distribution('top_ecfv14_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT v2','Events'))
+#plot.AddDistribution(root.Distribution('top_ecfv13_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD} BDT v2','Events'))
+plot.AddDistribution(root.Distribution('top_ecfv12_bdt',-1,1.,20,'Top ECF BDT v2','Events'))
+
+plot.AddDistribution(root.Distribution('top_ecfv8_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
 #plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD} BDT','Events'))
-plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1.3,1.,23,'Top ECF BDT','Events'))
+plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1,1.,20,'Top ECF BDT','Events'))
 
 #plot.AddDistribution(root.Distribution('top_ecf_bdt',-0.5,.5,20,'Top ECF BDT','Events'))
 
@@ -160,7 +178,7 @@ plot.AddDistribution(root.Distribution('fj1ECFN_2_4_10/pow(fj1ECFN_1_3_10,2)',1,
 plot.AddDistribution(root.Distribution('fj1ECFN_2_4_10/pow(fj1ECFN_2_3_05,2)',0,1.5,20,'e(2,4,1)/e(2,3,0.5)^{2}','Events',999,-999,'input9'))
 plot.AddDistribution(root.Distribution('fj1ECFN_2_4_20/pow(fj1ECFN_1_3_20,2)',0,5,20,'e(2,4,2)/e(1,3,2)^{2}','Events',999,-999,'input10'))
 
-plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
+#plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
 '''
 '''
 
