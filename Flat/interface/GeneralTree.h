@@ -38,6 +38,7 @@ class GeneralTree : public genericTree {
 	float sf_ewkV=0;
 	float sf_qcdV=0;
 	float sf_lep=0;
+  float sf_pho=0;
 	float sf_lepTrack=0;
 	float sf_btag0=0;
 	float sf_btag0BUp=0;
@@ -198,6 +199,7 @@ GeneralTree::GeneralTree() {
   sf_ewkV=1;
   sf_qcdV=1;
   sf_lep=1;
+  sf_pho=1;
   sf_lepTrack=1;
   sf_btag0=1;
   sf_btag0BUp=1;
@@ -369,6 +371,7 @@ void GeneralTree::Reset() {
   sf_ewkV = 1;
   sf_qcdV = 1;
   sf_lep = 1;
+  sf_pho = 1;
   sf_lepTrack = 1;
   sf_btag0 = 1;
   sf_btag0BUp = 1;
@@ -548,6 +551,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("sf_qcdV",&sf_qcdV);
 	treePtr->SetBranchStatus("sf_lep",1);
 	treePtr->SetBranchAddress("sf_lep",&sf_lep);
+  treePtr->SetBranchStatus("sf_pho",1);
+  treePtr->SetBranchAddress("sf_pho",&sf_pho);
 	treePtr->SetBranchStatus("sf_lepTrack",1);
 	treePtr->SetBranchAddress("sf_lepTrack",&sf_lepTrack);
 	treePtr->SetBranchStatus("sf_btag0",1);
@@ -839,6 +844,7 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("sf_ewkV",&sf_ewkV,"sf_ewkV/F");
 	treePtr->Branch("sf_qcdV",&sf_qcdV,"sf_qcdV/F");
 	treePtr->Branch("sf_lep",&sf_lep,"sf_lep/F");
+  treePtr->Branch("sf_pho",&sf_pho,"sf_pho/F");
 	treePtr->Branch("sf_lepTrack",&sf_lepTrack,"sf_lepTrack/F");
 	treePtr->Branch("sf_btag0",&sf_btag0,"sf_btag0/F");
 	treePtr->Branch("sf_btag0BUp",&sf_btag0BUp,"sf_btag0BUp/F");

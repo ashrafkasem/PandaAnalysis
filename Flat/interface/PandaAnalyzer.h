@@ -113,23 +113,25 @@ private:
 
   // files and histograms containing weights
   TFile *fEleSF=0, *fEleSFTight=0;
-  TH2D *hEleVeto, *hEleTight;
+  THCorr2 *hEleVeto, *hEleTight;
   TFile *fMuSF=0, *fMuSFTight=0;
-  TH2D *hMuLoose, *hMuTight;
+  THCorr2 *hMuLoose, *hMuTight;
   TFile *fEleSFTrack=0, *fMuSFTrack=0;
-  TH1D *hMuTrack; TH2D *hEleTrack;
+  THCorr1 *hMuTrack; THCorr2 *hEleTrack;
+  TFile *fPhoSF=0;
+  THCorr2 *hPho=0;
 
   TFile *fPU=0;
-  TH1D *hPUWeight;
+  THCorr1 *hPUWeight;
 
   TFile *fKFactor=0;
-  TH1D *hZNLO, *hANLO, *hWNLO;
-  TH1D *hZLO,  *hALO,  *hWLO;
-  TH1D *hZEWK, *hAEWK, *hWEWK;
+  THCorr1 *hZNLO, *hANLO, *hWNLO;
+  THCorr1 *hZLO,  *hALO,  *hWLO;
+  THCorr1 *hZEWK, *hAEWK, *hWEWK;
   TFile *fEleTrigB, *fEleTrigE, *fPhoTrig, *fEleTrigLow, *fMetTrig;
-  TH1D *hEleTrigB, *hEleTrigE, *hPhoTrig, *hMetTrig;
-  //TH1D *hEleTrigBUp=0, *hEleTrigBDown=0, *hEleTrigEUp=0, *hEleTrigEDown=0;
-  TH2D *hEleTrigLow;
+  THCorr1 *hEleTrigB, *hEleTrigE, *hPhoTrig, *hMetTrig;
+  //THCorr *hEleTrigBUp=0, *hEleTrigBDown=0, *hEleTrigEUp=0, *hEleTrigEDown=0;
+  THCorr2 *hEleTrigLow;
 
 
   // IO for the analyzer
