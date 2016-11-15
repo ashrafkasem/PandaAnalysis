@@ -1,8 +1,15 @@
 #!/usr/bin/env python
 
+import argparse
 from sys import argv
+
+parser = argparse.ArgumentParser(description='fit stuff')
+parser.add_argument('--indir',metavar='indir',type=str)
+args = parser.parse_args()
+basedir = args.indir
 argv=[]
 
+from math import sqrt
 import ROOT as root
 from PandaCore.Tools.Load import *
 Load('Drawers','HistogramDrawer')
@@ -25,9 +32,9 @@ for iC in [0,1]:
 
 # masscorr = 'L2L3'
 masscorr = ''
-basedir = '~/public_html/figs/toptagging/datavalidation/v8/templates/'
 
 hprong = {}; dhprong = {}; pdfprong = {}; norm = {}; smeared = {}; smear = {}; mu = {}; hdata = {}; dh_data={}
+mcnorms = {}; mcerrs = {}
 mass = root.RooRealVar("m","m_{SD} [GeV]",50,450)
 
 ftemplate = {
@@ -56,6 +63,11 @@ for iC in [0,1]:
     pdfprong[cat] = root.RooHistPdf('pdf%i%i'%cat,'pdf%i%i'%cat,root.RooArgSet(mass),dhprong[cat]) 
     norm_ = hprong[cat].Integral()
     norm[cat] = root.RooRealVar('norm%i%i'%cat,'norm%i%i'%cat,norm_,0.01*norm_,100*norm_)
+    mcnorms[cat] = norm_
+    err_ = 0
+    for iB in xrange(1,hprong[cat].GetNbinsX()+1):
+      err_ += pow(hprong[cat].GetBinError(iB),2)
+    mcerrs[cat] = sqrt(err_)
 
 # smear pdfs
 sigma = root.RooRealVar('sigma','sigma',0.1,0.1,10)
@@ -71,7 +83,17 @@ for iP in [1,2,3]:
 
 model = {}
 nsigtotal = root.RooFormulaVar('nsigtotal','norm30+norm31',root.RooArgList(norm[(3,0)],norm[(3,1)]))
-eff_ = norm[(3,1)].getVal()/(norm[(3,1)].getVal()+norm[(3,0)].getVal())
+# eff_ = norm[(3,1)].getVal()/(norm[(3,1)].getVal()+norm[(3,0)].getVal())
+
+def calcEffAndErr(p,perr,f,ferr):
+  eff_ = p/(p+f)
+  err_ = pow( perr * f / pow(p+f,2) , 2 )
+  err_ += pow( ferr * p / pow(p+f,2) , 2 )
+  err_ = sqrt(err_)
+  return eff_,err_
+
+eff_,err_ = calcEffAndErr(mcnorms[(3,1)],mcerrs[(3,1)],mcnorms[(3,0)],mcnorms[(3,1)])
+eff_ = mcnorms[(3,1)]/(mcnorms[(3,1)]+mcnorms[(3,0)])
 eff = root.RooRealVar('eff','eff',eff_,0.5*eff_,2*eff_)
 normsig = {
       0 : root.RooFormulaVar('nsigfail','(1.0-eff)*nsigtotal',root.RooArgList(eff,nsigtotal)),
@@ -168,15 +190,21 @@ for iC in [0,1]:
   hmodel.Scale(sum([norm[(x,iC)].getVal() for x in [1,2,3]])/hmodel.Integral())
   plot[iC].AddHistogram(hmodel,'Post-fit',root.kExtra5)
   plot[iC].AddAdditional(hmodel,'hist')
-  plot[iC].AddPlotLabel('#varepsilon_{tag} = %.3g^{+%.2g}_{-%.2g}'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo())),
-                        .6,.44,False,42,.04)
-  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD} = %.3g^{+%.2g}_{-%.2g}'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo())),
-                        .6,.34,False,42,.04)
+
+
+  plot[iC].AddPlotLabel('#varepsilon_{tag}^{Data} = %.3g^{+%.2g}_{-%.2g}'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo())),
+                        .6,.47,False,42,.04)
+  plot[iC].AddPlotLabel('#varepsilon_{tag}^{MC} = %.3g^{+%.2g}_{-%.2g}'%(eff_,err_,err_),
+                        .6,.37,False,42,.04)
+  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{Data} = %.3g^{+%.2g}_{-%.2g}'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo())),
+                        .6,.27,False,42,.04)
+  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{MC} = %.3g^{+%.2g}_{-%.2g}'%(eff_*effMass_,err_*effMass_,err_*effMass_),
+                        .6,.17,False,42,.04)
 
 plot[1].AddPlotLabel('Pass category',.18,.77,False,42,.05)
 plot[0].AddPlotLabel('Fail category',.18,.77,False,42,.05)
-plot[1].Draw(basedir+'mcshape/','pass%s'%masscorr)
-plot[0].Draw(basedir+'mcshape/','fail%s'%masscorr)
+plot[1].Draw(basedir,'pass%s'%masscorr)
+plot[0].Draw(basedir,'fail%s'%masscorr)
 
 # save outpuat
 w = root.RooWorkspace('w','workspace')
@@ -195,7 +223,7 @@ for iC in [0,1]:
     w.imp(pdfprong[cat])
     w.imp(norm[cat])
     w.imp(smeared[cat])
-w.writeToFile(basedir+'mcshape/wspace.root')
+w.writeToFile(basedir+'wspace.root')
 
 print 'Tagging cut:'
 print '\tPre-fit efficiency was %f'%(eff_)

@@ -52,10 +52,17 @@ elif args.cat=='2':
 elif args.cat=='1':
   samples = ['WJets','QCD']
   outname='prong1'
+elif args.cat=='gjets':
+  samples = ['GJets','QCD']
+  outname='gjets'
 elif args.cat=='data':
-  cut = tAND(cut,'(trigger&1)!=0')
+  if args.sel == 'photon':
+    cut = tAND(cut,'(trigger&4)!=0')
+    samples = ['SinglePhoton']
+  else:
+    cut = tAND(cut,'(trigger&1)!=0')
+    samples = ['MET']
   weight = '1'
-  samples = ['MET']
   outname='data'
 else:
   PError(sname,'Category %s not recognized'%args.cat)
