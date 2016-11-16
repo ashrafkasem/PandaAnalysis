@@ -93,5 +93,6 @@ plot.AddAdditional(pmc,'e2','MC')
 pdata.SetFillStyle(0)
 pdata.SetLineWidth(2); pdata.SetLineColor(root.kBlack)
 plot.AddHistogram(pdata,'Data',root.kData)
+plot.AddAdditional(pdata,'elp')
 
-plot.Draw(args.outdir,label+taggervar)
+plot.Draw(args.outdir+'/',label+taggervar)

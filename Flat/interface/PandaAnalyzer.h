@@ -5,6 +5,7 @@
 #include "vector"
 #include "map"
 #include <string>
+#include <cmath>
 
 // ROOT
 #include <TTree.h>
@@ -17,21 +18,19 @@
 #include "AnalyzerUtilities.h"
 #include "GeneralTree.h"
 
+// btag
 #include "CondFormats/BTauObjects/interface/BTagEntry.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibration.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
 #include "BTagCalibrationStandalone.h"
+
 // JEC
-//#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
-//#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
-//#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
+#include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
+#include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // some misc definitions
-
-double clean(double x, double d=-1) {
-  return (x==x) ? x : d;
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // PandaAnalyzer definition
@@ -100,6 +99,7 @@ private:
   std::vector<panda::PObject*> matchPhos, matchEles, matchLeps;
   
   // CMSSW-provided utilities
+  FactorizedJetCorrector *ak8MCCorrector=0, *ak8DataCorrector=0; 
 //  JetCorrectorParameters *ak8jec=0;
 //  JetCorrectionUncertainty *ak8unc=0;
 
@@ -113,23 +113,25 @@ private:
 
   // files and histograms containing weights
   TFile *fEleSF=0, *fEleSFTight=0;
-  TH2D *hEleVeto, *hEleTight;
+  THCorr2 *hEleVeto, *hEleTight;
   TFile *fMuSF=0, *fMuSFTight=0;
-  TH2D *hMuLoose, *hMuTight;
+  THCorr2 *hMuLoose, *hMuTight;
   TFile *fEleSFTrack=0, *fMuSFTrack=0;
-  TH1D *hMuTrack; TH2D *hEleTrack;
+  THCorr1 *hMuTrack; THCorr2 *hEleTrack;
+  TFile *fPhoSF=0;
+  THCorr2 *hPho=0;
 
   TFile *fPU=0;
-  TH1D *hPUWeight;
+  THCorr1 *hPUWeight;
 
   TFile *fKFactor=0;
-  TH1D *hZNLO, *hANLO, *hWNLO;
-  TH1D *hZLO,  *hALO,  *hWLO;
-  TH1D *hZEWK, *hAEWK, *hWEWK;
+  THCorr1 *hZNLO, *hANLO, *hWNLO;
+  THCorr1 *hZLO,  *hALO,  *hWLO;
+  THCorr1 *hZEWK, *hAEWK, *hWEWK;
   TFile *fEleTrigB, *fEleTrigE, *fPhoTrig, *fEleTrigLow, *fMetTrig;
-  TH1D *hEleTrigB, *hEleTrigE, *hPhoTrig, *hMetTrig;
-  //TH1D *hEleTrigBUp=0, *hEleTrigBDown=0, *hEleTrigEUp=0, *hEleTrigEDown=0;
-  TH2D *hEleTrigLow;
+  THCorr1 *hEleTrigB, *hEleTrigE, *hPhoTrig, *hMetTrig;
+  //THCorr *hEleTrigBUp=0, *hEleTrigBDown=0, *hEleTrigEUp=0, *hEleTrigEDown=0;
+  THCorr2 *hEleTrigLow;
 
 
   // IO for the analyzer

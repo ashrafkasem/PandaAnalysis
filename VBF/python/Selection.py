@@ -7,7 +7,7 @@ weights = {}
 triggers = {}
 
 eventsel = 'metfilter==1 && filterbadChCandidate==1 && filterbadPFMuon==1 && fabs(minJetMetDPhi_withendcap) > 0.5 && (fabs(caloMet-trueMet)/met) < 0.5 && n_tau==0 && n_bjetsMedium==0 && met>200'
-noid = tAND(eventsel,'jot1Eta*jot2Eta < 0 && jot1Pt>100. && jot2Pt>40. && leadingJet_outaccp==0 && fabs(jot1Eta)<4.7 && fabs(jot2Eta)<4.7 && jjDEta>3.75') 
+noid = tAND(eventsel,'jot1Eta*jot2Eta < 0 && jot1Pt>80. && jot2Pt>40. && (fabs(jot1Eta)>3.2||fabs(jot1Eta)<3.0) && fabs(jot1Eta)<4.7 && fabs(jot2Eta)<4.7') 
 baseline = tAND(noid,'jet1isMonoJetIdNew==1')
 
 #vbf cuts

@@ -99,6 +99,7 @@ d = {
   'GJets'               : ['GJets_ht100to200','GJets_ht200to400','GJets_ht400to600','GJets_ht600toinf'],
   'WJets'               : ['WJets_ht100to200','WJets_ht200to400','WJets_ht400to600','WJets_ht600to800','WJets_ht800to1200','WJets_ht1200to2500','WJets_ht2500toinf'],
   'TTbar'               : ['TTbar_Powheg'],
+  'TTbar_Herwig'        : ['TTbar_Herwig'],
   'TTbarDM'             : ['TTbarDM'],
   'TTbarDM_fast'        : ['TTbarDM_fast'],
   'SingleTop'           : ['SingleTop_tT','SingleTop_tTbar','SingleTop_tbarW','SingleTop_tW'],
