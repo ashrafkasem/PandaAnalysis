@@ -69,9 +69,10 @@ def normalizeFast(fpath,opt):
   if xsec<0:
     PError(sname,'could not find xsec, skipping %s!'%opt)
     return
-  PInfo(sname,'normalizing %s (%s) ...'%(fpath,opt))
+  PInfo(sname,'normalizing %s (%s) ...'%(fpath,xsec))
   n = root.Normalizer()
   n.histName = 'htotal'
+  print opt,xsec
   n.NormalizeTree(fpath,xsec)
 
 def merge(shortnames,mergedname):
@@ -96,6 +97,7 @@ def merge(shortnames,mergedname):
 d = {
   'Diboson'             : ['WW','WZ','ZZ'],
   'VBF_H125'            : ['VBF_HToInvisible_M125_13TeV_powheg_pythia8'],
+  'GGF_H125'            : ['Glu_HToInvisible_M125_13TeV_powheg_pythia8'],
   'ZJets'               : ['DYJetsToLL_M-50_HT-%sto%s'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,'Inf')]],
   'ZtoNuNu'             : ['ZJetsToNuNu_HT-%sTo%s_13TeV'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,800),(800,1200),(1200,2500),(2500,'Inf')]],
   'WJets'               : ['WJetsToLNu_Pt-%sTo%s'%(str(x[0]),str(x[1])) for x in [(100,250),(250,400),(400,600),(600,'Inf')]],
@@ -107,7 +109,7 @@ d = {
   'EWKZJets'            : ['EWKZ2Jets_ZToLL_M-50_13TeV'],
   'EWKWJets'            : ['EWKW%s2Jets_WToLNu_M-50_13TeV'%(x) for x in ['Plus','Minus']],
   'SingleTop'           : ['ST_t-channel_antitop_4f_inclusiveDecays_13TeV-powhegV2-madspin-pythia8','ST_t-channel_top_4f_leptonDecays_13TeV-powheg-pythia8','ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8','ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8'],
-  'QCD'                 : ['QCD_HT%sto%s'%(str(x[0]),str(x[1])) for x in [(200,300),(300,500),(500,700),(700,1000),(1000,1500),(1500,2000),(2000,'Info')]],
+  'QCD'                 : ['QCD_HT%sto%s'%(str(x[0]),str(x[1])) for x in [(200,300),(300,500),(500,700),(700,1000),(1000,1500),(1500,2000),(2000,'Inf')]],
   'GJets'               : ['GJets_HT-%sTo%s'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,'Inf')]],
 }
 

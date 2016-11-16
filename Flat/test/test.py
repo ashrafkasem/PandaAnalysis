@@ -17,7 +17,7 @@ if __name__ == "__main__":
    
     skimmer.firstEvent=0
     skimmer.lastEvent=100
-    skimmer.isData=True
+    skimmer.isData=False
     skimmer.applyJson=False
     skimmer.doFatjet=False
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonojet)

@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <vector>
 
-#define DEBUG 0
+#define DEBUG 1
 using namespace panda;
 using namespace std;
 
@@ -94,6 +94,7 @@ void PandaAnalyzer::Terminate() {
   fMuSFTrack->Close();
   fPU->Close();
   fKFactor->Close();
+  fPhoSF->Close();
 
   delete btagCalib;
   delete hfReader;
@@ -102,6 +103,9 @@ void PandaAnalyzer::Terminate() {
   delete lfUpReader;
   delete hfDownReader;
   delete lfDownReader;
+
+  delete ak8MCCorrector;
+  delete ak8DataCorrector;
 
 //  delete ak8jec;
 //  delete ak8unc;
@@ -124,42 +128,50 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   fMuSFTight    = new TFile(dirPath+"/scaleFactor_muon_tightid_12p9.root");
   fMuSFTrack    = new TFile(dirPath+"/scaleFactor_muon_track.root");
 
+  fPhoSF   = new TFile(dirPath+"/scaleFactor_photon_mediumid_12p9.root");
+
   fPU      = new TFile(dirPath+"/puWeight_13invfb.root");
 
   fKFactor = new TFile(dirPath+"/kfactors.root");
 
-  hEleTrigB = (TH1D*) fEleTrigB->Get("h_num");
-  hEleTrigE = (TH1D*) fEleTrigE->Get("h_num_endcap");
+  hEleTrigB = new THCorr1((TH1D*) fEleTrigB->Get("h_num"));
+  hEleTrigE = new THCorr1((TH1D*) fEleTrigE->Get("h_num_endcap"));
 
-  hPhoTrig = (TH1D*) fPhoTrig->Get("h_num");
-  hMetTrig = (TH1D*) fMetTrig->Get("numer");
-  hEleTrigLow = (TH2D*) fEleTrigLow->Get("hEffEtaPt");
+  hPhoTrig    = new THCorr1((TH1D*) fPhoTrig->Get("h_num"));
+  hMetTrig    = new THCorr1((TH1D*) fMetTrig->Get("numer"));
+  hEleTrigLow = new THCorr2((TH2D*) fEleTrigLow->Get("hEffEtaPt"));
 
-  hEleVeto  = (TH2D*) fEleSF->Get("scaleFactor_electron_vetoid_RooCMSShape");
-  hEleTight = (TH2D*) fEleSFTight->Get("scaleFactor_electron_tightid_RooCMSShape");
+  hEleVeto  = new THCorr2((TH2D*) fEleSF->Get("scaleFactor_electron_vetoid_RooCMSShape"));
+  hEleTight = new THCorr2((TH2D*) fEleSFTight->Get("scaleFactor_electron_tightid_RooCMSShape"));
 
-  hMuLoose = (TH2D*) fMuSF->Get("scaleFactor_muon_looseid_RooCMSShape");
-  hMuTight = (TH2D*) fMuSFTight->Get("scaleFactor_muon_tightid_RooCMSShape");
+  hMuLoose = new THCorr2((TH2D*) fMuSF->Get("scaleFactor_muon_looseid_RooCMSShape"));
+  hMuTight = new THCorr2((TH2D*) fMuSFTight->Get("scaleFactor_muon_tightid_RooCMSShape"));
 
-  hMuTrack = (TH1D*) fMuSFTrack->Get("htrack2");
-  hEleTrack = (TH2D*) fEleSFTrack->Get("EGamma_SF2D");
+  hMuTrack  = new THCorr1((TH1D*) fMuSFTrack->Get("htrack2"));
+  hEleTrack = new THCorr2((TH2D*) fEleSFTrack->Get("EGamma_SF2D"));
 
-  hPUWeight = (TH1D*)fPU->Get("hPU");
+  hPho = new THCorr2((TH2D*) fPhoSF->Get("scaleFactor_photon_mediumid_RooCMSShape"));
 
-  hZNLO = (TH1D*)fKFactor->Get("ZJets_012j_NLO/nominal");
-  hWNLO = (TH1D*)fKFactor->Get("WJets_012j_NLO/nominal");
-  hANLO = (TH1D*)fKFactor->Get("GJets_1j_NLO/nominal_G");
+  hPUWeight = new THCorr1((TH1D*)fPU->Get("hPU"));
 
-  hZLO  = (TH1D*)fKFactor->Get("ZJets_LO/inv_pt");
-  hWLO  = (TH1D*)fKFactor->Get("WJets_LO/inv_pt");
-  hALO  = (TH1D*)fKFactor->Get("GJets_LO/inv_pt_G");
+  hZNLO = new THCorr1((TH1D*)fKFactor->Get("ZJets_012j_NLO/nominal"));
+  hWNLO = new THCorr1((TH1D*)fKFactor->Get("WJets_012j_NLO/nominal"));
+  hANLO = new THCorr1((TH1D*)fKFactor->Get("GJets_1j_NLO/nominal_G"));
+
+  hZLO  = new THCorr1((TH1D*)fKFactor->Get("ZJets_LO/inv_pt"));
+  hWLO  = new THCorr1((TH1D*)fKFactor->Get("WJets_LO/inv_pt"));
+  hALO  = new THCorr1((TH1D*)fKFactor->Get("GJets_LO/inv_pt_G"));
  
-  hZEWK = (TH1D*)fKFactor->Get("EWKcorr/Z");
-  hWEWK = (TH1D*)fKFactor->Get("EWKcorr/W");
-  hAEWK = (TH1D*)fKFactor->Get("EWKcorr/photon");
+  hZEWK = new THCorr1((TH1D*)fKFactor->Get("EWKcorr/Z"));
+  hWEWK = new THCorr1((TH1D*)fKFactor->Get("EWKcorr/W"));
+  hAEWK = new THCorr1((TH1D*)fKFactor->Get("EWKcorr/photon"));
 
-  hZEWK->Divide(hZNLO);   hWEWK->Divide(hWNLO);   hAEWK->Divide(hANLO);
-  hZNLO->Divide(hZLO);    hWNLO->Divide(hWLO);    hANLO->Divide(hALO);
+  hZEWK->GetHist()->Divide(hZNLO->GetHist());   
+  hWEWK->GetHist()->Divide(hWNLO->GetHist());   
+  hAEWK->GetHist()->Divide(hANLO->GetHist());
+  hZNLO->GetHist()->Divide(hZLO->GetHist());    
+  hWNLO->GetHist()->Divide(hWLO->GetHist());    
+  hANLO->GetHist()->Divide(hALO->GetHist());
 
   btagCalib = new BTagCalibration("csvv2",(dirPath+"/CSVv2_ichep.csv").Data());
   hfReader = new BTagCalibrationReader(btagCalib,BTagEntry::OP_LOOSE,"comb","central");
@@ -177,6 +189,18 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   sj_hfDownReader = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"lt","down");
   sj_lfDownReader = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"incl","down");
 
+  // load only L2L3 JEC
+  std::string jecPath = (dirPath+"/jec/").Data();
+  std::vector<JetCorrectorParameters> mcParams;
+  std::vector<JetCorrectorParameters> dataParams;
+  mcParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_MC_L2Relative_AK8PFPuppi.txt"));
+  mcParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_MC_L3Absolute_AK8PFPuppi.txt"));
+  mcParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_MC_L2L3Residual_AK8PFPuppi.txt"));
+  dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L2Relative_AK8PFPuppi.txt"));
+  dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L3Absolute_AK8PFPuppi.txt"));
+  dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L2L3Residual_AK8PFPuppi.txt"));
+  ak8MCCorrector = new FactorizedJetCorrector(mcParams);
+  ak8DataCorrector = new FactorizedJetCorrector(dataParams);
 //  ak8jec = new JetCorrectorParameters((dirPath+"/Spring16_25nsV6_MC_Uncertainty_AK8PFPuppi.txt").Data());
 //  ak8unc = new JetCorrectionUncertainty(*ak8jec);
 }
@@ -239,29 +263,15 @@ void PandaAnalyzer::Run() {
   }
 
   // get bounds
-  float sf_puMin = 0, sf_puMax=999;
-  float sf_eleEtaMax=9999, sf_muEtaMax=9999;
-  float sf_elePtMin=0, sf_elePtMax=9999;
-  float sf_muPtMin=0, sf_muPtMax=9999;
   float genBosonPtMin=150, genBosonPtMax=1000;
   if (!isData) {
-    sf_puMin = hPUWeight->GetBinCenter(1);
-    sf_puMax = hPUWeight->GetBinCenter(hPUWeight->GetNbinsX());
-
-    const TAxis *sf_eleEta = hEleTight->GetXaxis();
-    sf_eleEtaMax = sf_eleEta->GetBinCenter(sf_eleEta->GetNbins());
-
-    const TAxis *sf_elePt = hEleTight->GetYaxis();
-    sf_elePtMin = sf_elePt->GetBinCenter(1); sf_elePtMax = sf_elePt->GetBinCenter(sf_elePt->GetNbins());
-
-    const TAxis *sf_muEta = hMuTight->GetXaxis();
-    sf_muEtaMax = sf_muEta->GetBinCenter(sf_muEta->GetNbins());
-
-    const TAxis *sf_muPt = hMuTight->GetYaxis();
-    sf_muPtMin = sf_muPt->GetBinCenter(1); sf_muPtMax = sf_muPt->GetBinCenter(sf_muPt->GetNbins());
-
-    genBosonPtMin = hZNLO->GetBinCenter(1); genBosonPtMax = hZNLO->GetBinCenter(hZNLO->GetNbinsX());
+    genBosonPtMin = hZNLO->GetHist()->GetBinCenter(1); 
+    genBosonPtMax = hZNLO->GetHist()->GetBinCenter(hZNLO->GetHist()->GetNbinsX());
   }
+
+  // jet corrector
+  FactorizedJetCorrector *ak8Corrector = 0;
+  ak8Corrector = (isData) ? ak8DataCorrector : ak8MCCorrector;
 
   // these are bins of b-tagging eff in pT
   std::vector<double> vbtagpt {50,70,100,140,200,300,670};
@@ -302,7 +312,7 @@ void PandaAnalyzer::Run() {
     gt->npv = event->npv;
     gt->metFilter = (event->metfilters->at(0)) ? 1 : 0;
     if (!isData) 
-      gt->sf_pu = getVal(hPUWeight,bound(gt->npv,sf_puMin,sf_puMax));
+      gt->sf_pu = hPUWeight->Eval(gt->npv);
     if (isData) {
       for (auto iT : metTriggers) {   
         if (event->tiggers->at(iT)) {
@@ -496,34 +506,30 @@ void PandaAnalyzer::Run() {
     // trigger efficiencies
     gt->sf_eleTrig=1; gt->sf_metTrig=1; gt->sf_phoTrig=1;
     if (!isData) {
-      gt->sf_metTrig = getVal(hMetTrig,bound(gt->pfmetnomu,0,1000));
+      gt->sf_metTrig = hMetTrig->Eval(gt->pfmetnomu);
 
       if (gt->nLooseElectron>0 && abs(gt->looseLep1PdgId)==1
           && gt->looseLep1IsTight==1 && gt->nLooseMuon==0) {
         float eff1=0, eff2=0;
         if (gt->looseLep1Pt<100) {
-          eff1 = getVal(hEleTrigLow,
-                        bound(gt->looseLep1Eta,-1.*sf_eleEtaMax,sf_eleEtaMax),
-                        bound(gt->looseLep1Pt,0,sf_elePtMax));
+          eff1 = hEleTrigLow->Eval(gt->looseLep1Eta,gt->looseLep1Pt);
         } else {
           if (fabs(gt->looseLep1Eta)<1.4442) {
-            eff1 = getVal(hEleTrigB,bound(gt->looseLep1Pt,0,1000));
+            eff1 = hEleTrigB->Eval(gt->looseLep1Pt);
           }
           if (1.5660<fabs(gt->looseLep1Eta) && fabs(gt->looseLep1Eta)<2.5) {
-            eff1 = getVal(hEleTrigE,bound(gt->looseLep1Pt,0,1000));
+            eff1 = hEleTrigE->Eval(gt->looseLep1Pt);
           }
         }
         if (gt->nLooseElectron>1 && fabs(gt->looseLep2PdgId)==11) {
           if (gt->looseLep2Pt<100) {
-            eff2 = getVal(hEleTrigLow,
-                          bound(gt->looseLep2Eta,-1.*sf_eleEtaMax,sf_eleEtaMax),
-                          bound(gt->looseLep2Pt,0,sf_elePtMax));
+            eff2 = hEleTrigLow->Eval(gt->looseLep2Eta,gt->looseLep2Pt);
           } else {
             if (fabs(gt->looseLep2Eta)<1.4442) {
-              eff2 = getVal(hEleTrigB,bound(gt->looseLep2Pt,0,1000));
+              eff2 = hEleTrigB->Eval(gt->looseLep2Pt);
             }
             if (1.5660<fabs(gt->looseLep2Eta) && fabs(gt->looseLep2Eta)<2.5) {
-              eff2 = getVal(hEleTrigE,bound(gt->looseLep2Pt,0,1000));
+              eff2 = hEleTrigE->Eval(gt->looseLep2Pt);
             }
           }
         }
@@ -531,7 +537,7 @@ void PandaAnalyzer::Run() {
       } // done with ele trig SF
 
       if (gt->nLoosePhoton>0 && gt->loosePho1IsTight)
-        gt->sf_phoTrig = getVal(hPhoTrig,bound(gt->loosePho1Pt,160,1000));
+        gt->sf_phoTrig = hPhoTrig->Eval(gt->loosePho1Pt);
     } 
 
     tr.TriggerEvent("triggers");
@@ -570,7 +576,9 @@ void PandaAnalyzer::Run() {
     PFatJet *fj1=0;
     gt->nFatjet=0;
     if (doFatjet) {
+      int fatjet_counter=-1;
       for (PFatJet *fj : *fatjets) {
+        ++fatjet_counter;
         float pt = fj->pt;
         float rawpt = fj->rawPt;
         float eta = fj->eta;
@@ -580,35 +588,59 @@ void PandaAnalyzer::Run() {
         float phi = fj->phi;
         if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi)) {
           continue;
-          /*
-          if (gt->nFatjet==0) {
-            break;
-          } else {
-            continue;
-          }
-          */
         }
         gt->nFatjet++;
         if (gt->nFatjet==1) {
           fj1 = fj;
+          if (fatjet_counter==0)
+            gt->fj1IsClean = 1;
+          else
+            gt->fj1IsClean = 0;
           gt->fj1Pt = pt;
           gt->fj1Eta = eta;
           gt->fj1Phi = phi;
           gt->fj1MSD = fj->mSD;
+          gt->fj1RawPt = rawpt;
+
+          // note - if we switch from rawPt to L1L2L3-corr pt, then
+          //        must replace fj->m with fj->m*pt/rawPt.
+          //        unless the upstream behavior is changed and fj->m is L1L2L3-corr, 
+          //        in which case using rawPt means replacing fj->m with fj->m*rawPt/pt
+          // this will never ever cause confusion or a bug in the future
+          double energy = sqrt(pow(fj->m,2) + 
+                               pow(rawpt,2) / ( 1 - pow(TMath::TanH(eta),2) )
+                              );
+
+          // compute L2L3 for mSD
+          ak8Corrector->setJetPt(rawpt);
+          ak8Corrector->setJetEta(eta);
+          ak8Corrector->setJetPhi(phi);
+          ak8Corrector->setJetE(energy);
+          ak8Corrector->setRho(0);
+          ak8Corrector->setJetA(0);
+          ak8Corrector->setJetEMF(-99.);
+          float l2l3corr = ak8Corrector->getCorrection();
+          gt->fj1MSDL2L3 = l2l3corr*fj->mSD;
+          
+          // now we do substructure
           gt->fj1Tau32 = clean(fj->tau3/fj->tau2);
           gt->fj1Tau32SD = clean(fj->tau3SD/fj->tau2SD);
           gt->fj1Tau21 = clean(fj->tau2/fj->tau1);
           gt->fj1Tau21SD = clean(fj->tau2SD/fj->tau1SD);
-          gt->fj1RawPt = rawpt;
 
           for (unsigned int iB=0; iB!=betas.size(); ++iB) {
             float beta = betas.at(iB);
             for (auto N : Ns) {
               for (auto order : orders) {
-                gt->fj1ECFNs[makeECFString(order,N,beta)] = fj->get_ecf(order,N,iB); 
+                if (gt->fj1IsClean || true)
+                  gt->fj1ECFNs[makeECFString(order,N,beta)] = fj->get_ecf(order,N,iB); 
+                else
+                  gt->fj1ECFNs[makeECFString(order,N,beta)] = -1; 
               }
             }
           } //loop over betas
+          gt->fj1HTTMass = fj->htt_mass;
+          gt->fj1HTTFRec = fj->htt_frec;
 
           VJet *subjets = fj->subjets;
           std::sort(subjets->begin(),subjets->end(),SortPJetByCSV);
@@ -1051,22 +1083,22 @@ void PandaAnalyzer::Run() {
           if (processType==kZ) {
             gt->trueGenBosonPt = gen->pt;
             gt->genBosonPt = bound(gen->pt,genBosonPtMin,genBosonPtMax);
-            gt->sf_qcdV = getVal(hZNLO,gt->genBosonPt);
-            gt->sf_ewkV = getVal(hZEWK,gt->genBosonPt);
+            gt->sf_qcdV = hZNLO->Eval(gt->genBosonPt);
+            gt->sf_ewkV = hZEWK->Eval(gt->genBosonPt);
             found=true;
           } else if (processType==kW) {
             gt->trueGenBosonPt = gen->pt;
             gt->genBosonPt = bound(gen->pt,genBosonPtMin,genBosonPtMax);
-            gt->sf_qcdV = getVal(hWNLO,gt->genBosonPt);
-            gt->sf_ewkV = getVal(hWEWK,gt->genBosonPt);
+            gt->sf_qcdV = hWNLO->Eval(gt->genBosonPt);
+            gt->sf_ewkV = hWEWK->Eval(gt->genBosonPt);
             found=true;
           } else if (processType==kA) {
             // take the highest pT
             if (gen->pt > gt->trueGenBosonPt) {
               gt->trueGenBosonPt = gen->pt;
               gt->genBosonPt = bound(gen->pt,genBosonPtMin,genBosonPtMax);
-              gt->sf_qcdV = getVal(hANLO,gt->genBosonPt);
-              gt->sf_ewkV = getVal(hAEWK,gt->genBosonPt);
+              gt->sf_qcdV = hANLO->Eval(gt->genBosonPt);
+              gt->sf_ewkV = hAEWK->Eval(gt->genBosonPt);
             }
           }
         } // target matches
@@ -1084,27 +1116,32 @@ void PandaAnalyzer::Run() {
         bool isTight = (iL==0 && gt->looseLep1IsTight) || (iL==1 && gt->looseLep2IsTight);
         PMuon *mu = dynamic_cast<PMuon*>(lep);
         if (mu!=NULL) {
-          pt = bound(pt,sf_muPtMin,sf_muPtMax);
-          eta = bound(eta,0,sf_muEtaMax);
           if (isTight)
-            gt->sf_lep *= getVal(hMuTight,eta,pt);
+            gt->sf_lep *= hMuTight->Eval(eta,pt);
           else
-            gt->sf_lep *= getVal(hMuLoose,eta,pt);
-          gt->sf_lepTrack *= getVal(hMuTrack,bound(gt->npv,0,50));
+            gt->sf_lep *= hMuLoose->Eval(eta,pt);
+          gt->sf_lepTrack *= hMuTrack->Eval(gt->npv);
         } else {
-          PElectron *ele = dynamic_cast<PElectron*>(lep);
-          pt = bound(pt,sf_elePtMin,sf_elePtMax);
-          eta = bound(eta,0,sf_eleEtaMax);
           if (isTight)
-            gt->sf_lep *= getVal(hEleTight,eta,pt);
+            gt->sf_lep *= hEleTight->Eval(eta,pt);
           else
-            gt->sf_lep *= getVal(hEleVeto,eta,pt);
-          gt->sf_lepTrack *= getVal(hEleTrack,bound(ele->eta,-2.5,2.5),bound(gt->npv,0,50));
+            gt->sf_lep *= hEleVeto->Eval(eta,pt);
+          gt->sf_lepTrack *= hEleTrack->Eval(eta,gt->npv);
         }
       }
     }
 
     tr.TriggerEvent("lepton SFs");
+
+    //photon SF
+    gt->sf_pho=1;
+    if (!isData && gt->nLoosePhoton>0) {
+      float pt = gt->loosePho1Pt, eta = gt->loosePho1Eta;
+      if (gt->loosePho1IsTight)
+        gt->sf_pho = hPho->Eval(eta,pt);
+    }
+
+    tr.TriggerEvent("photon SFs");
 
     gt->Fill();
 

@@ -12,6 +12,45 @@
 // PANDACore
 #include "PandaCore/Tools/interface/Common.h"
 
+template <typename T>
+class THCorr {
+public:
+  // wrapper around TH* to do corrections
+  THCorr(T *h_) {
+    h = h_;
+    dim = h->GetDimension();
+    TAxis *thurn = h->GetXaxis(); 
+    lo1 = thurn->GetBinCenter(1);
+    hi1 = thurn->GetBinCenter(thurn->GetNbins());
+    if (dim>1) {
+      TAxis *taxis = h->GetYaxis();
+      lo2 = taxis->GetBinCenter(1);
+      hi2 = taxis->GetBinCenter(taxis->GetNbins());
+    }
+  }
+  ~THCorr() {}
+  double Eval(double x) {
+    if (dim!=1)
+      return -1;
+    return getVal(h,bound(x,lo1,hi1));
+  }
+
+  double Eval(double x, double y) {
+    if (dim!=2)
+      return -1;
+    return getVal(h,bound(x,lo1,hi1),bound(y,lo2,hi2));
+  }
+
+  T *GetHist() { return h; }  
+
+private:
+  T *h;
+  int dim;
+  double lo1, lo2, hi1, hi2;
+};
+
+typedef THCorr<TH1D> THCorr1;
+typedef THCorr<TH2D> THCorr2;
 
 bool MuonIsolation(double pt, double eta, double iso, panda::PMuon::MuonID isoType) {
   float maxIso=0;
