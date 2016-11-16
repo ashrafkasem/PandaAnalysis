@@ -20,6 +20,7 @@ labels = {
     'mjj':'mjj',
     'jet1':'jot1Pt',
     'jet2':'jot2Pt',
+    'dphi':'fabsminJetMetDPhiwithendcap',
     }
 titles = {
     'eta':'min #Delta#eta(j_{1},j_{2})',
@@ -27,6 +28,7 @@ titles = {
     'mjj':'min M(j_{1},j_{2}) [GeV]',
     'jet1':'min p_{T}(j_{1}) [GeV]',
     'jet2':'min p_{T}(j_{2}) [GeV]',
+    'dphi':'min #Delta#phi(j,MET)',
     }
 
 import ROOT as root
@@ -61,12 +63,15 @@ c = root.TCanvas()
 deta = set([]); dphi = set([])
 listoffiles = glob(basedir+'/higgsCombine%s*%s*.root'%(labels[var1],labels[var2]))
 for f in listoffiles:
-  fname = f.split('/')[-1]
-  fname = fname.replace('higgsCombine','').replace('.Asymptotic.mH120.root','')
-  etacut = float(fname.split('_')[1])
-  phicut = float(fname.split('_')[-1])
-  deta.add(etacut)
-  dphi.add(phicut)
+  try:
+    fname = f.split('/')[-1]
+    fname = fname.replace('higgsCombine','').replace('.Asymptotic.mH120.root','')
+    etacut = float(fname.split('_')[1])
+    phicut = float(fname.split('_')[-1])
+    deta.add(etacut)
+    dphi.add(phicut)
+  except IndexError:
+    pass
 
 def xformSet(s):
   s_ = sorted(list(s))
@@ -104,5 +109,5 @@ h2.Draw('colz text')
 plot.AddCMSLabel(.16,.94)
 plot.SetLumi(12.9); plot.AddLumiLabel(True)
 plot.SetCanvas(c)
-plot.Draw(args.outdir+'/','scan_'+var1+var2)
+plot.Draw(args.outdir+'/','optimized_scan_'+var1+var2)
 

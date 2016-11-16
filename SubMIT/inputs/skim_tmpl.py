@@ -8,6 +8,10 @@ import subprocess
 
 which = int(argv[1])
 sname = argv[0]
+if len(argv)>2:
+  nper = int(argv[2])
+else:
+  nper = 1
 argv=[]
 
 import ROOT as root
@@ -41,7 +45,9 @@ if __name__ == "__main__":
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
-      if 'ZJets' in fullPath or 'DY' in fullPath:
+      if 'ST_' in fullPath:
+        processType=root.PandaAnalyzer.kTop
+      elif 'ZJets' in fullPath or 'DY' in fullPath:
         processType=root.PandaAnalyzer.kZ
       elif 'WJets' in fullPath:
         processType=root.PandaAnalyzer.kW
@@ -90,12 +96,15 @@ if __name__ == "__main__":
   
   cfg = open('local.cfg')
   lines = list(cfg)
-  ll = lines[which].split()
-  shortname = ll[0]
-  isData = (ll[1]!="MC")
-  xsec = float(ll[2])
-  longname = ll[3]
-  cfg.close() # free up memory
+  lines_ = lines[which*nper:min(len(lines),(which+1)*nper)]
   del lines
-  fn(shortname,longname,isData,xsec)
+  cfg.close()
+
+  for line in lines_:
+    ll = line.split()
+    shortname = ll[0]
+    isData = (ll[1]!="MC")
+    xsec = float(ll[2])
+    longname = ll[3]
+    fn(shortname,longname,isData,xsec)
 

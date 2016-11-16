@@ -47,6 +47,7 @@ formulae = [ (x,'F',x.replace('ecfN','fj1ECFN')) for x in
     ]
 ]
 formulae.append(['tau32SD','F','fj1Tau32SD'])
+formulae.append(['htt_frec','F','fj1HTTFRec'])
 
 spectators = [
 #          ('tau32','F'),

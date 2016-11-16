@@ -19,4 +19,4 @@ cd $RELEASE
 eval `scram runtime -sh`
 cd -
 
-python skim.py $THISPROCESS
+python skim.py $@ 
