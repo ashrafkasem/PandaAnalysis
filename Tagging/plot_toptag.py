@@ -56,13 +56,13 @@ elif args.cut=='massW':
   plotlabel = '50 < m_{SD} < 100 GeV'
 
 if args.pt=='inc':
-  pass
+  figsdir += '/inc/'
 elif args.pt=='lo':
   figsdir += '/lo/'
   cut = tAND(cut,'250 < fj1Pt && fj1Pt<450')
   plotlabel = '#splitline{%s}{250 < p_{T} < 450 GeV}'%plotlabel
-elif args.pt=='med':
-  figsdir += '/med/'
+elif args.pt=='hi':
+  figsdir += '/hi/'
   cut = tAND(cut,'450 < fj1Pt && fj1Pt<1000')
   plotlabel = '#splitline{%s}{450 < p_{T} < 1000 GeV}'%plotlabel
 
@@ -140,13 +140,14 @@ plot.AddDistribution(root.Distribution('UAmag',250,500,20,'#gamma recoil [GeV]',
 
 #plot.AddDistribution(root.Distribution('top_allv2_bdt',-1.3,1,23,'Top 50ECF BDT','Events'))
 
-plot.AddDistribution(root.Distribution('top_ecfv14_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT v2','Events'))
+#plot.AddDistribution(root.Distribution('top_ecfv14_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT v2','Events'))
 #plot.AddDistribution(root.Distribution('top_ecfv13_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD} BDT v2','Events'))
-plot.AddDistribution(root.Distribution('top_ecfv12_bdt',-1,1.,20,'Top ECF BDT v2','Events'))
+#plot.AddDistribution(root.Distribution('top_ecfv12_bdt',-1,1.,20,'Top ECF BDT v2','Events'))
 
-plot.AddDistribution(root.Distribution('top_ecfv8_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
+plot.AddDistribution(root.Distribution('top_ecfv_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
+#plot.AddDistribution(root.Distribution('top_ecfv8_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
 #plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD} BDT','Events'))
-plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1,1.,20,'Top ECF BDT','Events'))
+#plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1,1.,20,'Top ECF BDT','Events'))
 
 #plot.AddDistribution(root.Distribution('top_ecf_bdt',-0.5,.5,20,'Top ECF BDT','Events'))
 
