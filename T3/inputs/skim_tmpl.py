@@ -17,12 +17,14 @@ argv=[]
 import ROOT as root
 from PandaCore.Tools.Misc import *
 from PandaCore.Tools.Load import *
+import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 
 if __name__ == "__main__":
   
   Load('PandaAnalysisFlat','PandaAnalyzer')
 
   def fn(shortName,longName,isData,xsec):
+    # first we do some I/O stuff
     outdir = 'XXXX'
     outfilename = shortName+'.root'
     PInfo(sname,'Output: %s/%s'%(outdir,outfilename))
@@ -44,6 +46,7 @@ if __name__ == "__main__":
 
     system('xrdcp %s input.root'%fullPath)
 
+    # now we instantiate and configure the analyzer
     skimmer = root.PandaAnalyzer()
     skimmer.isData=isData
     skimmer.applyJson=False
@@ -62,6 +65,7 @@ if __name__ == "__main__":
         processType=root.PandaAnalyzer.kTT
     skimmer.processType=processType 
 
+    # read the inputs
     try:
       fin = root.TFile.Open('input.root')
       tree = fin.FindObjectAny("events")
@@ -73,9 +77,26 @@ if __name__ == "__main__":
     skimmer.SetOutputFile('output.root')
     skimmer.Init(tree,infotree)
 
+    # run and save output
     skimmer.Run()
     skimmer.Terminate()
 
+    # now run the BDT
+    Load('Learning','TMVABranchAdder')
+    ba = root.TMVABranchAdder()
+    ba.treename = 'events'
+    ba.defaultValue = -1.2
+    ba.presel = 'fj1ECFN_2_4_20>0'
+    for v in tagcfg.variables:
+      ba.AddVariable(v[0],v[2])
+    for v in tagcfg.formulae:
+      ba.AddFormula(v[0],v[2])
+    for s in tagcfg.spectators:
+      ba.AddSpectator(s[0])
+    ba.BookMVA('top_ecf_bdt',getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/trainings/top_ecfbdt_v8_BDT.weights.xml')
+    ba.RunFile('output.root')
+
+    # stageout
     mvargs = 'mv $PWD/output.root %s/%s'%(outdir,outfilename)
     PInfo(sname,mvargs)
     system(mvargs)
@@ -97,3 +118,4 @@ if __name__ == "__main__":
     longname = ll[3]
     fn(shortname,longname,isData,xsec)
 
+  exit(0)

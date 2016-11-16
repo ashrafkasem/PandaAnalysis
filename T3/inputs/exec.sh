@@ -23,4 +23,5 @@ cd -
 
 python skim.py $@
 
+ls
 rm -rf $RELEASE skim.py x509up 8011.tgz local.cfg 
