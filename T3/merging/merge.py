@@ -94,7 +94,7 @@ def merge(shortnames,mergedname):
 d = {
   'test'                : ['Diboson_ww'],
   'Diboson'             : ['Diboson_ww','Diboson_wz','Diboson_zz'],
-  'ZJets'               : ['ZJets_ht100to200','ZJets_ht200to400','ZJets_ht400to600','ZJets_ht600toinf'],
+  'ZJets'               : ['ZJets_ht%sto%s'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,800),(800,1200),(1200,2500),(2500,'inf')]],
   'ZtoNuNu'             : ['ZtoNuNu_ht100to200','ZtoNuNu_ht200to400','ZtoNuNu_ht400to600','ZtoNuNu_ht600to800','ZtoNuNu_ht800to1200','ZtoNuNu_ht1200to2500','ZtoNuNu_ht2500toinf'],
   'GJets'               : ['GJets_ht100to200','GJets_ht200to400','GJets_ht400to600','GJets_ht600toinf'],
   'WJets'               : ['WJets_ht100to200','WJets_ht200to400','WJets_ht400to600','WJets_ht600to800','WJets_ht800to1200','WJets_ht1200to2500','WJets_ht2500toinf'],
