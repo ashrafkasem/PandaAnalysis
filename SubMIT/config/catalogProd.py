@@ -19,7 +19,7 @@ eosproddirs = getenv('PANDA_PROD').split(':')
 
 listOfFiles=[]
 for d in eosproddirs:
-  print 'searching in',d
+  print 'searching in',d+'/*/*/*/*/panda_*.root'
   listOfFiles += glob(d+'/*/*/*/*/panda_*.root')
 
 def checkDS(nickname,include,exclude):
@@ -42,6 +42,7 @@ def checkDS(nickname,include,exclude):
   return (included and not(excluded))
 
 print 'found %i files'%len(listOfFiles)
+print 'writing to',args.outfile
 cfgFile = open(args.outfile,'w')
 
 couldNotFind = []

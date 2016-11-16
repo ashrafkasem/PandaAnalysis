@@ -1,7 +1,8 @@
 #!/bin/bash
 
 export PANDA="${CMSSW_BASE}/src/PandaAnalysis"
-export PANDA_PROD="${EOS2}/pandaprod/v5/" # can have multiple paths, separated by : 
+export PANDA_PROD="${EOS2}/pandaprod/v6/:${EOS2}/pandaprod/v6_bmaier/" # can have multiple paths, separated by : 
+#export PANDA_PROD="${EOS2}/pandaprod/v6_bmaier/" # can have multiple paths, separated by : 
 export PANDA_CFG="http://snarayan.web.cern.ch/snarayan/eoscatalog/20161013.cfg"
 export PANDA_FLATDIR="${HOME}/home000/panda/v6/"
 
