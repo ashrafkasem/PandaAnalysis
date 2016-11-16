@@ -22,7 +22,7 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-import PandaAnalysis.VBF.BaselineSelection as sel
+import PandaAnalysis.VBF.LooseSelection as sel
 Load('Drawers','PlotUtility')
 
 ### DEFINE REGIONS ###
@@ -135,8 +135,8 @@ plot.AddDistribution(root.Distribution('fabs(jet1DPhiMet)',0,3.142,20,'#Delta #p
 plot.AddDistribution(root.Distribution('fabs(minJetMetDPhi_withendcap)',0,3.142,20,'min #Delta #phi(jet, MET)','Events',minval,maxval,'minDPhiJetMet'))
 plot.AddDistribution(root.Distribution(sel.fixedmjj,0,4000,20,"Dijet mass [GeV]","Events/200 GeV",minval,maxval))
 plot.AddDistribution(root.Distribution("jjDEta",0,10,20,"Delta #eta leading jets","Events",minval,maxval))
-plot.AddDistribution(root.Distribution("jot1Pt",40,760,24,"Jet 1 p_{T} [GeV]","Events/30 GeV",minval,maxval))
-plot.AddDistribution(root.Distribution("jot2Pt",40,760,24,"Jet 2 p_{T} [GeV]","Events/30 GeV",minval,maxval))
+plot.AddDistribution(root.Distribution("jot1Pt",30,750,24,"Jet 1 p_{T} [GeV]","Events/30 GeV",minval,maxval))
+plot.AddDistribution(root.Distribution("jot2Pt",30,750,24,"Jet 2 p_{T} [GeV]","Events/30 GeV",minval,maxval))
 plot.AddDistribution(root.Distribution("jot1Eta",-2.5,2.5,20,"Jet 1 #eta","Events",minval,maxval))
 plot.AddDistribution(root.Distribution("jot2Eta",-5,5,20,"Jet 2 #eta","Events",minval,maxval))
 plot.AddDistribution(root.Distribution("fabs(SignedDeltaPhi(jot1Phi,jot2Phi))",0,3.142,20,"#Delta #phi leading jets","Events",minval,maxval,'jjDPhi'))

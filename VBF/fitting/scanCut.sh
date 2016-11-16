@@ -3,7 +3,7 @@
 thiscut=$(echo $1 | sed "s?'??g")
 scramdir=$2
 outdir=$3
-label=$(echo $thiscut | sed "s?[><&]?_?g")
+label=$(echo $thiscut | sed "s?[\(\)_]??g" | sed "s?[><&]?_?g" )
 thiscut=$(echo $thiscut | sed "s?&?\\\&?g")
 
 echo "$thiscut"
@@ -30,11 +30,11 @@ cd MonoX
 sed "s?XXXX?${thiscut}?g" configs/categories_config_vbf_tmpl.py > configs/categories_config_vbf_scan.py
 
 python buildModel.py categories_config_vbf_scan
-python runModel.py
+python runModelNoPhoton.py
 
-cp combined_model.root datacards/ 
-cd datacards
-combine -M Asymptotic vbf_combined_noqcd.txt -n $label --run=blind --noFitAsimov 
+cp combined_model.root datacardsNoPhoton/ 
+cd datacardsNoPhoton
+combine -M Asymptotic vbf_combined.txt -n $label --run=blind --noFitAsimov 
 #combine -M Asymptotic vbf_combined.txt -n $label --run=blind --noFitAsimov 
 cp higgs*root $outdir 
 

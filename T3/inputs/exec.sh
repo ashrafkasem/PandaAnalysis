@@ -21,6 +21,6 @@ cd $RELEASE
 eval `scram runtime -sh`
 cd -
 
-python skim.py $THISPROCESS
+python skim.py $@
 
 rm -rf $RELEASE skim.py x509up 8011.tgz local.cfg 

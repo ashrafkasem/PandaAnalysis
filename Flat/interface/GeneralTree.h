@@ -38,6 +38,7 @@ class GeneralTree : public genericTree {
 	float sf_ewkV=0;
 	float sf_qcdV=0;
 	float sf_lep=0;
+  float sf_pho=0;
 	float sf_lepTrack=0;
 	float sf_btag0=0;
 	float sf_btag0BUp=0;
@@ -135,6 +136,7 @@ class GeneralTree : public genericTree {
   float fj1Tau32SD=0;
   float fj1Tau21SD=0;
 	float fj1MSD=0;
+  float fj1MSDL2L3=0;
 	float fj1Pt=0;
 	float fj1Phi=0;
 	float fj1Eta=0;
@@ -152,6 +154,9 @@ class GeneralTree : public genericTree {
 	int fj1IsLoose=0;
 	float fj1RawPt=0;
 	int fj1IsHF=0;
+  float fj1HTTMass=0;
+  float fj1HTTFRec=0;
+  int fj1IsClean=0;
 	int isHF=0;
 	int nLoosePhoton=0;
 	int nTightPhoton=0;
@@ -194,6 +199,7 @@ GeneralTree::GeneralTree() {
   sf_ewkV=1;
   sf_qcdV=1;
   sf_lep=1;
+  sf_pho=1;
   sf_lepTrack=1;
   sf_btag0=1;
   sf_btag0BUp=1;
@@ -291,6 +297,7 @@ GeneralTree::GeneralTree() {
   fj1Tau32SD=0;
   fj1Tau21SD=0;
 	fj1MSD=0;
+  fj1MSDL2L3=0;
 	fj1Pt=0;
 	fj1Phi=0;
 	fj1Eta=0;
@@ -308,6 +315,9 @@ GeneralTree::GeneralTree() {
 	fj1IsLoose=0;
 	fj1RawPt=0;
 	fj1IsHF=0;
+  fj1HTTMass=0;
+  fj1HTTFRec=0;
+  fj1IsClean=0;
 	isHF=0;
 	nLoosePhoton=0;
 	nTightPhoton=0;
@@ -361,6 +371,7 @@ void GeneralTree::Reset() {
   sf_ewkV = 1;
   sf_qcdV = 1;
   sf_lep = 1;
+  sf_pho = 1;
   sf_lepTrack = 1;
   sf_btag0 = 1;
   sf_btag0BUp = 1;
@@ -458,6 +469,7 @@ void GeneralTree::Reset() {
   fj1Tau32SD = -1;
   fj1Tau21SD = -1;
 	fj1MSD = -1;
+  fj1MSDL2L3 = -1;
 	fj1Pt = -1;
 	fj1Phi = -1;
 	fj1Eta = -1;
@@ -475,6 +487,9 @@ void GeneralTree::Reset() {
 	fj1IsLoose = 0;
 	fj1RawPt = -1;
 	fj1IsHF = 0;
+  fj1HTTMass = -1;
+  fj1HTTFRec = -1;
+  fj1IsClean = 0;
 	isHF = 0;
 	nLoosePhoton = 0;
 	nTightPhoton = 0;
@@ -536,6 +551,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("sf_qcdV",&sf_qcdV);
 	treePtr->SetBranchStatus("sf_lep",1);
 	treePtr->SetBranchAddress("sf_lep",&sf_lep);
+  treePtr->SetBranchStatus("sf_pho",1);
+  treePtr->SetBranchAddress("sf_pho",&sf_pho);
 	treePtr->SetBranchStatus("sf_lepTrack",1);
 	treePtr->SetBranchAddress("sf_lepTrack",&sf_lepTrack);
 	treePtr->SetBranchStatus("sf_btag0",1);
@@ -730,6 +747,8 @@ void GeneralTree::ReadTree(TTree *t) {
   treePtr->SetBranchAddress("fj1Tau21SD",&fj1Tau21SD);
 	treePtr->SetBranchStatus("fj1MSD",1);
 	treePtr->SetBranchAddress("fj1MSD",&fj1MSD);
+  treePtr->SetBranchStatus("fj1MSDL2L3",1);
+  treePtr->SetBranchAddress("fj1MSDL2L3",&fj1MSDL2L3);
 	treePtr->SetBranchStatus("fj1Pt",1);
 	treePtr->SetBranchAddress("fj1Pt",&fj1Pt);
 	treePtr->SetBranchStatus("fj1Phi",1);
@@ -756,6 +775,10 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("fj1RawPt",&fj1RawPt);
 	treePtr->SetBranchStatus("fj1IsHF",1);
 	treePtr->SetBranchAddress("fj1IsHF",&fj1IsHF);
+	treePtr->SetBranchStatus("fj1HTTMass",1);
+	treePtr->SetBranchAddress("fj1HTTMass",&fj1HTTMass);
+	treePtr->SetBranchStatus("fj1HTTFRec",1);
+	treePtr->SetBranchAddress("fj1HTTFRec",&fj1HTTFRec);
 	treePtr->SetBranchStatus("isHF",1);
 	treePtr->SetBranchAddress("isHF",&isHF);
 	treePtr->SetBranchStatus("nLoosePhoton",1);
@@ -821,6 +844,7 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("sf_ewkV",&sf_ewkV,"sf_ewkV/F");
 	treePtr->Branch("sf_qcdV",&sf_qcdV,"sf_qcdV/F");
 	treePtr->Branch("sf_lep",&sf_lep,"sf_lep/F");
+  treePtr->Branch("sf_pho",&sf_pho,"sf_pho/F");
 	treePtr->Branch("sf_lepTrack",&sf_lepTrack,"sf_lepTrack/F");
 	treePtr->Branch("sf_btag0",&sf_btag0,"sf_btag0/F");
 	treePtr->Branch("sf_btag0BUp",&sf_btag0BUp,"sf_btag0BUp/F");
@@ -918,6 +942,7 @@ void GeneralTree::WriteTree(TTree *t) {
   treePtr->Branch("fj1Tau32SD",&fj1Tau32SD,"fj1Tau32SD/F");
   treePtr->Branch("fj1Tau21SD",&fj1Tau21SD,"fj1Tau21SD/F");
 	treePtr->Branch("fj1MSD",&fj1MSD,"fj1MSD/F");
+  treePtr->Branch("fj1MSDL2L3",&fj1MSDL2L3,"fj1MSDL2L3/F");
 	treePtr->Branch("fj1Pt",&fj1Pt,"fj1Pt/F");
 	treePtr->Branch("fj1Phi",&fj1Phi,"fj1Phi/F");
 	treePtr->Branch("fj1Eta",&fj1Eta,"fj1Eta/F");
@@ -935,6 +960,9 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("fj1IsLoose",&fj1IsLoose,"fj1IsLoose/I");
 	treePtr->Branch("fj1RawPt",&fj1RawPt,"fj1RawPt/F");
 	treePtr->Branch("fj1IsHF",&fj1IsHF,"fj1IsHF/I");
+	treePtr->Branch("fj1HTTMass",&fj1HTTMass,"fj1HTTMass/F");
+	treePtr->Branch("fj1HTTFRec",&fj1HTTFRec,"fj1HTTFRec/F");
+	treePtr->Branch("fj1IsClean",&fj1IsClean,"fj1IsClean/I");
 	treePtr->Branch("isHF",&isHF,"isHF/I");
 	treePtr->Branch("nLoosePhoton",&nLoosePhoton,"nLoosePhoton/I");
 	treePtr->Branch("nTightPhoton",&nTightPhoton,"nTightPhoton/I");

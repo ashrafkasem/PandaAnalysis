@@ -22,7 +22,7 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-import PandaAnalysis.VBF.BaselineSelection as sel
+import PandaAnalysis.VBF.LooseSelection as sel
 Load('Drawers','PlotUtility')
 
 ### DEFINE REGIONS ###
@@ -33,7 +33,7 @@ if args.which=='jot1Eta':
   label=''
 elif args.which=='dphi_only':
   cut=removeCut(cut,'fabs(minJetMetDPhi_withendcap)')
-  label='_only_'
+  label='only_'
 else:
   label=''
   cut=removeCut(removeCut(removeCut(cut,'leadingJet_outaccp'),'jet1isMonoJetIdNew'),'fabs(minJetMetDPhi_withendcap)')
@@ -101,7 +101,7 @@ if 'signal' in region:
   vbf.AddFile(baseDir+'VBF_H125.root')
   processes += [vbf]
 if region in  ['signal','zmm','wmn']:
-  data.additionalCut = root.TCut(sel.triggers['met'])
+  data.additionalCut = root.TCut(tAND(sel.triggers['met'],'runNum<=276811'))
   data.AddFile(baseDir+'MET.root')
   lep='#mu'
 elif region in ['zee','wen']:
