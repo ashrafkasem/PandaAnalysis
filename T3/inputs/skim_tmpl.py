@@ -44,7 +44,11 @@ if __name__ == "__main__":
             sub(r'\${EOS2}',eosEXOPath,longName))))
     PInfo(sname,fullPath)
 
-    system('xrdcp %s input.root'%fullPath)
+    # xrdcp if remote, copy if local
+    if 'root://' in fullPath:
+      system('xrdcp %s input.root'%fullPath)
+    else:
+      system('cp %s input.root'%fullPath)
 
     # now we instantiate and configure the analyzer
     skimmer = root.PandaAnalyzer()

@@ -35,7 +35,7 @@ if args.sel=='mistag':
   label = 'mistag_'
 elif args.sel=='photon':
   cut = 'nFatjet==1 && fj1Pt>250 && nLooseLep==0 && nLoosePhoton==1 && loosePho1IsTight==1 && nTau==0 && UAmag>250'
-  weight = '%f*normalizedWeight*sf_pu*sf_lep*%s*sf_tt*sf_phoTrig*0.93'%(lumi,nlo)
+  weight = '%f*normalizedWeight*sf_pu*sf_lep*%s*sf_tt*sf_phoTrig*sf_pho'%(lumi,nlo)
   label = 'photon_'
 else:
   cut = 'nFatjet==1 && fj1Pt>250 && fj1MaxCSV>0.46 && nLooseLep==1 && nTightMuon==1 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && UWmag>250 && isojetNBtags==1'
@@ -128,6 +128,7 @@ for p in processes:
   plot.AddProcess(p)
 
 
+'''
 plot.AddDistribution(root.Distribution('fj1MSDL2L3',40,450,20,'L3L3-corr fatjet m_{SD} [GeV]','Events/12.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
@@ -135,6 +136,7 @@ plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]',
 plot.AddDistribution(root.Distribution('UWmag',250,500,20,'W recoil [GeV]','Events'))
 
 plot.AddDistribution(root.Distribution('UAmag',250,500,20,'#gamma recoil [GeV]','Events'))
+'''
 
 #plot.AddDistribution(root.Distribution('npv',0,50,25,'npv','Events'))
 
@@ -144,13 +146,13 @@ plot.AddDistribution(root.Distribution('UAmag',250,500,20,'#gamma recoil [GeV]',
 #plot.AddDistribution(root.Distribution('top_ecfv13_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD} BDT v2','Events'))
 #plot.AddDistribution(root.Distribution('top_ecfv12_bdt',-1,1.,20,'Top ECF BDT v2','Events'))
 
-plot.AddDistribution(root.Distribution('top_ecfv_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
+plot.AddDistribution(root.Distribution('top_ecf_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
 #plot.AddDistribution(root.Distribution('top_ecfv8_bdt',-1,1.,20,'Top ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
 #plot.AddDistribution(root.Distribution('top_ecfv7_bdt',-1.3,1.,23,'Top ECF+#tau_{32}^{SD} BDT','Events'))
 #plot.AddDistribution(root.Distribution('top_ecfv6_bdt',-1,1.,20,'Top ECF BDT','Events'))
 
 #plot.AddDistribution(root.Distribution('top_ecf_bdt',-0.5,.5,20,'Top ECF BDT','Events'))
-
+'''
 plot.AddDistribution(root.Distribution('fj1Tau32SD',0,1,20,'Groomed #tau_{32}','Events',999,-999,'tau32SD'))
 
 plot.AddDistribution(root.Distribution('fj1Tau32',0,1,20,'#tau_{32}','Events',999,-999,'tau32'))
@@ -180,7 +182,6 @@ plot.AddDistribution(root.Distribution('fj1ECFN_2_4_10/pow(fj1ECFN_2_3_05,2)',0,
 plot.AddDistribution(root.Distribution('fj1ECFN_2_4_20/pow(fj1ECFN_1_3_20,2)',0,5,20,'e(2,4,2)/e(1,3,2)^{2}','Events',999,-999,'input10'))
 
 #plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
-'''
 '''
 
 '''
