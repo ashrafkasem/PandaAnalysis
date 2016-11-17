@@ -76,10 +76,13 @@ def normalizeFast(fpath,opt):
 
 def merge(shortnames,mergedname):
   for shortname in shortnames:
-    try:
+    if 'monotop' in shortname:
+      pd = shortname
+      xsec = 1
+    elif shortname in pds:
       pd = pds[shortname][0]
       xsec = pds[shortname][1]
-    except KeyError:
+    else:
       for shortname_ in [shortname.split('_')[0],shortname.split('_')[-1]]:
         if shortname_ in pds:
           pd = pds[shortname_][0]
@@ -115,7 +118,10 @@ d = {
 args = {}
 
 for pd in arguments:
-  args[pd] = d[pd]
+  if pd in d:
+    args[pd] = d[pd]
+  else:
+    args[pd] = [pd]
 
 for pd in args:
   merge(args[pd],pd)
