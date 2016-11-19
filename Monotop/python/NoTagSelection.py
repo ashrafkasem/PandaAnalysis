@@ -16,7 +16,6 @@ presel = 'nFatjet==1 && fj1Pt>250 && TMath::Abs(fj1Eta)<2.4 && 110<fj1MSD && fj1
 cuts = {
     # analysis regions
     'signal'            : tAND(metFilter,tAND(presel,'pfmet>175 && puppimet>250 && dphipuppimet>1.1 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0 && fj1MaxCSV>0.46 && isojetNBtags==0')),
-    # 'signal_nomf'       : tAND(presel,'met>175 && puppimet>250 && dphipuppimet>1.1 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0 && fj1MaxCSV>0.46 && isojetNBtags==0 && fj1isTight==1 && TMath::Abs(met-calomet)/puppimet<0.5'),
     'singlemuontop'     : tAND(metFilter,tAND(presel,'UWmag>250 && (nLooseElectron+nLoosePhoton+nTau)==0 && nLooseMuon==1 && looseLep1IsTight==1 && fj1MaxCSV>0.46 && isojetNBtags==1')),
     'singleelectrontop' : tAND(metFilter,tAND(presel,'UWmag>250 && (nLooseMuon+nLoosePhoton+nTau)==0 && nLooseElectron==1 && looseLep1IsTight==1 && fj1MaxCSV>0.46 && isojetNBtags==1 && puppimet>40')),
     'singlemuonw'       : tAND(metFilter,tAND(presel,'UWmag>250 && (nLooseElectron+nLoosePhoton+nTau)==0 && nLooseMuon==1 && looseLep1IsTight==1 && fj1MaxCSV<0.46 && isojetNBtags==0')),

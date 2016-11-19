@@ -11,8 +11,8 @@ uid=getuid()
 cfgpath = workpath+'/local.cfg'
 cfgfile = open(cfgpath)
 njobs = len(list(cfgfile))
-nper = 1
-#nper = 20
+#nper = 1
+nper = 20
 njobs = njobs/nper + 1
 #njobs = 1
 

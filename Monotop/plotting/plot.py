@@ -110,15 +110,23 @@ else:
 recoil=None
 if region=='signal':
   recoil=root.Distribution("puppimet",nRecoilBins,"puppi MET [GeV]","Events/GeV")
+  dphi=root.Distribution("dphipuppimet",0,3.14,20,"min#Delta#phi(jet,puppi MET)","Events")
 elif any([x in region for x in ['singlemuonw','singleelectronw','singlemuontop','singleelectrontop']]):
   recoil=root.Distribution('UWmag',nRecoilBins,'U(%s) [GeV]'%lep,"Events/GeV")
+  dphi=root.Distribution("dphiUW",0,3.14,20,"min#Delta#phi(jet,U(%s))"%lep,"Events")
+  plot.AddDistribution(root.Distribution("dphipuppimet",0,3.14,20,"min#Delta#phi(jet,puppi MET)","Events"))
 elif any([x in region for x in ['dielectron','dimuon']]):
   recoil=root.Distribution('UZmag',nRecoilBins,'U(%s%s) [GeV]'%(lep,lep),"Events/GeV")
+  dphi=root.Distribution("dphiUZ",0,3.14,20,"min#Delta#phi(jet,U(%s%s))"%(lep,lep),"Events")
+  plot.AddDistribution(root.Distribution("dphipuppimet",0,3.14,20,"min#Delta#phi(jet,puppi MET)","Events"))
 elif region=='photon':
   recoil=root.Distribution('UAmag',nRecoilBins,'U(#gamma) [GeV]',"Events/GeV")
+  dphi=root.Distribution("dphiUA",0,3.14,20,"min#Delta#phi(jet,U(#gamma))","Events")
+  plot.AddDistribution(root.Distribution("dphipuppimet",0,3.14,20,"min#Delta#phi(jet,puppi MET)","Events"))
 if recoil:
   setBins(recoil,recoilBins)
   plot.AddDistribution(recoil)
+  plot.AddDistribution(dphi)
 
 plot.AddDistribution(root.Distribution('top_ecf_bdt',-1,1,20,'ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
 

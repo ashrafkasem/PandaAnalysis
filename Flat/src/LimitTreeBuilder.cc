@@ -1,5 +1,6 @@
 #include <TTreeFormula.h>
 #include "../interface/LimitTreeBuilder.h"
+#include "PandaCore/Tools/interface/TreeTools.h"
 
 Process::Process(TString n, TTree *in, VariableMap *vPtr, TString sel, TString w) {
   name = n;
@@ -21,8 +22,6 @@ Process::Process(TString n, TTree *in, VariableMap *vPtr, TString sel, TString w
     formulae.push_back(x);
     limitTree->Branch(x->name,x->val,x->name+"/F");
   }
-
-
 }
 
 Process::~Process() {
@@ -36,6 +35,16 @@ Process::~Process() {
 
 void Process::Run() {
   PInfo("LimitTreeBuilder::Process::Run",TString::Format("%s%s",name.Data(),syst.Data()));
+
+  inputTree->SetBranchStatus("*",0);
+  turnOnBranches(inputTree,selection);
+  turnOnBranches(inputTree,weight);
+  for (auto *x : vars) {
+    turnOnBranches(inputTree,x->formula);
+  }
+  for (auto *x : formulae) {
+    turnOnBranches(inputTree,x->formula);
+  }
 
   // apply selection
   TTree *clonedTree = (TTree*)inputTree->CopyTree(selection.Data());
@@ -57,7 +66,7 @@ void Process::Run() {
   float weightval=0; 
   limitTree->Branch("weight",&weightval,"weight/F");
 
-  // loop through and do shit
+  // loop through and do stuff
   unsigned int nEntries = clonedTree->GetEntries(), iE=0;
   ProgressReporter pr("LimitTreeBuilder::Process::Run",&iE,&nEntries,10);
   for (iE=0; iE!=nEntries; ++iE) {
@@ -72,12 +81,15 @@ void Process::Run() {
 
   for (auto tf : treeformulae)
     delete tf;
+  delete clonedTree;
 }
 
 void LimitTreeBuilder::Output() {
+  PDebug("",TString::Format("%p",fOut));
   for (auto r : regions) {
     const char *rname = r->name.Data();
     for (auto p : r->GetProcesses()) {
+      PDebug("",TString::Format("%p %p %p",fOut,r,p));
       const char *pname = p->name.Data();
       const char *systname = p->syst.Data();
       fOut->WriteTObject(p->GetTree(),TString::Format("%s_%s%s",pname,rname,systname));
@@ -85,4 +97,5 @@ void LimitTreeBuilder::Output() {
   }
   fOut->Close();
   fOut=0;
+  PDebug("",TString::Format("%p",fOut));
 }
