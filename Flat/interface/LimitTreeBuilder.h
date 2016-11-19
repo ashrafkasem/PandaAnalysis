@@ -45,6 +45,7 @@ public:
   ~Process();
   void Run();
   TTree *GetTree() { return limitTree; }
+  TTree *GetInput() { return inputTree; }
   TString name;
   TString syst="";
 private:
