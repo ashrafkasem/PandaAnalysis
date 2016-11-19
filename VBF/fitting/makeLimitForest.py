@@ -33,9 +33,13 @@ def dataCut(basecut,trigger):
   #return tAND(trigger,basecut)
   return tAND(tAND(trigger,basecut),'runNum<=276811')
 
+treelist = []
+
 def getTree(fpath):
+  global treelist
   fIn = root.TFile(baseDir+fpath+'.root')
   tIn = fIn.Get('events')
+  treelist.append(tIn)
   return tIn,fIn
 
 def enable(regionName):
@@ -48,6 +52,7 @@ def enable(regionName):
 tZll,fZll = getTree('ZJets')
 tZvv,fZvv = getTree('ZtoNuNu')
 tWlv,fWlv = getTree('WJets')
+tWlv_nlo,fWlv_nlo = getTree('WJets_nlo')
 tewkZll,fewkZll = getTree('EWKZJets')
 tewkZvv,fewkZvv = getTree('EWKZtoNuNu')
 tewkWlv,fewkWlv = getTree('EWKWJets')
@@ -61,6 +66,17 @@ tSingleEle,fSEle = getTree('SingleElectron')
 tSinglePho,fSPho = getTree('SinglePhoton')
 tVBF,fVBF = getTree('VBF_H125')
 tGGF,fGGF = getTree('GGF_H125')
+
+tAllWlv = root.TChain('events')
+for f in ['WJets','EWKWJets']:
+  tAllWlv.AddFile(baseDir+'/'+f+'.root')
+tAllZll = root.TChain('events')
+for f in ['ZJets','EWKZJets']:
+  tAllZll.AddFile(baseDir+'/'+f+'.root')
+tAllZvv = root.TChain('events')
+for f in ['ZtoNuNu','EWKZtoNuNu']:
+  tAllZvv.AddFile(baseDir+'/'+f+'.root')
+treelist += [tAllWlv,tAllZll,tAllZvv]
 
 factory.cd()
 regions = {}
@@ -98,7 +114,7 @@ if enable('signal'):
   processes['signal'] = [
     root.Process('Data',tMET,vm,dataCut(cut,sel.triggers['met']),'1'),
     root.Process('Zvv',tZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
-    root.Process('Wlv',tWlv,vm,cut,tTIMES('ewk_w',weight)),
+    root.Process('Wlv',tWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
     root.Process('Zll',tZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
     root.Process('ewkZvv',tewkZvv,vm,cut,weight),
     root.Process('ewkWlv',tewkWlv,vm,cut,weight),
@@ -109,6 +125,9 @@ if enable('signal'):
     root.Process('QCD',tQCD,vm,cut,weight),
     root.Process('VBF_H125',tVBF,vm,cut,weight),
     root.Process('GGF_H125',tGGF,vm,cut,weight),
+    root.Process('allWlv',tAllWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
+    root.Process('allZvv',tAllZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
+    root.Process('allZll',tAllZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
   ]
 
   for p in processes['signal']:
@@ -123,7 +142,7 @@ if enable('wmn'):
   processes['wmn'] = [
     root.Process('Data',tMET,vm,dataCut(cut,sel.triggers['met']),'1'),
     root.Process('Zvv',tZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
-    root.Process('Wlv',tWlv,vm,cut,tTIMES('ewk_w',weight)),
+    root.Process('Wlv',tWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
     root.Process('Zll',tZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
     root.Process('ewkZvv',tewkZvv,vm,cut,weight),
     root.Process('ewkWlv',tewkWlv,vm,cut,weight),
@@ -132,6 +151,9 @@ if enable('wmn'):
     root.Process('ST',tST,vm,cut,weight),
     root.Process('Diboson',tVV,vm,cut,weight),
     root.Process('QCD',tQCD,vm,cut,weight),
+    root.Process('allWlv',tAllWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
+    root.Process('allZvv',tAllZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
+    root.Process('allZll',tAllZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
   ]
 
   for p in processes['wmn']:
@@ -146,7 +168,7 @@ if enable('wen'):
   processes['wen'] = [
     root.Process('Data',tSingleEle,vm,dataCut(cut,sel.triggers['ele']),'1'),
     root.Process('Zvv',tZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
-    root.Process('Wlv',tWlv,vm,cut,tTIMES('ewk_w',weight)),
+    root.Process('Wlv',tWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
     root.Process('Zll',tZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
     root.Process('ewkZvv',tewkZvv,vm,cut,weight),
     root.Process('ewkWlv',tewkWlv,vm,cut,weight),
@@ -155,6 +177,9 @@ if enable('wen'):
     root.Process('ST',tST,vm,cut,weight),
     root.Process('Diboson',tVV,vm,cut,weight),
     root.Process('QCD',tQCD,vm,cut,weight),
+    root.Process('allWlv',tAllWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
+    root.Process('allZvv',tAllZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
+    root.Process('allZll',tAllZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
   ]
 
   for p in processes['wen']:
@@ -169,7 +194,7 @@ if enable('zmm'):
   processes['zmm'] = [
     root.Process('Data',tMET,vm,dataCut(cut,sel.triggers['met']),'1'),
     root.Process('Zvv',tZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
-    root.Process('Wlv',tWlv,vm,cut,tTIMES('ewk_w',weight)),
+    root.Process('Wlv',tWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
     root.Process('Zll',tZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
     root.Process('ewkZvv',tewkZvv,vm,cut,weight),
     root.Process('ewkWlv',tewkWlv,vm,cut,weight),
@@ -178,6 +203,9 @@ if enable('zmm'):
     root.Process('ST',tST,vm,cut,weight),
     root.Process('Diboson',tVV,vm,cut,weight),
     root.Process('QCD',tQCD,vm,cut,weight),
+    root.Process('allWlv',tAllWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
+    root.Process('allZvv',tAllZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
+    root.Process('allZll',tAllZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
   ]
 
   for p in processes['zmm']:
@@ -192,7 +220,7 @@ if enable('zee'):
   processes['zee'] = [
     root.Process('Data',tSingleEle,vm,dataCut(cut,sel.triggers['ele']),'1'),
     root.Process('Zvv',tZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
-    root.Process('Wlv',tWlv,vm,cut,tTIMES('ewk_w',weight)),
+    root.Process('Wlv',tWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
     root.Process('Zll',tZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
     root.Process('ewkZvv',tewkZvv,vm,cut,weight),
     root.Process('ewkWlv',tewkWlv,vm,cut,weight),
@@ -201,6 +229,9 @@ if enable('zee'):
     root.Process('ST',tST,vm,cut,weight),
     root.Process('Diboson',tVV,vm,cut,weight),
     root.Process('QCD',tQCD,vm,cut,weight),
+    root.Process('allWlv',tAllWlv,vm,cut,tTIMES('wkfactor*ewk_w',weight)),
+    root.Process('allZvv',tAllZvv,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
+    root.Process('allZll',tAllZll,vm,cut,tTIMES('zkfactor*ewk_z',weight)),
   ]
 
   for p in processes['zee']:
@@ -227,6 +258,9 @@ if enable('pho'):
 PInfo('makeLimitForest','Starting '+str(toProcess))
 factory.Run()
 PInfo('makeLimitForest','Finishing '+str(toProcess))
+
+for t in treelist:
+  t.SetDirectory(0)
 
 factory.Output()
 

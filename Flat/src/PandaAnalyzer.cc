@@ -657,6 +657,9 @@ void PandaAnalyzer::Run() {
     TLorentzVector vJet;
     PJet *jet1=0, *jet2=0;
     gt->dphipuppimet=999; gt->dphipfmet=999;
+    gt->dphiUW=999; gt->dphipfUW=999;
+    gt->dphiUZ=999; gt->dphipfUZ=999;
+    gt->dphiUA=999; gt->dphipfUA=999;
     for (PJet *jet : *jets) {
       if (jet->pt<30 || abs(jet->eta)>4.5) // loose ID should go here
         continue;
@@ -679,9 +682,17 @@ void PandaAnalyzer::Run() {
         gt->jet2CSV = csv; 
       } 
       // compute dphi wrt mets
-      vJet.SetPtEtaPhiM(jet->pt,jet->eta,jet->phi,jet->m);
-      gt->dphipuppimet = std::min(fabs(vJet.DeltaPhi(vPuppiMET)),(double)gt->dphipuppimet);
-      gt->dphipfmet = std::min(fabs(vJet.DeltaPhi(vPFMET)),(double)gt->dphipfmet);
+      if (cleanedJets.size()<7) {
+        vJet.SetPtEtaPhiM(jet->pt,jet->eta,jet->phi,jet->m);
+        gt->dphipuppimet = std::min(fabs(vJet.DeltaPhi(vPuppiMET)),(double)gt->dphipuppimet);
+        gt->dphipfmet = std::min(fabs(vJet.DeltaPhi(vPFMET)),(double)gt->dphipfmet);
+        gt->dphiUA = std::min(fabs(vJet.DeltaPhi(vUA)),(double)gt->dphiUA);
+        gt->dphiUW = std::min(fabs(vJet.DeltaPhi(vUW)),(double)gt->dphiUW);
+        gt->dphiUZ = std::min(fabs(vJet.DeltaPhi(vUZ)),(double)gt->dphiUZ);
+        gt->dphipfUA = std::min(fabs(vJet.DeltaPhi(vpfUA)),(double)gt->dphipfUA);
+        gt->dphipfUW = std::min(fabs(vJet.DeltaPhi(vpfUW)),(double)gt->dphipfUW);
+        gt->dphipfUZ = std::min(fabs(vJet.DeltaPhi(vpfUZ)),(double)gt->dphipfUZ);
+      }
       // btags
       if (csv>0.460) ++gt->jetNBtags;
       if (gt->nFatjet>0 && fabs(jet->eta)<2.5
