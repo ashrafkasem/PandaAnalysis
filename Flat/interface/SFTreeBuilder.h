@@ -15,6 +15,7 @@
 #include <TTreeFormula.h>
 
 #include "PandaCore/Tools/interface/Common.h"
+#include "PandaCore/Tools/interface/TreeTools.h"
 /////////////////////////////////////////////////////////////////////////////
 // some misc definitions
 

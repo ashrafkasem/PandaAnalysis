@@ -73,9 +73,23 @@ void SFTreeBuilder::Run() {
   for (TTree *tIn : processes) {
     pid++;
 
+    unsigned nTaggers = tagger_inNames.size();
+    tIn->SetBranchStatus("*",0);
+    for (unsigned iT=0; iT!=nTaggers; ++iT) {
+      turnOnBranches(tIn,tagger_inNames[iT]);
+    }
+    turnOnBranches(tIn,"eventNumber");
+    turnOnBranches(tIn,"runNumber");
+    turnOnBranches(tIn,"lumiNumber");
+    turnOnBranches(tIn,"npv");
+    turnOnBranches(tIn,"fj1Pt");
+    turnOnBranches(tIn,"fj1Eta");
+    turnOnBranches(tIn,"fj1MSD");
+    turnOnBranches(tIn,weightFormula);    
+    turnOnBranches(tIn,cutFormula);    
+
     weightTF = new TTreeFormula("weight",weightFormula,tIn); weightTF->SetQuickLoad(true);
     cutTF = new TTreeFormula("cut",cutFormula,tIn); cutTF->SetQuickLoad(true);
-    unsigned nTaggers = tagger_inNames.size();
     for (unsigned iT=0; iT!=nTaggers; ++iT) {
       TTreeFormula *this_tf 
             = new TTreeFormula(tagger_outNames[iT], tagger_inNames[iT], tIn);
