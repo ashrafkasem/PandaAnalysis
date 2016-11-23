@@ -202,6 +202,12 @@ void PandaAnalyzer::SetDataDir(const char *s) {
     btagReaders["jet_M_lf_up"]   = new BTagCalibrationReader(btagCalib_alt,BTagEntry::OP_MEDIUM,"incl","up");
     btagReaders["jet_M_hf_down"] = new BTagCalibrationReader(btagCalib_alt,BTagEntry::OP_MEDIUM,"comb","down");
     btagReaders["jet_M_lf_down"] = new BTagCalibrationReader(btagCalib_alt,BTagEntry::OP_MEDIUM,"incl","down");
+
+    MSDcorr = new TFile(dirPath+"/puppiCorr.root");
+    puppisd_corrGEN = (TF1*)MSDcorr->Get("puppiJECcorr_gen");;
+    puppisd_corrRECO_cen = (TF1*)MSDcorr->Get("puppiJECcorr_reco_0eta1v3");
+    puppisd_corrRECO_for = (TF1*)MSDcorr->Get("puppiJECcorr_reco_1v3eta2v5");
+
   }
 
   sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"/subjet_CSVv2_ichep.csv").Data());
@@ -287,6 +293,24 @@ void PandaAnalyzer::calcBJetSFs(TString readername, int flavor,
   sfDown = uncFactor*(sfDown-sf)+sf;
   return;
 }
+
+float PandaAnalyzer::getMSDcorr(Float_t puppipt, Float_t puppieta) { 
+
+  float genCorr  = 1.;
+  float recoCorr = 1.;
+  float totalWeight = 1.;
+
+  genCorr =  puppisd_corrGEN->Eval( puppipt );
+  if( fabs(puppieta)  <= 1.3 ){
+    recoCorr = puppisd_corrRECO_cen->Eval( puppipt );
+  }
+  else{
+    recoCorr = puppisd_corrRECO_for->Eval( puppipt );
+  }
+  totalWeight = genCorr * recoCorr;
+
+  return totalWeight;
+} 
 
 // run
 void PandaAnalyzer::Run() {
@@ -665,7 +689,9 @@ void PandaAnalyzer::Run() {
         float rawpt = fj->rawPt;
         float eta = fj->eta;
         float mass = fj->m;
-        float ptcut = 200;
+        float ptcut = 250;
+	if (flags["monohiggs"]) 
+	  ptcut = 200;
         if (pt<ptcut || fabs(eta)>2.4 || (fj->id&PFatJet::kMonojet)==0)
           continue;
   
@@ -685,6 +711,11 @@ void PandaAnalyzer::Run() {
           gt->fj1Phi = phi;
           gt->fj1M = mass;
           gt->fj1MSD = fj->mSD;
+	  if (flags["monohiggs"]) {
+	    float corrweight=1.;
+	    corrweight = getMSDcorr(pt,eta);
+	    gt->fj1MSD_corr = corrweight*gt->fj1MSD;
+	  }
           gt->fj1Tau32 = clean(fj->tau3/fj->tau2);
           gt->fj1Tau32SD = clean(fj->tau3SD/fj->tau2SD);
           gt->fj1Tau21 = clean(fj->tau2/fj->tau1);
