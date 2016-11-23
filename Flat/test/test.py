@@ -17,9 +17,9 @@ if __name__ == "__main__":
    
     skimmer.firstEvent=0
     skimmer.lastEvent=100
-    skimmer.isData=True
+    skimmer.isData=False
     skimmer.applyJson=False
-    skimmer.SetFlag("monohiggs",True)
+#    skimmer.SetFlag("monohiggs",True)
 #    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonojet)
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
 #    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonohiggs)
