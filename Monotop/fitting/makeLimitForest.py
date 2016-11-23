@@ -172,7 +172,7 @@ if enable('singleelectronw'):
   weight = sel.weights['singleelectronw']%lumi
   vm = vms['w']
   processes['singleelectronw'] = [
-    root.Process('Data',tMET,vm,dataCut(cut,sel.triggers['ele']),'1'),
+    root.Process('Data',tSingleEle,vm,dataCut(cut,sel.triggers['ele']),'1'),
     root.Process('Zvv',tZvv,vm,cut,weight),
     root.Process('Zll',tZll,vm,cut,weight),
     root.Process('Wlv',tWlv,vm,cut,weight),
@@ -226,7 +226,7 @@ if enable('singleelectrontop'):
   weight = sel.weights['singleelectrontop']%lumi
   vm = vms['w']
   processes['singleelectrontop'] = [
-    root.Process('Data',tMET,vm,dataCut(cut,sel.triggers['ele']),'1'),
+    root.Process('Data',tSingleEle,vm,dataCut(cut,sel.triggers['ele']),'1'),
     root.Process('Zvv',tZvv,vm,cut,weight),
     root.Process('Zll',tZll,vm,cut,weight),
     root.Process('Wlv',tWlv,vm,cut,weight),
@@ -249,8 +249,8 @@ if enable('singleelectrontop'):
 #dimuon
 if enable('dimuon'):
   regions['dimuon'] = root.Region('dimuon')
-  cut = sel.cuts['singlemuonw']
-  weight = sel.weights['singlemuonw']%lumi
+  cut = sel.cuts['dimuon']
+  weight = sel.weights['dimuon']%lumi
   vm = vms['z']
   processes['dimuon'] = [
     root.Process('Data',tMET,vm,dataCut(cut,sel.triggers['met']),'1'),
@@ -274,7 +274,7 @@ if enable('dielectron'):
   weight = sel.weights['dielectron']%lumi
   vm = vms['z']
   processes['dielectron'] = [
-    root.Process('Data',tMET,vm,dataCut(cut,sel.triggers['ele']),'1'),
+    root.Process('Data',tSingleEle,vm,dataCut(cut,sel.triggers['ele']),'1'),
     root.Process('Zvv',tZvv,vm,cut,weight),
     root.Process('Zll',tZll,vm,cut,weight),
     root.Process('Wlv',tWlv,vm,cut,weight),
@@ -288,7 +288,7 @@ if enable('dielectron'):
     regions['dielectron'].AddProcess(p)
   factory.AddRegion(regions['dielectron'])
 
-#dielectron
+#photon
 if enable('photon'):
   regions['photon'] = root.Region('photon')
   cut = sel.cuts['photon']
