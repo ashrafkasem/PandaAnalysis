@@ -15,6 +15,7 @@ parser.add_argument('--tagged',metavar='tagged',type=str,default='True')
 parser.add_argument('--sel',metavar='sel',type=str,default='tag')
 parser.add_argument('--cut',metavar='cut',type=float,default=0.5)
 parser.add_argument('--pt',metavar='pt',type=str,default='inc')
+parser.add_argument('--shower',metavar='shower',type=str,default='pythia')
 args = parser.parse_args()
 
 figsdir = args.outdir+'/'+args.pt
@@ -49,6 +50,7 @@ disclabels = {
     'top_ecfv6_bdt':'ECF BDT',
     'top_ecfv7_bdt':'ECF+#tau_{32}^{SD} BDT',
     'top_ecfv8_bdt':'ECF+#tau_{32}^{SD}+f_{rec} BDT',
+    'top_ecf_bdt':'ECF+#tau_{32}^{SD}+f_{rec} BDT',
     }
 
 label += args.disc+'_'
@@ -120,21 +122,31 @@ if args.sel=='photon':
   qcd.AddFile(basedir+'QCD.root')
 else:
   data.AddFile(basedir+'MET.root') 
-  prong1.AddFile(basedir+'QCD.root')
-  prong1.AddFile(basedir+'WJets.root')
-  prong2.AddFile(basedir+'Diboson.root')
-  prong2.AddFile(basedir+'TTbar.root')
-  prong2.AddFile(basedir+'SingleTop.root')
-  prong3.AddFile(basedir+'TTbar.root')
-  prong3.AddFile(basedir+'SingleTop.root')
+  if args.shower.upper()=='HERWIG':
+    prong1.AddFile(basedir+'prong1.root')
+    prong2.AddFile(basedir+'prong2_Herwig.root')
+    prong3.AddFile(basedir+'prong3_Herwig.root')
+    label += 'herwig_'
+    print label
+  else:
+    prong1.AddFile(basedir+'prong1.root')
+    prong2.AddFile(basedir+'prong2.root')
+    prong3.AddFile(basedir+'prong3.root')
+#  prong1.AddFile(basedir+'QCD.root')
+#  prong1.AddFile(basedir+'WJets.root')
+#  prong2.AddFile(basedir+'Diboson.root')
+#  prong2.AddFile(basedir+'TTbar.root')
+#  prong2.AddFile(basedir+'SingleTop.root')
+#  prong3.AddFile(basedir+'TTbar.root')
+#  prong3.AddFile(basedir+'SingleTop.root')
 
-# processes = [data,prong1]
+#processes = [prong1,data]
 for p in processes:
   plot.AddProcess(p)
 
 plot.AddDistribution(root.Distribution('fj1MSD',50,450,40,'fatjet m_{SD} [GeV]','Events/10 GeV'))
 # plot.AddDistribution(root.Distribution('fj1MSDL2L3',50,450,40,'L2L3-corr fatjet m_{SD} [GeV]','Events/10 GeV'))
-plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
+#plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
 
 ### DRAW AND CATALOGUE ###
 plot.DrawAll(figsdir+'/'+label)

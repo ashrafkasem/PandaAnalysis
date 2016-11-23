@@ -28,7 +28,7 @@ def getIntAndErr(t,cut,weight):
   hone = root.TH1F('h1','h1',1,-2,2)
   hone.Sumw2()
   t.Draw('1>>h1',tTIMES(cut,weight))
-  val = hone.Integral()
+  val = hone.GetBinContent(1)
   err = hone.GetBinError(1)
   return val,err
 
@@ -37,6 +37,7 @@ def calcEffAndErr(p,perr,f,ferr):
   err_ = pow( perr * f / pow(p+f,2) , 2 )
   err_ += pow( ferr * p / pow(p+f,2) , 2 )
   err_ = sqrt(err_)
+  print p,perr,f,ferr,eff_,err_
   return eff_,err_
 
 def calcSFAndErr(d,derr,m,merr):
