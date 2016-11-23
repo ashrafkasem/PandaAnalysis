@@ -5,6 +5,7 @@ from sys import argv
 
 parser = argparse.ArgumentParser(description='fit stuff')
 parser.add_argument('--indir',metavar='indir',type=str)
+parser.add_argument('--shower',metavar='shower',type=str,default='pythia')
 args = parser.parse_args()
 basedir = args.indir
 argv=[]
@@ -37,10 +38,17 @@ hprong = {}; dhprong = {}; pdfprong = {}; norm = {}; smeared = {}; smear = {}; m
 mcnorms = {}; mcerrs = {}
 mass = root.RooRealVar("m","m_{SD} [GeV]",50,450)
 
-ftemplate = {
-      'pass' : root.TFile(basedir+'tag_top_ecfv8_bdt_pass_hists.root'),
-      'fail' : root.TFile(basedir+'tag_top_ecfv8_bdt_fail_hists.root')
-    }
+if args.shower.upper()=='HERWIG':
+  ftemplate = {
+        'pass' : root.TFile(basedir+'tag_top_ecf_bdt_pass_herwig_hists.root'),
+        'fail' : root.TFile(basedir+'tag_top_ecf_bdt_fail_herwig_hists.root')
+      }
+  basedir += 'herwig_'
+else:
+  ftemplate = {
+        'pass' : root.TFile(basedir+'tag_top_ecf_bdt_pass_hists.root'),
+        'fail' : root.TFile(basedir+'tag_top_ecf_bdt_fail_hists.root')
+      }
 
 # get histograms
 hdata[1] = ftemplate['pass'].Get('h_fj1MSD%s_Data'%masscorr)
@@ -194,11 +202,13 @@ for iC in [0,1]:
 
   plot[iC].AddPlotLabel('#varepsilon_{tag}^{Data} = %.3g^{+%.2g}_{-%.2g}'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo())),
                         .6,.47,False,42,.04)
-  plot[iC].AddPlotLabel('#varepsilon_{tag}^{MC} = %.3g^{+%.2g}_{-%.2g}'%(eff_,err_,err_),
+  #plot[iC].AddPlotLabel('#varepsilon_{tag}^{MC} = %.3g^{+%.2g}_{-%.2g}'%(eff_,err_,err_),
+  plot[iC].AddPlotLabel('#varepsilon_{tag}^{MC} = %.3g'%(eff_),
                         .6,.37,False,42,.04)
   plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{Data} = %.3g^{+%.2g}_{-%.2g}'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo())),
                         .6,.27,False,42,.04)
-  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{MC} = %.3g^{+%.2g}_{-%.2g}'%(eff_*effMass_,err_*effMass_,err_*effMass_),
+  #plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{MC} = %.3g^{+%.2g}_{-%.2g}'%(eff_*effMass_,err_*effMass_,err_*effMass_),
+  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{MC} = %.3g'%(eff_*effMass_),
                         .6,.17,False,42,.04)
 
 plot[1].AddPlotLabel('Pass category',.18,.77,False,42,.05)
