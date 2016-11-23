@@ -66,6 +66,7 @@ public :
   ~PandaAnalyzer();
   void Init(TTree *tree, TTree *infotree);
   void SetOutputFile(TString fOutName);
+  float getMSDcorr(Float_t puppipt, Float_t puppieta);
   void ResetBranches();
   void Run();
   void Terminate();
@@ -135,6 +136,10 @@ private:
   //TH1D *hEleTrigBUp=0, *hEleTrigBDown=0, *hEleTrigEUp=0, *hEleTrigEDown=0;
   TH2D *hEleTrigLow;
 
+  TFile *MSDcorr;
+  TF1* puppisd_corrGEN;
+  TF1* puppisd_corrRECO_cen;
+  TF1* puppisd_corrRECO_for;
 
   // IO for the analyzer
   TFile *fOut;   // output file is owned by PandaAnalyzer
