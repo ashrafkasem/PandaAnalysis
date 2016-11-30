@@ -104,30 +104,15 @@ void PandaAnalyzer::Terminate() {
   fPhoSF->Close();
 
   delete btagCalib;
-  delete btagReaders["jet_L_hf_cent"];
-  delete btagReaders["jet_L_lf_cent"];
-  delete btagReaders["jet_L_hf_up"];
-  delete btagReaders["jet_L_lf_up"];
-  delete btagReaders["jet_L_hf_down"];
-  delete btagReaders["jet_L_lf_down"];
+  delete btagReaders["jet_L"];
 
   if (flags["monohiggs"]) {
     delete btagCalib_alt;
-    delete btagReaders["jet_M_hf_cent"];
-    delete btagReaders["jet_M_lf_cent"];
-    delete btagReaders["jet_M_hf_up"];
-    delete btagReaders["jet_M_lf_up"];
-    delete btagReaders["jet_M_hf_down"];
-    delete btagReaders["jet_M_lf_down"];
+    delete btagReaders["jet_M"];
   }
 
   delete sj_btagCalib;
-  delete btagReaders["sj_L_hf_cent"];
-  delete btagReaders["sj_L_lf_cent"];
-  delete btagReaders["sj_L_hf_up"];
-  delete btagReaders["sj_L_lf_up"];
-  delete btagReaders["sj_L_hf_down"];
-  delete btagReaders["sj_L_lf_down"];
+  delete btagReaders["sj_L"];
 
   delete ak8MCCorrector;
   delete ak8DataCorrector;
@@ -199,38 +184,32 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   hANLO->GetHist()->Divide(hALO->GetHist());
 
   btagCalib = new BTagCalibration("csvv2",(dirPath+"/CSVv2_ichep.csv").Data());
-  btagReaders["jet_L_hf_cent"] = new BTagCalibrationReader(btagCalib,BTagEntry::OP_LOOSE,"comb","central");
-  btagReaders["jet_L_lf_cent"] = new BTagCalibrationReader(btagCalib,BTagEntry::OP_LOOSE,"incl","central");
-  btagReaders["jet_L_hf_up"]   = new BTagCalibrationReader(btagCalib,BTagEntry::OP_LOOSE,"comb","up");
-  btagReaders["jet_L_lf_up"]   = new BTagCalibrationReader(btagCalib,BTagEntry::OP_LOOSE,"incl","up");
-  btagReaders["jet_L_hf_down"] = new BTagCalibrationReader(btagCalib,BTagEntry::OP_LOOSE,"comb","down");
-  btagReaders["jet_L_lf_down"] = new BTagCalibrationReader(btagCalib,BTagEntry::OP_LOOSE,"incl","down");
+  btagReaders["jet_L"] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
+  btagReaders["jet_L"]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
+  btagReaders["jet_L"]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
+  btagReaders["jet_L"]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
   if (flags["monohiggs"]) {
     btagCalib_alt = new BTagCalibration("csvv2",(dirPath+"/CSVv2_ichep.csv").Data());
-    btagReaders["jet_M_hf_cent"] = new BTagCalibrationReader(btagCalib_alt,BTagEntry::OP_MEDIUM,"comb","central");
-    btagReaders["jet_M_lf_cent"] = new BTagCalibrationReader(btagCalib_alt,BTagEntry::OP_MEDIUM,"incl","central");
-    btagReaders["jet_M_hf_up"]   = new BTagCalibrationReader(btagCalib_alt,BTagEntry::OP_MEDIUM,"comb","up");
-    btagReaders["jet_M_lf_up"]   = new BTagCalibrationReader(btagCalib_alt,BTagEntry::OP_MEDIUM,"incl","up");
-    btagReaders["jet_M_hf_down"] = new BTagCalibrationReader(btagCalib_alt,BTagEntry::OP_MEDIUM,"comb","down");
-    btagReaders["jet_M_lf_down"] = new BTagCalibrationReader(btagCalib_alt,BTagEntry::OP_MEDIUM,"incl","down");
+    btagReaders["jet_M"] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM,"central",{"up","down"});
+    btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
+    btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
+    btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
     MSDcorr = new TFile(dirPath+"/puppiCorr.root");
     puppisd_corrGEN = (TF1*)MSDcorr->Get("puppiJECcorr_gen");;
     puppisd_corrRECO_cen = (TF1*)MSDcorr->Get("puppiJECcorr_reco_0eta1v3");
     puppisd_corrRECO_for = (TF1*)MSDcorr->Get("puppiJECcorr_reco_1v3eta2v5");
-
   }
 
   sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"/subjet_CSVv2_ichep.csv").Data());
-  btagReaders["sj_L_hf_cent"] = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"lt","central");
-  btagReaders["sj_L_lf_cent"] = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"incl","central");
-  btagReaders["sj_L_hf_up"]   = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"lt","up");
-  btagReaders["sj_L_lf_up"]   = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"incl","up");
-  btagReaders["sj_L_hf_down"] = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"lt","down");
-  btagReaders["sj_L_lf_down"] = new BTagCalibrationReader(sj_btagCalib,BTagEntry::OP_LOOSE,"incl","down");
+  btagReaders["sj_L"] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
+  btagReaders["sj_L"]->load(*btagCalib,BTagEntry::FLAV_B,"lt");
+  btagReaders["sj_L"]->load(*btagCalib,BTagEntry::FLAV_C,"lt");
+  btagReaders["sj_L"]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
   // load only L2L3 JEC
+  /*
   std::string jecPath = (dirPath+"/jec/").Data();
   std::vector<JetCorrectorParameters> mcParams;
   std::vector<JetCorrectorParameters> dataParams;
@@ -242,6 +221,7 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L2L3Residual_AK8PFPuppi.txt"));
   ak8MCCorrector = new FactorizedJetCorrector(mcParams);
   ak8DataCorrector = new FactorizedJetCorrector(dataParams);
+  */
 //  ak8jec = new JetCorrectorParameters((dirPath+"/Spring16_25nsV6_MC_Uncertainty_AK8PFPuppi.txt").Data());
 //  ak8unc = new JetCorrectionUncertainty(*ak8jec);
 }
@@ -283,34 +263,25 @@ bool PandaAnalyzer::PassPreselection() {
       }
     }
   }
-
-  // if (preselBits & kVBF) {
-  //   if (nSelectedJet>1 && jet1Pt>40 && jet1IsTight==1) {
-  //     if ( (met>180 || pfUZmag>180 || pfUWmag>180 || pfUAmag>180) ||
-  //           (puppimet>180 || UZmag>180 || UWmag>180 || UAmag>180) ) {
-  //       isGood = true;
-  //     }
-  //   }
-  // }
   
   return isGood;
 }
 
 void PandaAnalyzer::calcBJetSFs(TString readername, int flavor, 
-                  double eta, double pt, double eff, double uncFactor,
-                  double &sf, double &sfUp, double &sfDown) {
+                                double eta, double pt, double eff, double uncFactor,
+                                double &sf, double &sfUp, double &sfDown) {
   if (flavor==5) {
-    sf     =  btagReaders[readername+"_hf_cent"]->eval(BTagEntry::FLAV_B,eta,pt,0);
-    sfUp   =  btagReaders[readername+"_hf_up"]->eval(BTagEntry::FLAV_B,eta,pt,0);
-    sfDown =  btagReaders[readername+"_hf_down"]->eval(BTagEntry::FLAV_B,eta,pt,0);
+    sf     =  btagReaders[readername]->eval_auto_bounds("central",BTagEntry::FLAV_B,eta,pt);
+    sfUp   =  btagReaders[readername]->eval_auto_bounds("up",BTagEntry::FLAV_B,eta,pt);
+    sfDown =  btagReaders[readername]->eval_auto_bounds("down",BTagEntry::FLAV_B,eta,pt);
   } else if (flavor==4) {
-    sf     =  btagReaders[readername+"_hf_cent"]->eval(BTagEntry::FLAV_C,eta,pt,0);
-    sfUp   =  btagReaders[readername+"_hf_up"]->eval(BTagEntry::FLAV_C,eta,pt,0);
-    sfDown =  btagReaders[readername+"_hf_down"]->eval(BTagEntry::FLAV_C,eta,pt,0);
+    sf     =  btagReaders[readername]->eval_auto_bounds("central",BTagEntry::FLAV_C,eta,pt);
+    sfUp   =  btagReaders[readername]->eval_auto_bounds("up",BTagEntry::FLAV_C,eta,pt);
+    sfDown =  btagReaders[readername]->eval_auto_bounds("down",BTagEntry::FLAV_C,eta,pt);
   } else {
-    sf     =  btagReaders[readername+"_lf_cent"]->eval(BTagEntry::FLAV_UDSG,eta,pt,0);
-    sfUp   =  btagReaders[readername+"_lf_up"]->eval(BTagEntry::FLAV_UDSG,eta,pt,0);
-    sfDown =  btagReaders[readername+"_lf_down"]->eval(BTagEntry::FLAV_UDSG,eta,pt,0);
+    sf     =  btagReaders[readername]->eval_auto_bounds("central",BTagEntry::FLAV_UDSG,eta,pt);
+    sfUp   =  btagReaders[readername]->eval_auto_bounds("up",BTagEntry::FLAV_UDSG,eta,pt);
+    sfDown =  btagReaders[readername]->eval_auto_bounds("down",BTagEntry::FLAV_UDSG,eta,pt);
   }
 
   sfUp = uncFactor*(sfUp-sf)+sf;
@@ -1254,7 +1225,7 @@ void PandaAnalyzer::Run() {
 
     // ttbar pT weight
     gt->sf_tt = 1;
-    gt->sf_tt_ext = 1;
+    gt->sf_tt8TeV = 1;
     if (!isData && processType==kTT) {
       float pt_t=0, pt_tbar=0;
       for (auto *gen : *genparts) {
@@ -1270,10 +1241,10 @@ void PandaAnalyzer::Run() {
           break;
       }
       if (pt_t>0 && pt_tbar>0) {
-        gt->sf_tt_ext = TMath::Sqrt( TMath::Exp(0.156-0.00137*pt_t) * TMath::Exp(0.156-0.00137*pt_tbar) ); // extend the fit past 400
         pt_t = bound(pt_t,0,400);
         pt_tbar = bound(pt_tbar,0,400);
-        gt->sf_tt = TMath::Sqrt( TMath::Exp(0.156-0.00137*pt_t) * TMath::Exp(0.156-0.00137*pt_tbar) ); // bound at 400
+        gt->sf_tt = TMath::Sqrt( TMath::Exp(0.0615-0.0005*pt_t) * TMath::Exp(0.0615-0.0005*pt_tbar) );  // 13TeV tune
+        gt->sf_tt8TeV= TMath::Sqrt( TMath::Exp(0.156-0.00137*pt_t) * TMath::Exp(0.156-0.00137*pt_tbar) );  // 8TeV tune
       }
     } 
 
