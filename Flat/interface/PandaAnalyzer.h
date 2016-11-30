@@ -21,8 +21,8 @@
 // btag
 #include "CondFormats/BTauObjects/interface/BTagEntry.h"
 #include "CondFormats/BTauObjects/interface/BTagCalibration.h"
-#include "CondFormats/BTauObjects/interface/BTagCalibrationReader.h"
-#include "BTagCalibrationStandalone.h"
+#include "CondTools/BTau/interface/BTagCalibrationReader.h"
+//#include "BTagCalibrationStandalone.h"
 
 // JEC
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
@@ -109,17 +109,9 @@ private:
   BTagCalibration *btagCalib_alt=0;
   BTagCalibration *sj_btagCalib;
 
-  std::map<TString,BTagCalibrationReader*> btagReaders;
+  std::map<TString,BTagCalibrationReader*> btagReaders; //!< maps "JETTYPE_WP" to a reader 
+                                                        // I think we can load multiple flavors in a single reader 
   
-  // BTagCalibrationReader *hfReader=0, *hfUpReader=0, *hfDownReader=0;
-  // BTagCalibrationReader *lfReader=0, *lfUpReader=0, *lfDownReader=0;
-
-  // BTagCalibrationReader *hfReader_alt=0, *hfUpReader_alt=0, *hfDownReader_alt=0;
-  // BTagCalibrationReader *lfReader_alt=0, *lfUpReader_alt=0, *lfDownReader_alt=0;
-
-  // BTagCalibrationReader *sj_hfReader=0, *sj_hfUpReader=0, *sj_hfDownReader=0;
-  // BTagCalibrationReader *sj_lfReader=0, *sj_lfUpReader=0, *sj_lfDownReader=0;
-
   // files and histograms containing weights
   TFile *fEleSF=0, *fEleSFTight=0;
   THCorr2 *hEleVeto, *hEleTight;
