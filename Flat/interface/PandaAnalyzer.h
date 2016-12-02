@@ -85,7 +85,7 @@ public :
   }
 
   // public configuration
-  void SetFlag(TString flag, bool b) { flags[flag]=b; }
+  void SetFlag(TString flag, bool b=true) { flags[flag]=b; }
   bool isData=false;                         // to do gen matching, etc
   int firstEvent=-1;
   int lastEvent=-1;                          // max events to process; -1=>all
@@ -95,8 +95,8 @@ private:
 
   std::map<TString,bool> flags;
 
-  std::map<panda::PGenParticle*,float> genObjects;                      // particles we want to match the jets to, and the 'size' of the daughters
-  panda::PGenParticle *MatchToGen(double eta, double phi, double r2, int pdgid=0);    // private function to match a jet; returns NULL if not found
+  std::map<panda::PGenParticle*,float> genObjects;         //!< particles we want to match the jets to, and the 'size' of the daughters
+  panda::PGenParticle *MatchToGen(double eta, double phi, double r2, int pdgid=0);    //!< private function to match a jet; returns NULL if not found
   std::vector<panda::PObject*> matchPhos, matchEles, matchLeps;
   
   // CMSSW-provided utilities

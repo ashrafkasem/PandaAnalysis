@@ -14,8 +14,8 @@ done
 cd $CMSSW_BASE/
 if [[ $doTar == 1 ]]; then
   echo "Tarring up CMSSW..."
-  tar -chzf 8011.tgz src python biglib bin lib objs test external # h = --dereference symlinks
-  mv 8011.tgz $WD
+  tar -chzf cmssw.tgz src python biglib bin lib objs test external # h = --dereference symlinks
+  mv cmssw.tgz $WD
 fi
 
 wget -O $WD/local.cfg $PANDA_CFG
@@ -31,4 +31,4 @@ cp /tmp/x509up_u$UID $WD/x509up
 
 cp ${CMSSW_BASE}/src/PandaAnalysis/T3/inputs/exec.sh $WD
 
-# input files for submission: 8011.tgz, skim.py, x509up, local.cfg. exec.sh is the executable
+# input files for submission: cmssw.tgz, skim.py, x509up, local.cfg. exec.sh is the executable
