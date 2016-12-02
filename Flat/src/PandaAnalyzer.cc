@@ -204,9 +204,9 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 
   sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"/subjet_CSVv2_ichep.csv").Data());
   btagReaders["sj_L"] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
-  btagReaders["sj_L"]->load(*btagCalib,BTagEntry::FLAV_B,"lt");
-  btagReaders["sj_L"]->load(*btagCalib,BTagEntry::FLAV_C,"lt");
-  btagReaders["sj_L"]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
+  btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_B,"lt");
+  btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_C,"lt");
+  btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
   // load only L2L3 JEC
   /*
