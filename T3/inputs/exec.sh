@@ -13,9 +13,9 @@ ls
 export X509_USER_PROXY=${PWD}/x509up
 export HOME=.
 
-RELEASE=CMSSW_8_0_11
+RELEASE=CMSSW_8_0_20
 scram p CMSSW $RELEASE
-tar xzf 8011.tgz -C $RELEASE
+tar xzf cmssw.tgz -C $RELEASE
 
 cd $RELEASE
 eval `scram runtime -sh`
@@ -24,4 +24,4 @@ cd -
 python skim.py $@
 
 ls
-rm -rf $RELEASE skim.py x509up 8011.tgz local.cfg 
+rm -rf $RELEASE skim.py x509up cmssw.tgz local.cfg 
