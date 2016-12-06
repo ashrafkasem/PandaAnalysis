@@ -94,7 +94,7 @@ class GeneralTree : public genericTree {
 	float sf_metTrig=0;
 	float sf_pu=0;
 	float sf_tt=0;
-  float sf_tt_ext=0;
+	float sf_tt8TeV=0;
 	float sf_phoPurity=0;
 	float finalWeight=0;
 	float pfmet=0;
@@ -294,7 +294,7 @@ GeneralTree::GeneralTree() {
   sf_metTrig=1;
   sf_pu=1;
   sf_tt=1;
-  sf_tt_ext=1;
+  sf_tt8TeV=1;
   sf_phoPurity=1;
 	finalWeight=0;
 	pfmet=0;
@@ -509,7 +509,7 @@ void GeneralTree::Reset() {
   sf_metTrig = 1;
   sf_pu = 1;
   sf_tt = 1;
-  sf_tt_ext = 1;
+  sf_tt8TeV = 1;
   sf_phoPurity = 1;
 	finalWeight = -1;
 	pfmet = -1;
@@ -784,8 +784,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("sf_pu",&sf_pu);
 	treePtr->SetBranchStatus("sf_tt",1);
 	treePtr->SetBranchAddress("sf_tt",&sf_tt);
-  treePtr->SetBranchStatus("sf_tt_ext",1);
-  treePtr->SetBranchAddress("sf_tt_ext",&sf_tt_ext);
+  treePtr->SetBranchStatus("sf_tt8TeV",1);
+  treePtr->SetBranchAddress("sf_tt8TeV",&sf_tt8TeV);
 	treePtr->SetBranchStatus("sf_phoPurity",1);
 	treePtr->SetBranchAddress("sf_phoPurity",&sf_phoPurity);
 	treePtr->SetBranchStatus("finalWeight",1);
@@ -1109,7 +1109,7 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("sf_metTrig",&sf_metTrig,"sf_metTrig/F");
 	treePtr->Branch("sf_pu",&sf_pu,"sf_pu/F");
 	treePtr->Branch("sf_tt",&sf_tt,"sf_tt/F");
-  treePtr->Branch("sf_tt_ext",&sf_tt_ext,"sf_tt_ext/F");
+  treePtr->Branch("sf_tt8TeV",&sf_tt8TeV,"sf_tt8TeV/F");
 	treePtr->Branch("sf_phoPurity",&sf_phoPurity,"sf_phoPurity/F");
 	treePtr->Branch("finalWeight",&finalWeight,"finalWeight/F");
 	treePtr->Branch("pfmet",&pfmet,"pfmet/F");
