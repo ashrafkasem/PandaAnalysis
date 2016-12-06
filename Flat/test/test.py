@@ -15,15 +15,12 @@ if __name__ == "__main__":
 
     skimmer = root.PandaAnalyzer()
    
-    skimmer.firstEvent=0
-    skimmer.lastEvent=100
+#    skimmer.firstEvent=0
+#    skimmer.lastEvent=100
     skimmer.isData=False
-    skimmer.applyJson=False
-#    skimmer.SetFlag("monohiggs",True)
-#    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonojet)
-    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
-#    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonohiggs)
-#    skimmer.processType = root.PandaAnalyzer.kTT
+    skimmer.SetFlag('puppi',False)
+    skimmer.SetFlag('fatjet',False)
+#    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     fin = root.TFile.Open(fullPath)
 
     print fullPath
