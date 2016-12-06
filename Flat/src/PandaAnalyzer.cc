@@ -50,7 +50,8 @@ void PandaAnalyzer::Init(TTree *t, TTree *infotree)
   TString jetname = (flags["puppi"]) ? "puppi" : "chs";
   if (flags["fatjet"])
     t->SetBranchAddress(jetname+"CA15",&fatjets);
-  t->SetBranchAddress(jetname+"AK4",&jets);
+  t->SetBranchAddress("chsAK4",&jets);
+  //t->SetBranchAddress(jetname+"AK4",&jets);
   t->SetBranchAddress("electron",&electrons);
   t->SetBranchAddress("muon",&muons);
   t->SetBranchAddress("tau",&taus);
@@ -248,9 +249,9 @@ bool PandaAnalyzer::PassPreselection() {
     }
   }
   if (preselBits & kMonojet) {
-    if (gt->nJet>=1 && gt->jet1Pt>40) { 
-      if ( (gt->puppimet>180 || gt->UZmag>180 || gt->UWmag>180 || gt->UAmag>180) ||
-            (gt->pfmet>180 || gt->pfUZmag>180 || gt->pfUWmag>180 || gt->pfUAmag>180) ) {
+    if (true) { 
+      if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
+            (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
             isGood = true;
       }
     }
@@ -793,7 +794,7 @@ void PandaAnalyzer::Run() {
         gt->dphipfUZ = std::min(fabs(vJet.DeltaPhi(vpfUZ)),(double)gt->dphipfUZ);
       }
       // btags
-      if (csv>0.460) {
+      if (csv>0.8) { // temporarily medium WP
         ++gt->jetNBtags;
         if (flags["monohiggs"]) {
           btaggedJets.push_back(jet);
