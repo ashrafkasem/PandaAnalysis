@@ -437,12 +437,13 @@ void PandaAnalyzer::Run() {
     std::vector<PObject*> looseLeps, tightLeps;
     for (PElectron *ele : *electrons) {
       float pt = ele->pt; float eta = ele->eta; float aeta = fabs(eta);
-      if (pt<10 || aeta>2.5 || (aeta>1.4442 && aeta<1.566))
+      //if (pt<10 || aeta>2.5 || (aeta>1.4442 && aeta<1.566))
+      if (pt<10 || aeta>2.5)
         continue;
       if ((ele->id&PElectron::kVeto)==0)
         continue;
-      if (!ElectronIsolation(pt,eta,ele->iso,PElectron::kVeto))
-        continue;
+//      if (!ElectronIsolation(pt,eta,ele->iso,PElectron::kVeto))
+//        continue;
       looseLeps.push_back(ele);
       gt->nLooseElectron++;
     } 
@@ -489,14 +490,14 @@ void PandaAnalyzer::Run() {
                           MuonIsolation(mu->pt,mu->eta,mu->iso,PMuon::kTight) &&
                           mu->pt>20 && fabs(mu->eta)<2.4 );
         if (lep_counter==1) {
-          gt->looseLep1PdgId = mu->q*13;
+          gt->looseLep1PdgId = mu->q*-13;
           if (isTight) {
             gt->nTightMuon++;
             gt->looseLep1IsTight = 1;
             matchLeps.push_back(lep);
           }
         } else if (lep_counter==2) {
-          gt->looseLep2PdgId = mu->q*13;
+          gt->looseLep2PdgId = mu->q*-13;
           if (isTight) {
             gt->nTightMuon++;
             gt->looseLep2IsTight = 1;
@@ -507,10 +508,10 @@ void PandaAnalyzer::Run() {
       } else {
         PElectron *ele = dynamic_cast<PElectron*>(lep);
         bool isTight = ( (ele->id&PElectron::kTight)!=0 &&
-                          ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&
+//                          ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&
                           ele->pt>40 && fabs(ele->eta)<2.5 );
         if (lep_counter==1) {
-          gt->looseLep1PdgId = ele->q*11;
+          gt->looseLep1PdgId = ele->q*-11;
           if (isTight) {
             gt->nTightElectron++;
             gt->looseLep1IsTight = 1;
@@ -518,7 +519,7 @@ void PandaAnalyzer::Run() {
             matchEles.push_back(lep);
           }
         } else if (lep_counter==2) {
-          gt->looseLep2PdgId = ele->q*11;
+          gt->looseLep2PdgId = ele->q*-11;
           if (isTight) {
             gt->nTightElectron++;
             gt->looseLep2IsTight = 1;
@@ -547,15 +548,17 @@ void PandaAnalyzer::Run() {
     // photons
     std::vector<panda::PPhoton*> loosePhos;
     for (PPhoton *pho : *photons) {
-      if ((pho->id&PPhoton::kLoose)==0)
+      if ((pho->id&PPhoton::kLoose)==0 || (pho->id&PPhoton::kEleVeto)==0)
         continue;
       float pt = pho->pt;
       if (pt<1) continue;
       float eta = pho->eta, phi = pho->phi;
       if (pt<15 || fabs(eta)>2.5)
         continue;
+      /*
       if (IsMatched(&matchEles,0.16,eta,phi))
         continue;
+      */
       loosePhos.push_back(pho);
       gt->nLoosePhoton++;
       if (gt->nLoosePhoton==1) {
@@ -563,7 +566,7 @@ void PandaAnalyzer::Run() {
         gt->loosePho1Eta = eta;
         gt->loosePho1Phi = phi;
       }
-      if ( (pho->id&PPhoton::kTight)!=0 &&
+      if ( (pho->id&PPhoton::kMedium)!=0 &&
             pt>175 && fabs(eta)<1.4442 ) {
         if (gt->nLoosePhoton==1)
           gt->loosePho1IsTight=1;
@@ -741,7 +744,7 @@ void PandaAnalyzer::Run() {
     tr.TriggerEvent("fatjet");
 
     // first identify interesting jets
-    vector<PJet*> cleanedJets, isoJets, btaggedJets;
+    vector<PJet*> cleanedJets, isoJets, btaggedJets, centralJets;
     vector<int> btagindices;
     TLorentzVector vJet;
     PJet *jet1=0, *jet2=0;
@@ -750,27 +753,32 @@ void PandaAnalyzer::Run() {
     gt->dphiUZ=999; gt->dphipfUZ=999;
     gt->dphiUA=999; gt->dphipfUA=999;
     for (PJet *jet : *jets) {
-      if (jet->pt<30 || abs(jet->eta)>4.5 || (jet->id&PJet::kMonojet)==0) 
+      if (jet->pt<30 || abs(jet->eta)>4.5) 
         continue;
       if (IsMatched(&matchLeps,0.16,jet->eta,jet->phi) ||
           IsMatched(&matchPhos,0.16,jet->eta,jet->phi))
         continue;
       
+
       cleanedJets.push_back(jet);
       float csv = (fabs(jet->eta)<2.5) ? jet->csv : -1;
-      if (cleanedJets.size()==1) {
-        jet1 = jet;
-        gt->jet1Pt = jet->pt;
-        gt->jet1Eta = jet->eta;
-        gt->jet1Phi = jet->phi;
-        gt->jet1CSV = csv; 
-      } else if (cleanedJets.size()==2) {
-        jet2 = jet;
-        gt->jet2Pt = jet->pt;
-        gt->jet2Eta = jet->eta;
-        gt->jet2Phi = jet->phi;
-        gt->jet2CSV = csv; 
-      } 
+      if (fabs(jet->eta)<2.4) {
+        centralJets.push_back(jet);
+        if (centralJets.size()==1) {
+          jet1 = jet;
+          gt->jet1Pt = jet->pt;
+          gt->jet1Eta = jet->eta;
+          gt->jet1Phi = jet->phi;
+          gt->jet1CSV = csv; 
+          gt->jet1IsTight = ((jet->id&PJet::kMonojet)==0) ? 0 : 1;
+        } else if (centralJets.size()==2) {
+          jet2 = jet;
+          gt->jet2Pt = jet->pt;
+          gt->jet2Eta = jet->eta;
+          gt->jet2Phi = jet->phi;
+          gt->jet2CSV = csv; 
+        } 
+      }
 
       if (flags["monohiggs"]) {
         gt->jetPt[cleanedJets.size()-1]=jet->pt;
@@ -782,7 +790,7 @@ void PandaAnalyzer::Run() {
       }
 
       // compute dphi wrt mets
-      if (cleanedJets.size()<7) {
+      if (cleanedJets.size()<5) {
         vJet.SetPtEtaPhiM(jet->pt,jet->eta,jet->phi,jet->m);
         gt->dphipuppimet = std::min(fabs(vJet.DeltaPhi(vPuppiMET)),(double)gt->dphipuppimet);
         gt->dphipfmet = std::min(fabs(vJet.DeltaPhi(vPFMET)),(double)gt->dphipfmet);
