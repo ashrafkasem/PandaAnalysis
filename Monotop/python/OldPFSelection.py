@@ -8,15 +8,15 @@ triggers = {
 }
 
 metFilter='metFilter==1'
-topTagSF = '%f*(fj1IsMatched==1)+%f*(fj1IsMatched==0)'%(1.007,1.02)
+topTagSF = '%f*(fj1IsMatched==1)+%f*(fj1IsMatched==0)'%(1.,1.)
 ak4bTagSF = 'sf_btag0*(isojetNBtags==0)+sf_btag1*(isojetNBtags==1)+1*(isojetNBtags>1)'
 
 
-presel = 'nFatjet==1 && fj1Pt>250 && TMath::Abs(fj1Eta)<2.4 && fj1Tau32<0.61 && 110<fj1MSD && fj1MSD<210'
+presel = 'nFatjet==1 && fj1Pt>250 && TMath::Abs(fj1Eta)<2.4 && 110<fj1MSD && fj1MSD<210 && fj1Tau32<0.6'
 cuts = {
     # analysis regions
-    #'signal'            : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>1.1 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0')), # turning off btags
-    'signal'            : tAND(metFilter,tAND(presel,'pfmet>175 && puppimet>250 && dphipuppimet>1.1 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0 && fj1MaxCSV>0.46 && isojetNBtags==0')),
+    'signal_nobtag'     : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>1.1 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0')), # turning off btags
+    'signal'            : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>1.1 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0 && fj1MaxCSV>0.46 && isojetNBtags==0')),
     # 'signal_nomf'       : tAND(presel,'met>175 && puppimet>250 && dphipuppimet>1.1 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0 && fj1MaxCSV>0.46 && isojetNBtags==0 && fj1isTight==1 && TMath::Abs(met-calomet)/puppimet<0.5'),
     'singlemuontop'     : tAND(metFilter,tAND(presel,'pfUWmag>250 && (nLooseElectron+nLoosePhoton+nTau)==0 && nLooseMuon==1 && looseLep1IsTight==1 && fj1MaxCSV>0.46 && isojetNBtags==1')),
     'singleelectrontop' : tAND(metFilter,tAND(presel,'pfUWmag>250 && (nLooseMuon+nLoosePhoton+nTau)==0 && nLooseElectron==1 && looseLep1IsTight==1 && fj1MaxCSV>0.46 && isojetNBtags==1 && pfmet>40')),
@@ -43,10 +43,12 @@ tt_cuts = {
 
 weights = {
     # analysis weights
-  'signal'    : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),
-  'top'       : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),
-  'w'         : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),
-  'notag'     : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),
+  'signal_nobtag'    : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),
+  'signal'    : tTIMES(tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV*sf_sjbtag1',topTagSF),ak4bTagSF),
+  'top'       : tTIMES(tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV*sf_sjbtag1',topTagSF),ak4bTagSF),
+  'w'         : tTIMES(tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV*sf_sjbtag0',topTagSF),ak4bTagSF),
+  #'notag'     : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),
+  'notag'     : tTIMES('%f*normalizedWeight*sf_pu*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),
   'singleelectron' : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),
   'singlemuon'     : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),
 }
@@ -56,8 +58,12 @@ for x in ['singlemuontop','singleelectrontop']:
 for x in ['singlemuonw','singleelectronw']:
   weights[x] = weights['w']
 for x in ['dimuon','dielectron']:
-  weights[x] = weights['notag']
+  if x=='dielectron':
+    weights[x] = tTIMES('sf_lep',weights['notag'])
+  else:
+    weights[x] = weights['notag']
 for x in ['photon']:
+  #weights[x] = weights['notag']
   weights[x] = tTIMES('sf_pho',weights['notag'])
 
 '''
