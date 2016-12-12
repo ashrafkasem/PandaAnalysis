@@ -15,12 +15,12 @@ if __name__ == "__main__":
 
     skimmer = root.PandaAnalyzer()
    
-#    skimmer.firstEvent=0
-#    skimmer.lastEvent=100
+    skimmer.firstEvent=0
+    skimmer.lastEvent=1000
     skimmer.isData=False
-    skimmer.SetFlag('puppi',False)
-    skimmer.SetFlag('fatjet',False)
-#    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
+    skimmer.SetFlag('puppi',True)
+    skimmer.SetFlag('fatjet',True)
+    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     fin = root.TFile.Open(fullPath)
 
     print fullPath

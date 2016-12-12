@@ -22,8 +22,9 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-# import PandaAnalysis.Monotop.NoTagSelection as sel
-import PandaAnalysis.Monotop.NewSelection as sel
+#import PandaAnalysis.Monotop.NoBTagSelection as sel
+import PandaAnalysis.Monotop.NoTagSelection as sel
+#import PandaAnalysis.Monotop.NewSelection as sel
 #import PandaAnalysis.Monotop.OldSelection as sel
 Load('Drawers','PlotUtility')
 
@@ -39,7 +40,7 @@ plot.Logy(not(linear))
 plot.SetLumi(lumi/1000)
 # plot.SetSignalScale(10)
 plot.Ratio(True)
-# plot.FixRatio()
+plot.FixRatio(0.4)
 plot.SetTDRStyle()
 plot.InitLegend()
 plot.DrawMCErrors(True)
@@ -77,18 +78,23 @@ wjets.AddFile(baseDir+'WJets.root')
 diboson.AddFile(baseDir+'Diboson.root')
 ttbar.AddFile(baseDir+'TTbar.root')
 singletop.AddFile(baseDir+'SingleTop.root')
-qcd.AddFile(baseDir+'QCD.root')
 if 'pho' in region:
   processes = [qcd,gjets]
   gjets.AddFile(baseDir+'GJets.root')
-
+  qcd.AddFile(baseDir+'SinglePhoton.root')
+  qcd.additionalCut = root.TCut(sel.triggers['pho'])
+  qcd.useCommonWeight = False
+  qcd.additionalWeight = root.TCut('sf_phoPurity')
 if any([x in region for x in ['signal','muon']]):
   data.additionalCut = root.TCut(sel.triggers['met'])
   PInfo(sname,'Using MET data')
   data.AddFile(baseDir+'MET.root')
   lep='#mu'
 elif 'electron' in region:
-  data.additionalCut = root.TCut(sel.triggers['ele'])
+  if 'di' in region:
+    data.additionalCut = root.TCut(tOR(sel.triggers['pho'],sel.triggers['ele']))
+  else:
+    data.additionalCut = root.TCut(sel.triggers['ele'])
   data.AddFile(baseDir+'SingleElectron.root')
   lep='e'
 elif region=='photon':
@@ -115,14 +121,26 @@ elif any([x in region for x in ['singlemuonw','singleelectronw','singlemuontop',
   recoil=root.Distribution('UWmag',nRecoilBins,'U(%s) [GeV]'%lep,"Events/GeV")
   dphi=root.Distribution("dphiUW",0,3.14,20,"min#Delta#phi(jet,U(%s))"%lep,"Events")
   plot.AddDistribution(root.Distribution("dphipuppimet",0,3.14,20,"min#Delta#phi(jet,puppi MET)","Events"))
+  plot.AddDistribution(root.Distribution("dphipfmet",0,3.14,20,"min#Delta#phi(jet,PF MET)","Events"))
+  plot.AddDistribution(root.Distribution('looseLep1Pt',0,500,20,'Leading lep p_{T} [GeV]','Events/25 GeV'))
+  plot.AddDistribution(root.Distribution('looseLep1Eta',-2.5,2.5,20,'Leading lep #eta','Events'))
 elif any([x in region for x in ['dielectron','dimuon']]):
   recoil=root.Distribution('UZmag',nRecoilBins,'U(%s%s) [GeV]'%(lep,lep),"Events/GeV")
   dphi=root.Distribution("dphiUZ",0,3.14,20,"min#Delta#phi(jet,U(%s%s))"%(lep,lep),"Events")
   plot.AddDistribution(root.Distribution("dphipuppimet",0,3.14,20,"min#Delta#phi(jet,puppi MET)","Events"))
+  plot.AddDistribution(root.Distribution("dphipfmet",0,3.14,20,"min#Delta#phi(jet,PF MET)","Events"))
+  plot.AddDistribution(root.Distribution('looseLep1Pt',0,500,20,'Leading lep p_{T} [GeV]','Events/25 GeV'))
+  plot.AddDistribution(root.Distribution('looseLep1Eta',-2.5,2.5,20,'Leading lep #eta','Events'))
+  plot.AddDistribution(root.Distribution('looseLep2Pt',0,500,20,'Sub-leading lep p_{T} [GeV]','Events/25 GeV'))
+  plot.AddDistribution(root.Distribution('looseLep2Eta',-2.5,2.5,20,'Sub-leading lep #eta','Events'))
 elif region=='photon':
   recoil=root.Distribution('UAmag',nRecoilBins,'U(#gamma) [GeV]',"Events/GeV")
   dphi=root.Distribution("dphiUA",0,3.14,20,"min#Delta#phi(jet,U(#gamma))","Events")
   plot.AddDistribution(root.Distribution("dphipuppimet",0,3.14,20,"min#Delta#phi(jet,puppi MET)","Events"))
+  plot.AddDistribution(root.Distribution("dphipfmet",0,3.14,20,"min#Delta#phi(jet,pf MET)","Events"))
+  plot.AddDistribution(root.Distribution('loosePho1Pt',0,500,20,'Leading pho p_{T} [GeV]','Events/25 GeV'))
+  plot.AddDistribution(root.Distribution('loosePho1Eta',-2.5,2.5,20,'Leading pho #eta','Events'))
+  plot.AddDistribution(root.Distribution('loosePho1Phi',-3.142,3.142,20,'Leading pho #phi','Events'))
 if recoil:
   setBins(recoil,recoilBins)
   plot.AddDistribution(recoil)
@@ -141,6 +159,11 @@ plot.AddDistribution(root.Distribution('jet1Pt',15,500,20,'leading jet p_{T} [Ge
 plot.AddDistribution(root.Distribution('fj1Pt',250,1000,20,'fatjet p_{T} [GeV]','Events/37.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1MSD',40,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
+
+plot.AddDistribution(root.Distribution('max(0.01,fj1MaxCSV)',0,1,20,'fatjet max subjet CSV','Events',999,-999,'fj1MaxCSV'))
+
+plot.AddDistribution(root.Distribution('max(0.01,jet1CSV)',0,1,20,'jet 1 CSV','Events',999,-999,'jet1CSV'))
+
 '''
 '''
 
