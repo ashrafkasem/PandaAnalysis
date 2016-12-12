@@ -1,6 +1,7 @@
 #!/bin/bash
 
 WD=$SUBMIT_WORKDIR
+rm -rf $WD/*
 
 doTar=0
 while getopts ":t" opt; do
@@ -30,5 +31,7 @@ voms-proxy-init -voms cms
 cp /tmp/x509up_u$UID $WD/x509up
 
 cp ${CMSSW_BASE}/src/PandaAnalysis/T3/inputs/exec.sh $WD
+
+cp -r $WD $SUBMIT_OUTDIR/workdir/
 
 # input files for submission: cmssw.tgz, skim.py, x509up, local.cfg. exec.sh is the executable
