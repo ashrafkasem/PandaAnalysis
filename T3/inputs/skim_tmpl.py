@@ -53,7 +53,8 @@ if __name__ == "__main__":
     # now we instantiate and configure the analyzer
     skimmer = root.PandaAnalyzer()
     skimmer.isData=isData
-    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
+    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+    #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
       if 'ST_' in fullPath:

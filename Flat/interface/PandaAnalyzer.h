@@ -42,7 +42,8 @@ public :
    kMonohiggs   =(1<<2),
    kMonojet     =(1<<3),
    kTriggers    =(1<<4),
-   kVBF         =(1<<5)
+   kVBF         =(1<<5),
+   kRecoil      =(1<<6)
   };
 
   enum ProcessType { 
@@ -111,7 +112,9 @@ private:
 
   std::map<TString,BTagCalibrationReader*> btagReaders; //!< maps "JETTYPE_WP" to a reader 
                                                         // I think we can load multiple flavors in a single reader 
-  
+  std::vector<TFile*> openFiles; //!< anything that should be closed
+  std::vector<void*> gc; //!< used for misc garbage collection
+
   // files and histograms containing weights
   TFile *fEleSF=0, *fEleSFTight=0;
   THCorr2 *hEleVeto, *hEleTight;
@@ -131,6 +134,8 @@ private:
   THCorr1 *hZEWK, *hAEWK, *hWEWK;
   TFile *fEleTrigB, *fEleTrigE, *fPhoTrig, *fEleTrigLow, *fMetTrig;
   THCorr1 *hEleTrigB, *hEleTrigE, *hPhoTrig, *hMetTrig;
+  TFile *fCSVLF, *fCSVHF, *fCSVHF2;
+  THCorr1 *hCSVLF, *hCSVHF, *hCSVHF2;
   //THCorr *hEleTrigBUp=0, *hEleTrigBDown=0, *hEleTrigEUp=0, *hEleTrigEDown=0;
   THCorr2 *hEleTrigLow;
 

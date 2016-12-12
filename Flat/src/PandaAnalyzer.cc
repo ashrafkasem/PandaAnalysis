@@ -91,18 +91,9 @@ void PandaAnalyzer::Terminate() {
   fOut->WriteTObject(tOut);
   fOut->Close();
 
-  fEleTrigB->Close();
-  fEleTrigE->Close();
-  fPhoTrig->Close();
-  fEleSF->Close();
-  fMuSF->Close();
-  fEleSFTight->Close();
-  fMuSFTight->Close();
-  fEleSFTrack->Close();
-  fMuSFTrack->Close();
-  fPU->Close();
-  fKFactor->Close();
-  fPhoSF->Close();
+  for (TFile *f :openFiles)
+    f->Close();
+  openFiles.clear();
 
   delete btagCalib;
   delete btagReaders["jet_L"];
@@ -130,40 +121,61 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   fPhoTrig     = new TFile(dirPath+"/trigger_eff/pho_trig.root");
   fMetTrig     = new TFile(dirPath+"/trigger_eff/met_trig.root");
   fEleTrigLow  = new TFile(dirPath+"/trigger_eff/ele_trig_lowpt.root");
+  openFiles.push_back(fEleTrigB);
+  openFiles.push_back(fEleTrigE);
+  openFiles.push_back(fPhoTrig);
+  openFiles.push_back(fMetTrig);
+  openFiles.push_back(fEleTrigLow);
 
   fEleSF        = new TFile(dirPath+"/scaleFactor_electron_vetoid_12p9.root");
   fEleSFTight   = new TFile(dirPath+"/scaleFactor_electron_tightid_12p9.root");
   fEleSFTrack   = new TFile(dirPath+"/scaleFactor_electron_track.root");
+  openFiles.push_back(fEleSF);
+  openFiles.push_back(fEleSFTight);
+  openFiles.push_back(fEleSFTrack);
 
   fMuSF         = new TFile(dirPath+"/scaleFactor_muon_looseid_12p9.root");
   fMuSFTight    = new TFile(dirPath+"/scaleFactor_muon_tightid_12p9.root");
   fMuSFTrack    = new TFile(dirPath+"/scaleFactor_muon_track.root");
+  openFiles.push_back(fMuSF);
+  openFiles.push_back(fMuSFTight);
+  openFiles.push_back(fMuSFTrack);
 
   fPhoSF   = new TFile(dirPath+"/scaleFactor_photon_mediumid_12p9.root");
+  openFiles.push_back(fPhoSF);
 
   fPU      = new TFile(dirPath+"/puWeight_13invfb.root");
+  openFiles.push_back(fPU);
 
   fKFactor = new TFile(dirPath+"/kfactors.root");
+  openFiles.push_back(fKFactor);
 
   hEleTrigB = new THCorr1((TH1D*) fEleTrigB->Get("h_num"));
   hEleTrigE = new THCorr1((TH1D*) fEleTrigE->Get("h_num_endcap"));
+  gc.push_back(hEleTrigB); gc.push_back(hEleTrigE);
 
   hPhoTrig    = new THCorr1((TH1D*) fPhoTrig->Get("h_num"));
   hMetTrig    = new THCorr1((TH1D*) fMetTrig->Get("numer"));
   hEleTrigLow = new THCorr2((TH2D*) fEleTrigLow->Get("hEffEtaPt"));
+  gc.push_back(hPhoTrig); gc.push_back(hMetTrig); gc.push_back(hEleTrigLow);
 
   hEleVeto  = new THCorr2((TH2D*) fEleSF->Get("scaleFactor_electron_vetoid_RooCMSShape"));
   hEleTight = new THCorr2((TH2D*) fEleSFTight->Get("scaleFactor_electron_tightid_RooCMSShape"));
+  gc.push_back(hEleVeto); gc.push_back(hEleTight);
 
   hMuLoose = new THCorr2((TH2D*) fMuSF->Get("scaleFactor_muon_looseid_RooCMSShape"));
   hMuTight = new THCorr2((TH2D*) fMuSFTight->Get("scaleFactor_muon_tightid_RooCMSShape"));
+  gc.push_back(hMuLoose); gc.push_back(hMuTight);
 
   hMuTrack  = new THCorr1((TH1D*) fMuSFTrack->Get("htrack2"));
   hEleTrack = new THCorr2((TH2D*) fEleSFTrack->Get("EGamma_SF2D"));
+  gc.push_back(hMuTrack); gc.push_back(hEleTrack);
 
   hPho = new THCorr2((TH2D*) fPhoSF->Get("scaleFactor_photon_mediumid_RooCMSShape"));
+  gc.push_back(hPho);
 
   hPUWeight = new THCorr1((TH1D*)fPU->Get("hPU"));
+  gc.push_back(hPUWeight);
 
   hZNLO = new THCorr1((TH1D*)fKFactor->Get("ZJets_012j_NLO/nominal"));
   hWNLO = new THCorr1((TH1D*)fKFactor->Get("WJets_012j_NLO/nominal"));
@@ -209,6 +221,15 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_C,"lt");
   btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
+  fCSVLF = new TFile(dirPath+"/csvWeights/csvweight_fake.root"); openFiles.push_back(fCSVLF);
+  hCSVLF = new THCorr1( (TH1D*)fCSVLF->Get("hratio") ); gc.push_back(hCSVLF);
+
+  fCSVHF = new TFile(dirPath+"/csvWeights/csvweight_tag.root"); openFiles.push_back(fCSVHF);
+  hCSVHF = new THCorr1( (TH1D*)fCSVHF->Get("hratio") ); gc.push_back(hCSVHF);
+
+  fCSVHF2 = new TFile(dirPath+"/csvWeights/csvweight_tag_iterative.root"); openFiles.push_back(fCSVHF2);
+  hCSVHF2 = new THCorr1( (TH1D*)fCSVHF2->Get("hratio") ); gc.push_back(hCSVHF2);
+
   // load only L2L3 JEC
   /*
   std::string jecPath = (dirPath+"/jec/").Data();
@@ -240,6 +261,12 @@ bool PandaAnalyzer::PassPreselection() {
     return true;
   bool isGood=false;
 
+  if (preselBits & kRecoil) {
+    if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
+          (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
+          isGood = true;
+    }
+  }
   if (preselBits & kMonotop) {
     if (gt->nFatjet>=1 && gt->fj1Pt>250) { 
       if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
@@ -671,8 +698,8 @@ void PandaAnalyzer::Run() {
         float eta = fj->eta;
         float mass = fj->m;
         float ptcut = 250;
-	if (flags["monohiggs"]) 
-	  ptcut = 200;
+        if (flags["monohiggs"]) 
+          ptcut = 200;
         if (pt<ptcut || fabs(eta)>2.4 || (fj->id&PFatJet::kMonojet)==0)
           continue;
   
@@ -802,27 +829,38 @@ void PandaAnalyzer::Run() {
         gt->dphipfUZ = std::min(fabs(vJet.DeltaPhi(vpfUZ)),(double)gt->dphipfUZ);
       }
       // btags
-      if (csv>0.8) { // temporarily medium WP
+      if (csv>0.8) { 
         ++gt->jetNBtags;
         if (flags["monohiggs"]) {
           btaggedJets.push_back(jet);
           btagindices.push_back(cleanedJets.size()-1);
         }
       }
-      if (gt->nFatjet>0 && fabs(jet->eta)<2.5
-          && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet->eta,jet->phi)>2.25) {
+
+      bool isIsoJet = gt->nFatjet>0;
+      isIsoJet = isIsoJet && fabs(jet->eta)<2.5;
+      isIsoJet = isIsoJet && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet->eta,jet->phi)>2.25;
+
+      if (gt->nFatjet==0 || isIsoJet) {
         isoJets.push_back(jet);
         if (csv>0.460) 
           ++gt->isojetNBtags;
         if (flags["monohiggs"]) 
           gt->jetIso[cleanedJets.size()-1]=1;
-      }
-      else {
+        if (isoJets.size()==1) {
+          gt->isojet1Pt = jet->pt;
+          gt->isojet1CSV = jet->csv;
+        } else if (isoJets.size()==2) {
+          gt->isojet2Pt = jet->pt;
+          gt->isojet2CSV = jet->csv;
+        }
+      } else {
         if (flags["monohiggs"]) 
           gt->jetIso[cleanedJets.size()-1]=0;
       }
 
-    }
+    } // VJet loop
+
     gt->nJet = cleanedJets.size();
     if (gt->nJet>1 && flags["monojet"]) {
       gt->jet12DEta = fabs(jet1->eta-jet2->eta);
@@ -1112,6 +1150,17 @@ void PandaAnalyzer::Run() {
           sj_sf_bUp.push_back(sf); sj_sf_bDown.push_back(sf);
           sj_sf_mUp.push_back(sfUp); sj_sf_mDown.push_back(sfDown);
         }
+
+        // evaluate the CSV weight
+        if (subjet->csv>0) {
+          if (flavor==0) {
+            gt->sf_sjcsvWeight *= hCSVLF->Eval(subjet->csv);
+            gt->sf_sjcsvWeightIt *= hCSVLF->Eval(subjet->csv);
+          } else {
+            gt->sf_sjcsvWeight *= hCSVHF->Eval(subjet->csv);
+            gt->sf_sjcsvWeightIt *= hCSVHF2->Eval(subjet->csv);
+          }
+        }
   
       } // loop over subjets
       EvalBtagSF(sj_btagcands,sj_sf_cent,
@@ -1167,16 +1216,17 @@ void PandaAnalyzer::Run() {
         float eta = jet->eta;
         double eff(1),sf(1),sfUp(1),sfDown(1);
         unsigned int bin = btagpt.bin(pt);
-        if (flavor==5) {
-	  eff = beff[bin];
-	}
-	else if (flavor==4) {
-	  eff = ceff[bin];
-	}
-	else {
-	  eff = lfeff[bin];
-	}
-	if (isIsoJet){
+        if (flavor==5) 
+          eff = beff[bin];
+        else if (flavor==4) 
+          eff = ceff[bin];
+        else 
+          eff = lfeff[bin];
+        if (isIsoJet) {
+          if (jet==isoJets.at(0)) 
+            gt->isojet1Flav = flavor;
+          else if (jet==isoJets.at(1))
+            gt->isojet2Flav = flavor;
           calcBJetSFs("jet_L",flavor,eta,pt,eff,btagUncFactor,sf,sfUp,sfDown);
           btagcands.push_back(btagcand(iJ,flavor,eff,sf,sfUp,sfDown));
           sf_cent.push_back(sf);
@@ -1186,6 +1236,17 @@ void PandaAnalyzer::Run() {
           } else {
             sf_bUp.push_back(sf); sf_bDown.push_back(sf);
             sf_mUp.push_back(sfUp); sf_mDown.push_back(sfDown);
+          }
+
+          // evaluate the CSV weight
+          if (jet->csv>0) {
+            if (flavor==0) {
+              gt->sf_csvWeight *= hCSVLF->Eval(jet->csv);
+              gt->sf_csvWeightIt *= hCSVLF->Eval(jet->csv);
+            } else {
+              gt->sf_csvWeight *= hCSVHF->Eval(jet->csv);
+              gt->sf_csvWeightIt *= hCSVHF2->Eval(jet->csv);
+            }
           }
         }
 
