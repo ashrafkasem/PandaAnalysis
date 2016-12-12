@@ -127,19 +127,10 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   openFiles.push_back(fMetTrig);
   openFiles.push_back(fEleTrigLow);
 
-  fEleSF        = new TFile(dirPath+"/scaleFactor_electron_vetoid_12p9.root");
-  fEleSFTight   = new TFile(dirPath+"/scaleFactor_electron_tightid_12p9.root");
-  fEleSFTrack   = new TFile(dirPath+"/scaleFactor_electron_track.root");
-  openFiles.push_back(fEleSF);
-  openFiles.push_back(fEleSFTight);
-  openFiles.push_back(fEleSFTrack);
-
-  fMuSF         = new TFile(dirPath+"/scaleFactor_muon_looseid_12p9.root");
-  fMuSFTight    = new TFile(dirPath+"/scaleFactor_muon_tightid_12p9.root");
-  fMuSFTrack    = new TFile(dirPath+"/scaleFactor_muon_track.root");
-  openFiles.push_back(fMuSF);
-  openFiles.push_back(fMuSFTight);
-  openFiles.push_back(fMuSFTrack);
+  fLepSF        = new TFile(dirPath+"/scalefactors_lepton_moriond.root");
+  fLepRecoSF    = new TFile(dirPath+"/scalefactors_reco_lepton_moriond.root");
+  openFiles.push_back(fLepSF);
+  openFiles.push_back(fLepRecoSF);
 
   fPhoSF   = new TFile(dirPath+"/scaleFactor_photon_mediumid_12p9.root");
   openFiles.push_back(fPhoSF);
@@ -159,17 +150,19 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   hEleTrigLow = new THCorr2((TH2D*) fEleTrigLow->Get("hEffEtaPt"));
   gc.push_back(hPhoTrig); gc.push_back(hMetTrig); gc.push_back(hEleTrigLow);
 
-  hEleVeto  = new THCorr2((TH2D*) fEleSF->Get("scaleFactor_electron_vetoid_RooCMSShape"));
-  hEleTight = new THCorr2((TH2D*) fEleSFTight->Get("scaleFactor_electron_tightid_RooCMSShape"));
-  gc.push_back(hEleVeto); gc.push_back(hEleTight);
+  hEleVetoLoPU  = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_electron_vetoid_pu_0_17"));
+  hEleVetoHiPU  = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_electron_vetoid_pu_17_50"));
+  hEleTightLoPU = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_electron_tightid_pu_0_17"));
+  hEleTightHiPU = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_electron_tightid_pu_17_50"));
+  hMuLooseLoPU  = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_muon_looseid_pu_0_17"));
+  hMuLooseHiPU  = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_muon_looseid_pu_17_50"));
+  hMuTightLoPU  = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_muon_tightid_pu_0_17"));
+  hMuTightHiPU  = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_muon_tightid_pu_17_50"));
 
-  hMuLoose = new THCorr2((TH2D*) fMuSF->Get("scaleFactor_muon_looseid_RooCMSShape"));
-  hMuTight = new THCorr2((TH2D*) fMuSFTight->Get("scaleFactor_muon_tightid_RooCMSShape"));
-  gc.push_back(hMuLoose); gc.push_back(hMuTight);
-
-  hMuTrack  = new THCorr1((TH1D*) fMuSFTrack->Get("htrack2"));
-  hEleTrack = new THCorr2((TH2D*) fEleSFTrack->Get("EGamma_SF2D"));
-  gc.push_back(hMuTrack); gc.push_back(hEleTrack);
+  hRecoEleLoPU  = new THCorr2((TH2D*) fLepRecoSF->Get("scaleFactor_electron_recoelectronmatch_pu_0_17"));
+  hRecoEleHiPU  = new THCorr2((TH2D*) fLepRecoSF->Get("scaleFactor_electron_recoelectronmatch_pu_17_50"));
+  hRecoMuLoPU  = new THCorr2((TH2D*) fLepRecoSF->Get("scaleFactor_muon_trackerid_pu_0_17"));
+  hRecoMuHiPU  = new THCorr2((TH2D*) fLepRecoSF->Get("scaleFactor_muon_trackerid_pu_17_50"));
 
   hPho = new THCorr2((TH2D*) fPhoSF->Get("scaleFactor_photon_mediumid_RooCMSShape"));
   gc.push_back(hPho);
@@ -224,11 +217,8 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   fCSVLF = new TFile(dirPath+"/csvWeights/csvweight_fake.root"); openFiles.push_back(fCSVLF);
   hCSVLF = new THCorr1( (TH1D*)fCSVLF->Get("hratio") ); gc.push_back(hCSVLF);
 
-  fCSVHF = new TFile(dirPath+"/csvWeights/csvweight_tag.root"); openFiles.push_back(fCSVHF);
+  fCSVHF = new TFile(dirPath+"/csvWeights/csvweight_tag_iterative.root"); openFiles.push_back(fCSVHF);
   hCSVHF = new THCorr1( (TH1D*)fCSVHF->Get("hratio") ); gc.push_back(hCSVHF);
-
-  fCSVHF2 = new TFile(dirPath+"/csvWeights/csvweight_tag_iterative.root"); openFiles.push_back(fCSVHF2);
-  hCSVHF2 = new THCorr1( (TH1D*)fCSVHF2->Get("hratio") ); gc.push_back(hCSVHF2);
 
   // load only L2L3 JEC
   /*
@@ -1154,15 +1144,18 @@ void PandaAnalyzer::Run() {
         // evaluate the CSV weight
         if (subjet->csv>0) {
           if (flavor==0) {
-            gt->sf_sjcsvWeight *= hCSVLF->Eval(subjet->csv);
-            gt->sf_sjcsvWeightIt *= hCSVLF->Eval(subjet->csv);
+            gt->sf_sjcsvWeightM *= hCSVLF->Eval(subjet->csv);
           } else {
-            gt->sf_sjcsvWeight *= hCSVHF->Eval(subjet->csv);
-            gt->sf_sjcsvWeightIt *= hCSVHF2->Eval(subjet->csv);
+            gt->sf_sjcsvWeightB *= hCSVHF->Eval(subjet->csv);
           }
         }
   
       } // loop over subjets
+      gt->sf_sjcsvWeightMUp = 1.05 * gt->sf_sjcsvWeightM;
+      gt->sf_sjcsvWeightMDown = 0.95 * gt->sf_sjcsvWeightM;
+      gt->sf_sjcsvWeightBUp = 1.05 * gt->sf_sjcsvWeightB;
+      gt->sf_sjcsvWeightBDown = 0.95 * gt->sf_sjcsvWeightB;
+
       EvalBtagSF(sj_btagcands,sj_sf_cent,
                   gt->sf_sjbtag0,gt->sf_sjbtag1,gt->sf_sjbtag2);
       EvalBtagSF(sj_btagcands,sj_sf_bUp,
@@ -1241,11 +1234,9 @@ void PandaAnalyzer::Run() {
           // evaluate the CSV weight
           if (jet->csv>0) {
             if (flavor==0) {
-              gt->sf_csvWeight *= hCSVLF->Eval(jet->csv);
-              gt->sf_csvWeightIt *= hCSVLF->Eval(jet->csv);
+              gt->sf_csvWeightM *= hCSVLF->Eval(jet->csv);
             } else {
-              gt->sf_csvWeight *= hCSVHF->Eval(jet->csv);
-              gt->sf_csvWeightIt *= hCSVHF2->Eval(jet->csv);
+              gt->sf_csvWeightB *= hCSVHF->Eval(jet->csv);
             }
           }
         }
@@ -1265,6 +1256,10 @@ void PandaAnalyzer::Run() {
           }
         }
       } // loop over jets
+      gt->sf_csvWeightMUp = 1.05 * gt->sf_csvWeightM;
+      gt->sf_csvWeightMDown = 0.95 * gt->sf_csvWeightM;
+      gt->sf_csvWeightBUp = 1.05 * gt->sf_csvWeightB;
+      gt->sf_csvWeightBDown = 0.95 * gt->sf_csvWeightB;
 
       EvalBtagSF(btagcands,sf_cent,
                   gt->sf_btag0,gt->sf_btag1,gt->sf_btag2);
@@ -1361,25 +1356,41 @@ void PandaAnalyzer::Run() {
     tr.TriggerEvent("qcd/ewk SFs");
 
     //lepton SFs
-    gt->sf_lep=1; gt->sf_lepTrack=1;
+    gt->sf_lep=1; gt->sf_lepReco=1;
     if (!isData) {
       for (unsigned int iL=0; iL!=TMath::Min(gt->nLooseLep,2); ++iL) {
         PObject *lep = looseLeps.at(iL);
-        float pt = lep->pt, eta = lep->eta;
+        float pt = lep->pt, aeta = TMath::Abs(lep->eta);
         bool isTight = (iL==0 && gt->looseLep1IsTight) || (iL==1 && gt->looseLep2IsTight);
         PMuon *mu = dynamic_cast<PMuon*>(lep);
         if (mu!=NULL) {
-          if (isTight)
-            gt->sf_lep *= hMuTight->Eval(eta,pt);
-          else
-            gt->sf_lep *= hMuLoose->Eval(eta,pt);
-          gt->sf_lepTrack *= hMuTrack->Eval(gt->npv);
+          if (gt->npv<=17) {
+            if (isTight)
+              gt->sf_lep *= hMuTightLoPU->Eval(aeta,pt);
+            else
+              gt->sf_lep *= hMuLooseLoPU->Eval(aeta,pt);
+            gt->sf_lepReco *= hRecoMuLoPU->Eval(aeta,pt);
+          } else {
+            if (isTight)
+              gt->sf_lep *= hMuTightHiPU->Eval(aeta,pt);
+            else
+              gt->sf_lep *= hMuLooseHiPU->Eval(aeta,pt);
+            gt->sf_lepReco *= hRecoMuHiPU->Eval(aeta,pt);
+          }
         } else {
-          if (isTight)
-            gt->sf_lep *= hEleTight->Eval(eta,pt);
-          else
-            gt->sf_lep *= hEleVeto->Eval(eta,pt);
-          gt->sf_lepTrack *= hEleTrack->Eval(eta,gt->npv);
+          if (gt->npv<=17) {
+            if (isTight)
+              gt->sf_lep *= hEleTightLoPU->Eval(aeta,pt);
+            else
+              gt->sf_lep *= hEleVetoLoPU->Eval(aeta,pt);
+            gt->sf_lepReco *= hRecoEleLoPU->Eval(aeta,pt);
+          } else {
+            if (isTight)
+              gt->sf_lep *= hEleTightHiPU->Eval(aeta,pt);
+            else
+              gt->sf_lep *= hEleVetoHiPU->Eval(aeta,pt);
+            gt->sf_lepReco *= hRecoEleHiPU->Eval(aeta,pt);
+          }
         }
       }
     }
