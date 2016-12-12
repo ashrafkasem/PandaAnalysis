@@ -11,7 +11,7 @@ rm *root
 
 executable=runNtuplerCondor.py
 
-scramdir=/home/snarayan/cms/cmssw/analysis/CMSSW_8_0_11/src
+scramdir=/home/snarayan/cms/cmssw/analysis/CMSSW_8_0_20/src
 cd ${scramdir}/
 eval `scramv1 runtime -sh`
 cd -
@@ -25,6 +25,7 @@ voms-proxy-init -voms cms
 pandadir=${scramdir}/PandaProd/Ntupler/test/
 
 cp -r ${pandadir}/jec .
+cp -r ${pandadir}/jer .
 
 cat $cfgName
 
