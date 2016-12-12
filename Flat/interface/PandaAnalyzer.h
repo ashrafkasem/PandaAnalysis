@@ -116,12 +116,13 @@ private:
   std::vector<void*> gc; //!< used for misc garbage collection
 
   // files and histograms containing weights
-  TFile *fEleSF=0, *fEleSFTight=0;
-  THCorr2 *hEleVeto, *hEleTight;
-  TFile *fMuSF=0, *fMuSFTight=0;
-  THCorr2 *hMuLoose, *hMuTight;
-  TFile *fEleSFTrack=0, *fMuSFTrack=0;
-  THCorr1 *hMuTrack; THCorr2 *hEleTrack;
+  TFile *fLepSF=0, *fLepRecoSF=0;
+  THCorr2 *hEleVetoLoPU, *hEleTightLoPU;
+  THCorr2 *hEleVetoHiPU, *hEleTightHiPU;
+  THCorr2 *hMuLooseLoPU, *hMuTightLoPU;
+  THCorr2 *hMuLooseHiPU, *hMuTightHiPU;
+  THCorr2 *hRecoEleLoPU, *hRecoEleHiPU;
+  THCorr2 *hRecoMuLoPU,  *hRecoMuHiPU;
   TFile *fPhoSF=0;
   THCorr2 *hPho=0;
 
@@ -134,8 +135,8 @@ private:
   THCorr1 *hZEWK, *hAEWK, *hWEWK;
   TFile *fEleTrigB, *fEleTrigE, *fPhoTrig, *fEleTrigLow, *fMetTrig;
   THCorr1 *hEleTrigB, *hEleTrigE, *hPhoTrig, *hMetTrig;
-  TFile *fCSVLF, *fCSVHF, *fCSVHF2;
-  THCorr1 *hCSVLF, *hCSVHF, *hCSVHF2;
+  TFile *fCSVLF, *fCSVHF;
+  THCorr1 *hCSVLF, *hCSVHF;
   //THCorr *hEleTrigBUp=0, *hEleTrigBDown=0, *hEleTrigEUp=0, *hEleTrigEDown=0;
   THCorr2 *hEleTrigLow;
 
