@@ -12,12 +12,12 @@ import ROOT as root
 from PandaCore.Tools.Misc import *
 from PandaCore.Tools.Load import *
 import PandaCore.Tools.Functions # kinematics
-import PandaAnalysis.Monotop.NoTagSelection as sel
+import PandaAnalysis.Monotop.NewPFSelection as sel
 
 Load('PandaAnalysisFlat','LimitTreeBuilder')
 
 baseDir = getenv('PANDA_FLATDIR')
-lumi = 12918
+lumi = 36560
 
 factory = root.LimitTreeBuilder()
 if toProcess:
@@ -64,6 +64,28 @@ def shiftBtags(label,tree,varmap,cut,baseweight):
       ps.append(shiftedProcess)
   return ps
 
+def shiftCSV(label,tree,varmap,cut,baseweight):
+  ps = []
+  for shift in ['Up','Down']:
+    for cent in ['sf_csvWeight','sf_sjcsvWeight']:
+      shiftedlabel = '_'
+      shiftfac = 1.
+      if 'sj' in cent:
+        shiftedlabel += 'sjbtag'
+      else:
+        shiftedlabel += 'btag'
+      if 'Up' in shift:
+        shiftedlabel += 'Up'
+        shiftfac = 1.05
+      else:
+        shiftedlabel += 'Down'
+        shiftfac = 0.95
+      weight = tTIMES('%f'%shiftfac,sel.weights[baseweight]%lumi)
+      shiftedProcess = root.Process(label,tree,varmap,cut,weight)
+      shiftedProcess.syst = shiftedlabel
+      ps.append(shiftedProcess)
+  return ps
+
 # input
 tZll,fZll = getTree('ZJets')
 tZvv,fZvv = getTree('ZtoNuNu')
@@ -83,17 +105,17 @@ regions = {}
 processes = {}
 
 vms = {}
-for region_type,met_type,phi_type in [('signal','puppimet','puppimetphi'),
-                                      ('w','UWmag','UWphi'),
-                                      ('z','UZmag','UZphi'),
-                                      ('a','UAmag','UAphi')]:
+for region_type,met_type,phi_type in [('signal','pfmet','pfmetphi'),
+                                      ('w','pfUWmag','pfUWphi'),
+                                      ('z','pfUZmag','pfUZphi'),
+                                      ('a','pfUAmag','pfUAphi')]:
   vms[region_type] = root.VariableMap()
   vms[region_type].AddVar('met',met_type)
   # vms[region_type].AddVar('metphi',phi_type)
   vms[region_type].AddVar('genBosonPt','genBosonPt')
   # vms[region_type].AddVar('genBosonPhi','genBosonPhi')
-  for x in ['fj1Tau32','top_ecf_bdt']:
-    vms[region_type].AddVar(x,x)
+  # for x in ['fj1Tau32','top_ecf_bdt']:
+  #   vms[region_type].AddVar(x,x)
 
 
 # test region
@@ -131,7 +153,8 @@ if enable('signal'):
   for p in processes['signal']:
     if p.name=='Data':
       continue
-    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'signal')
+    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'signal')
+    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'signal')
   processes['signal'] += btag_shifts
 
   for p in processes['signal']:
@@ -158,7 +181,8 @@ if enable('singlemuonw'):
   for p in processes['singlemuonw']:
     if p.name=='Data':
       continue
-    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singlemuonw')
+    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singlemuonw')
+    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singlemuonw')
   processes['singlemuonw'] += btag_shifts
 
   for p in processes['singlemuonw']:
@@ -185,7 +209,8 @@ if enable('singleelectronw'):
   for p in processes['singleelectronw']:
     if p.name=='Data':
       continue
-    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singleelectronw')
+    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singleelectronw')
+    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singleelectronw')
   processes['singleelectronw'] += btag_shifts
 
   for p in processes['singleelectronw']:
@@ -212,7 +237,8 @@ if enable('singlemuontop'):
   for p in processes['singlemuontop']:
     if p.name=='Data':
       continue
-    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singlemuontop')
+    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singlemuontop')
+    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singlemuontop')
   processes['singlemuontop'] += btag_shifts
 
   for p in processes['singlemuontop']:
@@ -239,7 +265,8 @@ if enable('singleelectrontop'):
   for p in processes['singleelectrontop']:
     if p.name=='Data':
       continue
-    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singleelectrontop')
+    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singleelectrontop')
+    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singleelectrontop')
   processes['singleelectrontop'] += btag_shifts
 
   for p in processes['singleelectrontop']:
