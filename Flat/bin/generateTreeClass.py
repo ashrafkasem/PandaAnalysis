@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from sys import argv
+from sys import argv,exit
 from re import sub
 
 suffixes = { 'float':'F', 
@@ -185,6 +185,11 @@ def parseCfg(cfg,className):
   s += tree.writeReadTree()
   s += tree.writeWriteTree()
   return s
+
+
+if len(argv)<3:
+  print 'Usage %s className cfgFile'%(argv[0])
+  exit(1)
 
 className = argv[1]
 cfg = open(argv[2])
