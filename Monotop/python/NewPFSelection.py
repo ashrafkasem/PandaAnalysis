@@ -10,7 +10,7 @@ triggers = {
 metFilter='metFilter==1'
 topTagSF = '%f*(fj1IsMatched==1)+%f*(fj1IsMatched==0)'%(1.,1.)
 #ak4bTagSF = 'sf_btag0*(isojetNBtags==0)+sf_btag1*(isojetNBtags==1)+1*(isojetNBtags>1)'
-ak4bTagSF = '0.95*sf_csvWeightIt*sf_sjcsvWeightIt'
+ak4bTagSF = '0.95*sf_csvWeightB*sf_csvWeightM*sf_sjcsvWeightB*sf_sjcsvWeightM'
 #ak4bTagSF = '1'
 
 presel = 'nFatjet==1 && fj1Pt>250 && TMath::Abs(fj1Eta)<2.4 && 110<fj1MSD && fj1MSD<210 && top_ecf_bdt>0.1'

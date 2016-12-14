@@ -22,9 +22,9 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-import PandaAnalysis.Monotop.NewPFSelection as sel
+#import PandaAnalysis.Monotop.NewPFSelection as sel
 #import PandaAnalysis.Monotop.OldPFSelection as sel
-#import PandaAnalysis.Monotop.NoTagPFSelection as sel
+import PandaAnalysis.Monotop.NoTagPFSelection as sel
 #import PandaAnalysis.Monotop.NoMassPFSelection as sel
 Load('Drawers','PlotUtility')
 
