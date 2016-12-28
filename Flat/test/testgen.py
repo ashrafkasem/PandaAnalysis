@@ -18,7 +18,7 @@ if __name__ == "__main__":
     skimmer = root.GenAnalyzer()
    
     skimmer.firstEvent=0
-    skimmer.lastEvent=10000
+    skimmer.lastEvent=100
     fin = root.TFile.Open(fullPath)
 
     print fullPath
@@ -27,8 +27,8 @@ if __name__ == "__main__":
 
     skimmer.SetOutputPath('./')
     skimmer.order = root.GenAnalyzer.kNLO
-    skimmer.processType = root.GenAnalyzer.kW
-    skimmer.AddInput(tree,1.5,'w_nlo')
+    skimmer.processType = root.GenAnalyzer.kZ
+    skimmer.AddInput(tree,1,'z_nlo')
 
     skimmer.Run()
     print 'done running'
