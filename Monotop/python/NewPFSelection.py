@@ -51,7 +51,14 @@ for x in ['photon']:
   #weights[x] = weights['notag']
   weights[x] = tTIMES('sf_pho',weights['notag'])
 
+'''
 for r in ['signal','top','w','singlemuontop','singleelectrontop','singlemuonw','singleelectronw']:
   for shift in ['BUp','BDown','MUp','MDown']:
     for cent in ['sf_btag','sf_sjbtag']:
       weights[r+'_'+cent+shift] = sub(cent+'0',cent+'0'+shift,sub(cent+'1',cent+'1'+shift,weights[r]))
+'''
+for r in ['signal','top','w','singlemuontop','singleelectrontop','singlemuonw','singleelectronw']:
+  for shift in ['Up','Down']:
+    #for cent in ['sf_btag','sf_sjbtag']:
+    for cent in ['sf_sjcsvWeightB','sf_sjcsvWeightM','sf_csvWeightB','sf_csvWeightM']:
+      weights[r+'_'+cent+shift] = sub(cent,cent+shift,weights[r])

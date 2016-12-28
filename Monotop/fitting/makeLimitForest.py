@@ -67,20 +67,19 @@ def shiftBtags(label,tree,varmap,cut,baseweight):
 def shiftCSV(label,tree,varmap,cut,baseweight):
   ps = []
   for shift in ['Up','Down']:
-    for cent in ['sf_csvWeight','sf_sjcsvWeight']:
+    for cent in ['sf_csvWeightB','sf_csvWeightM','sf_sjcsvWeightB','sf_sjcsvWeightM']:
       shiftedlabel = '_'
-      shiftfac = 1.
       if 'sj' in cent:
-        shiftedlabel += 'sjbtag'
-      else:
+        shiftedlabel += 'sj'
+      if 'B' in cent:
         shiftedlabel += 'btag'
+      else:
+        shiftedlabel += 'mistag'
       if 'Up' in shift:
         shiftedlabel += 'Up'
-        shiftfac = 1.05
       else:
         shiftedlabel += 'Down'
-        shiftfac = 0.95
-      weight = tTIMES('%f'%shiftfac,sel.weights[baseweight]%lumi)
+      weight = sel.weights[baseweight+'_'+cent+shift]%lumi
       shiftedProcess = root.Process(label,tree,varmap,cut,weight)
       shiftedProcess.syst = shiftedlabel
       ps.append(shiftedProcess)
@@ -127,7 +126,12 @@ if enable('test'):
     root.Process('Data',tMET,vms['signal'],dataCut(cut,sel.triggers['met']),'1'),
     root.Process('Diboson',tVV,vms['signal'],cut,weight),
   ]
-
+  btag_shifts = []
+  for p in processes['test']:
+    if p.name=='Data':
+      continue
+    btag_shifts += shiftCSV(p.name,p.GetInput(),vms['signal'],cut,'signal')
+  processes['test'] += btag_shifts
   for p in processes['test']:
     regions['test'].AddProcess(p)
   factory.AddRegion(regions['test'])
@@ -137,6 +141,9 @@ if enable('signal'):
   regions['signal'] = root.Region('signal')
   cut = sel.cuts['signal']
   weight = sel.weights['signal']%lumi
+  weight_nobtag = sub('sf_[sj]*csvWeight[BM]','1',weight) # for signal
+  print weight
+  print weight_nobtag
   vm = vms['signal']
   processes['signal'] = [
     root.Process('Data',tMET,vm,dataCut(cut,sel.triggers['met']),'1'),
@@ -147,11 +154,11 @@ if enable('signal'):
     root.Process('ST',tST,vm,cut,weight),
     root.Process('Diboson',tVV,vm,cut,weight),
     root.Process('QCD',tQCD,vm,cut,weight),
-    root.Process('signal',tSig,vm,cut,weight),
+    root.Process('signal',tSig,vm,cut,weight_nobtag),
   ]
   btag_shifts = []
   for p in processes['signal']:
-    if p.name=='Data':
+    if p.name=='Data' or p.name=='signal':
       continue
     #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'signal')
     btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'signal')

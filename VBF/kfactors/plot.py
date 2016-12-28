@@ -26,7 +26,7 @@ recoilBins = [200,250,300,350,400,500,600,1000]
 nRecoilBins = len(recoilBins)-1
 recoilBins = array('f',recoilBins)
 
-ptBins = [100,120,160,200,250,300,350,400,500,600,1000]
+ptBins = [100,120,160,200,250,300,350,400,450,500,550,600,650,700,800,900,1000,1200]
 nPtBins = len(ptBins)-1
 ptBins = array('f',ptBins)
 
@@ -34,16 +34,14 @@ plot = root.HistogramDrawer()
 plot.SetTDRStyle()
 plot.AddCMSLabel()
 plot.Logy(True)
-plot.SetAbsMin(0.0001)
-plot.SetTDRStyle()
+#plot.SetAbsMin(0.0001)
 plot.InitLegend()
 
 plotr = root.HistogramDrawer()
-plotr.SetLumi(12.9)
 plotr.SetRatioStyle()
 plotr.AddCMSLabel()
-plotr.AddLumiLabel()
-plotr.InitLegend(.15,.6,.5,.8)
+#plotr.InitLegend(.15,.6,.5,.8)
+plotr.InitLegend()
 
 counter=0
 
@@ -72,7 +70,7 @@ def getDist(tree,var,bins,xlabel,cut='1==1'):
   h.SetFillStyle(0)
   return h
 
-def plotDist(V,dists):
+def plotDist(V,dists,cut):
   if V=='Z':
     tlo = tzlo
     tnlo = tznlo
@@ -81,8 +79,8 @@ def plotDist(V,dists):
     tnlo = twnlo
   toreturn = []
   for d in dists:
-    hlo = getDist(tlo,d[0],d[1],d[2])
-    hnlo = getDist(tnlo,d[0],d[1],d[2])
+    hlo = getDist(tlo,d[0],d[1],d[2],cut)
+    hnlo = getDist(tnlo,d[0],d[1],d[2],cut)
     toreturn.append((hlo,hnlo))
     plot.AddHistogram(hlo,'%s LO'%(V),root.kSignal2)
     plot.AddHistogram(hnlo,'%s NLO'%(V),root.kExtra2)
@@ -91,48 +89,33 @@ def plotDist(V,dists):
     else:
       plot.Draw(args.outdir,V+'_'+d[3])
     plot.Reset()
+    plot.AddCMSLabel()
   return toreturn
 
-'''
- plotr.AddHistogram(hsigewk,'Signal region',root.kExtra2,root.kBlack)
-  if V=='W':
-    plotr.AddHistogram(hmuewk,'Single lep CRs',root.kExtra1)
-  #  plotr.AddHistogram(heleewk,'Single e CR',root.kExtra4)
-  else:
-    plotr.AddHistogram(hmuewk,'Dilep CRs',root.kExtra1)
-  #  plotr.AddHistogram(heleewk,'Dielectron CR',root.kExtra4)
-  plotr.AddAdditional(hsigerr,'e2')
-  plotr.AddAdditional(hmuerr,'e2')
-  plotr.Draw(args.outdir,label)
+def plotKFactors(V,hists,name):
+  # hists is a list of tuples (hlo, hnlo, label)
+  counter=0
+  for hlo,hnlo,label in hists:
+    hratio = hnlo.Clone()
+    hratio.Divide(hlo)
+    if counter==0:
+      hratio.SetMaximum(2); hratio.SetMinimum(0)
+    plotr.AddHistogram(hratio,label,root.kExtra1+counter)
+    hratioerr = hratio.Clone()
+    hratioerr.SetFillStyle(3004)
+    hratioerr.SetFillColorAlpha(root.kBlack,0.5)
+    hratioerr.SetLineWidth(0)
+    plotr.AddAdditional(hratioerr,'e2')
+    counter += 1
+  plotr.Draw(args.outdir,V+'_'+name)
   plotr.Reset()
+  plotr.AddCMSLabel()
 
-def plotWZ(label):
-  totalcut = tTIMES(tAND(vbfsel,cuts['signal']),weights['signal'])
-  hqcdz = getMETHist(tqcdzvv,totalcut)
-  hqcdw = getMETHist(tqcdw,totalcut)
-  hewkz = getMETHist(tewkzvv,totalcut)
-  hewkw = getMETHist(tewkw,totalcut)
-  hewkw.Divide(hqcdw)
-  hewkz.Divide(hqcdz)
-  for h in [hewkw,hewkz]:
-    h.GetYaxis().SetTitle('EWK V/QCD V')
-  hwerr = hewkw.Clone()
-  hwerr.SetFillStyle(3004)
-  hwerr.SetFillColorAlpha(root.kGreen+1,0.5)
-  hwerr.SetLineWidth(0)
-  hzerr = hewkz.Clone()
-  hzerr.SetFillStyle(3005)
-  hzerr.SetFillColorAlpha(root.kCyan+1,0.5)
-  hzerr.SetLineWidth(0)
-  plotr.AddHistogram(hewkz,'EWK Z/QCD Z',root.kExtra2)
-  plotr.AddHistogram(hewkw,'EWK W/QCD W',root.kExtra3)
-  plotr.AddAdditional(hzerr,'e2')
-  plotr.AddAdditional(hwerr,'e2')
-  plotr.Draw(args.outdir,label)
-  plotr.Reset()
-
-'''
-
-plotDist('Z',[('vpt',recoilBins,'p_{T}^{V} [GeV]')])
-plotDist('W',[('vpt',recoilBins,'p_{T}^{V} [GeV]')])
+hmono = plotDist('Z',[('vpt',ptBins,'p_{T}^{V} [GeV]','vpt_monojet')],'njet>0 && jet1pt>100')[0]
+hdi   = plotDist('Z',[('vpt',ptBins,'p_{T}^{V} [GeV]','vpt_dijet')],'njet>1 && jet1pt>80 && jet2pt>40 && jet1eta*jet2eta<0')[0]
+hvbf  = plotDist('Z',[('vpt',ptBins,'p_{T}^{V} [GeV]','vpt_vbf')],'njet>1 && jet1pt>80 && jet2pt>40 && jet1eta*jet2eta<0 && mjj>1100')[0]
+plotKFactors('Z',[(hmono[0],hmono[1],'Monojet'),
+                  (hdi[0],hdi[1],'Dijet'),
+                  (hvbf[0],hvbf[1],'VBF')],'kfactor_ptV')
+#plotDist('W',[('vpt',recoilBins,'p_{T}^{V} [GeV]')])
 
