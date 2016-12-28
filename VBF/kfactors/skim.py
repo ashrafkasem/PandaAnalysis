@@ -35,15 +35,17 @@ def fn(infiles,outname,order,ptype):
   skimmer.Terminate()
 
 
-fn([('lo_wlo.root',1738.4,'lo_wlo')],'w_lo.root',root.GenAnalyzer.kLO,root.GenAnalyzer.kW)
-fn([('lo_zlo.root',373.207,'lo_zlo')],'z_lo.root',root.GenAnalyzer.kLO,root.GenAnalyzer.kZ)
+#fn([('lo_wlo.root',1.5,'lo_wlo')],'w_lo.root',root.GenAnalyzer.kLO,root.GenAnalyzer.kW)
+#fn([('lo_zlo.root',1.,'lo_zlo')],'z_lo.root',root.GenAnalyzer.kLO,root.GenAnalyzer.kZ)
 fn([('nn012j_5f_pt150_NLO_FXFX_genkine.root',16.49*3,'nlo_z1'),
     ('nn012j_5f_pt80_NLO_FXFX_genkine.root',90.81*3,'nlo_z0')],
     'z_nlo.root',
     root.GenAnalyzer.kNLO,
     root.GenAnalyzer.kZ)
+'''
 fn([('nl012j_5f_pt80_NLO_FXFX_genkine.root',388.3*3,'nlo_w0'),
     ('nl012j_5f_pt150_NLO_FXFX_genkine.root',65.8*3,'nlo_w1')],
     'w_nlo.root',
     root.GenAnalyzer.kNLO,
     root.GenAnalyzer.kW)
+'''

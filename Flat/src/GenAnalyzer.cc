@@ -79,6 +79,8 @@ void GenAnalyzer::RunLO() {
     TH1F *hsumw = new TH1F("hsumw","hsumw",1,0,2);
     t->Draw("1>>hsumw","weight");
     double sumw = hsumw->Integral();
+    sumw = 1; // I think this is already normalized?
+    hsumw->Delete();
 
     nEvents = t->GetEntries();
     nZero = 0;
@@ -196,7 +198,7 @@ void GenAnalyzer::RunNLO() {
   Particles neutrinos;
   Particles photons;
   Particles jets;
-  float met_pt;
+  float met_pt, met_phi;
 
   for (InputTree intree : tIns) {
     TTree *t = intree.t;
@@ -204,6 +206,7 @@ void GenAnalyzer::RunNLO() {
     TH1F *hsumw = new TH1F("hsumw","hsumw",1,0,2);
     t->Draw("1>>hsumw","weight");
     double sumw = hsumw->Integral();
+    hsumw->Delete();
 
     nEvents = t->GetEntries();
     nZero = 0;
@@ -219,7 +222,7 @@ void GenAnalyzer::RunNLO() {
     t->SetBranchStatus("muons.*", 1);
     t->SetBranchStatus("neutrinos.*", 1);
     t->SetBranchStatus("jets.*", 1);
-    t->SetBranchStatus("met.pt", 1);
+    t->SetBranchStatus("met.*", 1);
 
     t->SetBranchAddress("weight", &weight);
     t->SetBranchAddress("electrons.size", &electrons.size);
@@ -244,6 +247,7 @@ void GenAnalyzer::RunNLO() {
     t->SetBranchAddress("jets.phi", jets.phi);
     t->SetBranchAddress("jets.mass", jets.mass);
     t->SetBranchAddress("met.pt", &met_pt);
+    t->SetBranchAddress("met.phi", &met_phi);
 
     // set up reporters
     unsigned int iE=nZero;
@@ -271,6 +275,12 @@ void GenAnalyzer::RunNLO() {
           vNu.SetPtEtaPhiM(neutrinos.pt[iNu],neutrinos.eta[iNu],neutrinos.phi[iNu],0);          
           vV += vNu;
         }
+        //kt->vpt = vV.Pt();
+        //if (kt->vpt<100)
+        //  continue;
+        kt->vpt = kt->met;
+        if (kt->met<100) // sometimes neutrinos are missing ???
+          continue;
       } else {
         if (electrons.size==0 && muons.size==0)
           continue;
@@ -319,11 +329,11 @@ void GenAnalyzer::RunNLO() {
           }
         }
         vV = vL+vNu;
+        kt->vpt = vV.Pt();
+        if (kt->vpt<100)
+          continue;
       }
 
-      kt->vpt = vV.Pt();
-      if (kt->vpt<100)
-        continue;
       kt->veta = vV.Eta();
       kt->vm = vV.M();
 
