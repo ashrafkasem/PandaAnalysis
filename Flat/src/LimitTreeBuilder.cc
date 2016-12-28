@@ -85,11 +85,11 @@ void Process::Run() {
 }
 
 void LimitTreeBuilder::Output() {
-  PDebug("",TString::Format("%p",fOut));
+//  PDebug("",TString::Format("%p",fOut));
   for (auto r : regions) {
     const char *rname = r->name.Data();
     for (auto p : r->GetProcesses()) {
-      PDebug("",TString::Format("%p %p %p",fOut,r,p));
+//      PDebug("",TString::Format("%p %p %p",fOut,r,p));
       const char *pname = p->name.Data();
       const char *systname = p->syst.Data();
       fOut->WriteTObject(p->GetTree(),TString::Format("%s_%s%s",pname,rname,systname));
@@ -97,5 +97,5 @@ void LimitTreeBuilder::Output() {
   }
   fOut->Close();
   fOut=0;
-  PDebug("",TString::Format("%p",fOut));
+//  PDebug("",TString::Format("%p",fOut));
 }

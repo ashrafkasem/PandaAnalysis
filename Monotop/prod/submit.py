@@ -7,7 +7,7 @@ from time import sleep
 
 user = environ['USER']
 cfgName=argv[1]
-nPerJob = 4
+nPerJob = 50
 xrd='root://xrootd.cmsaf.mit.edu/'
 
 histdir = '/home/%s/cms/hist/monotop_private_panda/%s/'%(user,cfgName)

@@ -22,9 +22,9 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-#import PandaAnalysis.Monotop.NewPFSelection as sel
+import PandaAnalysis.Monotop.NewPFSelection as sel
 #import PandaAnalysis.Monotop.OldPFSelection as sel
-import PandaAnalysis.Monotop.NoTagPFSelection as sel
+#import PandaAnalysis.Monotop.NoTagPFSelection as sel
 #import PandaAnalysis.Monotop.NoMassPFSelection as sel
 Load('Drawers','PlotUtility')
 
@@ -156,7 +156,7 @@ if recoil:
 
 plot.AddDistribution(root.Distribution('pfmetphi',-3.142,3.142,20,'PF MET #phi','Events'))
 
-#plot.AddDistribution(root.Distribution('top_ecf_bdt',-1,1,20,'ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
+plot.AddDistribution(root.Distribution('top_ecf_bdt',-1,1,20,'ECF+#tau_{32}^{SD}+f_{rec} BDT','Events'))
 
 plot.AddDistribution(root.Distribution('fj1Tau32SD',0,1,20,'Groomed #tau_{32}','Events',999,-999,'tau32SD'))
 
@@ -167,6 +167,8 @@ plot.AddDistribution(root.Distribution('jet1Pt',15,1000,20,'leading jet p_{T} [G
 # plot.AddDistribution(root.Distribution('nJet',-0.5,8.5,9,'N_{jet}','Events'))
 
 plot.AddDistribution(root.Distribution('fj1Pt',250,1000,20,'fatjet p_{T} [GeV]','Events/37.5 GeV'))
+
+plot.AddDistribution(root.Distribution('fj1Eta',-2.5,2.5,20,'fatjet #eta','Events'))
 
 plot.AddDistribution(root.Distribution('fj1MSD',0,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
 
