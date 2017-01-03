@@ -14,6 +14,12 @@ export SUBMIT_OUTDIR="/mnt/hadoop/cms/store/user/snarayan/panda/v_8020_2_3/batch
 #export SUBMIT_TMPL="skim_csv_tmpl.py"
 export SUBMIT_TMPL="skim_tmpl.py"
 
+#private production 
 export PRIVATE_LOGDIR="${HOME}/cms/logs/monotop_private_panda/"
 export PRIVATE_PRODDIR="${HOME}/cms/hist/monotop_private_panda/"
 export PRIVATE_CFGDIR="${HOME}/cms/condor/monotop_private_panda/"
+
+# fitting
+export PANDA_FIT=/data/t3serv014/snarayan/CMSSW_7_4_7/
+export PANDA_FITSCAN=${PANDA_FLATDIR}/scans/
+export PANDA_LIMITS=${PANDA_FLATDIR}/limits/

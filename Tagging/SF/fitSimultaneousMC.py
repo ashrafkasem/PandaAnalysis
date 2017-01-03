@@ -3,6 +3,8 @@
 import argparse
 from sys import argv
 
+NBINS=30
+
 parser = argparse.ArgumentParser(description='fit stuff')
 parser.add_argument('--indir',metavar='indir',type=str)
 parser.add_argument('--shower',metavar='shower',type=str,default='pythia')
@@ -28,7 +30,8 @@ for iC in [0,1]:
   plot[iC].DrawEmpty(True)
   plot[iC].SetTDRStyle()
   plot[iC].AddCMSLabel()
-  plot[iC].SetLumi(12.9); plot[iC].AddLumiLabel(True)
+  plot[iC].SetLumi(36.6)
+  plot[iC].AddLumiLabel(True)
   plot[iC].InitLegend()
 
 # masscorr = 'L2L3'
@@ -40,14 +43,14 @@ mass = root.RooRealVar("m","m_{SD} [GeV]",50,450)
 
 if args.shower.upper()=='HERWIG':
   ftemplate = {
-        'pass' : root.TFile(basedir+'tag_top_ecf_bdt_pass_herwig_hists.root'),
-        'fail' : root.TFile(basedir+'tag_top_ecf_bdt_fail_herwig_hists.root')
+        'pass' : root.TFile(basedir+'top_ecf_bdt_pass_herwig_hists.root'),
+        'fail' : root.TFile(basedir+'top_ecf_bdt_fail_herwig_hists.root')
       }
   basedir += 'herwig_'
 else:
   ftemplate = {
-        'pass' : root.TFile(basedir+'tag_top_ecf_bdt_pass_hists.root'),
-        'fail' : root.TFile(basedir+'tag_top_ecf_bdt_fail_hists.root')
+        'pass' : root.TFile(basedir+'top_ecf_bdt_pass_hists.root'),
+        'fail' : root.TFile(basedir+'top_ecf_bdt_fail_hists.root')
       }
 
 # get histograms
@@ -77,9 +80,21 @@ for iC in [0,1]:
       err_ += pow(hprong[cat].GetBinError(iB),2)
     mcerrs[cat] = sqrt(err_)
 
-# smear pdfs
-sigma = root.RooRealVar('sigma','sigma',0.1,0.1,10)
-for iP in [1,2,3]:
+# smear pdfs with a single gaussian for pass/fail
+jesr_sigma = root.RooRealVar('sigma','sigma',0.1,0.1,10)
+jesr_mu = root.RooRealVar('mu','mu',0,-10,10)
+#jesr_sigma = root.RooRealVar('jesr_sigma','jesr_sigma',0.1,0.1,0.1)
+#jesr_mu = root.RooRealVar('jesr_mu','jesr_mu',0,0,0)
+jesr = root.RooGaussian('jesr','jesr',mass,jesr_mu,jesr_sigma)
+for iP in [3,2,1]:
+  for iC in [0,1]:
+    cat = (iP,iC)
+    if iP>1:
+      smeared[cat] = root.RooFFTConvPdf('conv%i%i'%cat,'conv%i%i'%cat,mass,pdfprong[cat],jesr)
+    else:
+      smeared[cat] = pdfprong[cat]
+'''
+for iP in [3,2,1]:
   mu[iP] = root.RooRealVar('mu%i'%iP,'mu%i'%iP,10,-25,25)
   smear[iP] = root.RooGaussian('gauss%i'%iP,'gauss%i'%iP,mass,mu[iP],sigma)
   for iC in [0,1]:
@@ -88,6 +103,7 @@ for iP in [1,2,3]:
       smeared[cat] = pdfprong[cat]
     else:
       smeared[cat] = root.RooFFTConvPdf('conv%i%i'%cat,'conv%i%i'%cat,mass,pdfprong[cat],smear[iP])
+'''
 
 model = {}
 nsigtotal = root.RooFormulaVar('nsigtotal','norm30+norm31',root.RooArgList(norm[(3,0)],norm[(3,1)]))
@@ -109,6 +125,7 @@ normsig = {
     }
 for iC in [0,1]:
   model[iC] = root.RooAddPdf('model%i'%iC,'model%i'%iC,
+#                            root.RooArgList(*[pdfprong[(x,iC)] for x in [1,2,3]]),
                             root.RooArgList(*[smeared[(x,iC)] for x in [1,2,3]]),
                             root.RooArgList(norm[(1,iC)],norm[(2,iC)],normsig[iC]))
 
@@ -159,7 +176,7 @@ labels = {
 for iC in [0,1]:
   for iP in [3,2,1]:
     cat = (iP,iC)
-    h = smeared[cat].createHistogram('h%i%i'%cat,mass,root.RooFit.Binning(40))
+    h = smeared[cat].createHistogram('h%i%i'%cat,mass,root.RooFit.Binning(NBINS))
     h.SetLineWidth(3)
     h.SetLineStyle(1)
     h.SetLineColor(colors[iP])
@@ -173,11 +190,13 @@ for iC in [0,1]:
   hprefit.SetLineWidth(2)
   hprefit.SetLineStyle(2)
   hprefit.SetLineColor(root.kBlue+2)
+  hprefit.SetFillStyle(0)
   plot[iC].AddAdditional(hprefit,'hist','Pre-fit')
 
   for iP in [1,2,3]:
     cat = (iP,iC)
     hprong[cat].SetLineColor(colors[iP])
+    hprong[cat].SetFillStyle(0)
     hprong[cat].SetLineWidth(2)
     hprong[cat].SetLineStyle(2)
     plot[iC].AddAdditional(hprong[cat],'hist')
@@ -186,7 +205,7 @@ for iC in [0,1]:
   hdata[iC].SetMarkerStyle(20);
   plot[iC].AddHistogram(hdata[iC],'Data',root.kData)
 
-  hmodel_ = model[iC].createHistogram('hmodel%i'%iC,mass,root.RooFit.Binning(40))
+  hmodel_ = model[iC].createHistogram('hmodel%i'%iC,mass,root.RooFit.Binning(NBINS))
   hmodel = root.TH1D(); hmodel_.Copy(hmodel)
   hmodel.SetLineWidth(3);
   hmodel.SetLineColor(root.kBlue+10)
@@ -196,6 +215,7 @@ for iC in [0,1]:
     hmodel.GetXaxis().SetTitle('L2L3-corr fatjet m_{SD} [GeV]')
   hmodel.GetYaxis().SetTitle('Events/10 GeV')
   hmodel.Scale(sum([norm[(x,iC)].getVal() for x in [1,2,3]])/hmodel.Integral())
+  hmodel.SetFillStyle(0)
   plot[iC].AddHistogram(hmodel,'Post-fit',root.kExtra5)
   plot[iC].AddAdditional(hmodel,'hist')
 
@@ -220,7 +240,7 @@ plot[0].Draw(basedir,'fail%s'%masscorr)
 w = root.RooWorkspace('w','workspace')
 w.imp = imp(w)
 w.imp(mass)
-for x in [nsigtotal,eff,sigma,sample,datacomb,simult]:
+for x in [nsigtotal,eff,jesr,sample,datacomb,simult]:
   w.imp(x)
 for iC in [0,1]:
   w.imp(normsig[iC])
@@ -228,11 +248,11 @@ for iC in [0,1]:
   w.imp(model[iC])
   for iP in [1,2,3]:
     cat = (iP,iC)
-    w.imp(smear[iP]); w.imp(mu[iP])
+#    w.imp(smear[iP]); w.imp(mu[iP])
     w.imp(dhprong[cat])
     w.imp(pdfprong[cat])
     w.imp(norm[cat])
-    w.imp(smeared[cat])
+#    w.imp(smeared[cat])
 w.writeToFile(basedir+'wspace.root')
 
 print 'Tagging cut:'
