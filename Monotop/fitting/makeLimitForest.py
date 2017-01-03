@@ -2,6 +2,7 @@
 from re import sub
 from sys import argv,exit
 from os import path,getenv
+from glob import glob
 import argparse
 parser = argparse.ArgumentParser(description='make forest')
 parser.add_argument('--region',metavar='region',type=str,default=None)
@@ -97,7 +98,14 @@ tST,fST = getTree('SingleTop')
 tMET,fMET = getTree('MET')
 tSingleEle,fSEle = getTree('SingleElectron')
 tSinglePho,fSPho = getTree('SinglePhoton')
-tSig,fSig = getTree('monotop-nr-v3-1700-100_med-1700_dm-100')
+tSig,fSig = getTree('monotop-nr-v3-1700-100_med-1700_dm-100') # this is just a sample point
+
+tAllSig = {}; fAllSig = {}
+if enable('signal'):
+  signalFiles = glob(baseDir+'/monotop*root')
+  for f in signalFiles:
+    fname = f.split('/')[-1].replace('.root','')
+    tAllSig[fname],fAllSig[fname] = getTree(fname)
 
 factory.cd()
 regions = {}
@@ -113,8 +121,8 @@ for region_type,met_type,phi_type in [('signal','pfmet','pfmetphi'),
   # vms[region_type].AddVar('metphi',phi_type)
   vms[region_type].AddVar('genBosonPt','genBosonPt')
   # vms[region_type].AddVar('genBosonPhi','genBosonPhi')
-  # for x in ['fj1Tau32','top_ecf_bdt']:
-  #   vms[region_type].AddVar(x,x)
+  for x in ['fj1Tau32','top_ecf_bdt']:
+    vms[region_type].AddVar(x,x)
 
 
 # test region
@@ -141,9 +149,6 @@ if enable('signal'):
   regions['signal'] = root.Region('signal')
   cut = sel.cuts['signal']
   weight = sel.weights['signal']%lumi
-  weight_nobtag = sub('sf_[sj]*csvWeight[BM]','1',weight) # for signal
-  print weight
-  print weight_nobtag
   vm = vms['signal']
   processes['signal'] = [
     root.Process('Data',tMET,vm,dataCut(cut,sel.triggers['met']),'1'),
@@ -154,11 +159,13 @@ if enable('signal'):
     root.Process('ST',tST,vm,cut,weight),
     root.Process('Diboson',tVV,vm,cut,weight),
     root.Process('QCD',tQCD,vm,cut,weight),
-    root.Process('signal',tSig,vm,cut,weight_nobtag),
+    root.Process('signal',tSig,vm,cut,weight),
   ]
+  for signame,tsig in tAllSig.iteritems():
+    processes['signal'].append( root.Process(signame,tsig,vm,cut,weight) )
   btag_shifts = []
   for p in processes['signal']:
-    if p.name=='Data' or p.name=='signal':
+    if p.name=='Data':
       continue
     #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'signal')
     btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'signal')
