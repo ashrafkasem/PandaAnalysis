@@ -6,6 +6,7 @@ from time import sleep
 
 
 user = environ['USER']
+cmssw = environ['CMSSW_BASE']
 cfgName=argv[1]
 nPerJob = 50
 xrd='root://xrootd.cmsaf.mit.edu/'
@@ -26,12 +27,12 @@ requirements = UidDomain == \\\"mit.edu\\\" && Arch == \\\"X86_64\\\" && OpSysAn
 Error                      = %s/\$(Process).err
 Output                     = %s/\$(Process).out
 Log                        = %s/\$(Process).log
-Arguments                  = \$(Process) %s/\$(Process).cfg %s
+Arguments                  = \$(Process) %s/\$(Process).cfg %s %s
 should_transfer_files      = YES
 when_to_transfer_output    = ON_EXIT
 GetEnv                     = True
 accounting_group           = group_cmsuser.%s
-Queue %i'''%(logdir,logdir,logdir,cfgdir,histdir,user,l)
+Queue %i'''%(logdir,logdir,logdir,cfgdir,histdir,cmssw,user,l)
   system('echo "%s" | condor_submit'%condorJDLString)
 
 
