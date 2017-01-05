@@ -3,6 +3,7 @@
 label=$1
 cfgName=$2
 outpath=$3
+scramdir=$4
 
 echo $label $cfgName $outpath
 
@@ -11,7 +12,7 @@ rm *root
 
 executable=runNtuplerCondor.py
 
-scramdir=/home/snarayan/cms/cmssw/analysis/CMSSW_8_0_20/src
+#scramdir=/home/snarayan/cms/cmssw/analysis/CMSSW_8_0_20/src
 cd ${scramdir}/
 eval `scramv1 runtime -sh`
 cd -
