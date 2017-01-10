@@ -22,10 +22,10 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-import PandaAnalysis.Monotop.NewPFSelection as sel
+#import PandaAnalysis.Monotop.NewPFSelection as sel
 #import PandaAnalysis.Monotop.OldPFSelection as sel
 #import PandaAnalysis.Monotop.NoTagPFSelection as sel
-#import PandaAnalysis.Monotop.NoMassPFSelection as sel
+import PandaAnalysis.Monotop.NoMassPFSelection as sel
 Load('Drawers','PlotUtility')
 
 ### DEFINE REGIONS ###
@@ -170,7 +170,8 @@ plot.AddDistribution(root.Distribution('fj1Pt',250,1000,20,'fatjet p_{T} [GeV]',
 
 plot.AddDistribution(root.Distribution('fj1Eta',-2.5,2.5,20,'fatjet #eta','Events'))
 
-plot.AddDistribution(root.Distribution('fj1MSD',0,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
+plot.AddDistribution(root.Distribution('fj1MSD',50,250,20,'fatjet m_{SD} [GeV]','Events/10 GeV'))
+#plot.AddDistribution(root.Distribution('fj1MSD',0,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1MaxCSV',0,1,20,'fatjet max subjet CSV','Events',999,-999,'fj1MaxCSV'))
 
