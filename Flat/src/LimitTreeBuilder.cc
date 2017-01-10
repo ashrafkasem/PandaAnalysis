@@ -57,12 +57,14 @@ void Process::Run() {
   for (auto *x : formulae) {
     TTreeFormula *tf = new TTreeFormula(x->name.Data(),x->formula.Data(),clonedTree);
     tf->SetQuickLoad(true);
+    tf->GetNdata();
     treeformulae.push_back(tf);
   }
   unsigned int nF = treeformulae.size();
 
   TTreeFormula fweight(TString::Format("w_%s",name.Data()).Data(),weight.Data(),clonedTree);
   fweight.SetQuickLoad(true);
+  fweight.GetNdata();
   float weightval=0; 
   limitTree->Branch("weight",&weightval,"weight/F");
 
