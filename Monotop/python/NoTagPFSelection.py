@@ -15,16 +15,16 @@ ak4bTagSF = '0.95*sf_csvWeightB*sf_csvWeightM*sf_sjcsvWeightB*sf_sjcsvWeightM'
 
 presel = 'nFatjet==1 && fj1Pt>250 && TMath::Abs(fj1Eta)<2.4 && 110<fj1MSD && fj1MSD<210'
 cuts = {
-    'signal_nobtag'     : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>1.1 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0')), # turning off btags
-    'signal'            : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>1.1 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0 && fj1MaxCSV>0.46 && isojetNBtags==0')),
+    'signal_nobtag'     : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>0.5 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0')), # turning off btags
+    'signal'            : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>0.5 && (nLooseMuon+nLooseElectron+nLoosePhoton+nTau)==0 && fj1MaxCSV>0.46 && isojetNBtags==0')),
     'singlemuontop'     : tAND(metFilter,tAND(presel,'pfUWmag>250 && (nLooseElectron+nLoosePhoton+nTau)==0 && nLooseMuon==1 && looseLep1IsTight==1 && fj1MaxCSV>0.46 && isojetNBtags==1')),
     'singleelectrontop' : tAND(metFilter,tAND(presel,'pfUWmag>250 && (nLooseMuon+nLoosePhoton+nTau)==0 && nLooseElectron==1 && looseLep1IsTight==1 && fj1MaxCSV>0.46 && isojetNBtags==1 && pfmet>40')),
     'singlemuonw'       : tAND(metFilter,tAND(presel,'pfUWmag>250 && (nLooseElectron+nLoosePhoton+nTau)==0 && nLooseMuon==1 && looseLep1IsTight==1 && fj1MaxCSV<0.46 && isojetNBtags==0')),
     'singleelectronw'   : tAND(metFilter,tAND(presel,'pfUWmag>250 && (nLooseMuon+nLoosePhoton+nTau)==0 && nLooseElectron==1 && looseLep1IsTight==1 && fj1MaxCSV<0.46 && isojetNBtags==0 && pfmet>40')),
     'singlemuon'        : tAND(metFilter,tAND(presel,'pfUWmag>250 && (nLooseElectron+nLoosePhoton+nTau)==0 && nLooseMuon==1 && looseLep1IsTight==1')),
     'singleelectron'    : tAND(metFilter,tAND(presel,'pfUWmag>250 && (nLooseMuon+nLoosePhoton+nTau)==0 && nLooseElectron==1 && looseLep1IsTight==1 && pfmet>40')),
-    'dimuon'            : tAND(metFilter,tAND(presel,'pfUZmag>250 && (nLooseElectron+nLoosePhoton+nTau)==0 && nLooseMuon==2 && looseLep1IsTight==1')),
-    'dielectron'        : tAND(metFilter,tAND(presel,'pfUZmag>250 && (nLooseMuon+nLoosePhoton+nTau)==0 && nLooseElectron==2 && looseLep1IsTight==1')),
+    'dimuon'            : tAND(metFilter,tAND(presel,'pfUZmag>250 && (nLooseElectron+nLoosePhoton+nTau)==0 && nLooseMuon==2 && looseLep1IsTight==1 && 60<diLepMass && diLepMass<120')),
+    'dielectron'        : tAND(metFilter,tAND(presel,'pfUZmag>250 && (nLooseMuon+nLoosePhoton+nTau)==0 && nLooseElectron==2 && looseLep1IsTight==1 && 60<diLepMass && diLepMass<120')),
     'photon'            : tAND(metFilter,tAND(presel,'pfUAmag>250 && (nLooseMuon+nLooseElectron+nTau)==0 && nLoosePhoton==1 && loosePho1IsTight==1')),
 }
 
@@ -38,18 +38,26 @@ weights = {
   'singlemuon'     : tTIMES(tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV*sf_tt8TeV',topTagSF),'1'),
 }
 
-for x in ['singlemuontop','singleelectrontop']:
-  weights[x] = weights['top']
-for x in ['singlemuonw','singleelectronw']:
-  weights[x] = weights['w']
-for x in ['dimuon','dielectron']:
-  if x=='dielectron':
-    weights[x] = tTIMES('sf_lep',weights['notag'])
+def addTrig(region,weight):
+  if 'electron' in region:
+    return tTIMES('sf_eleTrig',weight)
+  elif 'photon' in region:
+    return tTIMES('sf_phoTrig',weight)
   else:
-    weights[x] = weights['notag']
+    return tTIMES('sf_metTrig',weight)
+
+for x in ['singlemuontop','singleelectrontop']:
+  weights[x] = addTrig(x,weights['top'])
+for x in ['singlemuonw','singleelectronw']:
+  weights[x] = addTrig(x,weights['w'])
+for x in ['dimuon','dielectron']:
+  #if x=='dielectron':
+    weights[x] = addTrig(x,tTIMES('sf_lep',weights['notag']))
+  #else:
+  #  weights[x] = weights['notag']
 for x in ['photon']:
-  #weights[x] = weights['notag']
-  weights[x] = tTIMES('sf_pho',weights['notag'])
+  weights[x] = addTrig(x,weights['notag'])
+  #weights[x] = tTIMES('sf_pho',weights['notag'])
 
 for r in ['signal','top','w','singlemuontop','singleelectrontop','singlemuonw','singleelectronw']:
   for shift in ['BUp','BDown','MUp','MDown']:

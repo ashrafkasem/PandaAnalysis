@@ -3,7 +3,7 @@
 label=$1
 cfgName=$2
 outpath=$3
-scramdir=$4
+scramdir=$4/src/
 
 echo $label $cfgName $outpath
 
