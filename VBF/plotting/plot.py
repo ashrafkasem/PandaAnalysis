@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from os import system,getenv
-from sys import argv
+from sys import argv,exit
 import argparse
 
 ### SET GLOBAL VARIABLES ###
@@ -11,7 +11,7 @@ parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
 parser.add_argument('--region',metavar='region',type=str,default=None)
 args = parser.parse_args()
-lumi = 12900.
+lumi = 35000
 blind=True
 linear=False
 region = args.region
@@ -23,7 +23,9 @@ from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
 #import PandaAnalysis.VBF.TightSelection as sel
-import PandaAnalysis.VBF.Selection as sel
+#import PandaAnalysis.VBF.Selection as sel
+import PandaAnalysis.VBF.LooseSelection as sel
+#import PandaAnalysis.VBF.MonojetSelection as sel
 Load('Drawers','PlotUtility')
 
 ### DEFINE REGIONS ###
@@ -41,7 +43,7 @@ else:
   plot.SetLumi(lumi/1000)
 plot.SetSignalScale(10)
 plot.Ratio(True)
-# plot.FixRatio()
+plot.FixRatio(0.4)
 plot.SetTDRStyle()
 plot.InitLegend()
 plot.DrawMCErrors(True)
@@ -60,7 +62,7 @@ PInfo(sname,'using weight: '+weight)
 ### DEFINE PROCESSES ###
 zjets     = root.Process('QCD Z+jets',root.kZjets); zjets.additionalWeight = root.TCut('zkfactor*ewk_z')
 zewk      = root.Process('EWK Z+jets',root.kExtra2)
-wjets     = root.Process('QCD W+jets',root.kWjets); wjets.additionalWeight = root.TCut('ewk_w')
+wjets     = root.Process('QCD W+jets',root.kWjets); wjets.additionalWeight = root.TCut('wkfactor*ewk_w')
 wewk      = root.Process('EWK W+jets',root.kExtra3)
 diboson   = root.Process('Diboson',root.kDiboson)
 ttbar     = root.Process('t#bar{t}',root.kTTbar)
@@ -69,8 +71,8 @@ qcd       = root.Process("QCD",root.kQCD)
 gjets     = root.Process('#gamma+jets',root.kGjets); gjets.additionalWeight = root.TCut('akfactor*ewk_a')
 vbf       = root.Process("VBF H#rightarrowInv",root.kSignal)
 data      = root.Process("Data",root.kData)
-#processes = [qcd,diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
-processes = [diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
+processes = [qcd,diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
+#processes = [diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
 
 ### ASSIGN FILES TO PROCESSES ###
 if region=='signal':
@@ -93,15 +95,15 @@ if 'signal' in region:
   vbf.AddFile(baseDir+'VBF_H125.root')
   processes += [vbf]
 if region in  ['signal','zmm','wmn']:
-  data.additionalCut = root.TCut(tAND(sel.triggers['met'],'runNum<=276811'))
+  data.additionalCut = root.TCut(sel.triggers['met'])
   data.AddFile(baseDir+'MET.root')
   lep='#mu'
 elif region in ['zee','wen']:
-  data.additionalCut = root.TCut(tAND(sel.triggers['ele'],'runNum<=276811'))
+  data.additionalCut = root.TCut(sel.triggers['ele'])
   data.AddFile(baseDir+'SingleElectron.root')
   lep='e'
 elif region=='pho':
-  data.additionalCut = root.TCut(tAND(sel.triggers['pho'],'runNum<=276811'))
+  data.additionalCut = root.TCut(sel.triggers['pho'])
   data.AddFile(baseDir+'SinglePhoton.root')
 processes.append(data)
 
@@ -148,8 +150,7 @@ elif region=='pho':
 if recoil:
   setBins(recoil,recoilBins)
   plot.AddDistribution(recoil)
-if region=='signal':
- plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
+plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
 
 ### DRAW AND CATALOGUE ###
 plot.DrawAll(args.outdir+'/'+region+'_')
