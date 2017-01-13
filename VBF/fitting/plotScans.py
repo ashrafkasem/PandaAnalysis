@@ -5,15 +5,21 @@ from sys import argv
 from array import array
 from glob import glob
 import argparse
+
+basedir = getenv('PANDA_VBFSCAN')
 parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--outdir',metavar='outdir',type=str)
+parser.add_argument('--indir',metavar='indir',type=str,default=basedir)
+#parser.add_argument('--outname',type=str)
 parser.add_argument('--var1',type=str)
-parser.add_argument('--var2',type=str)
+parser.add_argument('--var2',type=str) 
+parser.add_argument('--var3',type=str,default=None) # this one is not scanned, just fixed 
 args = parser.parse_args()
 figsdir = args.outdir
-var1=args.var1; var2=args.var2
-basedir = getenv('PANDA_VBFSCAN')
+var1=args.var1; var2=args.var2; var3=args.var3
+basedir=args.indir
 argv=[]
+
 labels = {
     'eta':'jjDEta',
     'phi':'jjDPhi',
@@ -60,16 +66,19 @@ root.gStyle.SetPadRightMargin(0.15)
 
 c = root.TCanvas()
 
-deta = set([]); dphi = set([])
-listoffiles = glob(basedir+'/higgsCombine%s*%s*.root'%(labels[var1],labels[var2]))
+cut1s = set([]); cut2s = set([])
+if var3:
+  listoffiles = glob(basedir+'/higgsCombine%s*%s*%s*.root'%(labels[var1],labels[var2],var3))
+else:
+  listoffiles = glob(basedir+'/higgsCombine%s*%s*.root'%(labels[var1],labels[var2]))
 for f in listoffiles:
   try:
     fname = f.split('/')[-1]
     fname = fname.replace('higgsCombine','').replace('.Asymptotic.mH120.root','')
-    etacut = float(fname.split('_')[1])
-    phicut = float(fname.split('_')[-1])
-    deta.add(etacut)
-    dphi.add(phicut)
+    cut1 = float(fname.split('_')[1])
+    cut2 = float(fname.split('_')[4])
+    cut1s.add(cut1)
+    cut2s.add(cut2)
   except IndexError:
     pass
 
@@ -80,23 +89,28 @@ def xformSet(s):
   l += [(3*s_[-1]-s_[-2])/2]
   return l
 
-etaarray = array('f',xformSet(deta))
-phiarray = array('f',xformSet(dphi))
-h2 = root.TH2F('h2','h2',len(etaarray)-1,etaarray,len(phiarray)-1,phiarray)
+cut1array = array('f',xformSet(cut1s))
+cut2array = array('f',xformSet(cut2s))
+h2 = root.TH2F('h2','h2',len(cut1array)-1,cut1array,len(cut2array)-1,cut2array)
 h2x = h2.GetXaxis(); h2y = h2.GetYaxis();
 h2x.SetTitle(titles[var1])
 h2y.SetTitle(titles[var2])
-h2.GetZaxis().SetTitle('Expected limit')
+h2.GetZaxis().SetTitle('Toy limit')
+#h2.SetMaximum(0.5); h2.SetMinimum(0.15)
 
-for e in deta:
-  for p in dphi:
+for e in cut1s:
+  for p in cut2s:
     try:
+      fname = basedir+'/higgsCombine'
       if var1=='mjj':
-        fname = basedir+'/higgsCombine%s_%i__%s_%.2f.Asymptotic.mH120.root'%(labels[var1],int(e),labels[var2],p)
+        fname += '%s_%i__%s_%.2f'%(labels[var1],int(e),labels[var2],p)
       elif var2=='mjj':
-        fname = basedir+'/higgsCombine%s_%.2f__%s_%i.Asymptotic.mH120.root'%(labels[var1],e,labels[var2],int(p))
+        fname += '%s_%.2f__%s_%i'%(labels[var1],e,labels[var2],int(p))
       else:
-        fname = basedir+'/higgsCombine%s_%.2f__%s_%.2f.Asymptotic.mH120.root'%(labels[var1],e,labels[var2],p)
+        fname += '%s_%.2f__%s_%.2f'%(labels[var1],e,labels[var2],p)
+      if var3:
+        fname += '__%s'%(var3)
+      fname += '.Asymptotic.mH120.root'
       f = root.TFile(fname)
       t = f.Get('limit')
       t.GetEntry(2)
@@ -107,7 +121,10 @@ for e in deta:
 c.Clear(); c.cd()
 h2.Draw('colz text')
 plot.AddCMSLabel(.16,.94)
-plot.SetLumi(12.9); plot.AddLumiLabel(True)
+plot.SetLumi(36.6); plot.AddLumiLabel(True)
 plot.SetCanvas(c)
-plot.Draw(args.outdir+'/','optimized_scan_'+var1+var2)
+if var3:
+  plot.Draw(args.outdir+'/','optimized_scan_'+'_'.join([var1,var2,var3]))
+else:
+  plot.Draw(args.outdir+'/','optimized_scan_'+'_'.join([var1,var2]))
 
