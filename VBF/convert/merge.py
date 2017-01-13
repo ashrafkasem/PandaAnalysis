@@ -31,6 +31,7 @@ system('mkdir -p /tmp/%s/split'%user) # tmp dir
 system('mkdir -p /tmp/%s/merged'%user) # tmp dir
 
 inbase = environ['PANDA_ZEYNEPDIR']
+#inbase = environ['PANDA_ZEYNEPDIR_PROMPT']
 outbase = inbase + '/merged/'
 
 def hadd(inpath,outpath):

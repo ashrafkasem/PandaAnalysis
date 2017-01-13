@@ -7,15 +7,10 @@ weights = {}
 triggers = {}
 
 eventsel = 'metfilter==1 && filterbadChCandidate==1 && filterbadPFMuon==1 && fabs(minJetMetDPhi_withendcap) > 0.5 && (fabs(caloMet-trueMet)/met) < 0.5 && n_tau==0 && n_bjetsMedium==0 && met>200'
-noid = tAND(eventsel,'jot1Eta*jot2Eta < 0 && jot1Pt>100. && jot2Pt>40. && leadingJet_outaccp==0 && fabs(jot1Eta)<4.7 && fabs(jot2Eta)<4.7 && jjDEta>3.5') 
-baseline = tAND(noid,'jet1isMonoJetIdNew==1')
-
-#vbf cuts
-cuts['baseline'] = baseline
-cuts['noid' ] = noid
-cuts['dEtaCut'] = tAND(baseline,'fabs(jjDEta)>3.')
-cuts['mjjCut'] = tAND(baseline, '%s>500'%fixedmjj)
-cuts['dEtaAndMjjCut'] =tAND(baseline, 'fabs(jjDEta)>3 && %s>500'%fixedmjj)
+#eventsel = 'metfilter==1 && filterbadChCandidate==1 && filterbadPFMuon==1 && fabs(minJetMetDPhi_withendcap) > 0.5 && n_tau==0 && n_bjetsMedium==0 && met>200'
+#noid = tAND(eventsel,'jot1Eta*jot2Eta < 0 && jot1Pt>80. && jot2Pt>40. && fabs(jot1Eta)<4.7 && fabs(jot2Eta)<4.7') 
+noid = tAND(eventsel,'jot1Eta*jot2Eta < 0 && jot1Pt>80. && jot2Pt>40. && fabs(jot1Eta)<4.7 && fabs(jot2Eta)<4.7 && (fabs(jot1Eta)<3||fabs(jot1Eta)>3.2)') 
+baseline = tAND(noid,'fabs(SignedDeltaPhi(jot1Phi,jot2Phi))<2 && jjDEta>1')
 
 #regions
 cuts['signal'] = tAND(baseline,'n_loosepho==0 && n_looselep==0')
@@ -28,12 +23,12 @@ cuts['zll'] = tOR(cuts['zmm'],cuts['zee'])
 cuts['wlv'] = tOR(cuts['wmn'],cuts['wen'])
 
 weights['signal'] = 'normalizedWeight*lepton_SF1*lepton_SF2*METTrigger*puWeight*topPtReweighting'
-weights['zmm'] = tTIMES(weights['signal'],'tracking_SF1*tracking_SF2')
-weights['wmn'] = tTIMES(weights['signal'],'tracking_SF1')
-weights['zee'] = tTIMES(weights['signal'],'gsfTracking_SF1*gsfTracking_SF2')
-weights['wen'] = tTIMES(weights['signal'],'gsfTracking_SF1')
+weights['zmm'] = tTIMES(weights['signal'],'1')
+weights['wmn'] = tTIMES(weights['signal'],'1')
+weights['zee'] = tTIMES(weights['signal'],'1')
+weights['wen'] = tTIMES(weights['signal'],'1')
 weights['pho'] = 'normalizedWeight*PhoTrigger*topPtReweighting*photon_SF*puWeight'
 
-triggers['met'] = "(triggerFired[10]==1 || triggerFired[11] == 1 || triggerFired[12] || triggerFired[13] == 1)" 
-triggers['ele'] = "(triggerFired[0] || triggerFired[1] || triggerFired[2] || triggerFired[3] || triggerFired[4] || triggerFired[5] || triggerFired[26])"
-triggers['pho'] = "(triggerFired[18] || triggerFired[19] || triggerFired[17] || triggerFired[5] || triggerFired[15] || triggerFired[16])"
+triggers['met'] = ' || '.join(['triggerFired[%i]'%x for x in [54,58,59,61,62,63,64,65]])
+triggers['ele'] = ' || '.join(['triggerFired[%i]'%x for x in [11,45]])
+triggers['pho'] = ' || '.join(['triggerFired[%i]'%x for x in [75,76]])
