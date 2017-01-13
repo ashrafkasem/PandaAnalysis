@@ -15,7 +15,7 @@ ba = root.BranchAdder()
 ba.formula = 'Mxx(jot1Pt,jot1Eta,jot1Phi,jot1M,jot2Pt,jot2Eta,jot2Phi,jot2M)'
 ba.newBranchName = 'fixed_mjj'
 
-fin = root.TFile(getenv('PANDA_ZEYNEPDIR')+'/merged/'+which+'.root')
+fin = root.TFile(getenv('PANDA_ZEYNEPDIR')+'/merged/'+which+'.root','UPDATE')
 tin = fin.Get('events')
 ba.AddBranchFromFormula(tin)
 fin.WriteTObject(tin,'events','Overwrite')

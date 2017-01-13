@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from os import system,getenv
-from sys import argv
+from sys import argv,exit
 import argparse
 
 ### SET GLOBAL VARIABLES ###
@@ -11,7 +11,7 @@ parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
 parser.add_argument('--region',metavar='region',type=str,default=None)
 args = parser.parse_args()
-lumi = 12900.
+lumi = 35000
 blind=True
 linear=False
 region = args.region
@@ -24,6 +24,7 @@ from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
 #import PandaAnalysis.VBF.TightSelection as sel
 import PandaAnalysis.VBF.LooseSelection as sel
+#import PandaAnalysis.VBF.MonojetSelection as sel
 Load('Drawers','PlotUtility')
 
 ### DEFINE REGIONS ###
@@ -35,21 +36,14 @@ PInfo(sname,'using cut: '+cut)
 plot = root.PlotUtility()
 plot.Stack(True)
 plot.Logy(not(linear))
-if 'signal' in region and blind:
-  plot.SetLumi(lumi/5000.)
-else:
-  plot.SetLumi(lumi/1000)
+plot.SetLumi(lumi/1000)
 plot.SetSignalScale(10)
-#plot.Ratio(True)
-# plot.FixRatio()
 plot.SetTDRStyle()
 plot.InitLegend()
 plot.DrawMCErrors(True)
 plot.AddCMSLabel()
 plot.AddLumiLabel(True)
 plot.SetEvtNum("eventNum")
-if region=='signal' and blind:
-  plot.SetEvtMod(5)
 plot.SetCut(root.TCut(cut))
 
 weight = '%f*%s'%(lumi,sel.weights[region])
@@ -60,7 +54,7 @@ PInfo(sname,'using weight: '+weight)
 ### DEFINE PROCESSES ###
 zjets     = root.Process('QCD Z+jets',root.kZjets); zjets.additionalWeight = root.TCut('zkfactor*ewk_z')
 zewk      = root.Process('EWK Z+jets',root.kExtra2)
-wjets     = root.Process('QCD W+jets',root.kWjets); wjets.additionalWeight = root.TCut('ewk_w')
+wjets     = root.Process('QCD W+jets',root.kWjets); wjets.additionalWeight = root.TCut('wkfactor*ewk_w')
 wewk      = root.Process('EWK W+jets',root.kExtra3)
 diboson   = root.Process('Diboson',root.kDiboson)
 ttbar     = root.Process('t#bar{t}',root.kTTbar)
@@ -68,9 +62,10 @@ singletop = root.Process('Single t',root.kST)
 qcd       = root.Process("QCD",root.kQCD)
 gjets     = root.Process('#gamma+jets',root.kGjets); gjets.additionalWeight = root.TCut('akfactor*ewk_a')
 vbf       = root.Process("VBF H#rightarrowInv",root.kSignal)
+ggf       = root.Process("GGF H#rightarrowInv",root.kSignal2)
 data      = root.Process("Data",root.kData)
-#processes = [qcd,diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
-processes = [diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
+processes = [vbf,ggf,qcd,diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
+#processes = [diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
 
 ### ASSIGN FILES TO PROCESSES ###
 if region=='signal':
@@ -88,41 +83,38 @@ qcd.AddFile(baseDir+'QCD.root')
 if 'pho' in region:
   processes = [qcd,gjets]
   gjets.AddFile(baseDir+'GJets.root')
-
-if 'signal' in region:
+elif 'signal' in region:
   vbf.AddFile(baseDir+'VBF_H125.root')
-  processes += [vbf]
+  ggf.AddFile(baseDir+'GGF_H125.root')
+
 
 for p in processes:
   plot.AddProcess(p)
 
 #recoilBins = [200,250,300,350,400,500,600,750,1000]
-recoilBins = [200,250,300,350,400,500,600,1000]
+#recoilBins = [200,250,300,350,400,500,600,1000]
+recoilBins = [200., 230., 260.0, 290.0, 320.0, 350.0, 390.0, 430.0, 470.0, 510.0, 550.0, 590.0, 640.0, 690.0, 740.0, 790.0, 840.0, 900.0, 960.0, 1020.0, 1090.0, 1160.0, 1250.0]
 nRecoilBins = len(recoilBins)-1
 
 ### CHOOSE DISTRIBUTIONS, LABELS ###
-if region in ['zmm','zee']:
-  minval=0.1; maxval=5*10**3
-else:
-  minval=1; maxval=10**5
 if not (region in ['signal','pho']):
-  plot.AddDistribution(root.Distribution("lep1Pt",0,500,20,"lep 1 p_{T} [GeV]","Events/25 GeV",minval,maxval))
-  plot.AddDistribution(root.Distribution("lep1Eta",-2.5,2.5,20,"lep 1 #eta","Events",minval,maxval))
+  plot.AddDistribution(root.Distribution("lep1Pt",0,500,20,"lep 1 p_{T} [GeV]","Events/25 GeV"))
+  plot.AddDistribution(root.Distribution("lep1Eta",-2.5,2.5,20,"lep 1 #eta","Events"))
 if region in ['pho']:
-  plot.AddDistribution(root.Distribution("photonPt",175,675,20,"photon 1 p_{T} [GeV]","Events/25 GeV",minval,maxval))
-  plot.AddDistribution(root.Distribution("photonEta",-1.4442,1.4442,20,"photon 1 #eta","Events",minval,maxval))
+  plot.AddDistribution(root.Distribution("photonPt",175,675,20,"photon 1 p_{T} [GeV]","Events/25 GeV"))
+  plot.AddDistribution(root.Distribution("photonEta",-1.4442,1.4442,20,"photon 1 #eta","Events"))
 if region in ['wmn','wen']:
-  plot.AddDistribution(root.Distribution('trueMet',0,500,20,'true MET [GeV]','Events/25 GeV',minval,maxval))
-  plot.AddDistribution(root.Distribution('mt',0,160,20,'M_{T} [GeV]','Events/8 GeV',minval,maxval))
-plot.AddDistribution(root.Distribution('fabs(jet1DPhiMet)',0,3.142,20,'#Delta #phi(jet 1, MET)','Events',minval,maxval,'jet1DPhiMet'))
-plot.AddDistribution(root.Distribution('fabs(minJetMetDPhi_withendcap)',0,3.142,20,'min #Delta #phi(jet, MET)','Events',minval,maxval,'minDPhiJetMet'))
-plot.AddDistribution(root.Distribution(sel.fixedmjj,0,4000,20,"Dijet mass [GeV]","Events/200 GeV",minval,maxval))
-plot.AddDistribution(root.Distribution("jjDEta",0,10,20,"Delta #eta leading jets","Events",minval,maxval))
-plot.AddDistribution(root.Distribution("jot1Pt",30,750,24,"Jet 1 p_{T} [GeV]","Events/30 GeV",minval,maxval))
-plot.AddDistribution(root.Distribution("jot2Pt",30,750,24,"Jet 2 p_{T} [GeV]","Events/30 GeV",minval,maxval))
-plot.AddDistribution(root.Distribution("jot1Eta",-5,5,20,"Jet 2 #eta","Events",minval,maxval))
-plot.AddDistribution(root.Distribution("jot2Eta",-5,5,20,"Jet 2 #eta","Events",minval,maxval))
-plot.AddDistribution(root.Distribution("fabs(SignedDeltaPhi(jot1Phi,jot2Phi))",0,3.142,20,"#Delta #phi leading jets","Events",minval,maxval,'jjDPhi'))
+  plot.AddDistribution(root.Distribution('trueMet',0,500,20,'true MET [GeV]','Events/25 GeV'))
+  plot.AddDistribution(root.Distribution('mt',0,160,20,'M_{T} [GeV]','Events/8 GeV'))
+plot.AddDistribution(root.Distribution('fabs(jet1DPhiMet)',0,3.142,20,'#Delta #phi(jet 1, MET)','Events',999,-999,'jet1DPhiMet'))
+plot.AddDistribution(root.Distribution('fabs(minJetMetDPhi_withendcap)',0,3.142,20,'min #Delta #phi(jet, MET)','Events',999,-999,'minDPhiJetMet'))
+plot.AddDistribution(root.Distribution(sel.fixedmjj,0,4000,20,"Dijet mass [GeV]","Events/200 GeV"))
+plot.AddDistribution(root.Distribution("jjDEta",0,10,20,"Delta #eta leading jets","Events"))
+plot.AddDistribution(root.Distribution("jot1Pt",40,760,24,"Jet 1 p_{T} [GeV]","Events/30 GeV"))
+plot.AddDistribution(root.Distribution("jot2Pt",40,760,24,"Jet 2 p_{T} [GeV]","Events/30 GeV"))
+plot.AddDistribution(root.Distribution("jot1Eta",-5,5,20,"Jet 2 #eta","Events"))
+plot.AddDistribution(root.Distribution("jot2Eta",-5,5,20,"Jet 2 #eta","Events"))
+plot.AddDistribution(root.Distribution("fabs(SignedDeltaPhi(jot1Phi,jot2Phi))",0,3.142,20,"#Delta #phi leading jets","Events",999,-999,'jjDPhi'))
 
 recoil=None
 if region=='signal':
@@ -136,8 +128,7 @@ elif region=='pho':
 if recoil:
   setBins(recoil,recoilBins)
   plot.AddDistribution(recoil)
-if region=='signal':
- plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
+plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
 
 ### DRAW AND CATALOGUE ###
 plot.DrawAll(args.outdir+'/'+region+'_')

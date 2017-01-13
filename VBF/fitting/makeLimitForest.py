@@ -19,7 +19,7 @@ import PandaAnalysis.VBF.LooseSelection as sel
 Load('PandaAnalysisFlat','LimitTreeBuilder')
 
 baseDir = getenv('PANDA_ZEYNEPDIR')+'/merged/'
-lumi = 12918
+lumi = 36600
 
 
 factory = root.LimitTreeBuilder()
@@ -30,8 +30,8 @@ else:
 
 def dataCut(basecut,trigger):
   # return tAND('metFilter==1',tAND(trigger,basecut))
-  #return tAND(trigger,basecut)
-  return tAND(tAND(trigger,basecut),'runNum<=276811')
+  return tAND(trigger,basecut)
+  #return tAND(tAND(trigger,basecut),'runNum<=276811')
 
 treelist = []
 
@@ -87,7 +87,8 @@ vm.AddVar('met','met')
 vm.AddVar('metPhi','metPhi')
 vm.AddVar('genBosonPt','genBos_pt')
 vm.AddVar('genBosonPhi','genBos_phi')
-for x in ['jjDEta','mjj','jot1Pt','jot2Pt','jot1Eta','jot2Eta','minJetMetDPhi_withendcap']:
+#for x in ['jjDEta','mjj','jot1Pt','jot2Pt','jot1Eta','jot2Eta','minJetMetDPhi_withendcap']:
+for x in ['jjDEta','mjj','minJetMetDPhi_withendcap']:
   vm.AddVar(x,x)
 vm.AddFormula('jjDPhi','fabs(SignedDeltaPhi(jot1Phi,jot2Phi))')
 
