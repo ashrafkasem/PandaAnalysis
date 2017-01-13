@@ -1,6 +1,8 @@
 from PandaCore.Tools.Misc import *
 from re import sub
 
+calomet cut?
+
 triggers = {
     'met':'(trigger&1)!=0',
     'ele':'(trigger&2)!=0',

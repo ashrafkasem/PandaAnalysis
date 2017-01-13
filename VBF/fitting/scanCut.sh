@@ -27,14 +27,15 @@ which combine
 cd $WD
 cp -r $scramdir/src/MonoX .
 cd MonoX
-sed "s?XXXX?${thiscut}?g" configs/categories_config_vbf_tmpl.py > configs/categories_config_vbf_scan.py
+sed "s?XXXX?${thiscut}?g" configs/vbf_tmpl.py > configs/vbf_scan.py
 
-python buildModel.py categories_config_vbf_scan
+python buildModel.py vbf_scan
 python runModelNoPhoton.py
 
-cp combined_model.root datacardsNoPhoton/ 
-cd datacardsNoPhoton
-combine -M Asymptotic vbf_combined.txt -n $label --run=blind --noFitAsimov 
+cp combined_model.root datacardsHiggs/ 
+cd datacardsHiggs
+#combine -M Asymptotic vbf_combined_fewbins.txt -n $label --run=blind --noFitAsimov 
+combine -M Asymptotic vbf_combined_binned.txt -n $label --run=blind --noFitAsimov 
 #combine -M Asymptotic vbf_combined.txt -n $label --run=blind --noFitAsimov 
 cp higgs*root $outdir 
 
