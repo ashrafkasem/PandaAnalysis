@@ -22,8 +22,9 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-import PandaAnalysis.VBF.TightSelection as sel
+#import PandaAnalysis.VBF.TightSelection as sel
 #import PandaAnalysis.VBF.LooseSelection as sel
+import PandaAnalysis.VBF.HornSelection as sel
 #import PandaAnalysis.VBF.MonojetSelection as sel
 Load('Drawers','PlotUtility')
 
@@ -42,7 +43,7 @@ else:
   plot.SetLumi(lumi/1000)
 plot.SetSignalScale(10)
 plot.Ratio(True)
-plot.FixRatio(0.4)
+plot.FixRatio(1)
 plot.SetTDRStyle()
 plot.InitLegend()
 plot.DrawMCErrors(True)
@@ -125,13 +126,18 @@ if region in ['pho']:
 if region in ['wmn','wen']:
   plot.AddDistribution(root.Distribution('trueMet',0,500,20,'true MET [GeV]','Events/25 GeV'))
   plot.AddDistribution(root.Distribution('mt',0,160,20,'M_{T} [GeV]','Events/8 GeV'))
-plot.AddDistribution(root.Distribution('fabs(jet1DPhiMet)',0,3.142,20,'#Delta #phi(jet 1, MET)','Events',999,-999,'jet1DPhiMet'))
+
+plot.AddDistribution(root.Distribution('fabs(SignedDeltaPhi(jot1Phi,metPhi))',0,3.142,20,'#Delta #phi(jet 1, MET)','Events',999,-999,'jet1DPhiMet'))
+plot.AddDistribution(root.Distribution('fabs(SignedDeltaPhi(jot1Phi,trueMetPhi))',0,3.142,20,'#Delta #phi(jet 1, MET)','Events',999,-999,'jet1DPhiTrueMet'))
+plot.AddDistribution(root.Distribution('fabs(SignedDeltaPhi(jot2Phi,metPhi))',0,3.142,20,'#Delta #phi(jet 2, MET)','Events',999,-999,'jet2DPhiMet'))
+plot.AddDistribution(root.Distribution('fabs(SignedDeltaPhi(jot2Phi,trueMetPhi))',0,3.142,20,'#Delta #phi(jet 2, MET)','Events',999,-999,'jet2DPhiTrueMet'))
+
 plot.AddDistribution(root.Distribution('fabs(minJetMetDPhi_withendcap)',0,3.142,20,'min #Delta #phi(jet, MET)','Events',999,-999,'minDPhiJetMet'))
 plot.AddDistribution(root.Distribution(sel.fixedmjj,0,4000,20,"Dijet mass [GeV]","Events/200 GeV"))
 plot.AddDistribution(root.Distribution("jjDEta",0,10,20,"Delta #eta leading jets","Events"))
 plot.AddDistribution(root.Distribution("jot1Pt",40,760,24,"Jet 1 p_{T} [GeV]","Events/30 GeV"))
 plot.AddDistribution(root.Distribution("jot2Pt",40,760,24,"Jet 2 p_{T} [GeV]","Events/30 GeV"))
-plot.AddDistribution(root.Distribution("jot1Eta",-5,5,20,"Jet 2 #eta","Events"))
+plot.AddDistribution(root.Distribution("jot1Eta",-5,5,20,"Jet 1 #eta","Events"))
 plot.AddDistribution(root.Distribution("jot2Eta",-5,5,20,"Jet 2 #eta","Events"))
 plot.AddDistribution(root.Distribution("fabs(SignedDeltaPhi(jot1Phi,jot2Phi))",0,3.142,20,"#Delta #phi leading jets","Events",999,-999,'jjDPhi'))
 

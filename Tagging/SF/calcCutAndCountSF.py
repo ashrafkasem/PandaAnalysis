@@ -2,25 +2,32 @@
 
 import argparse
 from sys import argv
+from os import getenv
 
-VERBOSE=False
+VERBOSE=True
 parser = argparse.ArgumentParser(description='fit stuff')
-parser.add_argument('--disc',metavar='disc',type=str,default='top_ecfv8_bdt')
-parser.add_argument('--cut',metavar='cut',type=float,default=0.6)
+parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
+parser.add_argument('--disc',metavar='disc',type=str,default='top_ecf_bdt')
+parser.add_argument('--cut',metavar='cut',type=float,default=0.1)
 parser.add_argument('--useMass',metavar='useMass',type=str,default='FALSE')
 args = parser.parse_args()
+sname = argv[0]
 argv=[]
 
 
 from math import sqrt
 import ROOT as root
 from PandaCore.Tools.Misc import *
+import PandaAnalysis.Monotop.NoMassPFSelection as sel
 
-basedir = '/home/snarayan/home000/store/panda/v8/sf/'
-nbins = 1
+basedir = getenv('PANDA_FLATDIR')
+fdata = root.TFile(basedir+'/MET.root')
+tdata = fdata.Get('events')
+fmc = root.TFile(basedir+'/ZJets.root')
+tmc = fmc.Get('events')
 
-fdata = root.TFile(basedir+'photon__data.root'); tdata = fdata.Get('data')
-fgjets = root.TFile(basedir+'photon__gjets.root'); tgjets = fgjets.Get('gjets')
+cut = removeCut(sel.cuts['dimuon'],'fj1MSD')
+weight = sel.weights['dimuon']%36600
 
 c = root.TCanvas()
 
@@ -37,7 +44,6 @@ def calcEffAndErr(p,perr,f,ferr):
   err_ = pow( perr * f / pow(p+f,2) , 2 )
   err_ += pow( ferr * p / pow(p+f,2) , 2 )
   err_ = sqrt(err_)
-  print p,perr,f,ferr,eff_,err_
   return eff_,err_
 
 def calcSFAndErr(d,derr,m,merr):
@@ -49,31 +55,32 @@ def calcSFAndErr(d,derr,m,merr):
 
 if args.useMass.upper()=='FALSE':
   if 'tau' in args.disc:
-    passcut='%s<%f && mSD>50'
-    failcut='%s>%f && mSD>50'
+    passcut='%s<%f'
+    failcut='%s>%f'
   else:
-    passcut='%s>%f && mSD>50'
-    failcut='%s<%f && mSD>50'
+    passcut='%s>%f'
+    failcut='%s<%f'
 else:
   if 'tau' in args.disc:
-    passcut='%s<%f && mSD>110 && mSD<210'
-    failcut='!(%s<%f && mSD>110 && mSD<210) && mSD>50'
+    passcut='%s<%f && fj1MSD>110 && fj1MSD<210'
+    failcut='!(%s<%f && fj1MSD>110 && fj1MSD<210)'
   else:
-    passcut='%s>%f && mSD>110 && mSD<210'
-    failcut='!(%s>%f && mSD>110 && mSD<210) && mSD>50'
+    passcut='%s>%f && fj1MSD>110 && fj1MSD<210'
+    failcut='!(%s>%f && fj1MSD>110 && fj1MSD<210)'
 
 # first get the yields for the tagging cut
-datapass,datapasserr = getIntAndErr(tdata,passcut%(args.disc,args.cut),'1')
-datafail,datafailerr = getIntAndErr(tdata,failcut%(args.disc,args.cut),'1')
-gjetspass,gjetspasserr = getIntAndErr(tgjets,passcut%(args.disc,args.cut),'weight')
-gjetsfail,gjetsfailerr = getIntAndErr(tgjets,failcut%(args.disc,args.cut),'weight')
+datapass,datapasserr = getIntAndErr(tdata,tAND(cut,passcut%(args.disc,args.cut)),'1')
+datafail,datafailerr = getIntAndErr(tdata,tAND(cut,failcut%(args.disc,args.cut)),'1')
+mcpass,mcpasserr = getIntAndErr(tmc,tAND(cut,passcut%(args.disc,args.cut)),weight)
+mcfail,mcfailerr = getIntAndErr(tmc,tAND(cut,failcut%(args.disc,args.cut)),weight)
 
 if VERBOSE:
-  print datapass,datafail,datapasserr,datafailerr
-  print gjetspass,gjetsfail,gjetspasserr,gjetsfailerr
+	PDebug(sname,'%10s %10s %10s %10s'%('pass','fail','passerr','failerr'))
+	PDebug(sname,'%10f %10f %10f %10f'%(datapass,datafail,datapasserr,datafailerr))
+	PDebug(sname,'%10f %10f %10f %10f'%(mcpass,mcfail,mcpasserr,mcfailerr))
 
-mceff,mcerr = calcEffAndErr(gjetspass,gjetspasserr,gjetsfail,gjetsfailerr)
+mceff,mcerr = calcEffAndErr(mcpass,mcpasserr,mcfail,mcfailerr)
 dataeff,dataerr = calcEffAndErr(datapass,datapasserr,datafail,datafailerr)
 tagsf, tagsferr = calcSFAndErr(dataeff,dataerr,mceff,mcerr)
 
-print '%.3g +/- %.2g'%(tagsf,tagsferr)
+PInfo(sname,'SF(%s) = %.4g +/- %.3g'%(passcut%(args.disc,args.cut),tagsf,tagsferr))
