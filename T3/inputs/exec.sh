@@ -24,4 +24,4 @@ cd -
 python skim.py $@
 
 ls
-rm -rf $RELEASE skim.py x509up cmssw.tgz local.cfg 
+rm -rf $RELEASE skim.py x509up cmssw.tgz local.cfg *root

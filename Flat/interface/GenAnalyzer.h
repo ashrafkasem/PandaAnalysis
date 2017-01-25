@@ -27,69 +27,69 @@
 // GenAnalyzer definition
 class GenAnalyzer {
 public :
-  // configuration enums
-  enum Order {
-   kLO,
-   kNLO
-  };
+	// configuration enums
+	enum Order {
+	 kLO,
+	 kNLO
+	};
 
-  enum Process { 
-    kZ,
-    kW
-  };
+	enum Process { 
+		kZ,
+		kW
+	};
 
-  enum Plots {
-    kVpt,
-    kVeta,
-    kMET,
-    kMjj,
-    kHT,
-    kJet1pt,
-    nPlots
-  };
+	enum Plots {
+		kVpt,
+		kVeta,
+		kMET,
+		kMjj,
+		kHT,
+		kJet1pt,
+		nPlots
+	};
 
-  //////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////
 
-  GenAnalyzer();
-  ~GenAnalyzer();
-  void AddInput(TTree *tree, double xsec, TString label);
-  void SetOutputPath(TString fOutName, TString fOutFileName="skimmed.root"); //!< location of output file plus any generated histograms
-  void ResetBranches();
-  void Run();
-  void Terminate();
+	GenAnalyzer();
+	~GenAnalyzer();
+	void AddInput(TTree *tree, double xsec, TString label);
+	void SetOutputPath(TString fOutName, TString fOutFileName="skimmed.root"); //!< location of output file plus any generated histograms
+	void ResetBranches();
+	void Run();
+	void Terminate();
 
-  // public configuration
-  void SetFlag(TString flag, bool b=true) { flags[flag]=b; }
-  void SetCut(TString cut) { scut = cut; }
-  int firstEvent=-1;
-  int lastEvent=-1;                          // max events to process; -1=>all
-  Process processType;             // determine which leps to look for
-  Order order;                         // this determines the data format
+	// public configuration
+	void SetFlag(TString flag, bool b=true) { flags[flag]=b; }
+	void SetCut(TString cut) { scut = cut; }
+	int firstEvent=-1;
+	int lastEvent=-1;													// max events to process; -1=>all
+	Process processType;						 // determine which leps to look for
+	Order order;												 // this determines the data format
 
 private:
-  struct InputTree {
-    TTree *t;
-    double xsec;
-    TString label;
-  };
+	struct InputTree {
+		TTree *t;
+		double xsec;
+		TString label;
+	};
 
-  void RunLO(); 
-  void RunNLO();
+	void RunLO(); 
+	void RunNLO();
 
-  std::map<TString,bool> flags;
+	std::map<TString,bool> flags;
 
-  // IO for the analyzer
-  TFile *fOut;   // output file is owned by GenAnalyzer
-  TTree *tOut;
-  KFactorTree *kt; // essentially a wrapper around tOut
-  std::vector<InputTree> tIns;  // input trees to read
-  TString outpath;
+	// IO for the analyzer
+	TFile *fOut;	 // output file is owned by GenAnalyzer
+	TTree *tOut;
+	KFactorTree *kt; // essentially a wrapper around tOut
+	std::vector<InputTree> tIns;	// input trees to read
+	TString outpath;
 
-  TString scut="1==1"; // turned into a TTreeFormula
+	TString scut="1==1"; // turned into a TTreeFormula
 
-  TH1D *hists[nPlots]{};
+	TH1D *hists[nPlots]{};
 
-  unsigned int nEvents, nZero;
+	unsigned int nEvents, nZero;
 };
 
 
