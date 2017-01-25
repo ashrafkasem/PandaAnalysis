@@ -10,6 +10,7 @@ parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
 parser.add_argument('--region',metavar='region',type=str,default=None)
+parser.add_argument('--era',metavar='era',default=None)
 args = parser.parse_args()
 lumi = 36560.
 blind=True
@@ -19,18 +20,38 @@ sname = argv[0]
 
 argv=[]
 import ROOT as root
+root.gROOT.SetBatch()
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
 #import PandaAnalysis.Monotop.NewPFSelection as sel
 #import PandaAnalysis.Monotop.OldPFSelection as sel
-#import PandaAnalysis.Monotop.NoTagPFSelection as sel
-import PandaAnalysis.Monotop.NoMassPFSelection as sel
+import PandaAnalysis.Monotop.NoTagPFSelection as sel
+#import PandaAnalysis.Monotop.NoMassPFSelection as sel
 Load('Drawers','PlotUtility')
 
 ### DEFINE REGIONS ###
 
 cut = tAND(sel.cuts[args.region],args.cut)
+datacut = '1==1'
+if args.era:
+  all_runs = {
+      'B' : (272007,275376),
+      'C' : (275657,276283),
+      'D' : (276315,276811),
+      'E' : (276831,277420),
+      'F' : (277772,278808),
+      'G' : (278820,280385),
+      'H' : (280919,284044),
+      }
+
+  run_boundaries = []
+  for e in args.era:
+    lo,hi = all_runs[e]
+    run_boundaries += [lo,hi]
+  runs = (min(run_boundaries),max(run_boundaries))
+  datacut = 'runNumber>%i && runNumber<%i'%(runs[0],runs[1])
+
 PInfo(sname,'using cut: '+cut)
 
 ### LOAD PLOTTING UTILITY ###
@@ -49,11 +70,14 @@ plot.SetEvtNum("eventNumber")
 if ('signal' in region) and blind:
   plot.SetEvtMod(5)
   plot.SetLumi(lumi/5000)
+  plot.AddPlotLabel('Every 5th event',.18,.7,False,42,.04)
 else:
   plot.SetLumi(lumi/1000)
 plot.AddLumiLabel(True)
 plot.SetDoOverflow()
 plot.SetDoUnderflow()
+if args.era:
+  plot.SetNormFactor(True)
 
 weight = sel.weights[region]%lumi
 plot.SetMCWeight(root.TCut(weight))
@@ -200,4 +224,7 @@ plot.AddDistribution(root.Distribution('jet1CSV',0,1,20,'jet 1 CSV','Events',999
 plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
 
 ### DRAW AND CATALOGUE ###
-plot.DrawAll(args.outdir+'/'+region+'_')
+if args.era:
+  plot.DrawAll(args.outdir+'/'+region+'_'+args.era+'_')
+else:
+  plot.DrawAll(args.outdir+'/'+region+'_')
