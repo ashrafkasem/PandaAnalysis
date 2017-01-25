@@ -15,23 +15,23 @@ class GeneralTree : public genericTree {
 		std::vector<double> betas = {0.5, 1.0, 2.0, 4.0};
 		std::vector<int> Ns = {1,2,3,4}; 
 		std::vector<int> orders = {1,2,3};
-    TString makeECFString(int order, int N, float beta) {
-      return TString::Format("ECFN_%i_%i_%.2i",order,N,int(10*beta));
-    }
+		TString makeECFString(int order, int N, float beta) {
+			return TString::Format("ECFN_%i_%i_%.2i",order,N,int(10*beta));
+		}
 
-  public:
-    bool monohiggs=false, monojet=false, fatjet=true;
-    GeneralTree();
-    ~GeneralTree();
-    void ReadTree(TTree *t);
-    void WriteTree(TTree *t);
-    void Fill() { treePtr->Fill(); }
-    void Reset();
+	public:
+		bool monohiggs=false, monojet=false, fatjet=true;
+		GeneralTree();
+		~GeneralTree();
+		void ReadTree(TTree *t);
+		void WriteTree(TTree *t);
+		void Fill() { treePtr->Fill(); }
+		void Reset();
 
-    std::vector<double> get_betas() const { return betas; }
-    std::vector<int> get_Ns() const { return Ns; }
-    std::vector<int> get_orders() const { return orders; }
-    
+		std::vector<double> get_betas() const { return betas; }
+		std::vector<int> get_Ns() const { return Ns; }
+		std::vector<int> get_orders() const { return orders; }
+		
 	int runNumber=0;
 	int lumiNumber=0;
 	ULong64_t eventNumber=0;
@@ -42,20 +42,20 @@ class GeneralTree : public genericTree {
 	float sf_ewkV=0;
 	float sf_qcdV=0;
 	float sf_lep=0;
-  float sf_pho=0;
+	float sf_pho=0;
 	float sf_lepReco=0;
-  float sf_sjcsvWeightB=0;
-  float sf_sjcsvWeightM=0;
-  float sf_csvWeightB=0;
-  float sf_csvWeightM=0;
-  float sf_sjcsvWeightBUp=0;
-  float sf_sjcsvWeightMUp=0;
-  float sf_csvWeightBUp=0;
-  float sf_csvWeightMUp=0;
-  float sf_sjcsvWeightBDown=0;
-  float sf_sjcsvWeightMDown=0;
-  float sf_csvWeightBDown=0;
-  float sf_csvWeightMDown=0;
+	float sf_sjcsvWeightB=0;
+	float sf_sjcsvWeightM=0;
+	float sf_csvWeightB=0;
+	float sf_csvWeightM=0;
+	float sf_sjcsvWeightBUp=0;
+	float sf_sjcsvWeightMUp=0;
+	float sf_csvWeightBUp=0;
+	float sf_csvWeightMUp=0;
+	float sf_sjcsvWeightBDown=0;
+	float sf_sjcsvWeightMDown=0;
+	float sf_csvWeightBDown=0;
+	float sf_csvWeightMDown=0;
 	float sf_btag0=0;
 	float sf_btag0BUp=0;
 	float sf_btag0BDown=0;
@@ -106,7 +106,11 @@ class GeneralTree : public genericTree {
 	float sf_metTrig=0;
 	float sf_pu=0;
 	float sf_tt=0;
+	float sf_tt_ext=0;
+	float sf_tt_bound=0;
 	float sf_tt8TeV=0;
+	float sf_tt8TeV_ext=0;
+	float sf_tt8TeV_bound=0;
 	float sf_phoPurity=0;
 	float finalWeight=0;
 	float pfmet=0;
@@ -148,7 +152,18 @@ class GeneralTree : public genericTree {
 	float genBosonEta=0;
 	float genBosonMass=0;
 	float genBosonPhi=0;
+	float genWPlusPt=0;
+	float genWMinusPt=0;
+	float genWPlusEta=0;
+	float genWMinusEta=0;
+	float genTopIsHad=0;
 	float genTopPt=0;
+	float genAntiTopIsHad=0;
+	float genAntiTopPt=0;
+	float genTopEta=0;
+	float genAntiTopEta=0;
+	float genTTPt=0;
+	float genTTEta=0;
 	int nJet=0;
 	float jet1Phi=0;
 	float jet1Pt=0;
@@ -172,11 +187,21 @@ class GeneralTree : public genericTree {
 	int nFatjet=0;
 	float fj1Tau32=0;
 	float fj1Tau21=0;
-  float fj1Tau32SD=0;
-  float fj1Tau21SD=0;
+	float fj1Tau32SD=0;
+	float fj1Tau21SD=0;
 	float fj1MSD=0;
 	float fj1MSD_corr=0;
 	float fj1Pt=0;
+	float fj1PtScaleUp=0;
+	float fj1PtScaleDown=0;
+	float fj1PtSmeared=0;
+	float fj1PtSmearedUp=0;
+	float fj1PtSmearedDown=0;
+	float fj1MSDScaleUp=0;
+	float fj1MSDScaleDown=0;
+	float fj1MSDSmeared=0;
+	float fj1MSDSmearedUp=0;
+	float fj1MSDSmearedDown=0;
 	float fj1Phi=0;
 	float fj1Eta=0;
 	float fj1M=0;
@@ -191,18 +216,18 @@ class GeneralTree : public genericTree {
 	float fj1sjM[NSUBJET];
 	float fj1sjCSV[NSUBJET];
 	float fj1sjQGL[NSUBJET];
-  float fj1GenWPt=0;
-  float fj1GenWSize=0;
-  int fj1IsWMatched=0;
-  int fj1HighestPtGen=0;
-  float fj1HighestPtGenPt=-1;
+	float fj1GenWPt=0;
+	float fj1GenWSize=0;
+	int fj1IsWMatched=0;
+	int fj1HighestPtGen=0;
+	float fj1HighestPtGenPt=-1;
 	int fj1IsTight=0;
 	int fj1IsLoose=0;
 	float fj1RawPt=0;
 	int fj1IsHF=0;
-  float fj1HTTMass=0;
-  float fj1HTTFRec=0;
-  int fj1IsClean=0;
+	float fj1HTTMass=0;
+	float fj1HTTFRec=0;
+	int fj1IsClean=0;
 	int isHF=0;
 	int nLoosePhoton=0;
 	int nTightPhoton=0;
@@ -228,101 +253,105 @@ class GeneralTree : public genericTree {
 	float looseLep2Phi=0;
 	float diLepMass=0;
 	int nTau=0;
-  float jetPt[NJET];
-  float jetEta[NJET];
-  float jetPhi[NJET];
-  float jetE[NJET];
-  float jetCSV[NJET];
-  float jetIso[NJET];
-  float jetQGL[NJET];
+	float jetPt[NJET];
+	float jetEta[NJET];
+	float jetPhi[NJET];
+	float jetE[NJET];
+	float jetCSV[NJET];
+	float jetIso[NJET];
+	float jetQGL[NJET];
 	float hbbpt;
 	float hbbeta;
 	float hbbphi;
 	float hbbm;
 	int hbbjtidx[2];
-	  
+		
 	std::map<TString,float> fj1ECFNs;
 
 //ENDDEF
 };
 
 GeneralTree::GeneralTree() {
-    	runNumber=0;
+			runNumber=0;
 	lumiNumber=0;
 	eventNumber=0;
 	npv=0;
 	mcWeight=0;
 	trigger=0;
 	metFilter=0;
-  sf_ewkV=1;
-  sf_qcdV=1;
-  sf_lep=1;
-  sf_pho=1;
-  sf_lepReco=1;
-  sf_sjcsvWeightB=1;
-  sf_sjcsvWeightM=1;
-  sf_csvWeightB=1;
-  sf_csvWeightM=1;
-  sf_sjcsvWeightBUp=1;
-  sf_sjcsvWeightMUp=1;
-  sf_csvWeightBUp=1;
-  sf_csvWeightMUp=1;
-  sf_sjcsvWeightBDown=1;
-  sf_sjcsvWeightMDown=1;
-  sf_csvWeightBDown=1;
-  sf_csvWeightMDown=1;
-  sf_btag0=1;
-  sf_btag0BUp=1;
-  sf_btag0BDown=1;
-  sf_btag0MUp=1;
-  sf_btag0MDown=1;
-  sf_btag1=1;
-  sf_btag1BUp=1;
-  sf_btag1BDown=1;
-  sf_btag1MUp=1;
-  sf_btag1MDown=1;
-  sf_btag2=1;
-  sf_btag2BUp=1;
-  sf_btag2BDown=1;
-  sf_btag2MUp=1;
-  sf_btag2MDown=1;
-  sf_btag0_alt=1;
-  sf_btag0BUp_alt=1;
-  sf_btag0BDown_alt=1;
-  sf_btag0MUp_alt=1;
-  sf_btag0MDown_alt=1;
-  sf_btag1_alt=1;
-  sf_btag1BUp_alt=1;
-  sf_btag1BDown_alt=1;
-  sf_btag1MUp_alt=1;
-  sf_btag1MDown_alt=1;
-  sf_btag2_alt=1;
-  sf_btag2BUp_alt=1;
-  sf_btag2BDown_alt=1;
-  sf_btag2MUp_alt=1;
-  sf_btag2MDown_alt=1;
-  sf_sjbtag0=1;
-  sf_sjbtag0BUp=1;
-  sf_sjbtag0BDown=1;
-  sf_sjbtag0MUp=1;
-  sf_sjbtag0MDown=1;
-  sf_sjbtag1=1;
-  sf_sjbtag1BUp=1;
-  sf_sjbtag1BDown=1;
-  sf_sjbtag1MUp=1;
-  sf_sjbtag1MDown=1;
-  sf_sjbtag2=1;
-  sf_sjbtag2BUp=1;
-  sf_sjbtag2BDown=1;
-  sf_sjbtag2MUp=1;
-  sf_sjbtag2MDown=1;
-  sf_eleTrig=1;
-  sf_phoTrig=1;
-  sf_metTrig=1;
-  sf_pu=1;
-  sf_tt=1;
-  sf_tt8TeV=1;
-  sf_phoPurity=1;
+	sf_ewkV=1;
+	sf_qcdV=1;
+	sf_lep=1;
+	sf_pho=1;
+	sf_lepReco=1;
+	sf_sjcsvWeightB=1;
+	sf_sjcsvWeightM=1;
+	sf_csvWeightB=1;
+	sf_csvWeightM=1;
+	sf_sjcsvWeightBUp=1;
+	sf_sjcsvWeightMUp=1;
+	sf_csvWeightBUp=1;
+	sf_csvWeightMUp=1;
+	sf_sjcsvWeightBDown=1;
+	sf_sjcsvWeightMDown=1;
+	sf_csvWeightBDown=1;
+	sf_csvWeightMDown=1;
+	sf_btag0=1;
+	sf_btag0BUp=1;
+	sf_btag0BDown=1;
+	sf_btag0MUp=1;
+	sf_btag0MDown=1;
+	sf_btag1=1;
+	sf_btag1BUp=1;
+	sf_btag1BDown=1;
+	sf_btag1MUp=1;
+	sf_btag1MDown=1;
+	sf_btag2=1;
+	sf_btag2BUp=1;
+	sf_btag2BDown=1;
+	sf_btag2MUp=1;
+	sf_btag2MDown=1;
+	sf_btag0_alt=1;
+	sf_btag0BUp_alt=1;
+	sf_btag0BDown_alt=1;
+	sf_btag0MUp_alt=1;
+	sf_btag0MDown_alt=1;
+	sf_btag1_alt=1;
+	sf_btag1BUp_alt=1;
+	sf_btag1BDown_alt=1;
+	sf_btag1MUp_alt=1;
+	sf_btag1MDown_alt=1;
+	sf_btag2_alt=1;
+	sf_btag2BUp_alt=1;
+	sf_btag2BDown_alt=1;
+	sf_btag2MUp_alt=1;
+	sf_btag2MDown_alt=1;
+	sf_sjbtag0=1;
+	sf_sjbtag0BUp=1;
+	sf_sjbtag0BDown=1;
+	sf_sjbtag0MUp=1;
+	sf_sjbtag0MDown=1;
+	sf_sjbtag1=1;
+	sf_sjbtag1BUp=1;
+	sf_sjbtag1BDown=1;
+	sf_sjbtag1MUp=1;
+	sf_sjbtag1MDown=1;
+	sf_sjbtag2=1;
+	sf_sjbtag2BUp=1;
+	sf_sjbtag2BDown=1;
+	sf_sjbtag2MUp=1;
+	sf_sjbtag2MDown=1;
+	sf_eleTrig=1;
+	sf_phoTrig=1;
+	sf_metTrig=1;
+	sf_pu=1;
+	sf_tt=1;
+	sf_tt_ext=1;
+	sf_tt_bound=1;
+	sf_tt8TeV=1;
+	sf_tt8TeV_ext=1;
+	sf_tt8TeV_bound=1;
+	sf_phoPurity=1;
 	finalWeight=0;
 	pfmet=0;
 	pfmetphi=0;
@@ -363,7 +392,18 @@ GeneralTree::GeneralTree() {
 	genBosonEta=0;
 	genBosonMass=0;
 	genBosonPhi=0;
+	genWPlusPt=0;
+	genWMinusPt=0;
+	genWPlusEta=0;
+	genWMinusEta=0;
 	genTopPt=0;
+	genAntiTopPt=0;
+	genTopIsHad=0;
+	genAntiTopIsHad=0;
+	genTopEta=0;
+	genAntiTopEta=0;
+	genTTPt=0;
+	genTTEta=0;
 	nJet=0;
 	jet1Phi=0;
 	jet1Pt=0;
@@ -387,11 +427,21 @@ GeneralTree::GeneralTree() {
 	nFatjet=0;
 	fj1Tau32=0;
 	fj1Tau21=0;
-  fj1Tau32SD=0;
-  fj1Tau21SD=0;
+	fj1Tau32SD=0;
+	fj1Tau21SD=0;
 	fj1MSD=0;
 	fj1MSD_corr=0;
 	fj1Pt=0;
+	fj1PtScaleUp=0;
+	fj1PtScaleDown=0;
+	fj1PtSmeared=0;
+	fj1PtSmearedUp=0;
+	fj1PtSmearedDown=0;
+	fj1MSDScaleUp=0;
+	fj1MSDScaleDown=0;
+	fj1MSDSmeared=0;
+	fj1MSDSmearedUp=0;
+	fj1MSDSmearedDown=0;
 	fj1Phi=0;
 	fj1Eta=0;
 	fj1M=0;
@@ -400,18 +450,18 @@ GeneralTree::GeneralTree() {
 	fj1GenPt=0;
 	fj1GenSize=0;
 	fj1IsMatched=0;
-  fj1GenWPt=0;
-  fj1GenWSize=0;
-  fj1IsWMatched=0;
-  fj1HighestPtGen=0;
-  fj1HighestPtGenPt=-1;
+	fj1GenWPt=0;
+	fj1GenWSize=0;
+	fj1IsWMatched=0;
+	fj1HighestPtGen=0;
+	fj1HighestPtGenPt=-1;
 	fj1IsTight=0;
 	fj1IsLoose=0;
 	fj1RawPt=0;
 	fj1IsHF=0;
-  fj1HTTMass=0;
-  fj1HTTFRec=0;
-  fj1IsClean=0;
+	fj1HTTMass=0;
+	fj1HTTFRec=0;
+	fj1IsClean=0;
 	isHF=0;
 	nLoosePhoton=0;
 	nTightPhoton=0;
@@ -442,117 +492,121 @@ GeneralTree::GeneralTree() {
 	hbbphi=0;
 	hbbm=0;
 	
-  for (auto beta : betas) {
-    for (auto N : Ns) {
-      for (auto order : orders) {
-        TString ecfn(makeECFString(order,N,beta));
-        fj1ECFNs[ecfn]=-1;
-      }
-    }
-  }
+	for (auto beta : betas) {
+		for (auto N : Ns) {
+			for (auto order : orders) {
+				TString ecfn(makeECFString(order,N,beta));
+				fj1ECFNs[ecfn]=-1;
+			}
+		}
+	}
 
-  for (unsigned int iSJ=0; iSJ!=NSUBJET; ++iSJ) {
-    fj1sjPt[iSJ] = -1;
-    fj1sjEta[iSJ] = -1;
-    fj1sjPhi[iSJ] = -1;
-    fj1sjM[iSJ] = -1;
-    fj1sjCSV[iSJ] = -1;
-    fj1sjQGL[iSJ] = -1;
-  }
-  for (unsigned int iJ=0; iJ!=NJET; ++iJ) {
-    jetPt[iJ] = -1;
-    jetEta[iJ] = -1;
-    jetPhi[iJ] = -1;
-    jetE[iJ] = -1;
-    jetCSV[iJ] = -1;
-    jetIso[iJ] = -1;
-    jetQGL[iJ] = -1;
-  }
+	for (unsigned int iSJ=0; iSJ!=NSUBJET; ++iSJ) {
+		fj1sjPt[iSJ] = -1;
+		fj1sjEta[iSJ] = -1;
+		fj1sjPhi[iSJ] = -1;
+		fj1sjM[iSJ] = -1;
+		fj1sjCSV[iSJ] = -1;
+		fj1sjQGL[iSJ] = -1;
+	}
+	for (unsigned int iJ=0; iJ!=NJET; ++iJ) {
+		jetPt[iJ] = -1;
+		jetEta[iJ] = -1;
+		jetPhi[iJ] = -1;
+		jetE[iJ] = -1;
+		jetCSV[iJ] = -1;
+		jetIso[iJ] = -1;
+		jetQGL[iJ] = -1;
+	}
 
 //ENDCONST
 }
 
 GeneralTree::~GeneralTree() {
-    //ENDDEST
+		//ENDDEST
 }
 
 void GeneralTree::Reset() {
-    	runNumber = 0;
+			runNumber = 0;
 	lumiNumber = 0;
 	eventNumber = 0;
 	npv = 0;
 	mcWeight = -1;
 	trigger = 0;
 	metFilter = 0;
-  sf_ewkV = 1;
-  sf_qcdV = 1;
-  sf_lep = 1;
-  sf_pho = 1;
-  sf_lepReco = 1;
-  sf_sjcsvWeightB=1;
-  sf_sjcsvWeightM=1;
-  sf_csvWeightB=1;
-  sf_csvWeightM=1;
-  sf_sjcsvWeightBUp=1;
-  sf_sjcsvWeightMUp=1;
-  sf_csvWeightBUp=1;
-  sf_csvWeightMUp=1;
-  sf_sjcsvWeightBDown=1;
-  sf_sjcsvWeightMDown=1;
-  sf_csvWeightBDown=1;
-  sf_csvWeightMDown=1;
-  sf_btag0 = 1;
-  sf_btag0BUp = 1;
-  sf_btag0BDown = 1;
-  sf_btag0MUp = 1;
-  sf_btag0MDown = 1;
-  sf_btag1 = 1;
-  sf_btag1BUp = 1;
-  sf_btag1BDown = 1;
-  sf_btag1MUp = 1;
-  sf_btag1MDown = 1;
-  sf_btag2 = 1;
-  sf_btag2BUp = 1;
-  sf_btag2BDown = 1;
-  sf_btag2MUp = 1;
-  sf_btag2MDown = 1;
-  sf_btag0_alt = 1;
-  sf_btag0BUp_alt = 1;
-  sf_btag0BDown_alt = 1;
-  sf_btag0MUp_alt = 1;
-  sf_btag0MDown_alt = 1;
-  sf_btag1_alt = 1;
-  sf_btag1BUp_alt = 1;
-  sf_btag1BDown_alt = 1;
-  sf_btag1MUp_alt = 1;
-  sf_btag1MDown_alt = 1;
-  sf_btag2_alt = 1;
-  sf_btag2BUp_alt = 1;
-  sf_btag2BDown_alt = 1;
-  sf_btag2MUp_alt = 1;
-  sf_btag2MDown_alt = 1;
-  sf_sjbtag0 = 1;
-  sf_sjbtag0BUp = 1;
-  sf_sjbtag0BDown = 1;
-  sf_sjbtag0MUp = 1;
-  sf_sjbtag0MDown = 1;
-  sf_sjbtag1 = 1;
-  sf_sjbtag1BUp = 1;
-  sf_sjbtag1BDown = 1;
-  sf_sjbtag1MUp = 1;
-  sf_sjbtag1MDown = 1;
-  sf_sjbtag2 = 1;
-  sf_sjbtag2BUp = 1;
-  sf_sjbtag2BDown = 1;
-  sf_sjbtag2MUp = 1;
-  sf_sjbtag2MDown = 1;
-  sf_eleTrig = 1;
-  sf_phoTrig = 1;
-  sf_metTrig = 1;
-  sf_pu = 1;
-  sf_tt = 1;
-  sf_tt8TeV = 1;
-  sf_phoPurity = 1;
+	sf_ewkV = 1;
+	sf_qcdV = 1;
+	sf_lep = 1;
+	sf_pho = 1;
+	sf_lepReco = 1;
+	sf_sjcsvWeightB=1;
+	sf_sjcsvWeightM=1;
+	sf_csvWeightB=1;
+	sf_csvWeightM=1;
+	sf_sjcsvWeightBUp=1;
+	sf_sjcsvWeightMUp=1;
+	sf_csvWeightBUp=1;
+	sf_csvWeightMUp=1;
+	sf_sjcsvWeightBDown=1;
+	sf_sjcsvWeightMDown=1;
+	sf_csvWeightBDown=1;
+	sf_csvWeightMDown=1;
+	sf_btag0 = 1;
+	sf_btag0BUp = 1;
+	sf_btag0BDown = 1;
+	sf_btag0MUp = 1;
+	sf_btag0MDown = 1;
+	sf_btag1 = 1;
+	sf_btag1BUp = 1;
+	sf_btag1BDown = 1;
+	sf_btag1MUp = 1;
+	sf_btag1MDown = 1;
+	sf_btag2 = 1;
+	sf_btag2BUp = 1;
+	sf_btag2BDown = 1;
+	sf_btag2MUp = 1;
+	sf_btag2MDown = 1;
+	sf_btag0_alt = 1;
+	sf_btag0BUp_alt = 1;
+	sf_btag0BDown_alt = 1;
+	sf_btag0MUp_alt = 1;
+	sf_btag0MDown_alt = 1;
+	sf_btag1_alt = 1;
+	sf_btag1BUp_alt = 1;
+	sf_btag1BDown_alt = 1;
+	sf_btag1MUp_alt = 1;
+	sf_btag1MDown_alt = 1;
+	sf_btag2_alt = 1;
+	sf_btag2BUp_alt = 1;
+	sf_btag2BDown_alt = 1;
+	sf_btag2MUp_alt = 1;
+	sf_btag2MDown_alt = 1;
+	sf_sjbtag0 = 1;
+	sf_sjbtag0BUp = 1;
+	sf_sjbtag0BDown = 1;
+	sf_sjbtag0MUp = 1;
+	sf_sjbtag0MDown = 1;
+	sf_sjbtag1 = 1;
+	sf_sjbtag1BUp = 1;
+	sf_sjbtag1BDown = 1;
+	sf_sjbtag1MUp = 1;
+	sf_sjbtag1MDown = 1;
+	sf_sjbtag2 = 1;
+	sf_sjbtag2BUp = 1;
+	sf_sjbtag2BDown = 1;
+	sf_sjbtag2MUp = 1;
+	sf_sjbtag2MDown = 1;
+	sf_eleTrig = 1;
+	sf_phoTrig = 1;
+	sf_metTrig = 1;
+	sf_pu = 1;
+	sf_tt = 1;
+	sf_tt_ext = 1;
+	sf_tt_bound = 1;
+	sf_tt8TeV = 1;
+	sf_tt8TeV_ext = 1;
+	sf_tt8TeV_bound = 1;
+	sf_phoPurity = 1;
 	finalWeight = -1;
 	pfmet = -1;
 	pfmetphi = -1;
@@ -593,7 +647,18 @@ void GeneralTree::Reset() {
 	genBosonEta = -1;
 	genBosonMass = -1;
 	genBosonPhi = -1;
+	genWPlusPt = -1;
+	genWMinusPt = -1;
+	genWPlusEta = -1;
+	genWMinusEta = -1;
 	genTopPt = -1;
+	genAntiTopPt = -1;
+	genTopIsHad = -1;
+	genAntiTopIsHad = -1;
+	genTopEta = -1;
+	genAntiTopEta = -1;
+	genTTPt = -1;
+	genTTEta = -1;
 	nJet = 0;
 	jet1Phi = -1;
 	jet1Pt = -1;
@@ -617,11 +682,21 @@ void GeneralTree::Reset() {
 	nFatjet = 0;
 	fj1Tau32 = -1;
 	fj1Tau21 = -1;
-  fj1Tau32SD = -1;
-  fj1Tau21SD = -1;
+	fj1Tau32SD = -1;
+	fj1Tau21SD = -1;
 	fj1MSD = -1;
 	fj1MSD_corr = -1;
 	fj1Pt = -1;
+	fj1PtScaleUp = -1;
+	fj1PtScaleDown = -1;
+	fj1PtSmeared = -1;
+	fj1PtSmearedUp = -1;
+	fj1PtSmearedDown = -1;
+	fj1MSDScaleUp = -1;
+	fj1MSDScaleDown = -1;
+	fj1MSDSmeared = -1;
+	fj1MSDSmearedUp = -1;
+	fj1MSDSmearedDown = -1;
 	fj1Phi = -1;
 	fj1Eta = -1;
 	fj1M = -1;
@@ -630,18 +705,18 @@ void GeneralTree::Reset() {
 	fj1GenPt = -1;
 	fj1GenSize = -1;
 	fj1IsMatched = 0;
-  fj1GenWPt = -1;
-  fj1GenWSize = -1;
-  fj1IsWMatched = 0;
-  fj1HighestPtGen=0;
-  fj1HighestPtGenPt=-1;
+	fj1GenWPt = -1;
+	fj1GenWSize = -1;
+	fj1IsWMatched = 0;
+	fj1HighestPtGen=0;
+	fj1HighestPtGenPt=-1;
 	fj1IsTight = 0;
 	fj1IsLoose = 0;
 	fj1RawPt = -1;
 	fj1IsHF = 0;
-  fj1HTTMass = -1;
-  fj1HTTFRec = -1;
-  fj1IsClean = 0;
+	fj1HTTMass = -1;
+	fj1HTTFRec = -1;
+	fj1IsClean = 0;
 	isHF = 0;
 	nLoosePhoton = 0;
 	nTightPhoton = 0;
@@ -672,40 +747,40 @@ void GeneralTree::Reset() {
 	hbbphi = -1;
 	hbbm = -1;
 
-  for (auto beta : betas) {
-    for (auto N : Ns) {
-      for (auto order : orders) {
-        TString ecfn(makeECFString(order,N,beta));
-        fj1ECFNs[ecfn]=-1;
-      }
-    }
-  }
+	for (auto beta : betas) {
+		for (auto N : Ns) {
+			for (auto order : orders) {
+				TString ecfn(makeECFString(order,N,beta));
+				fj1ECFNs[ecfn]=-1;
+			}
+		}
+	}
 
-  for (unsigned int iSJ=0; iSJ!=NSUBJET; ++iSJ) {
-    fj1sjPt[iSJ] = -1;
-    fj1sjEta[iSJ] = -1;
-    fj1sjPhi[iSJ] = -1;
-    fj1sjM[iSJ] = -1;
-    fj1sjCSV[iSJ] = -1;
-    fj1sjQGL[iSJ] = -1;
-  }
-  for (unsigned int iJ=0; iJ!=NJET; ++iJ) {
-    jetPt[iJ] = -1;
-    jetEta[iJ] = -1;
-    jetPhi[iJ] = -1;
-    jetE[iJ] = -1;
-    jetCSV[iJ] = -1;
-    jetIso[iJ] = -1;
-    jetQGL[iJ] = -1;
-  }
+	for (unsigned int iSJ=0; iSJ!=NSUBJET; ++iSJ) {
+		fj1sjPt[iSJ] = -1;
+		fj1sjEta[iSJ] = -1;
+		fj1sjPhi[iSJ] = -1;
+		fj1sjM[iSJ] = -1;
+		fj1sjCSV[iSJ] = -1;
+		fj1sjQGL[iSJ] = -1;
+	}
+	for (unsigned int iJ=0; iJ!=NJET; ++iJ) {
+		jetPt[iJ] = -1;
+		jetEta[iJ] = -1;
+		jetPhi[iJ] = -1;
+		jetE[iJ] = -1;
+		jetCSV[iJ] = -1;
+		jetIso[iJ] = -1;
+		jetQGL[iJ] = -1;
+	}
 
 //ENDRESET
 }
 
 void GeneralTree::ReadTree(TTree *t) {
-      treePtr = t;
-      treePtr->SetBranchStatus("*",0);
-    	treePtr->SetBranchStatus("runNumber",1);
+			treePtr = t;
+			treePtr->SetBranchStatus("*",0);
+			treePtr->SetBranchStatus("runNumber",1);
 	treePtr->SetBranchAddress("runNumber",&runNumber);
 	treePtr->SetBranchStatus("lumiNumber",1);
 	treePtr->SetBranchAddress("lumiNumber",&lumiNumber);
@@ -725,8 +800,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("sf_qcdV",&sf_qcdV);
 	treePtr->SetBranchStatus("sf_lep",1);
 	treePtr->SetBranchAddress("sf_lep",&sf_lep);
-  treePtr->SetBranchStatus("sf_pho",1);
-  treePtr->SetBranchAddress("sf_pho",&sf_pho);
+	treePtr->SetBranchStatus("sf_pho",1);
+	treePtr->SetBranchAddress("sf_pho",&sf_pho);
 	treePtr->SetBranchStatus("sf_lepReco",1);
 	treePtr->SetBranchAddress("sf_lepReco",&sf_lepReco);
 	treePtr->SetBranchStatus("sf_sjcsvWeightB",1);
@@ -853,8 +928,16 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("sf_pu",&sf_pu);
 	treePtr->SetBranchStatus("sf_tt",1);
 	treePtr->SetBranchAddress("sf_tt",&sf_tt);
-  treePtr->SetBranchStatus("sf_tt8TeV",1);
-  treePtr->SetBranchAddress("sf_tt8TeV",&sf_tt8TeV);
+	treePtr->SetBranchStatus("sf_tt_ext",1);
+	treePtr->SetBranchAddress("sf_tt_ext",&sf_tt);
+	treePtr->SetBranchStatus("sf_tt_bound",1);
+	treePtr->SetBranchAddress("sf_tt_bound",&sf_tt);
+	treePtr->SetBranchStatus("sf_tt8TeV",1);
+	treePtr->SetBranchAddress("sf_tt8TeV",&sf_tt8TeV);
+	treePtr->SetBranchStatus("sf_tt8TeV_ext",1);
+	treePtr->SetBranchAddress("sf_tt8TeV_ext",&sf_tt8TeV);
+	treePtr->SetBranchStatus("sf_tt8TeV_bound",1);
+	treePtr->SetBranchAddress("sf_tt8TeV_bound",&sf_tt8TeV);
 	treePtr->SetBranchStatus("sf_phoPurity",1);
 	treePtr->SetBranchAddress("sf_phoPurity",&sf_phoPurity);
 	treePtr->SetBranchStatus("finalWeight",1);
@@ -937,8 +1020,30 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("genBosonMass",&genBosonMass);
 	treePtr->SetBranchStatus("genBosonPhi",1);
 	treePtr->SetBranchAddress("genBosonPhi",&genBosonPhi);
+	treePtr->SetBranchStatus("genWPlusPt",1);
+	treePtr->SetBranchAddress("genWPlusPt",&genWPlusPt);
+	treePtr->SetBranchStatus("genWMinusPt",1);
+	treePtr->SetBranchAddress("genWMinusPt",&genWMinusPt);
+	treePtr->SetBranchStatus("genWPlusEta",1);
+	treePtr->SetBranchAddress("genWPlusEta",&genWPlusEta);
+	treePtr->SetBranchStatus("genWMinusEta",1);
+	treePtr->SetBranchAddress("genWMinusEta",&genWMinusEta);
 	treePtr->SetBranchStatus("genTopPt",1);
 	treePtr->SetBranchAddress("genTopPt",&genTopPt);
+	treePtr->SetBranchStatus("genAntiTopPt",1);
+	treePtr->SetBranchAddress("genAntiTopPt",&genAntiTopPt);
+	treePtr->SetBranchStatus("genTopIsHad",1);
+	treePtr->SetBranchAddress("genTopIsHad",&genTopIsHad);
+	treePtr->SetBranchStatus("genAntiTopIsHad",1);
+	treePtr->SetBranchAddress("genAntiTopIsHad",&genAntiTopIsHad);
+	treePtr->SetBranchStatus("genTopEta",1);
+	treePtr->SetBranchAddress("genTopEta",&genTopEta);
+	treePtr->SetBranchStatus("genAntiTopEta",1);
+	treePtr->SetBranchAddress("genAntiTopEta",&genAntiTopEta);
+	treePtr->SetBranchStatus("genTTPt",1);
+	treePtr->SetBranchAddress("genTTPt",&genTTPt);
+	treePtr->SetBranchStatus("genTTEta",1);
+	treePtr->SetBranchAddress("genTTEta",&genTTEta);
 	treePtr->SetBranchStatus("nJet",1);
 	treePtr->SetBranchAddress("nJet",&nJet);
 	treePtr->SetBranchStatus("jet1Phi",1);
@@ -979,36 +1084,50 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("jetNBtags",&jetNBtags);
 	treePtr->SetBranchStatus("isojetNBtags",1);
 	treePtr->SetBranchAddress("isojetNBtags",&isojetNBtags);
-  if (monohiggs) {
-    treePtr->SetBranchStatus("jetPt",1);
-    treePtr->SetBranchAddress("jetPt",jetPt);
-    treePtr->SetBranchStatus("jetEta",1);
-    treePtr->SetBranchAddress("jetEta",jetEta);
-    treePtr->SetBranchStatus("jetPhi",1);
-    treePtr->SetBranchAddress("jetPhi",jetPhi);
-    treePtr->SetBranchStatus("jetE",1);
-    treePtr->SetBranchAddress("jetE",jetE);
-    treePtr->SetBranchStatus("jetCSV",1);
-    treePtr->SetBranchAddress("jetCSV",jetCSV);
-    treePtr->SetBranchStatus("jetIso",1);
-    treePtr->SetBranchAddress("jetIso",jetIso);
-    treePtr->SetBranchStatus("jetQGL",1);
-    treePtr->SetBranchAddress("jetQGL",jetQGL);
-  }
+	if (monohiggs) {
+		treePtr->SetBranchStatus("jetPt",1);
+		treePtr->SetBranchAddress("jetPt",jetPt);
+		treePtr->SetBranchStatus("jetEta",1);
+		treePtr->SetBranchAddress("jetEta",jetEta);
+		treePtr->SetBranchStatus("jetPhi",1);
+		treePtr->SetBranchAddress("jetPhi",jetPhi);
+		treePtr->SetBranchStatus("jetE",1);
+		treePtr->SetBranchAddress("jetE",jetE);
+		treePtr->SetBranchStatus("jetCSV",1);
+		treePtr->SetBranchAddress("jetCSV",jetCSV);
+		treePtr->SetBranchStatus("jetIso",1);
+		treePtr->SetBranchAddress("jetIso",jetIso);
+		treePtr->SetBranchStatus("jetQGL",1);
+		treePtr->SetBranchAddress("jetQGL",jetQGL);
+	}
 	treePtr->SetBranchStatus("nFatjet",1);
 	treePtr->SetBranchAddress("nFatjet",&nFatjet);
 	treePtr->SetBranchStatus("fj1Tau32",1);
 	treePtr->SetBranchAddress("fj1Tau32",&fj1Tau32);
 	treePtr->SetBranchStatus("fj1Tau21",1);
 	treePtr->SetBranchAddress("fj1Tau21",&fj1Tau21);
-  treePtr->SetBranchStatus("fj1Tau32SD",1);
-  treePtr->SetBranchAddress("fj1Tau32SD",&fj1Tau32SD);
-  treePtr->SetBranchStatus("fj1Tau21SD",1);
-  treePtr->SetBranchAddress("fj1Tau21SD",&fj1Tau21SD);
+	treePtr->SetBranchStatus("fj1Tau32SD",1);
+	treePtr->SetBranchAddress("fj1Tau32SD",&fj1Tau32SD);
+	treePtr->SetBranchStatus("fj1Tau21SD",1);
+	treePtr->SetBranchAddress("fj1Tau21SD",&fj1Tau21SD);
 	treePtr->SetBranchStatus("fj1MSD",1);
 	treePtr->SetBranchAddress("fj1MSD",&fj1MSD);
 	treePtr->SetBranchStatus("fj1Pt",1);
 	treePtr->SetBranchAddress("fj1Pt",&fj1Pt);
+	treePtr->SetBranchStatus("fj1PtScaleUp",1);
+	treePtr->SetBranchAddress("fj1PtScaleUp",&fj1PtScaleUp);
+	treePtr->SetBranchStatus("fj1PtScaleDown",1);
+	treePtr->SetBranchAddress("fj1PtScaleDown",&fj1PtScaleDown);
+	treePtr->SetBranchStatus("fj1PtSmeared",1); treePtr->SetBranchAddress("fj1PtSmeared",&fj1PtSmeared);
+	treePtr->SetBranchStatus("fj1PtSmearedUp",1); treePtr->SetBranchAddress("fj1PtSmearedUp",&fj1PtSmearedUp);
+	treePtr->SetBranchStatus("fj1PtSmearedDown",1); treePtr->SetBranchAddress("fj1PtSmearedDown",&fj1PtSmearedDown);
+	treePtr->SetBranchStatus("fj1MSDScaleUp",1);
+	treePtr->SetBranchAddress("fj1MSDScaleUp",&fj1MSDScaleUp);
+	treePtr->SetBranchStatus("fj1MSDScaleDown",1);
+	treePtr->SetBranchAddress("fj1MSDScaleDown",&fj1MSDScaleDown);
+	treePtr->SetBranchStatus("fj1MSDSmeared",1); treePtr->SetBranchAddress("fj1MSDSmeared",&fj1MSDSmeared);
+	treePtr->SetBranchStatus("fj1MSDSmearedUp",1); treePtr->SetBranchAddress("fj1MSDSmearedUp",&fj1MSDSmearedUp);
+	treePtr->SetBranchStatus("fj1MSDSmearedDown",1); treePtr->SetBranchAddress("fj1MSDSmearedDown",&fj1MSDSmearedDown);
 	treePtr->SetBranchStatus("fj1Phi",1);
 	treePtr->SetBranchAddress("fj1Phi",&fj1Phi);
 	treePtr->SetBranchStatus("fj1Eta",1);
@@ -1025,8 +1144,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("fj1GenSize",&fj1GenSize);
 	treePtr->SetBranchStatus("fj1IsMatched",1);
 	treePtr->SetBranchAddress("fj1IsMatched",&fj1IsMatched);
-  treePtr->SetBranchAddress("fj1HighestPtGen",&fj1HighestPtGen);
-  treePtr->SetBranchAddress("fj1HighestPtGenPt",&fj1HighestPtGenPt);
+	treePtr->SetBranchAddress("fj1HighestPtGen",&fj1HighestPtGen);
+	treePtr->SetBranchAddress("fj1HighestPtGenPt",&fj1HighestPtGenPt);
 	treePtr->SetBranchStatus("fj1IsTight",1);
 	treePtr->SetBranchAddress("fj1IsTight",&fj1IsTight);
 	treePtr->SetBranchStatus("fj1IsLoose",1);
@@ -1041,22 +1160,22 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("fj1HTTFRec",&fj1HTTFRec);
 	treePtr->SetBranchStatus("isHF",1);
 	treePtr->SetBranchAddress("isHF",&isHF);
-  if (monohiggs) {
-  	treePtr->SetBranchStatus("fj1sjPt",1);
-  	treePtr->SetBranchAddress("fj1sjPt",fj1sjPt);
-  	treePtr->SetBranchStatus("fj1sjEta",1);
-  	treePtr->SetBranchAddress("fj1sjEta",fj1sjEta);
-  	treePtr->SetBranchStatus("fj1sjPhi",1);
-  	treePtr->SetBranchAddress("fj1sjPhi",fj1sjPhi);
-  	treePtr->SetBranchStatus("fj1sjM",1);
-  	treePtr->SetBranchAddress("fj1sjM",fj1sjM);
-  	treePtr->SetBranchStatus("fj1sjCSV",1);
-  	treePtr->SetBranchAddress("fj1sjCSV",fj1sjCSV);
-  	treePtr->SetBranchStatus("fj1sjQGL",1);
-  	treePtr->SetBranchAddress("fj1sjQGL",fj1sjQGL);
+	if (monohiggs) {
+		treePtr->SetBranchStatus("fj1sjPt",1);
+		treePtr->SetBranchAddress("fj1sjPt",fj1sjPt);
+		treePtr->SetBranchStatus("fj1sjEta",1);
+		treePtr->SetBranchAddress("fj1sjEta",fj1sjEta);
+		treePtr->SetBranchStatus("fj1sjPhi",1);
+		treePtr->SetBranchAddress("fj1sjPhi",fj1sjPhi);
+		treePtr->SetBranchStatus("fj1sjM",1);
+		treePtr->SetBranchAddress("fj1sjM",fj1sjM);
+		treePtr->SetBranchStatus("fj1sjCSV",1);
+		treePtr->SetBranchAddress("fj1sjCSV",fj1sjCSV);
+		treePtr->SetBranchStatus("fj1sjQGL",1);
+		treePtr->SetBranchAddress("fj1sjQGL",fj1sjQGL);
 	treePtr->SetBranchStatus("fj1MSD_corr",1);
 	treePtr->SetBranchAddress("fj1MSD_corr",&fj1MSD_corr);	
-  }
+	}
 	treePtr->SetBranchStatus("nLoosePhoton",1);
 	treePtr->SetBranchAddress("nLoosePhoton",&nLoosePhoton);
 	treePtr->SetBranchStatus("nTightPhoton",1);
@@ -1105,24 +1224,24 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("diLepMass",&diLepMass);
 	treePtr->SetBranchStatus("nTau",1);
 	treePtr->SetBranchAddress("nTau",&nTau);
-  if (monohiggs) {
-      treePtr->SetBranchStatus("hbbpt",1);
-      treePtr->SetBranchAddress("hbbpt",&hbbpt);
-      treePtr->SetBranchStatus("hbbeta",1);
-      treePtr->SetBranchAddress("hbbeta",&hbbeta);
-      treePtr->SetBranchStatus("hbbphi",1);
-      treePtr->SetBranchAddress("hbbphi",&hbbphi);
-      treePtr->SetBranchStatus("hbbm",1);
-      treePtr->SetBranchAddress("hbbm",&hbbm);
-      treePtr->SetBranchStatus("hbbjtidx",1);
-      treePtr->SetBranchAddress("hbbjtidx",hbbjtidx);
-  }
+	if (monohiggs) {
+			treePtr->SetBranchStatus("hbbpt",1);
+			treePtr->SetBranchAddress("hbbpt",&hbbpt);
+			treePtr->SetBranchStatus("hbbeta",1);
+			treePtr->SetBranchAddress("hbbeta",&hbbeta);
+			treePtr->SetBranchStatus("hbbphi",1);
+			treePtr->SetBranchAddress("hbbphi",&hbbphi);
+			treePtr->SetBranchStatus("hbbm",1);
+			treePtr->SetBranchAddress("hbbm",&hbbm);
+			treePtr->SetBranchStatus("hbbjtidx",1);
+			treePtr->SetBranchAddress("hbbjtidx",hbbjtidx);
+	}
 //ENDREAD
 }
 
 void GeneralTree::WriteTree(TTree *t) {
-      treePtr = t;
-    	treePtr->Branch("runNumber",&runNumber,"runNumber/I");
+			treePtr = t;
+			treePtr->Branch("runNumber",&runNumber,"runNumber/I");
 	treePtr->Branch("lumiNumber",&lumiNumber,"lumiNumber/I");
 	treePtr->Branch("eventNumber",&eventNumber,"eventNumber/l");
 	treePtr->Branch("npv",&npv,"npv/I");
@@ -1132,9 +1251,9 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("sf_ewkV",&sf_ewkV,"sf_ewkV/F");
 	treePtr->Branch("sf_qcdV",&sf_qcdV,"sf_qcdV/F");
 	treePtr->Branch("sf_lep",&sf_lep,"sf_lep/F");
-  treePtr->Branch("sf_pho",&sf_pho,"sf_pho/F");
+	treePtr->Branch("sf_pho",&sf_pho,"sf_pho/F");
 	treePtr->Branch("sf_lepReco",&sf_lepReco,"sf_lepReco/F");
-  treePtr->Branch("sf_btag0",&sf_btag0,"sf_btag0/F");
+	treePtr->Branch("sf_btag0",&sf_btag0,"sf_btag0/F");
 	treePtr->Branch("sf_sjcsvWeightB",&sf_sjcsvWeightB,"sf_sjcsvWeightB/F");
 	treePtr->Branch("sf_sjcsvWeightM",&sf_sjcsvWeightM,"sf_sjcsvWeightM/F");
 	treePtr->Branch("sf_csvWeightB",&sf_csvWeightB,"sf_csvWeightB/F");
@@ -1196,7 +1315,11 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("sf_metTrig",&sf_metTrig,"sf_metTrig/F");
 	treePtr->Branch("sf_pu",&sf_pu,"sf_pu/F");
 	treePtr->Branch("sf_tt",&sf_tt,"sf_tt/F");
-  treePtr->Branch("sf_tt8TeV",&sf_tt8TeV,"sf_tt8TeV/F");
+	treePtr->Branch("sf_tt_ext",&sf_tt_ext,"sf_tt_ext/F");
+	treePtr->Branch("sf_tt_bound",&sf_tt_bound,"sf_tt_bound/F");
+	treePtr->Branch("sf_tt8TeV",&sf_tt8TeV,"sf_tt8TeV/F");
+	treePtr->Branch("sf_tt8TeV_ext",&sf_tt8TeV_ext,"sf_tt8TeV_ext/F");
+	treePtr->Branch("sf_tt8TeV_bound",&sf_tt8TeV_bound,"sf_tt8TeV_bound/F");
 	treePtr->Branch("sf_phoPurity",&sf_phoPurity,"sf_phoPurity/F");
 	treePtr->Branch("finalWeight",&finalWeight,"finalWeight/F");
 	treePtr->Branch("pfmet",&pfmet,"pfmet/F");
@@ -1238,7 +1361,18 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("genBosonEta",&genBosonEta,"genBosonEta/F");
 	treePtr->Branch("genBosonMass",&genBosonMass,"genBosonMass/F");
 	treePtr->Branch("genBosonPhi",&genBosonPhi,"genBosonPhi/F");
+	treePtr->Branch("genWPlusPt",&genWPlusPt,"genWPlusPt/F");
+	treePtr->Branch("genWMinusPt",&genWMinusPt,"genWMinusPt/F");
+	treePtr->Branch("genWPlusEta",&genWPlusEta,"genWPlusEta/F");
+	treePtr->Branch("genWMinusEta",&genWMinusEta,"genWMinusEta/F");
 	treePtr->Branch("genTopPt",&genTopPt,"genTopPt/F");
+	treePtr->Branch("genAntiTopPt",&genAntiTopPt,"genAntiTopPt/F");
+	treePtr->Branch("genTopIsHad",&genTopIsHad,"genTopIsHad/F");
+	treePtr->Branch("genAntiTopIsHad",&genAntiTopIsHad,"genAntiTopIsHad/F");
+	treePtr->Branch("genTopEta",&genTopEta,"genTopEta/F");
+	treePtr->Branch("genAntiTopEta",&genAntiTopEta,"genAntiTopEta/F");
+	treePtr->Branch("genTTPt",&genTTPt,"genTTPt/F");
+	treePtr->Branch("genTTEta",&genTTEta,"genTTEta/F");
 	treePtr->Branch("nJet",&nJet,"nJet/I");
 	treePtr->Branch("jet1Phi",&jet1Phi,"jet1Phi/F");
 	treePtr->Branch("jet1Pt",&jet1Pt,"jet1Pt/F");
@@ -1259,34 +1393,44 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("jet12DEta",&jet12DEta,"jet12DEta/F");
 	treePtr->Branch("jetNBtags",&jetNBtags,"jetNBtags/I");
 	treePtr->Branch("isojetNBtags",&isojetNBtags,"isojetNBtags/I");
-  if (monohiggs) {
-    treePtr->Branch("jetPt",jetPt,"jetPt[nJet]/F");
-    treePtr->Branch("jetEta",jetEta,"jetEta[nJet]/F");
-    treePtr->Branch("jetPhi",jetPhi,"jetPhi[nJet]/F");
-    treePtr->Branch("jetE",jetE,"jetE[nJet]/F");
-    treePtr->Branch("jetCSV",jetCSV,"jetCSV[nJet]/F");
-    treePtr->Branch("jetIso",jetIso,"jetIso[nJet]/F");
-    treePtr->Branch("jetQGL",jetQGL,"jetQGL[nJet]/F");
-  }
+	if (monohiggs) {
+		treePtr->Branch("jetPt",jetPt,"jetPt[nJet]/F");
+		treePtr->Branch("jetEta",jetEta,"jetEta[nJet]/F");
+		treePtr->Branch("jetPhi",jetPhi,"jetPhi[nJet]/F");
+		treePtr->Branch("jetE",jetE,"jetE[nJet]/F");
+		treePtr->Branch("jetCSV",jetCSV,"jetCSV[nJet]/F");
+		treePtr->Branch("jetIso",jetIso,"jetIso[nJet]/F");
+		treePtr->Branch("jetQGL",jetQGL,"jetQGL[nJet]/F");
+	}
 	treePtr->Branch("nFatjet",&nFatjet,"nFatjet/I");
 	treePtr->Branch("fj1Tau32",&fj1Tau32,"fj1Tau32/F");
 	treePtr->Branch("fj1Tau21",&fj1Tau21,"fj1Tau21/F");
-  treePtr->Branch("fj1Tau32SD",&fj1Tau32SD,"fj1Tau32SD/F");
-  treePtr->Branch("fj1Tau21SD",&fj1Tau21SD,"fj1Tau21SD/F");
+	treePtr->Branch("fj1Tau32SD",&fj1Tau32SD,"fj1Tau32SD/F");
+	treePtr->Branch("fj1Tau21SD",&fj1Tau21SD,"fj1Tau21SD/F");
 	treePtr->Branch("fj1MSD",&fj1MSD,"fj1MSD/F");
 	treePtr->Branch("fj1Pt",&fj1Pt,"fj1Pt/F");
+	treePtr->Branch("fj1PtScaleUp",&fj1PtScaleUp,"fj1PtScaleUp/F");
+	treePtr->Branch("fj1PtScaleDown",&fj1PtScaleDown,"fj1PtScaleDown/F");
+	treePtr->Branch("fj1PtSmeared",&fj1PtSmeared,"fj1PtSmeared/F");
+	treePtr->Branch("fj1PtSmearedUp",&fj1PtSmearedUp,"fj1PtSmearedUp/F");
+	treePtr->Branch("fj1PtSmearedDown",&fj1PtSmearedDown,"fj1PtSmearedDown/F");
+	treePtr->Branch("fj1MSDScaleUp",&fj1MSDScaleUp,"fj1MSDScaleUp/F");
+	treePtr->Branch("fj1MSDScaleDown",&fj1MSDScaleDown,"fj1MSDScaleDown/F");
+	treePtr->Branch("fj1MSDSmeared",&fj1MSDSmeared,"fj1MSDSmeared/F");
+	treePtr->Branch("fj1MSDSmearedUp",&fj1MSDSmearedUp,"fj1MSDSmearedUp/F");
+	treePtr->Branch("fj1MSDSmearedDown",&fj1MSDSmearedDown,"fj1MSDSmearedDown/F");
 	treePtr->Branch("fj1Phi",&fj1Phi,"fj1Phi/F");
 	treePtr->Branch("fj1Eta",&fj1Eta,"fj1Eta/F");
 	treePtr->Branch("fj1M",&fj1M,"fj1M/F");
-  if (monohiggs) {
-    treePtr->Branch("fj1sjPt",fj1sjPt,"fj1sjPt[2]/F");
-    treePtr->Branch("fj1sjPhi",fj1sjPhi,"fj1sjPhi[2]/F");
-    treePtr->Branch("fj1sjEta",fj1sjEta,"fj1sjEta[2]/F");
-    treePtr->Branch("fj1sjM",fj1sjM,"fj1sjM[2]/F");
-    treePtr->Branch("fj1sjCSV",fj1sjCSV,"fj1sjCSV[2]/F");
-    treePtr->Branch("fj1sjQGL",fj1sjQGL,"fj1sjQGL[2]/F");
-    treePtr->Branch("fj1MSD_corr",&fj1MSD_corr,"fj1MSD_corr/F");
-  }
+	if (monohiggs) {
+		treePtr->Branch("fj1sjPt",fj1sjPt,"fj1sjPt[2]/F");
+		treePtr->Branch("fj1sjPhi",fj1sjPhi,"fj1sjPhi[2]/F");
+		treePtr->Branch("fj1sjEta",fj1sjEta,"fj1sjEta[2]/F");
+		treePtr->Branch("fj1sjM",fj1sjM,"fj1sjM[2]/F");
+		treePtr->Branch("fj1sjCSV",fj1sjCSV,"fj1sjCSV[2]/F");
+		treePtr->Branch("fj1sjQGL",fj1sjQGL,"fj1sjQGL[2]/F");
+		treePtr->Branch("fj1MSD_corr",&fj1MSD_corr,"fj1MSD_corr/F");
+	}
 	treePtr->Branch("fj1sjPt",&fj1sjPt,"fj1sjPt/F");
 	treePtr->Branch("fj1sjPhi",&fj1sjPhi,"fj1sjPhi/F");
 	treePtr->Branch("fj1sjEta",&fj1sjEta,"fj1sjEta/F");
@@ -1298,11 +1442,11 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("fj1GenPt",&fj1GenPt,"fj1GenPt/F");
 	treePtr->Branch("fj1GenSize",&fj1GenSize,"fj1GenSize/F");
 	treePtr->Branch("fj1IsMatched",&fj1IsMatched,"fj1IsMatched/I");
-  treePtr->Branch("fj1GenWPt",&fj1GenWPt,"fj1GenWPt/F");
-  treePtr->Branch("fj1GenWSize",&fj1GenWSize,"fj1GenWSize/F");
-  treePtr->Branch("fj1IsWMatched",&fj1IsWMatched,"fj1IsWMatched/I");
-  treePtr->Branch("fj1HighestPtGen",&fj1HighestPtGen,"fj1HighestPtGen/I");
-  treePtr->Branch("fj1HighestPtGenPt",&fj1HighestPtGenPt,"fj1HighestPtGenPt/F");
+	treePtr->Branch("fj1GenWPt",&fj1GenWPt,"fj1GenWPt/F");
+	treePtr->Branch("fj1GenWSize",&fj1GenWSize,"fj1GenWSize/F");
+	treePtr->Branch("fj1IsWMatched",&fj1IsWMatched,"fj1IsWMatched/I");
+	treePtr->Branch("fj1HighestPtGen",&fj1HighestPtGen,"fj1HighestPtGen/I");
+	treePtr->Branch("fj1HighestPtGenPt",&fj1HighestPtGenPt,"fj1HighestPtGenPt/F");
 	treePtr->Branch("fj1IsTight",&fj1IsTight,"fj1IsTight/I");
 	treePtr->Branch("fj1IsLoose",&fj1IsLoose,"fj1IsLoose/I");
 	treePtr->Branch("fj1RawPt",&fj1RawPt,"fj1RawPt/F");
@@ -1335,21 +1479,21 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("looseLep2Phi",&looseLep2Phi,"looseLep2Phi/F");
 	treePtr->Branch("diLepMass",&diLepMass,"diLepMass/F");
 	treePtr->Branch("nTau",&nTau,"nTau/I");
-  if (monohiggs) {
-    treePtr->Branch("hbbpt",&hbbpt,"hbbpt/F");
-    treePtr->Branch("hbbeta",&hbbeta,"hbbeta/F");
-    treePtr->Branch("hbbphi",&hbbphi,"hbbphi/F");
-    treePtr->Branch("hbbm",&hbbm,"hbbm/F");
-    treePtr->Branch("hbbjtidx",hbbjtidx,"hbbjtidx/F");
-  }
+	if (monohiggs) {
+		treePtr->Branch("hbbpt",&hbbpt,"hbbpt/F");
+		treePtr->Branch("hbbeta",&hbbeta,"hbbeta/F");
+		treePtr->Branch("hbbphi",&hbbphi,"hbbphi/F");
+		treePtr->Branch("hbbm",&hbbm,"hbbm/F");
+		treePtr->Branch("hbbjtidx",hbbjtidx,"hbbjtidx/F");
+	}
 
-  for (auto beta : betas) {
-    for (auto N : Ns) {
-      for (auto order : orders) {
-        TString ecfn(makeECFString(order,N,beta));
-        treePtr->Branch("fj1"+ecfn,&(fj1ECFNs[ecfn]),"fj1"+ecfn+"/F");
-      }
-    }
-  }
+	for (auto beta : betas) {
+		for (auto N : Ns) {
+			for (auto order : orders) {
+				TString ecfn(makeECFString(order,N,beta));
+				treePtr->Branch("fj1"+ecfn,&(fj1ECFNs[ecfn]),"fj1"+ecfn+"/F");
+			}
+		}
+	}
 //ENDWRITE
 }

@@ -9,34 +9,36 @@ from PandaCore.Tools.Load import *
 
 if __name__ == "__main__":
 
-  Load('PandaAnalysisFlat','PandaAnalyzer')
-  
-  def fn(fullPath):
+	Load('PandaAnalysisFlat','PandaAnalyzer')
+	
+	def fn(fullPath):
 
-    skimmer = root.PandaAnalyzer()
-   
-    skimmer.firstEvent=0
-    skimmer.lastEvent=1000
-    skimmer.isData=False
-    skimmer.SetFlag('puppi',True)
-    skimmer.SetFlag('fatjet',True)
-    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
-    fin = root.TFile.Open(fullPath)
+		skimmer = root.PandaAnalyzer()
+	 
+		skimmer.firstEvent=0
+		skimmer.lastEvent=10
+		skimmer.isData=False
+		skimmer.SetFlag('puppi',True)
+		skimmer.SetFlag('fatjet',True)
+		skimmer.SetFlag('firstGen',False)
+		skimmer.processType = root.PandaAnalyzer.kTT
+#		skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
+		fin = root.TFile.Open(fullPath)
 
-    print fullPath
-    print fin
+		print fullPath
+		print fin
 
-    tree = fin.FindObjectAny("events")
-    infotree = fin.FindObjectAny("all")
-    print tree,infotree
+		tree = fin.FindObjectAny("events")
+		infotree = fin.FindObjectAny("all")
+		print tree,infotree
 
-    skimmer.SetDataDir(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/')
-    skimmer.SetOutputFile('testskim.root')
-    skimmer.Init(tree,infotree)
+		skimmer.SetDataDir(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/')
+		skimmer.SetOutputFile('testskim.root')
+		skimmer.Init(tree,infotree)
 
-    skimmer.Run()
-    print 'done running'
-    skimmer.Terminate()
-    print 'done terminating'
+		skimmer.Run()
+		print 'done running'
+		skimmer.Terminate()
+		print 'done terminating'
 
-  fn(argv[1]) 
+	fn(argv[1]) 
