@@ -14,7 +14,7 @@ while getopts ":tn:" opt; do
 			filesetSize=$OPTARG
 			;;
 		:)
-			echo "Error: option -n must have an argument"
+			PError -n "T3/bin/buildMergedInputs.sh"  "Option -n must specify number of files"
 			exit 1
 			;;
   esac 
