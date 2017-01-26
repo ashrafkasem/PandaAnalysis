@@ -116,7 +116,6 @@ if __name__ == "__main__":
 	PDebug(sname,'%i ->%i'%(which*nper,min(len(lines),(which+1)*nper)))
 	PDebug(sname,'%i %i'%(len(lines),len(lines_)))
 	del lines
-	print lines_
 	cfg.close()
 
 	for line in lines_:
