@@ -22,7 +22,7 @@ keys = sorted(samples)
 counter=0
 for k in keys:
 	sample = samples[k]
-	configs = sample.get_config(args.nfiles)
+	configs = sample.get_config(args.nfiles,suffix='_%i')
 	for c in configs:
 		fout.write(c%(counter,counter))
 		counter += 1
