@@ -113,7 +113,10 @@ if __name__ == "__main__":
 	cfg = open('local.cfg')
 	lines = list(cfg)
 	lines_ = lines[which*nper:min(len(lines),(which+1)*nper)]
+	PDebug(sname,'%i ->%i'%(which*nper,min(len(lines),(which+1)*nper)))
+	PDebug(sname,'%i %i'%(len(lines),len(lines_)))
 	del lines
+	print lines_
 	cfg.close()
 
 	for line in lines_:
