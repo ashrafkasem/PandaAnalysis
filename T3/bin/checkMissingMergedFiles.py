@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from os import getenv
-from PandaCore.Tools.ConfigBuilder import *
+from PandaCore.Tools.ConfigBuilding import *
 import subprocess
 import sys
 import argparse

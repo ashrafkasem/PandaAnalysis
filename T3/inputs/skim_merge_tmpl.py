@@ -7,10 +7,6 @@ from time import clock,time
 
 which = int(argv[1])
 sname = argv[0]
-if len(argv)>2:
-	nper = int(argv[2])
-else:
-	nper = 1
 argv=[]
 
 import ROOT as root
