@@ -1032,7 +1032,7 @@ void PandaAnalyzer::Run() {
 						}
 					} // looking for W
 					if (iW<0) {// ???
-						PDebug("","Could not find W");
+//						PWarning("","Could not find W");
 						continue;
 					}
 					PGenParticle *partW = genparts->at(iW);

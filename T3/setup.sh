@@ -10,12 +10,12 @@ export PANDA_FLATDIR="${HOME}/home000/store/panda/v_8020_2_5/"
 #export PANDA_FLATDIR="${HOME}/home000/sync/flat/"
 
 #export SUBMIT_TMPL="skim_csv_tmpl.py"
-export SUBMIT_TMPL="skim_tmpl.py"
+export SUBMIT_TMPL="skim_merge_tmpl.py"
 export SUBMIT_NAME="v_8020_6"
 export SUBMIT_WORKDIR="/data/t3serv014/snarayan/condor/"${SUBMIT_NAME}"/work/"
 export SUBMIT_LOGDIR="/data/t3serv014/snarayan/condor/"${SUBMIT_NAME}"/logs/"
 export SUBMIT_OUTDIR="/mnt/hadoop/scratch/snarayan/panda/"${SUBMIT_NAME}"/batch/"
-mkdir -p $SUBMIT_WORKDIR $SUBMIT_OUTDIR $SUBMIT_LOGDIR
+mkdir -p $SUBMIT_WORKDIR $SUBMIT_OUTDIR/locks/ $SUBMIT_LOGDIR
 
 #private production 
 export PRIVATE_LOGDIR="${HOME}/cms/logs/monotop_private_panda/"

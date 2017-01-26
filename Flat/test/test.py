@@ -15,13 +15,13 @@ if __name__ == "__main__":
 
 		skimmer = root.PandaAnalyzer()
 	 
-		skimmer.firstEvent=0
-		skimmer.lastEvent=10
-		skimmer.isData=False
+#		skimmer.firstEvent=0
+#		skimmer.lastEvent=10
+		skimmer.isData=True
 		skimmer.SetFlag('puppi',True)
 		skimmer.SetFlag('fatjet',True)
 		skimmer.SetFlag('firstGen',False)
-		skimmer.processType = root.PandaAnalyzer.kTT
+#		skimmer.processType = root.PandaAnalyzer.kTT
 #		skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
 		fin = root.TFile.Open(fullPath)
 
