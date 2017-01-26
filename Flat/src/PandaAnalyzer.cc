@@ -1372,18 +1372,6 @@ void PandaAnalyzer::Run() {
 					if (gen->parent>=0 && genparts->at(gen->parent)->pdgid==gen->pdgid)
 						continue; // must be first copy
 				}
-				bool foundLep = false;
-				for (auto *daughter : *genparts) {
-					if (foundLep)
-						break;
-					if (daughter->pdgid*gen->pdgid<0)
-						continue;
-					unsigned adpdgid = abs(daughter->pdgid);
-					if (apdgid<11 || apdgid>18)
-						continue;
-					auto *parent = daughter;
-					while (
-				}
 				if (gen->pdgid>0) {
 					pt_t = gen->pt;
 					gt->genTopPt = gen->pt;
