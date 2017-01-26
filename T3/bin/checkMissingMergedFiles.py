@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser(description='check missing files')
 parser.add_argument('--infile',type=str)
 parser.add_argument('--outfile',type=str)
 parser.add_argument('--outdir',type=str,default=outdir)
+parser.add_argument('--force',action='store_true')
 args = parser.parse_args()
 outdir = args.outdir
 
@@ -42,6 +43,9 @@ class Output:
     return s
 
 sys.argv=[]
+
+root_files_glob = glob(outdir+'/*root')
+root_files = [f.split('/')[-1] for f in root_files_glob]
 
 processedfiles = []
 
@@ -77,6 +81,15 @@ for name in sorted(all_samples):
 		else:
 			data.add(found)
 
+	if not args.force: # do not resubmit if partial output doesn't exist
+		output_exists=False
+		for rf in root_files:
+			rf_base = sub('_[0-9]+$','',rf)
+			if name==rf_base:
+				output_exists = True
+				break
+		if not output_exists:
+			continue
 	if len(out_sample.files)>0:
 		filtered_samples[name] = out_sample
 

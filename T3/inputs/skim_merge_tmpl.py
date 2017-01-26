@@ -15,7 +15,7 @@ from PandaCore.Tools.Load import *
 import PandaCore.Tools.ConfigBuilding as cb
 import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 
-now = int(time.time())
+now = int(time())
 Load('PandaAnalysisFlat','PandaAnalyzer')
 
 def copy_local(long_name):
@@ -46,7 +46,7 @@ def copy_local(long_name):
 		return None
 
 
-def fn(input_name,isData):
+def fn(input_name,isData,full_path):
 	start=clock()
 	
 	PInfo(sname+'.fn','Starting to process '+input_name)
@@ -54,7 +54,6 @@ def fn(input_name,isData):
 	skimmer = root.PandaAnalyzer()
 	skimmer.isData=isData
 	skimmer.SetFlag('firstGen',False)
-	skimmer.SetFlag('puppi',False)
 	skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
 	#skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
 	processType=root.PandaAnalyzer.kNone
@@ -92,8 +91,10 @@ def fn(input_name,isData):
 	ret = path.isfile(output_name)
 	if ret:
 		PInfo(sname+'.fn','Successfully created %s in %.2f sec'%(output_name,(clock()-start)/1000.))
+		return True
 	else:
 		PError(sname+'.fn','Failed in creating %s!'%(output_name))
+		return False
 
 
 def hadd(good_inputs):
@@ -143,7 +144,7 @@ def write_lock(outdir,outfilename,processed):
 
 
 if __name__ == "__main__":
-	sample_list = read_sample_config('local.cfg',as_dict=False)
+	sample_list = cb.read_sample_config('local.cfg',as_dict=False)
 	to_run = sample_list[which]
 	outdir = 'XXXX' # will be replaced when building the job
 	outfilename = to_run.name+'_%i.root'%(now)
@@ -152,7 +153,7 @@ if __name__ == "__main__":
 	for f in to_run.files:
 		input_name = copy_local(f)
 		if input_name:
-			success = fn(input_name,(to_run.dtype!='MC'))
+			success = fn(input_name,(to_run.dtype!='MC'),f)
 			if success:
 				processed[input_name] = f
 	
