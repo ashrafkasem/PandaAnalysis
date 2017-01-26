@@ -13,7 +13,7 @@ cfgpath = workpath+'/local.cfg'
 cfgfile = open(cfgpath)
 njobs = 0 
 for line in cfgfile:
-	if 'CONFIG_' in line:
+	if 'CONFIG' in line:
 		njobs += 1
 
 now = int(time())
