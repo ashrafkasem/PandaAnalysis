@@ -375,10 +375,10 @@ void PandaAnalyzer::Run() {
 	// Binner newbtageta(vnewbtageta);
 
 	// these are triggers. at some point these ought to be read from the file
-	std::vector<unsigned int> metTriggers {0,1,2,3,4,5,6};
-	std::vector<unsigned int> eleTriggers {14,15,16,17,18};
-	std::vector<unsigned int> phoTriggers {20,21,24};
-	std::vector<unsigned int> muTriggers  {7,8,9,10,12,12,13};
+	std::vector<unsigned int> metTriggers {0,1,2,3,4,5,6,7,8,9,10,11};
+	std::vector<unsigned int> eleTriggers {27,28,29,30,31,32,33,34,35,36};
+	std::vector<unsigned int> phoTriggers {37,38,39,40,41,42,43,44};
+	std::vector<unsigned int> muTriggers  {13,14,15,16,17,18,19,20,21,22,23,24,25,26};
 
 	// set up reporters
 	unsigned int iE=0;
@@ -870,7 +870,7 @@ void PandaAnalyzer::Run() {
 				gt->dphipfUZ = std::min(fabs(vJet.DeltaPhi(vpfUZ)),(double)gt->dphipfUZ);
 			}
 			// btags
-			if (csv>0.8) { 
+			if (csv>0.8484) { 
 				++gt->jetNBtags;
 				if (flags["monohiggs"]) {
 					btaggedJets.push_back(jet);
@@ -884,7 +884,7 @@ void PandaAnalyzer::Run() {
 
 			if (gt->nFatjet==0 || isIsoJet) {
 				isoJets.push_back(jet);
-				if (csv>0.460) 
+				if (csv>0.5426) 
 					++gt->isojetNBtags;
 				if (flags["monohiggs"]) 
 					gt->jetIso[cleanedJets.size()-1]=1;
