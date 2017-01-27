@@ -29,7 +29,7 @@ class Output:
   def __str__(self):
     if self.total==0:
       return ''
-    s = '%-50s'%self.name
+    s = '%-80s'%self.name
     frac = 1.*self.done/self.total
     s += '\t[\033[0;42m'
     switched = False
