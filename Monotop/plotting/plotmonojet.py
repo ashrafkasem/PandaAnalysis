@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
 from os import system,getenv
-from sys import argv
+from sys import argv,exit
 import argparse
 
 ### SET GLOBAL VARIABLES ###
 baseDir = getenv('PANDA_FLATDIR')+'/' 
-ttbaseDir = baseDir.replace('2_5','2_5_tt_last')
 parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
@@ -19,6 +18,7 @@ blind=True
 linear=False
 region = args.region
 sname = argv[0]
+print baseDir
 
 argv=[]
 import ROOT as root
@@ -103,13 +103,14 @@ else:
 	zjets.AddFile(baseDir+'ZJets.root')
 wjets.AddFile(baseDir+'WJets.root')
 diboson.AddFile(baseDir+'Diboson.root')
-ttbar.AddFile(ttbaseDir+'TTbar.root')
+ttbar.AddFile(baseDir+'TTbar.root')
 singletop.AddFile(baseDir+'SingleTop.root')
 if 'pho' in region:
 	processes = [qcd,gjets]
 	gjets.AddFile(baseDir+'GJets.root')
 	qcd.AddFile(baseDir+'SinglePhoton.root')
 	qcd.additionalCut = root.TCut(tAND(datacut,sel.triggers['pho']))
+	#qcd.additionalCut = root.TCut(datacut)
 	qcd.useCommonWeight = False
 	qcd.additionalWeight = root.TCut('sf_phoPurity')
 else:
@@ -121,18 +122,22 @@ if any([x in region for x in ['singlemuontop','singleelectrontop']]):
 	processes = [qcd,diboson,singletop,zjets,wjets,ttbar]
 if any([x in region for x in ['signal','muon']]):
 	data.additionalCut = root.TCut(tAND(datacut,sel.triggers['met']))
+	#data.additionalCut = root.TCut(datacut)
 	PInfo(sname,'Using MET data')
 	data.AddFile(baseDir+'MET.root')
 	lep='#mu'
 elif 'electron' in region:
 	if 'di' in region:
 		data.additionalCut = root.TCut(tAND(datacut,tOR(sel.triggers['ele'],sel.triggers['pho'])))
+		#data.additionalCut = root.TCut(datacut)
 	else:
 		data.additionalCut = root.TCut(tAND(datacut,sel.triggers['ele']))
+		#data.additionalCut = root.TCut(datacut)
 	data.AddFile(baseDir+'SingleElectron.root')
 	lep='e'
 elif region=='photon':
 	data.additionalCut = root.TCut(tAND(datacut,sel.triggers['pho']))
+	#data.additionalCut = root.TCut(datacut)
 	data.AddFile(baseDir+'SinglePhoton.root')
 processes.append(data)
 
