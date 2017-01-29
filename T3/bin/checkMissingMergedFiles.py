@@ -14,6 +14,7 @@ parser.add_argument('--infile',type=str)
 parser.add_argument('--outfile',type=str)
 parser.add_argument('--outdir',type=str,default=outdir)
 parser.add_argument('--force',action='store_true')
+parser.add_argument('--nfiles',type=int,default=-1)
 args = parser.parse_args()
 outdir = args.outdir
 
@@ -61,6 +62,7 @@ mc = Output('MC')
 
 all_samples = read_sample_config(args.infile)
 filtered_samples = {}
+merged_samples = {}
 outfile = open(args.outfile,'w')
 for name in sorted(all_samples):
 	sample = all_samples[name]
@@ -70,11 +72,15 @@ for name in sorted(all_samples):
 	if base_name not in outputs:
 		outputs[base_name] = Output(base_name)
 	output = outputs[base_name]
+	if base_name not in merged_samples:
+		merged_samples[base_name] = DataSample(base_name,sample.dtype,sample.xsec)
+	merged_sample = merged_samples[base_name]
 
 	for f in sample.files:
 		found = (f in processedfiles)
 		if not found:
 			out_sample.add_file(f)
+			merged_sample.add_file(f)
 		output.add(found)
 		if sample.dtype=='MC':
 			mc.add(found)
@@ -93,12 +99,24 @@ for name in sorted(all_samples):
 	if len(out_sample.files)>0:
 		filtered_samples[name] = out_sample
 
-keys = sorted(filtered_samples)
-for k in keys:
-	sample = filtered_samples[k]
-	configs = sample.get_config(-1)
-	for c in configs:
-		outfile.write(c)
+if args.nfiles<0:
+	keys = sorted(filtered_samples)
+	for k in keys:
+		sample = filtered_samples[k]
+		configs = sample.get_config(-1)
+		for c in configs:
+			outfile.write(c)
+else:
+	keys = sorted(merged_samples)
+	counter=0
+	for k in keys:
+		sample = merged_samples[k]
+		if len(sample.files)==0:
+			continue
+		configs = sample.get_config(args.nfiles,suffix='_%i')
+		for c in configs:
+			outfile.write(c%(counter,counter))
+			counter += 1
 
 for n in sorted(outputs):
   print str(outputs[n])
