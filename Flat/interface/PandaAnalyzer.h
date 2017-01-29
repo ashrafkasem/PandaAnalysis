@@ -119,11 +119,11 @@ private:
 
 	// files and histograms containing weights
 	TFile *fLepSF=0, *fLepRecoSF=0;
-	THCorr2 *hEleVetoLoPU, *hEleTightLoPU;
-	THCorr2 *hEleVetoHiPU, *hEleTightHiPU;
+	TFile *fEleSF=0;
+	THCorr2 *hEleVeto, *hEleTight;
 	THCorr2 *hMuLooseLoPU, *hMuTightLoPU;
 	THCorr2 *hMuLooseHiPU, *hMuTightHiPU;
-	THCorr2 *hRecoEleLoPU, *hRecoEleHiPU;
+	THCorr2 *hRecoEle;
 	THCorr2 *hRecoMuLoPU,	*hRecoMuHiPU;
 	TFile *fPhoSF=0;
 	THCorr2 *hPho=0;
