@@ -23,20 +23,26 @@ cuts = {
 
 weights = {
     # analysis weights
-  'signal'         : tTIMES('%f*normalizedWeight*sf_ewkV*sf_qcdV*sf_pu*sf_lep','1'),
-  'top'            : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV','1'),
-  'w'              : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV','1'),
-  'notag'          : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV','1'),
-  'singleelectron' : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV','1'),
-  'singlemuon'     : tTIMES('%f*normalizedWeight*sf_pu*sf_lep*sf_ewkV*sf_qcdV','1'),
+  'signal'         : tTIMES('%f*normalizedWeight*sf_ewkV*sf_qcdV*sf_lep','1'),
+  'top'            : tTIMES('%f*normalizedWeight*sf_lep*sf_ewkV*sf_qcdV','1'),
+  'w'              : tTIMES('%f*normalizedWeight*sf_lep*sf_ewkV*sf_qcdV','1'),
+  'notag'          : tTIMES('%f*normalizedWeight*sf_lep*sf_ewkV*sf_qcdV','1'),
+  'singleelectron' : tTIMES('%f*normalizedWeight*sf_lep*sf_ewkV*sf_qcdV','1'),
+  'singlemuon'     : tTIMES('%f*normalizedWeight*sf_lep*sf_ewkV*sf_qcdV','1'),
 }
 
 for x in ['singlemuontop','singleelectrontop']:
   weights[x] = weights['top']
 for x in ['singlemuonw','singleelectronw']:
-  weights[x] = weights['w']
+	if 'muon' in x:
+	  weights[x] = weights['w'].replace('sf_lep','1')
+	else:
+	  weights[x] = tTIMES('0.82',weights['w']) # temporary correction for missing run G
 for x in ['dimuon','dielectron']:
-  weights[x] = weights['notag']
+	if 'muon' in x:
+	  weights[x] = weights['notag'].replace('sf_lep','1')
+	else:
+	  weights[x] = tTIMES('0.82',weights['notag'])
 for x in ['photon']:
   weights[x] = weights['notag']
   #weights[x] = tTIMES('sf_pho',weights['notag'])
