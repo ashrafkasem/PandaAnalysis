@@ -17,7 +17,7 @@ if __name__ == "__main__":
 	 
 #		skimmer.firstEvent=0
 #		skimmer.lastEvent=10
-		skimmer.isData=False
+		skimmer.isData=True
 		skimmer.SetFlag('puppi',True)
 		skimmer.SetFlag('fatjet',True)
 		skimmer.SetFlag('firstGen',False)

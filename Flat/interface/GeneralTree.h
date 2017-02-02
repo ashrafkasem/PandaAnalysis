@@ -166,13 +166,13 @@ class GeneralTree : public genericTree {
 	float genTTEta=0;
 	int nJet=0;
 	float jet1Phi=0;
-	float jet1Flav=0;
+	int jet1Flav=0;
 	float jet1GenPt=0;
 	float jet1Pt=0;
 	float jet1Eta=0;
 	float jet1CSV=0;
 	float jet2Phi=0;
-	float jet2Flav=0;
+	int jet2Flav=0;
 	float jet2GenPt=0;
 	float jet2Pt=0;
 	float jet2Eta=0;
@@ -249,6 +249,8 @@ class GeneralTree : public genericTree {
 	int looseLep2PdgId=0;
 	int looseLep1IsTight=0;
 	int looseLep2IsTight=0;
+	int looseLep1IsHLTSafe=0;
+	int looseLep2IsHLTSafe=0;
 	float looseLep1Pt=0;
 	float looseLep1Eta=0;
 	float looseLep1Phi=0;
@@ -487,6 +489,8 @@ GeneralTree::GeneralTree() {
 	looseLep2PdgId=0;
 	looseLep1IsTight=0;
 	looseLep2IsTight=0;
+	looseLep1IsHLTSafe=0;
+	looseLep2IsHLTSafe=0;
 	looseLep1Pt=0;
 	looseLep1Eta=0;
 	looseLep1Phi=0;
@@ -746,6 +750,8 @@ void GeneralTree::Reset() {
 	looseLep2PdgId = 0;
 	looseLep1IsTight = 0;
 	looseLep2IsTight = 0;
+	looseLep1IsHLTSafe = 0;
+	looseLep2IsHLTSafe = 0;
 	looseLep1Pt = -1;
 	looseLep1Eta = -1;
 	looseLep1Phi = -1;
@@ -1228,6 +1234,10 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("looseLep1IsTight",&looseLep1IsTight);
 	treePtr->SetBranchStatus("looseLep2IsTight",1);
 	treePtr->SetBranchAddress("looseLep2IsTight",&looseLep2IsTight);
+	treePtr->SetBranchStatus("looseLep1IsHLTSafe",1);
+	treePtr->SetBranchAddress("looseLep1IsHLTSafe",&looseLep1IsHLTSafe);
+	treePtr->SetBranchStatus("looseLep2IsHLTSafe",1);
+	treePtr->SetBranchAddress("looseLep2IsHLTSafe",&looseLep2IsHLTSafe);
 	treePtr->SetBranchStatus("looseLep1Pt",1);
 	treePtr->SetBranchAddress("looseLep1Pt",&looseLep1Pt);
 	treePtr->SetBranchStatus("looseLep1Eta",1);
@@ -1395,13 +1405,13 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("genTTEta",&genTTEta,"genTTEta/F");
 	treePtr->Branch("nJet",&nJet,"nJet/I");
 	treePtr->Branch("jet1Phi",&jet1Phi,"jet1Phi/F");
-	treePtr->Branch("jet1Flav",&jet1Flav,"jet1Flav/F");
+	treePtr->Branch("jet1Flav",&jet1Flav,"jet1Flav/I");
 	treePtr->Branch("jet1GenPt",&jet1GenPt,"jet1GenPt/F");
 	treePtr->Branch("jet1Pt",&jet1Pt,"jet1Pt/F");
 	treePtr->Branch("jet1Eta",&jet1Eta,"jet1Eta/F");
 	treePtr->Branch("jet1CSV",&jet1CSV,"jet1CSV/F");
 	treePtr->Branch("jet2Phi",&jet2Phi,"jet2Phi/F");
-	treePtr->Branch("jet2Flav",&jet2Flav,"jet2Flav/F");
+	treePtr->Branch("jet2Flav",&jet2Flav,"jet2Flav/I");
 	treePtr->Branch("jet2GenPt",&jet2GenPt,"jet2GenPt/F");
 	treePtr->Branch("jet2Pt",&jet2Pt,"jet2Pt/F");
 	treePtr->Branch("jet2Eta",&jet2Eta,"jet2Eta/F");
@@ -1495,6 +1505,8 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("looseLep2PdgId",&looseLep2PdgId,"looseLep2PdgId/I");
 	treePtr->Branch("looseLep1IsTight",&looseLep1IsTight,"looseLep1IsTight/I");
 	treePtr->Branch("looseLep2IsTight",&looseLep2IsTight,"looseLep2IsTight/I");
+	treePtr->Branch("looseLep1IsHLTSafe",&looseLep1IsHLTSafe,"looseLep1IsHLTSafe/I");
+	treePtr->Branch("looseLep2IsHLTSafe",&looseLep2IsHLTSafe,"looseLep2IsHLTSafe/I");
 	treePtr->Branch("looseLep1Pt",&looseLep1Pt,"looseLep1Pt/F");
 	treePtr->Branch("looseLep1Eta",&looseLep1Eta,"looseLep1Eta/F");
 	treePtr->Branch("looseLep1Phi",&looseLep1Phi,"looseLep1Phi/F");
