@@ -121,22 +121,22 @@ if any([x in region for x in ['singlemuonw','singleelectronw']]):
 if any([x in region for x in ['singlemuontop','singleelectrontop']]):
 	processes = [qcd,diboson,singletop,zjets,wjets,ttbar]
 if any([x in region for x in ['signal','muon']]):
-	#data.additionalCut = root.TCut(tAND(datacut,sel.triggers['met']))
+	data.additionalCut = root.TCut(tAND(datacut,sel.triggers['met']))
 	data.additionalCut = root.TCut(datacut)
 	PInfo(sname,'Using MET data')
 	data.AddFile(baseDir+'MET.root')
 	lep='#mu'
 elif 'electron' in region:
 	if 'di' in region:
-		#data.additionalCut = root.TCut(tAND(datacut,tOR(sel.triggers['ele'],sel.triggers['pho'])))
+		data.additionalCut = root.TCut(tAND(datacut,tOR(sel.triggers['ele'],sel.triggers['pho'])))
 		data.additionalCut = root.TCut(datacut)
 	else:
-		#data.additionalCut = root.TCut(tAND(datacut,sel.triggers['ele']))
+		data.additionalCut = root.TCut(tAND(datacut,sel.triggers['ele']))
 		data.additionalCut = root.TCut(datacut)
 	data.AddFile(baseDir+'SingleElectron.root')
 	lep='e'
 elif region=='photon':
-	#data.additionalCut = root.TCut(tAND(datacut,sel.triggers['pho']))
+	data.additionalCut = root.TCut(tAND(datacut,sel.triggers['pho']))
 	data.additionalCut = root.TCut(datacut)
 	data.AddFile(baseDir+'SinglePhoton.root')
 processes.append(data)
@@ -181,6 +181,8 @@ elif region=='photon':
 	plot.AddDistribution(root.Distribution('loosePho1Eta',-2.5,2.5,20,'Leading pho #eta','Events'))
 	plot.AddDistribution(root.Distribution('loosePho1Phi',-3.142,3.142,20,'Leading pho #phi','Events'))
 	plot.AddDistribution(root.Distribution('fabs(calomet-pfmet)/pfUAmag',0,1,20,'|E_{T,calo}^{miss}-E_{T}^{miss}|/U(#gamma)','Events',999,-999,'pfcalobalance'))
+#if region!='photon':
+	#plot.AddDistribution(root.Distribution('fixed_mt',0,1000,20,'M_{T} [GeV]','Events/50 GeV'))
 if recoil:
 	setBins(recoil,recoilBins)
 	plot.AddDistribution(recoil)

@@ -364,16 +364,19 @@ void PandaAnalyzer::Run() {
 	}
 
 	// these are bins of b-tagging eff in pT
-	std::vector<double> vbtagpt {50,70,100,140,200,300,670};
-	std::vector<double> beff  {0.60592 , 0.634613, 0.645663, 0.646712, 0.649283, 0.621973, 0.554093};
-	std::vector<double> ceff  {0.122067, 0.119659, 0.123723, 0.132141, 0.143654, 0.143127, 0.133581};
-	std::vector<double> lfeff {0.014992, 0.012208, 0.011654, 0.011675, 0.015165, 0.016569, 0.020099};
+	std::vector<double> vbtagpt {20.0,50.0,80.0,120.0,200.0,300.0,400.0,500.0,700.0,1000.0};
+	std::vector<double> vbtageta {0.0,0.5,1.5,2.5};
+	std::vector<std::vector<double>> lfeff  = {{0.081,0.065,0.060,0.063,0.072,0.085,0.104,0.127,0.162},
+                                         		 {0.116,0.097,0.092,0.099,0.112,0.138,0.166,0.185,0.222},
+                                         		 {0.173,0.145,0.149,0.175,0.195,0.225,0.229,0.233,0.250}};
+	std::vector<std::vector<double>> ceff = {{0.377,0.389,0.391,0.390,0.391,0.375,0.372,0.392,0.435},
+                           		             {0.398,0.407,0.416,0.424,0.424,0.428,0.448,0.466,0.500},
+                           		             {0.375,0.389,0.400,0.425,0.437,0.459,0.481,0.534,0.488}};
+	std::vector<std::vector<double>> beff = {{0.791,0.815,0.825,0.835,0.821,0.799,0.784,0.767,0.760},
+                          		             {0.794,0.816,0.829,0.836,0.823,0.804,0.798,0.792,0.789},
+                          		             {0.739,0.767,0.780,0.789,0.776,0.771,0.779,0.787,0.806}};
 	Binner btagpt(vbtagpt);
-
-	// std::vector<double> vnewbtagpt {30,40,60,100,160};
-	// std::vector<double> vnewbtageta {0.8,1.6,2.41};
-	// Binner newbtagpt(vnewbtagpt);
-	// Binner newbtageta(vnewbtageta);
+	Binner btageta(vbtageta);
 
 	// these are triggers. at some point these ought to be read from the file
 	std::vector<unsigned int> metTriggers {0,1,2,3,4,5,6,7,8,9,10,11};
@@ -517,6 +520,7 @@ void PandaAnalyzer::Run() {
 													mu->pt>20 && fabs(mu->eta)<2.4 );
 				if (lep_counter==1) {
 					gt->looseLep1PdgId = mu->q*-13;
+					gt->looseLep1IsHLTSafe = 1;
 					if (isTight) {
 						gt->nTightMuon++;
 						gt->looseLep1IsTight = 1;
@@ -524,6 +528,7 @@ void PandaAnalyzer::Run() {
 					}
 				} else if (lep_counter==2) {
 					gt->looseLep2PdgId = mu->q*-13;
+					gt->looseLep2IsHLTSafe = 1;
 					if (isTight) {
 						gt->nTightMuon++;
 						gt->looseLep2IsTight = 1;
@@ -538,6 +543,7 @@ void PandaAnalyzer::Run() {
 													ele->pt>40 && fabs(ele->eta)<2.5 );
 				if (lep_counter==1) {
 					gt->looseLep1PdgId = ele->q*-11;
+					gt->looseLep1IsHLTSafe = (ele->id&PElectron::kHLTPresel)!=0 ? 1 : 0;
 					if (isTight) {
 						gt->nTightElectron++;
 						gt->looseLep1IsTight = 1;
@@ -546,6 +552,7 @@ void PandaAnalyzer::Run() {
 					}
 				} else if (lep_counter==2) {
 					gt->looseLep2PdgId = ele->q*-11;
+					gt->looseLep2IsHLTSafe = (ele->id&PElectron::kHLTPresel)!=0 ? 1 : 0;
 					if (isTight) {
 						gt->nTightElectron++;
 						gt->looseLep2IsTight = 1;
@@ -593,7 +600,7 @@ void PandaAnalyzer::Run() {
 				gt->loosePho1Phi = phi;
 			}
 			if ( (pho->id&PPhoton::kMedium)!=0 &&
-						pt>175 && fabs(eta)<1.4442 ) {
+						pt>175 /*&& fabs(eta)<1.4442*/ ) { // apply eta cut offline
 				if (gt->nLoosePhoton==1)
 					gt->loosePho1IsTight=1;
 				gt->nTightPhoton++;
@@ -963,7 +970,7 @@ void PandaAnalyzer::Run() {
 				continue;
 			if (tau->isoDeltaBetaCorr>5)
 				continue; 
-			if (tau->pt<10 || fabs(tau->eta)>2.3)
+			if (tau->pt<18 || fabs(tau->eta)>2.3)
 				continue;
 			if (IsMatched(&matchLeps,0.16,tau->eta,tau->phi))
 				continue;
@@ -1174,13 +1181,14 @@ void PandaAnalyzer::Run() {
 				float btagUncFactor = 1;
 				float eta = subjet->eta;
 				double eff(1),sf(1),sfUp(1),sfDown(1);
-				unsigned int bin = btagpt.bin(pt);
+				unsigned int binpt = btagpt.bin(pt);
+				unsigned int bineta = btageta.bin(fabs(eta));
 				if (flavor==5) {
-					eff = beff[bin];
+					eff = beff[bineta][binpt];
 				} else if (flavor==4) {
-					eff = ceff[bin];
+					eff = ceff[bineta][binpt];
 				} else {
-					eff = lfeff[bin];
+					eff = lfeff[bineta][binpt];
 				}
 				calcBJetSFs("sj_L",flavor,eta,pt,eff,btagUncFactor,sf,sfUp,sfDown);
 				sj_btagcands.push_back(btagcand(iSJ,flavor,eff,sf,sfUp,sfDown));
@@ -1257,13 +1265,14 @@ void PandaAnalyzer::Run() {
 				float btagUncFactor = 1;
 				float eta = jet->eta;
 				double eff(1),sf(1),sfUp(1),sfDown(1);
-				unsigned int bin = btagpt.bin(pt);
+				unsigned int binpt = btagpt.bin(pt);
+				unsigned int bineta = btageta.bin(fabs(eta));
 				if (flavor==5) 
-					eff = beff[bin];
+					eff = beff[bineta][binpt];
 				else if (flavor==4) 
-					eff = ceff[bin];
+					eff = ceff[bineta][binpt];
 				else 
-					eff = lfeff[bin];
+					eff = lfeff[bineta][binpt];
 				if (jet==centralJets.at(0)) {
 					gt->jet1Flav = flavor;
 					gt->jet1GenPt = genpt;
