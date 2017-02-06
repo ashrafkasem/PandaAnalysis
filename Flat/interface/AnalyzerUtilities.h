@@ -14,6 +14,21 @@
 #include "PandaCore/Tools/interface/DataTools.h"
 #include "PandaCore/Tools/interface/JERReader.h"
 
+class LumiRange {
+public:
+	LumiRange(int l0_,int l1_):
+		l0(l0_),
+		l1(l1_)
+ 	{ }
+	~LumiRange() {}
+	bool Contains(int l) {
+		return l0<=l && l<=l1;
+	}
+private:
+	int l0, l1;
+};
+
+
 template <typename T>
 class THCorr {
 public:

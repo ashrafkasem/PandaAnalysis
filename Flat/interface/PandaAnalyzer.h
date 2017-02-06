@@ -70,13 +70,9 @@ public :
 	~PandaAnalyzer();
 	void Init(TTree *tree, TTree *infotree);
 	void SetOutputFile(TString fOutName);
-	float getMSDcorr(Float_t puppipt, Float_t puppieta);
 	void ResetBranches();
 	void Run();
 	void Terminate();
-	bool PassPreselection();
-	bool PassEventFilters();
-	bool PassGoodLumis();
 	void SetDataDir(const char *s);
 	void SetPreselectionBit(PreselectionBit b,bool on=true) {
 		if (on) 
@@ -84,6 +80,7 @@ public :
 		else 
 			preselBits &= ~b;
 	}
+	void AddGoodLumiRange(int run, int l0, int l1);
 
 	// public configuration
 	void SetFlag(TString flag, bool b=true) { flags[flag]=b; }
@@ -98,11 +95,16 @@ private:
 
 	std::map<panda::PGenParticle*,float> genObjects;				 //!< particles we want to match the jets to, and the 'size' of the daughters
 	panda::PGenParticle *MatchToGen(double eta, double phi, double r2, int pdgid=0);		//!< private function to match a jet; returns NULL if not found
+	std::map<int,std::vector<LumiRange>> goodLumis;
+	bool PassGoodLumis(int run, int lumi);
+	bool PassPreselection();
+	float getMSDcorr(Float_t puppipt, Float_t puppieta);
 	std::vector<panda::PObject*> matchPhos, matchEles, matchLeps;
 	
 	// CMSSW-provided utilities
 
-	void calcBJetSFs(TString readername, int flavor, double eta, double pt, double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
+	void calcBJetSFs(TString readername, int flavor, double eta, double pt, 
+			             double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
 	BTagCalibration *btagCalib=0;
 	BTagCalibration *btagCalib_alt=0;
 	BTagCalibration *sj_btagCalib=0;

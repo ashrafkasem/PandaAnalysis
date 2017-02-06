@@ -6,7 +6,7 @@ cuts = {}
 weights = {}
 triggers = {}
 
-eventsel = 'metfilter==1 && filterbadChCandidate==1 && filterbadPFMuon==1 && fabs(minJetMetDPhi_withendcap)>0.5 && (fabs(caloMet-trueMet)/met)<0.5 && n_tau==0 && met>200 && n_bjetsMedium==0'
+eventsel = 'metfilter==1 && filterbadChCandidate==1 && filterbadPFMuon==1 && fabs(minJetMetDPhi_withendcap)>0.5 && (fabs(caloMet-trueMet)/met)<0.5 && n_tau==0 && met>200'
 noid = tAND(eventsel,'jet1Pt>100. && leadingJet_outaccp==0 && fabs(jet1Eta)<2.4') 
 baseline = tAND(noid,'jet1isMonoJetIdNew==1')
 
@@ -16,7 +16,7 @@ cuts['wmn'] = tAND(baseline,'n_loosepho==0 && n_looselep==1 && abs(lep1PdgId)==1
 #cuts['wmn'] = 'jet1isMonoJetIdNew==1&&leadingJet_outaccp==0&&1==1&&abs(jet1Eta)<2.5&&n_tau==0&&n_bjetsMedium==0&&n_looselep == 1 && abs(lep1PdgId)==13 && mt<160&&n_loosepho==0&&metfilter==1 && filterbadChCandidate==1 && filterbadPFMuon==1&&jet1Pt>100. &&(abs(caloMet-trueMet)/met) < 0.5&&n_tightlep > 0&&abs(minJetMetDPhi_withendcap) > 0.5&&met>200.0'
 cuts['wen'] = tAND(baseline,'n_loosepho==0 && n_looselep==1 && abs(lep1PdgId)==11 && n_tightlep>0 && trueMet>50 && mt<160 && lep1IsHLTSafe==1')
 cuts['zmm'] = tAND(baseline,'n_loosepho==0 && n_looselep == 2 && lep2PdgId*lep1PdgId==-169 && n_tightlep>0 && fabs(dilep_m-91)<30')
-cuts['zee'] = tAND(baseline,'n_loosepho==0 && n_looselep == 2 && lep2PdgId*lep1PdgId==-121 && n_tightlep==2 && fabs(dilep_m-91)<30 && (lep1IsHLTSafe==1 || lep2IsHLTSafe==1)')
+cuts['zee'] = tAND(baseline,'n_loosepho==0 && n_looselep == 2 && lep2PdgId*lep1PdgId==-121 && n_tightlep==1 && fabs(dilep_m-91)<30')
 cuts['pho'] = tAND(baseline,'photonPt>175 && fabs(photonEta)<1.4442 && n_mediumpho==1 && n_loosepho==1 && n_looselep == 0')
 cuts['zll'] = tOR(cuts['zmm'],cuts['zee'])
 cuts['wlv'] = tOR(cuts['wmn'],cuts['wen'])

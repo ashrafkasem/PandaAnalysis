@@ -38,8 +38,8 @@ def hadd(inpath,outpath):
   if type(inpath)==type('str'):
     infiles = glob(inpath)
     PInfo(sname,'hadding %s into %s'%(inpath,outpath))
-    cmd = 'hadd -k -ff -n 100 -f %s %s > /dev/null'%(outpath,inpath)
-    #cmd = 'hadd -k -ff -n 100 -f %s %s'%(outpath,inpath)
+    #cmd = 'hadd -k -ff -n 100 -f %s %s > /dev/null'%(outpath,inpath)
+    cmd = 'hadd -k -ff -n 100 -f %s %s'%(outpath,inpath)
     system(cmd)
     return
   else:
@@ -55,8 +55,8 @@ def hadd(inpath,outpath):
       if path.isfile(f):
         cmd += '%s '%f
   if VERBOSE: PInfo(sname,cmd)
-  system(cmd+' >/dev/null 2>/dev/null')
-  #system(cmd)
+  #system(cmd+' >/dev/null 2>/dev/null')
+  system(cmd)
 
 def normalizeFast(fpath,opt):
   xsec=-1
