@@ -1,10 +1,14 @@
 #!/usr/bin/env python
 
-from ROOT import gSystem,gROOT
-import ROOT as root
 from re import sub
 from sys import argv,exit
 from os import system,getenv
+import json
+
+torun = argv[1]
+argv = []
+
+import ROOT as root
 from PandaCore.Tools.Load import *
 
 if __name__ == "__main__":
@@ -21,7 +25,13 @@ if __name__ == "__main__":
 		skimmer.SetFlag('puppi',True)
 		skimmer.SetFlag('fatjet',True)
 		skimmer.SetFlag('firstGen',False)
-#		skimmer.processType = root.PandaAnalyzer.kTT
+		if skimmer.isData:
+			with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt') as jsonFile:
+				payload = json.load(jsonFile)
+				for run,lumis in payload.iteritems():
+					for l in lumis:
+						skimmer.AddGoodLumiRange(int(run),l[0],l[1])
+		skimmer.processType = root.PandaAnalyzer.kW
 #		skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
 		fin = root.TFile.Open(fullPath)
 
@@ -41,4 +51,4 @@ if __name__ == "__main__":
 		skimmer.Terminate()
 		print 'done terminating'
 
-	fn(argv[1]) 
+	fn(torun) 

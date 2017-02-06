@@ -110,7 +110,6 @@ if 'pho' in region:
 	gjets.AddFile(baseDir+'GJets.root')
 	qcd.AddFile(baseDir+'SinglePhoton.root')
 	qcd.additionalCut = root.TCut(tAND(datacut,sel.triggers['pho']))
-	#qcd.additionalCut = root.TCut(datacut)
 	qcd.useCommonWeight = False
 	qcd.additionalWeight = root.TCut('sf_phoPurity')
 else:
@@ -122,22 +121,19 @@ if any([x in region for x in ['singlemuontop','singleelectrontop']]):
 	processes = [qcd,diboson,singletop,zjets,wjets,ttbar]
 if any([x in region for x in ['signal','muon']]):
 	data.additionalCut = root.TCut(tAND(datacut,sel.triggers['met']))
-	data.additionalCut = root.TCut(datacut)
 	PInfo(sname,'Using MET data')
 	data.AddFile(baseDir+'MET.root')
 	lep='#mu'
 elif 'electron' in region:
 	if 'di' in region:
 		data.additionalCut = root.TCut(tAND(datacut,tOR(sel.triggers['ele'],sel.triggers['pho'])))
-		data.additionalCut = root.TCut(datacut)
 	else:
+#		pass
 		data.additionalCut = root.TCut(tAND(datacut,sel.triggers['ele']))
-		data.additionalCut = root.TCut(datacut)
-	data.AddFile(baseDir+'SingleElectron.root')
+	data.AddFile(baseDir+'/SingleElectron.root')
 	lep='e'
 elif region=='photon':
 	data.additionalCut = root.TCut(tAND(datacut,sel.triggers['pho']))
-	data.additionalCut = root.TCut(datacut)
 	data.AddFile(baseDir+'SinglePhoton.root')
 processes.append(data)
 

@@ -18,10 +18,13 @@ PandaAnalyzer::PandaAnalyzer() {
 	flags["monohiggs"]   = false;
 	flags["monojet"]     = false;
 	flags["firstGen"]    = true;
+	flags["applyJSON"]   = true;
 }
+
 
 PandaAnalyzer::~PandaAnalyzer() {
 }
+
 
 void PandaAnalyzer::ResetBranches() {
 	genObjects.clear();
@@ -30,6 +33,7 @@ void PandaAnalyzer::ResetBranches() {
 	matchLeps.clear();
 	gt->Reset();
 }
+
 
 void PandaAnalyzer::SetOutputFile(TString fOutName) {
 	fOut = new TFile(fOutName,"RECREATE");
@@ -42,6 +46,7 @@ void PandaAnalyzer::SetOutputFile(TString fOutName) {
 	gt->WriteTree(tOut);
 
 }
+
 
 void PandaAnalyzer::Init(TTree *t, TTree *infotree)
 {
@@ -69,6 +74,7 @@ void PandaAnalyzer::Init(TTree *t, TTree *infotree)
 	fOut->WriteTObject(hDTotalMCWeight,"hDTotalMCWeight");
 }
 
+
 PGenParticle *PandaAnalyzer::MatchToGen(double eta, double phi, double radius, int pdgid) {
 	PGenParticle *found=NULL;
 	double r2 = radius*radius;
@@ -87,6 +93,7 @@ PGenParticle *PandaAnalyzer::MatchToGen(double eta, double phi, double radius, i
 
 	return found;
 }
+
 
 void PandaAnalyzer::Terminate() {
 	fOut->WriteTObject(tOut);
@@ -112,6 +119,7 @@ void PandaAnalyzer::Terminate() {
 
 	delete ak8JERReader;
 }
+
 
 void PandaAnalyzer::SetDataDir(const char *s) {
 	TString dirPath(s);
@@ -194,13 +202,13 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 	fCSVHF = new TFile(dirPath+"/csvWeights/csvweight_tag_iterative.root"); openFiles.push_back(fCSVHF);
 	hCSVHF = new THCorr1( (TH1D*)fCSVHF->Get("hratio") ); gc.push_back(hCSVHF);
 
-	btagCalib = new BTagCalibration("csvv2",(dirPath+"/CSVv2Moriond17_2017_1_26_BtoH.csv").Data());
+	btagCalib = new BTagCalibration("csvv2",(dirPath+"/CSVv2_Moriond17_B_H.csv").Data());
 	btagReaders["jet_L"] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
 	btagReaders["jet_L"]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
 	btagReaders["jet_L"]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
 	btagReaders["jet_L"]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
-	sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"/CSVv2Moriond17_2017_1_26_BtoH.csv").Data());
+	sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"/CSVv2_Moriond17_B_H.csv").Data());
 	btagReaders["sj_L"] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
 	btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_B,"comb");
 	btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_C,"comb");
@@ -209,7 +217,7 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 	btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
 	if (flags["monohiggs"]) {
-		btagCalib_alt = new BTagCalibration("csvv2",(dirPath+"/CSVv2Moriond17_2017_1_26_BtoH.csv").Data());
+		btagCalib_alt = new BTagCalibration("csvv2",(dirPath+"/CSVv2_Moriond17_B_H.csv").Data());
 		btagReaders["jet_M"] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM,"central",{"up","down"});
 		btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
 		btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
@@ -252,13 +260,40 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 //	ak8UncReader = new JetCorrectionUncertainty(*ak8jec);
 }
 
-bool PandaAnalyzer::PassEventFilters() {
-	return true;
+
+void PandaAnalyzer::AddGoodLumiRange(int run, int l0, int l1) {
+	auto run_ = goodLumis.find(run); 
+	if (run_==goodLumis.end()) { // don't know about this run yet
+		std::vector<LumiRange> newLumiList;
+		newLumiList.emplace_back(l0,l1);
+		goodLumis[run] = newLumiList;
+	} else {
+		run_->second.emplace_back(l0,l1);
+	}
 }
 
-bool PandaAnalyzer::PassGoodLumis() {
-	return true;
+
+bool PandaAnalyzer::PassGoodLumis(int run, int lumi) {
+	auto run_ = goodLumis.find(run);
+	if (run_==goodLumis.end()) {
+		// matched no run
+		if (DEBUG) PDebug("PandaAnalyzer::PassGoodLumis",TString::Format("Failing run=%i",run));
+		return false;
+	}
+
+	// found the run, now look for a lumi range
+	for (auto &range : run_->second) {
+		if (range.Contains(lumi)) {
+			if (DEBUG) PDebug("PandaAnalyzer::PassGoodLumis",TString::Format("Accepting run=%i, lumi=%i",run,lumi));
+			return true;
+		}
+	}
+
+	// matched no lumi range
+	if (DEBUG) PDebug("PandaAnalyzer::PassGoodLumis",TString::Format("Failing run=%i, lumi=%i",run,lumi));
+	return false;
 }
+
 
 bool PandaAnalyzer::PassPreselection() {
 	if (preselBits==0)
@@ -299,6 +334,7 @@ bool PandaAnalyzer::PassPreselection() {
 	return isGood;
 }
 
+
 void PandaAnalyzer::calcBJetSFs(TString readername, int flavor, 
 																double eta, double pt, double eff, double uncFactor,
 																double &sf, double &sfUp, double &sfDown) {
@@ -321,6 +357,7 @@ void PandaAnalyzer::calcBJetSFs(TString readername, int flavor,
 	return;
 }
 
+
 float PandaAnalyzer::getMSDcorr(Float_t puppipt, Float_t puppieta) { 
 
 	float genCorr	= 1.;
@@ -338,6 +375,7 @@ float PandaAnalyzer::getMSDcorr(Float_t puppipt, Float_t puppieta) {
 
 	return totalWeight;
 } 
+
 
 // run
 void PandaAnalyzer::Run() {
@@ -363,7 +401,7 @@ void PandaAnalyzer::Run() {
 		genBosonPtMax = hZNLO->GetHist()->GetBinCenter(hZNLO->GetHist()->GetNbinsX());
 	}
 
-	// these are bins of b-tagging eff in pT
+	// these are bins of b-tagging eff in pT and eta, derived in 8024 TT MC
 	std::vector<double> vbtagpt {20.0,50.0,80.0,120.0,200.0,300.0,400.0,500.0,700.0,1000.0};
 	std::vector<double> vbtageta {0.0,0.5,1.5,2.5};
 	std::vector<std::vector<double>> lfeff  = {{0.081,0.065,0.060,0.063,0.072,0.085,0.104,0.127,0.162},
@@ -389,6 +427,8 @@ void PandaAnalyzer::Run() {
 	ProgressReporter pr("PandaAnalyzer::Run",&iE,&nEvents,10);
 	TimeReporter tr("PandaAnalyzer::Run",DEBUG);
 
+	bool applyJSON = flags["applyJSON"];
+
 	// EVENTLOOP --------------------------------------------------------------------------
 	for (iE=nZero; iE!=nEvents; ++iE) {
 		tr.Start();
@@ -407,6 +447,11 @@ void PandaAnalyzer::Run() {
 		if (!isData) 
 			gt->sf_pu = hPUWeight->Eval(gt->npv);
 		if (isData) {
+			// check the json
+			if (applyJSON && !PassGoodLumis(gt->runNumber,gt->lumiNumber)) 
+				continue;
+
+			// save triggers
 			for (auto iT : metTriggers) {	 
 				if (event->tiggers->at(iT)) {
 					gt->trigger |= kMETTrig;
@@ -466,13 +511,13 @@ void PandaAnalyzer::Run() {
 		std::vector<PObject*> looseLeps, tightLeps;
 		for (PElectron *ele : *electrons) {
 			float pt = ele->pt; float eta = ele->eta; float aeta = fabs(eta);
-			//if (pt<10 || aeta>2.5 || (aeta>1.4442 && aeta<1.566))
 			if (pt<10 || aeta>2.5)
+			//if (pt<10 || aeta>2.5 || (aeta>1.4442 && aeta<1.566))
 				continue;
 			if ((ele->id&PElectron::kVeto)==0)
 				continue;
-			if (!ElectronIsolation(pt,eta,ele->iso,PElectron::kVeto))
-				continue;
+			// if (!ElectronIsolation(pt,eta,ele->iso,PElectron::kVeto))
+			// 	continue;
 			looseLeps.push_back(ele);
 			gt->nLooseElectron++;
 		} 
@@ -539,7 +584,7 @@ void PandaAnalyzer::Run() {
 			} else {
 				PElectron *ele = dynamic_cast<PElectron*>(lep);
 				bool isTight = ( (ele->id&PElectron::kTight)!=0 &&
-													ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&
+													/*ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&*/
 													ele->pt>40 && fabs(ele->eta)<2.5 );
 				if (lep_counter==1) {
 					gt->looseLep1PdgId = ele->q*-11;
@@ -566,6 +611,10 @@ void PandaAnalyzer::Run() {
 			++lep_counter;
 		}
 		gt->nTightLep = gt->nTightElectron + gt->nTightMuon;
+		if (gt->nLooseLep>0) {
+			PObject *lep1 = looseLeps[0];
+			gt->mT = MT(lep1->pt,lep1->phi,gt->pfmet,gt->pfmetphi);
+		}
 		if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
 			TLorentzVector v1,v2;
 			PObject *lep1=looseLeps[0], *lep2=looseLeps[1];
@@ -968,8 +1017,10 @@ void PandaAnalyzer::Run() {
 			if ((tau->id&PTau::kDecayModeFinding)==0 ||
 					(tau->id&PTau::kDecayModeFindingNewDMs)==0) 
 				continue;
-			if (tau->isoDeltaBetaCorr>5)
-				continue; 
+			if ((tau->id&PTau::kVLooseIsolationMVArun2v1DBnewDMwLT)==0)
+				continue;
+//			if (tau->isoDeltaBetaCorr>5)
+//				continue; 
 			if (tau->pt<18 || fabs(tau->eta)>2.3)
 				continue;
 			if (IsMatched(&matchLeps,0.16,tau->eta,tau->phi))
