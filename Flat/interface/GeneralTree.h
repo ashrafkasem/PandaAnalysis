@@ -37,6 +37,8 @@ class GeneralTree : public genericTree {
 	ULong64_t eventNumber=0;
 	int npv=0;
 	float mcWeight=0;
+	float filter_maxRecoil=0;
+	int filter whichRecoil=-1;
 	int trigger=0;
 	int metFilter=0;
 	float sf_ewkV=0;
@@ -258,6 +260,7 @@ class GeneralTree : public genericTree {
 	float looseLep2Eta=0;
 	float looseLep2Phi=0;
 	float diLepMass=0;
+	float mT=0;
 	int nTau=0;
 	float jetPt[NJET];
 	float jetEta[NJET];
@@ -283,6 +286,8 @@ GeneralTree::GeneralTree() {
 	eventNumber=0;
 	npv=0;
 	mcWeight=0;
+	filter_maxRecoil=0;
+	filter_whichRecoil=-1;
 	trigger=0;
 	metFilter=0;
 	sf_ewkV=1;
@@ -498,6 +503,7 @@ GeneralTree::GeneralTree() {
 	looseLep2Eta=0;
 	looseLep2Phi=0;
 	diLepMass=0;
+	mT=0;
 	nTau=0;
 	hbbpt=0;
 	hbbeta=0;
@@ -544,6 +550,8 @@ void GeneralTree::Reset() {
 	eventNumber = 0;
 	npv = 0;
 	mcWeight = -1;
+	filter_maxRecoil = 0;
+	filter_whichRecoil = -1;
 	trigger = 0;
 	metFilter = 0;
 	sf_ewkV = 1;
@@ -759,6 +767,7 @@ void GeneralTree::Reset() {
 	looseLep2Eta = -1;
 	looseLep2Phi = -1;
 	diLepMass = -1;
+	mT = -1;
 	nTau = 0;
 	hbbpt = -1;
 	hbbeta = -1;
@@ -808,6 +817,10 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("npv",&npv);
 	treePtr->SetBranchStatus("mcWeight",1);
 	treePtr->SetBranchAddress("mcWeight",&mcWeight);
+	treePtr->SetBranchStatus("filter_maxRecoil",1);
+	treePtr->SetBranchAddress("filter_maxRecoil",&filter_maxRecoil);
+	treePtr->SetBranchStatus("filter_whichRecoil",1);
+	treePtr->SetBranchAddress("filter_whichRecoil",&filter_whichRecoil);
 	treePtr->SetBranchStatus("trigger",1);
 	treePtr->SetBranchAddress("trigger",&trigger);
 	treePtr->SetBranchStatus("metFilter",1);
@@ -1252,6 +1265,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("looseLep2Phi",&looseLep2Phi);
 	treePtr->SetBranchStatus("diLepMass",1);
 	treePtr->SetBranchAddress("diLepMass",&diLepMass);
+	treePtr->SetBranchStatus("mT",1);
+	treePtr->SetBranchAddress("mT",&mT);
 	treePtr->SetBranchStatus("nTau",1);
 	treePtr->SetBranchAddress("nTau",&nTau);
 	if (monohiggs) {
@@ -1276,6 +1291,8 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("eventNumber",&eventNumber,"eventNumber/l");
 	treePtr->Branch("npv",&npv,"npv/I");
 	treePtr->Branch("mcWeight",&mcWeight,"mcWeight/F");
+	treePtr->Branch("filter_maxRecoil",&filter_maxRecoil,"filter_maxRecoil/F");
+	treePtr->Branch("filter_whichRecoil",&filter_whichRecoil,"filter_whichRecoil/I");
 	treePtr->Branch("trigger",&trigger,"trigger/I");
 	treePtr->Branch("metFilter",&metFilter,"metFilter/I");
 	treePtr->Branch("sf_ewkV",&sf_ewkV,"sf_ewkV/F");
@@ -1514,6 +1531,7 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("looseLep2Eta",&looseLep2Eta,"looseLep2Eta/F");
 	treePtr->Branch("looseLep2Phi",&looseLep2Phi,"looseLep2Phi/F");
 	treePtr->Branch("diLepMass",&diLepMass,"diLepMass/F");
+	treePtr->Branch("mT",&mT,"mT/F");
 	treePtr->Branch("nTau",&nTau,"nTau/I");
 	if (monohiggs) {
 		treePtr->Branch("hbbpt",&hbbpt,"hbbpt/F");
