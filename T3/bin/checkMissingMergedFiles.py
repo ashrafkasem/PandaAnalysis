@@ -103,6 +103,8 @@ if args.nfiles<0:
 	keys = sorted(filtered_samples)
 	for k in keys:
 		sample = filtered_samples[k]
+		if len(sample.files)==0:
+			continue
 		configs = sample.get_config(-1)
 		for c in configs:
 			outfile.write(c)

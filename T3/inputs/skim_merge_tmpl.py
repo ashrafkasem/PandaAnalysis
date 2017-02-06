@@ -4,6 +4,7 @@ from re import sub
 from sys import argv,exit
 from os import system,getenv,path
 from time import clock,time
+import json
 
 which = int(argv[1])
 sname = argv[0]
@@ -17,20 +18,22 @@ import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 
 now = int(time())
 Load('PandaAnalysisFlat','PandaAnalyzer')
+data_dir = getenv('CMSSW_BASE') + '/src/PandaAnalysis/data/'
 
 def copy_local(long_name):
-	eosPath = 'root://eoscms.cern.ch//store/user/snarayan'
-	eosEXOPath = 'root://eoscms.cern.ch//store/group/phys_exotica'
-	cernboxPath = 'root://eosuser//eos/user/s/snarayan'
-	cernboxBPath = 'root://eosuser//eos/user/b/bmaier'
-	full_path = sub(r'\${CERNBOXB}',cernboxBPath,
-			sub(r'\${CERNBOX}',cernboxPath,
-				sub(r'\${EOS}',eosPath,
-					sub(r'\${EOS2}',eosEXOPath,long_name))))
+	replacements = {
+				r'\${EOS}':'root://eoscms.cern.ch//store/user/snarayan',
+				r'\${EOS2}':'root://eoscms.cern.ch//store/group/phys_exotica',
+				r'\${CERNBOX}':'root://eosuser//eos/user/s/snarayan',
+				r'\${CERNBOXB}':'root://eosuser//eos/user/b/bmaier',
+			}
+	full_path = long_name
+	for k,v in replacements.iteritems():
+		full_path = sub(k,v,full_path)
 	PInfo(sname,full_path)
 
-	panda_id = int(long_name.split('/')[-1].split('_')[-1].replace('.root',''))
-	input_name = 'input_%i.root'%panda_id
+	panda_id = long_name.split('/')[-1].split('_')[-1].replace('.root','')
+	input_name = 'input_%s.root'%panda_id
 
 	# xrdcp if remote, copy if local
 	if 'root://' in full_path:
@@ -80,7 +83,14 @@ def fn(input_name,isData,full_path):
 		return False # file open error => xrootd?
 
 	output_name = input_name.replace('input','output')
-	skimmer.SetDataDir(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/')
+	skimmer.SetDataDir(data_dir)
+	if isData:
+		with open(data_dir+'/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt') as jsonFile:
+			payload = json.load(jsonFile)
+			for run_str,lumis in payload.iteritems():
+				run = int(run_str)
+				for l in lumis:
+					skimmer.AddGoodLumiRange(run,l[0],l[1])
 	skimmer.SetOutputFile(output_name)
 	skimmer.Init(tree,infotree)
 
@@ -120,7 +130,7 @@ def add_bdt():
 		ba.AddFormula(v[0],v[2])
 	for s in tagcfg.spectators:
 		ba.AddSpectator(s[0])
-	ba.BookMVA('top_ecf_bdt',getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/trainings/top_ecfbdt_v8_BDT.weights.xml')
+	ba.BookMVA('top_ecf_bdt',data_dir+'/trainings/top_ecfbdt_v8_BDT.weights.xml')
 	ba.RunFile('output.root')
 
 

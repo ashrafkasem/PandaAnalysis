@@ -61,11 +61,12 @@ zjets		 = root.Process('QCD Z+jets',root.kZjets); zjets.additionalWeight = root.
 wjets		 = root.Process('QCD W+jets',root.kWjets); wjets.additionalWeight = root.TCut('wkfactor*ewk_w')
 diboson	 = root.Process('Diboson',root.kDiboson)
 ttbar		 = root.Process('t#bar{t}',root.kTTbar)
+singletop= root.Process('Single top',root.kST)
 qcd			 = root.Process("QCD",root.kQCD)
 gjets		 = root.Process('#gamma+jets',root.kGjets); gjets.additionalWeight = root.TCut('akfactor*ewk_a')
 vbf			 = root.Process("H#rightarrowInv",root.kSignal)
 data			= root.Process("Data",root.kData)
-processes = [qcd,diboson,ttbar,wjets,zjets]
+processes = [qcd,diboson,singletop,ttbar,wjets,zjets]
 #processes = [diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
 
 ### ASSIGN FILES TO PROCESSES ###
@@ -76,6 +77,7 @@ else:
 wjets.AddFile(baseDir+'WJets.root')
 diboson.AddFile(baseDir+'Diboson.root')
 ttbar.AddFile(baseDir+'TTbar.root')
+singletop.AddFile(baseDir+'SingleTop.root')
 qcd.AddFile(baseDir+'QCD.root')
 if 'pho' in region:
 	processes = [qcd,gjets]
