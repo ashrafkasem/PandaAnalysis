@@ -93,13 +93,13 @@ private:
 
 	std::map<TString,bool> flags;
 
-	std::map<panda::PGenParticle*,float> genObjects;				 //!< particles we want to match the jets to, and the 'size' of the daughters
-	panda::PGenParticle *MatchToGen(double eta, double phi, double r2, int pdgid=0);		//!< private function to match a jet; returns NULL if not found
+	std::map<panda::GenParticle const*,float> genObjects;				 //!< particles we want to match the jets to, and the 'size' of the daughters
+	panda::GenParticle const* MatchToGen(double eta, double phi, double r2, int pdgid=0);		//!< private function to match a jet; returns NULL if not found
 	std::map<int,std::vector<LumiRange>> goodLumis;
 	bool PassGoodLumis(int run, int lumi);
 	bool PassPreselection();
 	float getMSDcorr(Float_t puppipt, Float_t puppieta);
-	std::vector<panda::PObject*> matchPhos, matchEles, matchLeps;
+	std::vector<panda::Particle*> matchPhos, matchEles, matchLeps;
 	
 	// CMSSW-provided utilities
 
@@ -157,15 +157,7 @@ private:
 	unsigned int preselBits=0;
 
 	// objects to read from the tree
-	panda::PEvent *event=0;												// event object
-	panda::VGenParticle *genparts=0;							 // gen particle objects
-	panda::VFatJet *fatjets=0;										 // CA15 fat jets
-	panda::VJet *jets=0;													 // AK4 narrow jets
-	panda::VElectron *electrons=0;
-	panda::VMuon *muons=0;
-	panda::VTau *taus=0;
-	panda::VPhoton *photons=0;
-	panda::PMET *pfmet=0, *puppimet=0;
+	panda::Event event;
 
 	// configuration read from output tree
 	std::vector<double> betas;
