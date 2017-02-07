@@ -1,13 +1,5 @@
 // PandaProd Objects
-#include "PandaProd/Objects/interface/PEvent.h"
-#include "PandaProd/Objects/interface/PMET.h"
-#include "PandaProd/Objects/interface/PPhoton.h"
-#include "PandaProd/Objects/interface/PMuon.h"
-#include "PandaProd/Objects/interface/PElectron.h"
-#include "PandaProd/Objects/interface/PTau.h"
-#include "PandaProd/Objects/interface/PJet.h"
-#include "PandaProd/Objects/interface/PFatJet.h"
-#include "PandaProd/Objects/interface/PGenParticle.h"
+#include "PandaTree/Objects/interface/Event.h"
 
 // PANDACore
 #include "PandaCore/Tools/interface/Common.h"
@@ -69,27 +61,37 @@ private:
 typedef THCorr<TH1D> THCorr1;
 typedef THCorr<TH2D> THCorr2;
 
-bool MuonIsolation(double pt, double eta, double iso, panda::PMuon::MuonID isoType) {
+namespace panda {
+  enum IDWorkingPoint {
+    kVeto,
+    kLoose,
+    kMedium,
+    kTight,
+    nIDWorkingPoints
+  };
+}
+
+bool MuonIsolation(double pt, double eta, double iso, panda::IDWorkingPoint isoType) {
 	float maxIso=0;
 	float abseta = TMath::Abs(eta);
-	maxIso = (isoType == panda::PMuon::kTight) ? 0.15 : 0.25;
+	maxIso = (isoType == panda::kTight) ? 0.15 : 0.25;
 	return (iso < pt*maxIso);
 }
 
-bool ElectronIsolation(double pt, double eta, double iso, panda::PElectron::ElectronID isoType) {
+bool ElectronIsolation(double pt, double eta, double iso, panda::IDWorkingPoint isoType) {
 	float maxIso=0;
 	float abseta = TMath::Abs(eta);
 	switch (isoType) {
-		case panda::PElectron::kVeto:
+		case panda::kVeto:
 			maxIso = (abseta<=1.479) ? 0.126 : 0.144;
 			break;
-		case panda::PElectron::kLoose:
+		case panda::kLoose:
 			maxIso = (abseta<=1.479) ? 0.0893 : 0.121;
 			break;
-		case panda::PElectron::kMedium:
+		case panda::kMedium:
 			maxIso = (abseta<=1.479) ? 0.0766 : 0.0678;
 			break;
-		case panda::PElectron::kTight:
+		case panda::kTight:
 			maxIso = (abseta<=1.479) ? 0.0354 : 0.0646;
 			break;
 		default:
@@ -98,7 +100,7 @@ bool ElectronIsolation(double pt, double eta, double iso, panda::PElectron::Elec
 	return (iso < pt*maxIso);
 }
 
-bool IsMatched(std::vector<panda::PObject*>*objects,
+bool IsMatched(std::vector<panda::Particle*>*objects,
 							 double deltaR2, double eta, double phi) {
 	for (auto *x : *objects) {
 		if (x->pt>0) {

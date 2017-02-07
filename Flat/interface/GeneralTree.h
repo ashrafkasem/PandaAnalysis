@@ -38,7 +38,7 @@ class GeneralTree : public genericTree {
 	int npv=0;
 	float mcWeight=0;
 	float filter_maxRecoil=0;
-	int filter whichRecoil=-1;
+	int filter_whichRecoil=-1;
 	int trigger=0;
 	int metFilter=0;
 	float sf_ewkV=0;
