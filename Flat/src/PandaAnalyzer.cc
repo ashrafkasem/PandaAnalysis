@@ -637,10 +637,10 @@ void PandaAnalyzer::Run() {
 			float eta = pho->eta, phi = pho->phi;
 			if (pt<15 || fabs(eta)>2.5)
 				continue;
-			/*
+			
 			if (IsMatched(&matchEles,0.16,eta,phi))
 				continue;
-			*/
+			
 			loosePhos.push_back(pho);
 			gt->nLoosePhoton++;
 			if (gt->nLoosePhoton==1) {
