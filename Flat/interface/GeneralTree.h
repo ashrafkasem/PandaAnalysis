@@ -38,7 +38,7 @@ class GeneralTree : public genericTree {
 	int npv=0;
 	float mcWeight=0;
 	float filter_maxRecoil=0;
-	int filter whichRecoil=-1;
+	int filter_whichRecoil=-1;
 	int trigger=0;
 	int metFilter=0;
 	float sf_ewkV=0;
@@ -213,6 +213,7 @@ class GeneralTree : public genericTree {
 	float fj1M=0;
 	float fj1MaxCSV=0;
 	float fj1MinCSV=0;
+	float fj1DoubleCSV=0;
 	float fj1GenPt=0;
 	float fj1GenSize=0;
 	int fj1IsMatched=0;
@@ -462,6 +463,7 @@ GeneralTree::GeneralTree() {
 	fj1M=0;
 	fj1MaxCSV=0;
 	fj1MinCSV=0;
+	fj1DoubleCSV=0;
 	fj1GenPt=0;
 	fj1GenSize=0;
 	fj1IsMatched=0;
@@ -726,6 +728,7 @@ void GeneralTree::Reset() {
 	fj1M = -1;
 	fj1MaxCSV = -1;
 	fj1MinCSV = -1;
+	fj1DoubleCSV = -1;
 	fj1GenPt = -1;
 	fj1GenSize = -1;
 	fj1IsMatched = 0;
@@ -1212,8 +1215,10 @@ void GeneralTree::ReadTree(TTree *t) {
 		treePtr->SetBranchAddress("fj1sjCSV",fj1sjCSV);
 		treePtr->SetBranchStatus("fj1sjQGL",1);
 		treePtr->SetBranchAddress("fj1sjQGL",fj1sjQGL);
-	treePtr->SetBranchStatus("fj1MSD_corr",1);
-	treePtr->SetBranchAddress("fj1MSD_corr",&fj1MSD_corr);	
+		treePtr->SetBranchStatus("fj1MSD_corr",1);
+		treePtr->SetBranchAddress("fj1MSD_corr",&fj1MSD_corr);	
+		treePtr->SetBranchStatus("fj1DoubleCSV",1);
+		treePtr->SetBranchAddress("fj1DoubleCSV",&fj1DoubleCSV);
 	}
 	treePtr->SetBranchStatus("nLoosePhoton",1);
 	treePtr->SetBranchAddress("nLoosePhoton",&nLoosePhoton);
@@ -1481,6 +1486,7 @@ void GeneralTree::WriteTree(TTree *t) {
 		treePtr->Branch("fj1sjCSV",fj1sjCSV,"fj1sjCSV[2]/F");
 		treePtr->Branch("fj1sjQGL",fj1sjQGL,"fj1sjQGL[2]/F");
 		treePtr->Branch("fj1MSD_corr",&fj1MSD_corr,"fj1MSD_corr/F");
+		treePtr->Branch("fj1DoubleCSV",&fj1DoubleCSV,"fj1DoubleCSV/F");
 	}
 	treePtr->Branch("fj1sjPt",&fj1sjPt,"fj1sjPt/F");
 	treePtr->Branch("fj1sjPhi",&fj1sjPhi,"fj1sjPhi/F");
@@ -1538,7 +1544,7 @@ void GeneralTree::WriteTree(TTree *t) {
 		treePtr->Branch("hbbeta",&hbbeta,"hbbeta/F");
 		treePtr->Branch("hbbphi",&hbbphi,"hbbphi/F");
 		treePtr->Branch("hbbm",&hbbm,"hbbm/F");
-		treePtr->Branch("hbbjtidx",hbbjtidx,"hbbjtidx/F");
+		treePtr->Branch("hbbjtidx",hbbjtidx,"hbbjtidx[2]/I");
 	}
 
 	for (auto beta : betas) {
