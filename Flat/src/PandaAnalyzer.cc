@@ -881,6 +881,8 @@ void PandaAnalyzer::Run() {
 		for (PJet *jet : *jets) {
 			if (jet->pt<30 || abs(jet->eta)>4.5) 
 				continue;
+			if ((jet->id&PJet::kLoose)==0)
+				continue; // apply loose selection to all jets
 			if (IsMatched(&matchLeps,0.16,jet->eta,jet->phi) ||
 					IsMatched(&matchPhos,0.16,jet->eta,jet->phi))
 				continue;
