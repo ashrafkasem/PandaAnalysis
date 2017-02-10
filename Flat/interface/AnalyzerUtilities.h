@@ -73,7 +73,6 @@ namespace panda {
 
 bool MuonIsolation(double pt, double eta, double iso, panda::IDWorkingPoint isoType) {
 	float maxIso=0;
-	float abseta = TMath::Abs(eta);
 	maxIso = (isoType == panda::kTight) ? 0.15 : 0.25;
 	return (iso < pt*maxIso);
 }
@@ -101,14 +100,14 @@ bool ElectronIsolation(double pt, double eta, double iso, panda::IDWorkingPoint 
 }
 
 bool IsMatched(std::vector<panda::Particle*>*objects,
-							 double deltaR2, double eta, double phi) {
-	for (auto *x : *objects) {
-		if (x->pt>0) {
-			if ( DeltaR2(x->eta,x->phi,eta,phi) < deltaR2 )
-				return true;
-		}
-	}
-	return false;
+               double deltaR2, double eta, double phi) {
+  for (auto *x : *objects) {
+    if (x->pt()>0) {
+      if ( DeltaR2(x->eta(),x->phi(),eta,phi) < deltaR2 )
+        return true;
+    }
+  }
+  return false;
 }
 
 class btagcand {
