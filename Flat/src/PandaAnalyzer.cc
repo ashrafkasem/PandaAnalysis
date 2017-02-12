@@ -56,21 +56,12 @@ void PandaAnalyzer::Init(TTree *t, TTree *infotree)
         event.setStatus(*t, {"!*"}); // turn everything off first
 
         TString jetname = (flags["puppi"]) ? "puppi" : "chs";
-        panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", "isData", "npv", "weight", "triggers"});
+        panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", "isData", "npv", "weight", "triggers",
+              "chsAK4Jets", "electrons", "muons", "taus", "photons", "met", "caloMet", "puppiMet"});
 
-        if (flags["fatjet"]) {
-          readlist.push_back(jetname+"CA15");
-          readlist.push_back("subjets");
-        }
+        if (flags["fatjet"])
+          readlist += {jetname+"CA15Jets", "subjets"};
 
-        readlist.push_back("chsAK4Jets");
-        readlist.push_back("electrons");
-        readlist.push_back("muons");
-        readlist.push_back("taus");
-        readlist.push_back("photons");
-        readlist.push_back("met");
-        readlist.push_back("caloMet");
-        readlist.push_back("puppiMet");
         if (!isData)
           readlist.push_back("genParticles");
 
@@ -657,8 +648,7 @@ void PandaAnalyzer::Run() {
                                                  ele->pt()>40 && fabs(ele->eta())<2.5 );
                                 if (lep_counter==1) {
                                         gt->looseLep1PdgId = ele->q*-11;
-                                        // TODO
-                                        // gt->looseLep1IsHLTSafe = (ele->id&PElectron::kHLTPresel)!=0 ? 1 : 0;
+                                        gt->looseLep1IsHLTSafe = ele->hltsafe ? 1 : 0;
                                         if (isTight) {
                                                 gt->nTightElectron++;
                                                 gt->looseLep1IsTight = 1;
@@ -667,8 +657,7 @@ void PandaAnalyzer::Run() {
                                         }
                                 } else if (lep_counter==2) {
                                         gt->looseLep2PdgId = ele->q*-11;
-                                        // TODO
-                                        // gt->looseLep2IsHLTSafe = (ele->id&PElectron::kHLTPresel)!=0 ? 1 : 0;
+                                        gt->looseLep2IsHLTSafe = ele->hltsafe ? 1 : 0;
                                         if (isTight) {
                                                 gt->nTightElectron++;
                                                 gt->looseLep2IsTight = 1;
@@ -826,6 +815,7 @@ void PandaAnalyzer::Run() {
                                 float ptcut = 200;
                                 if (flags["monohiggs"])
                                         ptcut = 200;
+
                                 if (pt<ptcut || fabs(eta)>2.4 || !fj.monojet)
                                         continue;
 
@@ -833,6 +823,7 @@ void PandaAnalyzer::Run() {
                                 if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi)) {
                                         continue;
                                 }
+
                                 gt->nFatjet++;
                                 if (gt->nFatjet==1) {
                                         fj1 = &fj;
@@ -1093,11 +1084,10 @@ void PandaAnalyzer::Run() {
                 for (auto& tau : event.taus) {
                         if (!tau.decayMode || !tau.decayModeNew)
                                 continue;
-                        // TODO
-//                      if ((tau->id&PTau::kVLooseIsolationMVArun2v1DBnewDMwLT)==0)
-//                              continue;
-//                      if (tau->isoDeltaBetaCorr>5)
-//                              continue;
+                        if (!tau.looseIsoMVA)
+                                continue;
+                        if (tau.isoDeltaBetaCorr>5)
+                                continue;
                         if (tau.pt()<18 || fabs(tau.eta())>2.3)
                                 continue;
                         if (IsMatched(&matchLeps,0.16,tau.eta(),tau.phi()))
@@ -1577,6 +1567,7 @@ void PandaAnalyzer::Run() {
                         int target=24;
                         if (processType==kZ) target=23;
                         if (processType==kA) target=22;
+
                         for (auto& gen : event.genParticles) {
                                 if (found) break;
                                 int apdgid = abs(gen.pdgid);
