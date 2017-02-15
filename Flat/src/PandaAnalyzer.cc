@@ -852,15 +852,16 @@ void PandaAnalyzer::Run() {
 					gt->fj1MinCSV = subjets->back()->csv; 
 
 					if (flags["monohiggs"]) {
-						for (unsigned int iSJ=0; iSJ!=fj->subjets->size(); ++iSJ) {
-							PJet *subjet = fj1->subjets->at(iSJ);
-							gt->fj1sjPt[iSJ]=subjet->pt;
-							gt->fj1sjEta[iSJ]=subjet->eta;
-							gt->fj1sjPhi[iSJ]=subjet->phi;
-							gt->fj1sjM[iSJ]=subjet->m;
-							gt->fj1sjCSV[iSJ]=subjet->csv;
-							gt->fj1sjQGL[iSJ]=subjet->qgl;
-						}
+					  gt->fj1DoubleCSV = fj->double_sub;
+					  for (unsigned int iSJ=0; iSJ!=fj->subjets->size(); ++iSJ) {
+					    PJet *subjet = fj->subjets->at(iSJ);
+					    gt->fj1sjPt[iSJ]=subjet->pt;
+					    gt->fj1sjEta[iSJ]=subjet->eta;
+					    gt->fj1sjPhi[iSJ]=subjet->phi;
+					    gt->fj1sjM[iSJ]=subjet->m;
+					    gt->fj1sjCSV[iSJ]=subjet->csv;
+					    gt->fj1sjQGL[iSJ]=subjet->qgl;
+					  }
 					}
 				}
 			}
@@ -937,9 +938,12 @@ void PandaAnalyzer::Run() {
 			}
 
 			bool isIsoJet = false;
+			float maxIsoEta = 2.5;
+			if (flags["monohiggs"])
+			  maxIsoEta = 4.5;
 			if (gt->nFatjet==0) {
 				isIsoJet = true;
-			} else if (fabs(jet->eta)<2.5 
+			} else if (fabs(jet->eta)< maxIsoEta 
 					       && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet->eta,jet->phi)>2.25) {
 				isIsoJet = true;
 			
@@ -986,12 +990,12 @@ void PandaAnalyzer::Run() {
 			float tmp_hbbm=-99;
 			int tmp_hbbjtidx1=-1;
 			int tmp_hbbjtidx2=-1;
-			for (unsigned int i = 0;i<btaggedJets.size();i++){
-				PJet *jet_1 = btaggedJets.at(i);
+			for (unsigned int i = 0;i<cleanedJets.size();i++){
+				PJet *jet_1 = cleanedJets.at(i);
 				TLorentzVector hbbdaughter1;
 				hbbdaughter1.SetPtEtaPhiM(jet_1->pt,jet_1->eta,jet_1->phi,jet_1->m);
-				for (unsigned int j = i+1;j<btaggedJets.size();j++){
-					PJet *jet_2 = btaggedJets.at(j);
+				for (unsigned int j = i+1;j<cleanedJets.size();j++){
+					PJet *jet_2 = cleanedJets.at(j);
 					TLorentzVector hbbdaughter2;
 					hbbdaughter2.SetPtEtaPhiM(jet_2->pt,jet_2->eta,jet_2->phi,jet_2->m);
 					TLorentzVector hbbsystem = hbbdaughter1 + hbbdaughter2;
@@ -1000,8 +1004,8 @@ void PandaAnalyzer::Run() {
 						tmp_hbbeta = hbbsystem.Eta();
 						tmp_hbbphi = hbbsystem.Phi();
 						tmp_hbbm = hbbsystem.M();
-						tmp_hbbjtidx1 = btagindices.at(i);
-						tmp_hbbjtidx2 = btagindices.at(j);
+						tmp_hbbjtidx1 = i;
+						tmp_hbbjtidx2 = j;
 					}
 				}
 			}
