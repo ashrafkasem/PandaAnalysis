@@ -7,16 +7,19 @@ import argparse
 ### SET GLOBAL VARIABLES ###
 baseDir = getenv('PANDA_FLATDIR')+'/' 
 parser = argparse.ArgumentParser(description='plot stuff')
+parser.add_argument('--basedir',metavar='basedir',type=str,default=None)
 parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
 parser.add_argument('--region',metavar='region',type=str,default=None)
-parser.add_argument('--era',metavar='era',default=None)
+parser.add_argument('--tt',metavar='tt',type=str,default='')
 args = parser.parse_args()
 lumi = 36560.
 blind=True
 linear=False
 region = args.region
 sname = argv[0]
+if args.basedir:
+	baseDir = args.basedir
 
 argv=[]
 import ROOT as root
@@ -24,33 +27,13 @@ root.gROOT.SetBatch()
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-#import PandaAnalysis.Monotop.NewPFSelection as sel
-#import PandaAnalysis.Monotop.OldPFSelection as sel
-import PandaAnalysis.Monotop.NoTagPFSelection as sel
-#import PandaAnalysis.Monotop.NoMassPFSelection as sel
+#import PandaAnalysis.Monotop.OneFatJetSelection as sel
+import PandaAnalysis.Monotop.TestSelection as sel
 Load('Drawers','PlotUtility')
 
 ### DEFINE REGIONS ###
 
 cut = tAND(sel.cuts[args.region],args.cut)
-datacut = '1==1'
-if args.era:
-  all_runs = {
-      'B' : (272007,275376),
-      'C' : (275657,276283),
-      'D' : (276315,276811),
-      'E' : (276831,277420),
-      'F' : (277772,278808),
-      'G' : (278820,280385),
-      'H' : (280919,284044),
-      }
-
-  run_boundaries = []
-  for e in args.era:
-    lo,hi = all_runs[e]
-    run_boundaries += [lo,hi]
-  runs = (min(run_boundaries),max(run_boundaries))
-  datacut = 'runNumber>%i && runNumber<%i'%(runs[0],runs[1])
 
 PInfo(sname,'using cut: '+cut)
 
@@ -76,8 +59,6 @@ else:
 plot.AddLumiLabel(True)
 plot.SetDoOverflow()
 plot.SetDoUnderflow()
-if args.era:
-  plot.SetNormFactor(True)
 
 weight = sel.weights[region]%lumi
 plot.SetMCWeight(root.TCut(weight))
@@ -107,7 +88,7 @@ else:
   zjets.AddFile(baseDir+'ZJets.root')
 wjets.AddFile(baseDir+'WJets.root')
 diboson.AddFile(baseDir+'Diboson.root')
-ttbar.AddFile(baseDir+'TTbar.root')
+ttbar.AddFile(baseDir+'TTbar%s.root'%(args.tt))
 singletop.AddFile(baseDir+'SingleTop.root')
 if 'pho' in region:
   processes = [qcd,gjets]
@@ -188,21 +169,19 @@ plot.AddDistribution(root.Distribution('fj1Tau32',0,1,20,'#tau_{32}','Events',99
 
 plot.AddDistribution(root.Distribution('jet1Pt',15,1000,20,'leading jet p_{T} [GeV]','Events'))
 
-# plot.AddDistribution(root.Distribution('nJet',-0.5,8.5,9,'N_{jet}','Events'))
+plot.AddDistribution(root.Distribution('nJet',-0.5,8.5,9,'N_{jet}','Events'))
 
 plot.AddDistribution(root.Distribution('fj1Pt',250,1000,20,'fatjet p_{T} [GeV]','Events/37.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1Eta',-2.5,2.5,20,'fatjet #eta','Events'))
 
-plot.AddDistribution(root.Distribution('fj1MSD',50,250,20,'fatjet m_{SD} [GeV]','Events/10 GeV'))
-#plot.AddDistribution(root.Distribution('fj1MSD',0,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
+#plot.AddDistribution(root.Distribution('fj1MSD',50,250,20,'fatjet m_{SD} [GeV]','Events/10 GeV'))
+plot.AddDistribution(root.Distribution('fj1MSD',0,450,20,'fatjet m_{SD} [GeV]','Events/12.5 GeV'))
 
 plot.AddDistribution(root.Distribution('fj1MaxCSV',0,1,20,'fatjet max subjet CSV','Events',999,-999,'fj1MaxCSV'))
 
 plot.AddDistribution(root.Distribution('jet1CSV',0,1,20,'jet 1 CSV','Events',999,-999,'jet1CSV'))
 
-'''
-'''
 
 # plot.AddDistribution(root.Distribution('fj1HTTMass',40,450,20,'fatjet m_{HTT} [GeV]','Events/12.5 GeV'))
 
@@ -224,7 +203,4 @@ plot.AddDistribution(root.Distribution('jet1CSV',0,1,20,'jet 1 CSV','Events',999
 plot.AddDistribution(root.Distribution("1",0,2,1,"dummy","dummy"))
 
 ### DRAW AND CATALOGUE ###
-if args.era:
-  plot.DrawAll(args.outdir+'/'+region+'_'+args.era+'_')
-else:
-  plot.DrawAll(args.outdir+'/'+region+'_')
+plot.DrawAll(args.outdir+'/'+region+'_')
