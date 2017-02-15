@@ -8,11 +8,37 @@
 #include "PandaProd/Objects/interface/PJet.h"
 #include "PandaProd/Objects/interface/PFatJet.h"
 #include "PandaProd/Objects/interface/PGenParticle.h"
+#include "PandaProd/Objects/interface/PGenInfo.h"
 
 // PANDACore
 #include "PandaCore/Tools/interface/Common.h"
 #include "PandaCore/Tools/interface/DataTools.h"
 #include "PandaCore/Tools/interface/JERReader.h"
+
+double TTNLOToNNLO(double pt) {
+	double a = 0.1102;
+	double b = 0.1566;
+	double c = -3.685e-4;
+	double d = 1.098;
+
+	return TMath::Min(1.25,
+		                a*TMath::Exp(-b*pow(pt,2)+1) + c*pt + d);
+}
+
+class LumiRange {
+public:
+	LumiRange(int l0_,int l1_):
+		l0(l0_),
+		l1(l1_)
+ 	{ }
+	~LumiRange() {}
+	bool Contains(int l) {
+		return l0<=l && l<=l1;
+	}
+private:
+	int l0, l1;
+};
+
 
 template <typename T>
 class THCorr {
