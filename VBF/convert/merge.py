@@ -99,7 +99,7 @@ d = {
   'Diboson'             : ['WW','WZ','ZZ'],
   'VBF_H125'            : ['VBF_HToInvisible_M125_13TeV_powheg_pythia8'],
   'GGF_H125'            : ['Glu_HToInvisible_M125_13TeV_powheg_pythia8'],
-  'ZJets'               : ['DYJetsToLL_M-50_HT-%sto%s'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,'Inf')]],
+  'ZJets'               : ['DYJetsToLL_M-50_HT-%sto%s'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,800),(800,1200),(1200,2500),(2500,'Inf')]],
   'ZtoNuNu'             : ['ZJetsToNuNu_HT-%sTo%s_13TeV'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,800),(800,1200),(1200,2500),(2500,'Inf')]],
   'WJets'               : ['WJetsToLNu_HT-%sTo%s'%(str(x[0]),str(x[1])) for x in [(100,200),(200,400),(400,600),(600,800),(800,1200),(1200,2500),(2500,'Inf')]],
   'WJets_nlo'           : ['WJetsToLNu_Pt-%sTo%s'%(str(x[0]),str(x[1])) for x in [(100,250),(250,400),(400,600),(600,'Inf')]],

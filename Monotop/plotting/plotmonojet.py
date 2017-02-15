@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 
 from os import system,getenv
-from sys import argv
+from sys import argv,exit
 import argparse
 
 ### SET GLOBAL VARIABLES ###
 baseDir = getenv('PANDA_FLATDIR')+'/' 
-ttbaseDir = baseDir.replace('2_5','2_5_tt_last')
 parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
@@ -19,6 +18,7 @@ blind=True
 linear=False
 region = args.region
 sname = argv[0]
+print baseDir
 
 argv=[]
 import ROOT as root
@@ -103,7 +103,7 @@ else:
 	zjets.AddFile(baseDir+'ZJets.root')
 wjets.AddFile(baseDir+'WJets.root')
 diboson.AddFile(baseDir+'Diboson.root')
-ttbar.AddFile(ttbaseDir+'TTbar.root')
+ttbar.AddFile(baseDir+'TTbar.root')
 singletop.AddFile(baseDir+'SingleTop.root')
 if 'pho' in region:
 	processes = [qcd,gjets]
@@ -128,8 +128,9 @@ elif 'electron' in region:
 	if 'di' in region:
 		data.additionalCut = root.TCut(tAND(datacut,tOR(sel.triggers['ele'],sel.triggers['pho'])))
 	else:
+#		pass
 		data.additionalCut = root.TCut(tAND(datacut,sel.triggers['ele']))
-	data.AddFile(baseDir+'SingleElectron.root')
+	data.AddFile(baseDir+'/SingleElectron.root')
 	lep='e'
 elif region=='photon':
 	data.additionalCut = root.TCut(tAND(datacut,sel.triggers['pho']))
@@ -176,6 +177,8 @@ elif region=='photon':
 	plot.AddDistribution(root.Distribution('loosePho1Eta',-2.5,2.5,20,'Leading pho #eta','Events'))
 	plot.AddDistribution(root.Distribution('loosePho1Phi',-3.142,3.142,20,'Leading pho #phi','Events'))
 	plot.AddDistribution(root.Distribution('fabs(calomet-pfmet)/pfUAmag',0,1,20,'|E_{T,calo}^{miss}-E_{T}^{miss}|/U(#gamma)','Events',999,-999,'pfcalobalance'))
+#if region!='photon':
+	#plot.AddDistribution(root.Distribution('fixed_mt',0,1000,20,'M_{T} [GeV]','Events/50 GeV'))
 if recoil:
 	setBins(recoil,recoilBins)
 	plot.AddDistribution(recoil)

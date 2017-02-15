@@ -37,10 +37,13 @@ class GeneralTree : public genericTree {
 	ULong64_t eventNumber=0;
 	int npv=0;
 	float mcWeight=0;
+	float filter_maxRecoil=0;
+	int filter_whichRecoil=-1;
 	int trigger=0;
 	int metFilter=0;
 	float sf_ewkV=0;
 	float sf_qcdV=0;
+	float sf_qcdTT=0;
 	float sf_lep=0;
 	float sf_pho=0;
 	float sf_lepReco=0;
@@ -165,11 +168,16 @@ class GeneralTree : public genericTree {
 	float genTTPt=0;
 	float genTTEta=0;
 	int nJet=0;
+	int nIsoJet=0;
 	float jet1Phi=0;
+	int jet1Flav=0;
+	float jet1GenPt=0;
 	float jet1Pt=0;
 	float jet1Eta=0;
 	float jet1CSV=0;
 	float jet2Phi=0;
+	int jet2Flav=0;
+	float jet2GenPt=0;
 	float jet2Pt=0;
 	float jet2Eta=0;
 	float jet2CSV=0;
@@ -207,6 +215,7 @@ class GeneralTree : public genericTree {
 	float fj1M=0;
 	float fj1MaxCSV=0;
 	float fj1MinCSV=0;
+	float fj1DoubleCSV=0;
 	float fj1GenPt=0;
 	float fj1GenSize=0;
 	int fj1IsMatched=0;
@@ -245,6 +254,8 @@ class GeneralTree : public genericTree {
 	int looseLep2PdgId=0;
 	int looseLep1IsTight=0;
 	int looseLep2IsTight=0;
+	int looseLep1IsHLTSafe=0;
+	int looseLep2IsHLTSafe=0;
 	float looseLep1Pt=0;
 	float looseLep1Eta=0;
 	float looseLep1Phi=0;
@@ -252,6 +263,7 @@ class GeneralTree : public genericTree {
 	float looseLep2Eta=0;
 	float looseLep2Phi=0;
 	float diLepMass=0;
+	float mT=0;
 	int nTau=0;
 	float jetPt[NJET];
 	float jetEta[NJET];
@@ -265,6 +277,11 @@ class GeneralTree : public genericTree {
 	float hbbphi;
 	float hbbm;
 	int hbbjtidx[2];
+	float scaleUp;
+	float scaleDown;
+	float pdfUp;
+	float pdfDown;
+	float scale[6];
 		
 	std::map<TString,float> fj1ECFNs;
 
@@ -277,10 +294,13 @@ GeneralTree::GeneralTree() {
 	eventNumber=0;
 	npv=0;
 	mcWeight=0;
+	filter_maxRecoil=0;
+	filter_whichRecoil=-1;
 	trigger=0;
 	metFilter=0;
 	sf_ewkV=1;
 	sf_qcdV=1;
+	sf_qcdTT=1;
 	sf_lep=1;
 	sf_pho=1;
 	sf_lepReco=1;
@@ -405,11 +425,16 @@ GeneralTree::GeneralTree() {
 	genTTPt=0;
 	genTTEta=0;
 	nJet=0;
+	nIsoJet=0;
 	jet1Phi=0;
+	jet1Flav=0;
+	jet1GenPt=0;
 	jet1Pt=0;
 	jet1Eta=0;
 	jet1CSV=0;
 	jet2Phi=0;
+	jet2Flav=0;
+	jet2GenPt=0;
 	jet2Pt=0;
 	jet2Eta=0;
 	jet2CSV=0;
@@ -447,6 +472,7 @@ GeneralTree::GeneralTree() {
 	fj1M=0;
 	fj1MaxCSV=0;
 	fj1MinCSV=0;
+	fj1DoubleCSV=0;
 	fj1GenPt=0;
 	fj1GenSize=0;
 	fj1IsMatched=0;
@@ -479,6 +505,8 @@ GeneralTree::GeneralTree() {
 	looseLep2PdgId=0;
 	looseLep1IsTight=0;
 	looseLep2IsTight=0;
+	looseLep1IsHLTSafe=0;
+	looseLep2IsHLTSafe=0;
 	looseLep1Pt=0;
 	looseLep1Eta=0;
 	looseLep1Phi=0;
@@ -486,11 +514,19 @@ GeneralTree::GeneralTree() {
 	looseLep2Eta=0;
 	looseLep2Phi=0;
 	diLepMass=0;
+	mT=0;
 	nTau=0;
 	hbbpt=0;
 	hbbeta=0;
 	hbbphi=0;
 	hbbm=0;
+	scaleUp = 1;
+	scaleDown = 1;
+	pdfUp = 1;
+	pdfDown = 1;
+	for (unsigned iS=0; iS!=6; ++iS) {
+		scale[iS] = 1;
+	}
 	
 	for (auto beta : betas) {
 		for (auto N : Ns) {
@@ -532,10 +568,13 @@ void GeneralTree::Reset() {
 	eventNumber = 0;
 	npv = 0;
 	mcWeight = -1;
+	filter_maxRecoil = 0;
+	filter_whichRecoil = -1;
 	trigger = 0;
 	metFilter = 0;
 	sf_ewkV = 1;
 	sf_qcdV = 1;
+	sf_qcdTT = 1;
 	sf_lep = 1;
 	sf_pho = 1;
 	sf_lepReco = 1;
@@ -660,10 +699,15 @@ void GeneralTree::Reset() {
 	genTTPt = -1;
 	genTTEta = -1;
 	nJet = 0;
+	nIsoJet = 0;
 	jet1Phi = -1;
+	jet1Flav = -1;
+	jet1GenPt = -1;
 	jet1Pt = -1;
 	jet1Eta = -1;
 	jet1CSV = -1;
+	jet2Flav = -1;
+	jet2GenPt = -1;
 	jet2Phi = -1;
 	jet2Pt = -1;
 	jet2Eta = -1;
@@ -702,6 +746,7 @@ void GeneralTree::Reset() {
 	fj1M = -1;
 	fj1MaxCSV = -1;
 	fj1MinCSV = -1;
+	fj1DoubleCSV = -1;
 	fj1GenPt = -1;
 	fj1GenSize = -1;
 	fj1IsMatched = 0;
@@ -734,6 +779,8 @@ void GeneralTree::Reset() {
 	looseLep2PdgId = 0;
 	looseLep1IsTight = 0;
 	looseLep2IsTight = 0;
+	looseLep1IsHLTSafe = 0;
+	looseLep2IsHLTSafe = 0;
 	looseLep1Pt = -1;
 	looseLep1Eta = -1;
 	looseLep1Phi = -1;
@@ -741,11 +788,19 @@ void GeneralTree::Reset() {
 	looseLep2Eta = -1;
 	looseLep2Phi = -1;
 	diLepMass = -1;
+	mT = -1;
 	nTau = 0;
 	hbbpt = -1;
 	hbbeta = -1;
 	hbbphi = -1;
 	hbbm = -1;
+	scaleUp = 1;
+	scaleDown = 1;
+	pdfUp = 1; 
+	pdfDown = 1;
+	for (unsigned iS=0; iS!=6; ++iS) {
+		scale[iS] = 1;
+	}
 
 	for (auto beta : betas) {
 		for (auto N : Ns) {
@@ -790,6 +845,10 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("npv",&npv);
 	treePtr->SetBranchStatus("mcWeight",1);
 	treePtr->SetBranchAddress("mcWeight",&mcWeight);
+	treePtr->SetBranchStatus("filter_maxRecoil",1);
+	treePtr->SetBranchAddress("filter_maxRecoil",&filter_maxRecoil);
+	treePtr->SetBranchStatus("filter_whichRecoil",1);
+	treePtr->SetBranchAddress("filter_whichRecoil",&filter_whichRecoil);
 	treePtr->SetBranchStatus("trigger",1);
 	treePtr->SetBranchAddress("trigger",&trigger);
 	treePtr->SetBranchStatus("metFilter",1);
@@ -798,6 +857,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("sf_ewkV",&sf_ewkV);
 	treePtr->SetBranchStatus("sf_qcdV",1);
 	treePtr->SetBranchAddress("sf_qcdV",&sf_qcdV);
+	treePtr->SetBranchStatus("sf_qcdTT",1);
+	treePtr->SetBranchAddress("sf_qcdTT",&sf_qcdTT);
 	treePtr->SetBranchStatus("sf_lep",1);
 	treePtr->SetBranchAddress("sf_lep",&sf_lep);
 	treePtr->SetBranchStatus("sf_pho",1);
@@ -1046,8 +1107,14 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("genTTEta",&genTTEta);
 	treePtr->SetBranchStatus("nJet",1);
 	treePtr->SetBranchAddress("nJet",&nJet);
+	treePtr->SetBranchStatus("nIsoJet",1);
+	treePtr->SetBranchAddress("nIsoJet",&nIsoJet);
 	treePtr->SetBranchStatus("jet1Phi",1);
 	treePtr->SetBranchAddress("jet1Phi",&jet1Phi);
+	treePtr->SetBranchStatus("jet1Flav",1);
+	treePtr->SetBranchAddress("jet1Flav",&jet1Flav);
+	treePtr->SetBranchStatus("jet1GenPt",1);
+	treePtr->SetBranchAddress("jet1GenPt",&jet1GenPt);
 	treePtr->SetBranchStatus("jet1Pt",1);
 	treePtr->SetBranchAddress("jet1Pt",&jet1Pt);
 	treePtr->SetBranchStatus("jet1Eta",1);
@@ -1056,6 +1123,10 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("jet1CSV",&jet1CSV);
 	treePtr->SetBranchStatus("jet2Phi",1);
 	treePtr->SetBranchAddress("jet2Phi",&jet2Phi);
+	treePtr->SetBranchStatus("jet2Flav",1);
+	treePtr->SetBranchAddress("jet2Flav",&jet2Flav);
+	treePtr->SetBranchStatus("jet2GenPt",1);
+	treePtr->SetBranchAddress("jet2GenPt",&jet2GenPt);
 	treePtr->SetBranchStatus("jet2Pt",1);
 	treePtr->SetBranchAddress("jet2Pt",&jet2Pt);
 	treePtr->SetBranchStatus("jet2Eta",1);
@@ -1173,8 +1244,10 @@ void GeneralTree::ReadTree(TTree *t) {
 		treePtr->SetBranchAddress("fj1sjCSV",fj1sjCSV);
 		treePtr->SetBranchStatus("fj1sjQGL",1);
 		treePtr->SetBranchAddress("fj1sjQGL",fj1sjQGL);
-	treePtr->SetBranchStatus("fj1MSD_corr",1);
-	treePtr->SetBranchAddress("fj1MSD_corr",&fj1MSD_corr);	
+		treePtr->SetBranchStatus("fj1MSD_corr",1);
+		treePtr->SetBranchAddress("fj1MSD_corr",&fj1MSD_corr);	
+		treePtr->SetBranchStatus("fj1DoubleCSV",1);
+		treePtr->SetBranchAddress("fj1DoubleCSV",&fj1DoubleCSV);
 	}
 	treePtr->SetBranchStatus("nLoosePhoton",1);
 	treePtr->SetBranchAddress("nLoosePhoton",&nLoosePhoton);
@@ -1208,6 +1281,10 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("looseLep1IsTight",&looseLep1IsTight);
 	treePtr->SetBranchStatus("looseLep2IsTight",1);
 	treePtr->SetBranchAddress("looseLep2IsTight",&looseLep2IsTight);
+	treePtr->SetBranchStatus("looseLep1IsHLTSafe",1);
+	treePtr->SetBranchAddress("looseLep1IsHLTSafe",&looseLep1IsHLTSafe);
+	treePtr->SetBranchStatus("looseLep2IsHLTSafe",1);
+	treePtr->SetBranchAddress("looseLep2IsHLTSafe",&looseLep2IsHLTSafe);
 	treePtr->SetBranchStatus("looseLep1Pt",1);
 	treePtr->SetBranchAddress("looseLep1Pt",&looseLep1Pt);
 	treePtr->SetBranchStatus("looseLep1Eta",1);
@@ -1222,6 +1299,8 @@ void GeneralTree::ReadTree(TTree *t) {
 	treePtr->SetBranchAddress("looseLep2Phi",&looseLep2Phi);
 	treePtr->SetBranchStatus("diLepMass",1);
 	treePtr->SetBranchAddress("diLepMass",&diLepMass);
+	treePtr->SetBranchStatus("mT",1);
+	treePtr->SetBranchAddress("mT",&mT);
 	treePtr->SetBranchStatus("nTau",1);
 	treePtr->SetBranchAddress("nTau",&nTau);
 	if (monohiggs) {
@@ -1236,6 +1315,16 @@ void GeneralTree::ReadTree(TTree *t) {
 			treePtr->SetBranchStatus("hbbjtidx",1);
 			treePtr->SetBranchAddress("hbbjtidx",hbbjtidx);
 	}
+	treePtr->SetBranchStatus("scaleUp",1);
+	treePtr->SetBranchAddress("scaleUp",&scaleUp);
+	treePtr->SetBranchStatus("scaleDown",1);
+	treePtr->SetBranchAddress("scaleDown",&scaleDown);
+	treePtr->SetBranchStatus("pdfUp",1);
+	treePtr->SetBranchAddress("pdfUp",&pdfUp);
+	treePtr->SetBranchStatus("pdfDown",1);
+	treePtr->SetBranchAddress("pdfDown",&pdfDown);
+	treePtr->SetBranchStatus("scale",1);
+	treePtr->SetBranchAddress("scale",scale);
 //ENDREAD
 }
 
@@ -1246,10 +1335,13 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("eventNumber",&eventNumber,"eventNumber/l");
 	treePtr->Branch("npv",&npv,"npv/I");
 	treePtr->Branch("mcWeight",&mcWeight,"mcWeight/F");
+	treePtr->Branch("filter_maxRecoil",&filter_maxRecoil,"filter_maxRecoil/F");
+	treePtr->Branch("filter_whichRecoil",&filter_whichRecoil,"filter_whichRecoil/I");
 	treePtr->Branch("trigger",&trigger,"trigger/I");
 	treePtr->Branch("metFilter",&metFilter,"metFilter/I");
 	treePtr->Branch("sf_ewkV",&sf_ewkV,"sf_ewkV/F");
 	treePtr->Branch("sf_qcdV",&sf_qcdV,"sf_qcdV/F");
+	treePtr->Branch("sf_qcdTT",&sf_qcdTT,"sf_qcdTT/F");
 	treePtr->Branch("sf_lep",&sf_lep,"sf_lep/F");
 	treePtr->Branch("sf_pho",&sf_pho,"sf_pho/F");
 	treePtr->Branch("sf_lepReco",&sf_lepReco,"sf_lepReco/F");
@@ -1373,12 +1465,17 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("genAntiTopEta",&genAntiTopEta,"genAntiTopEta/F");
 	treePtr->Branch("genTTPt",&genTTPt,"genTTPt/F");
 	treePtr->Branch("genTTEta",&genTTEta,"genTTEta/F");
+	treePtr->Branch("nIsoJet",&nIsoJet,"nIsoJet/I");
 	treePtr->Branch("nJet",&nJet,"nJet/I");
 	treePtr->Branch("jet1Phi",&jet1Phi,"jet1Phi/F");
+	treePtr->Branch("jet1Flav",&jet1Flav,"jet1Flav/I");
+	treePtr->Branch("jet1GenPt",&jet1GenPt,"jet1GenPt/F");
 	treePtr->Branch("jet1Pt",&jet1Pt,"jet1Pt/F");
 	treePtr->Branch("jet1Eta",&jet1Eta,"jet1Eta/F");
 	treePtr->Branch("jet1CSV",&jet1CSV,"jet1CSV/F");
 	treePtr->Branch("jet2Phi",&jet2Phi,"jet2Phi/F");
+	treePtr->Branch("jet2Flav",&jet2Flav,"jet2Flav/I");
+	treePtr->Branch("jet2GenPt",&jet2GenPt,"jet2GenPt/F");
 	treePtr->Branch("jet2Pt",&jet2Pt,"jet2Pt/F");
 	treePtr->Branch("jet2Eta",&jet2Eta,"jet2Eta/F");
 	treePtr->Branch("jet2CSV",&jet2CSV,"jet2CSV/F");
@@ -1430,6 +1527,7 @@ void GeneralTree::WriteTree(TTree *t) {
 		treePtr->Branch("fj1sjCSV",fj1sjCSV,"fj1sjCSV[2]/F");
 		treePtr->Branch("fj1sjQGL",fj1sjQGL,"fj1sjQGL[2]/F");
 		treePtr->Branch("fj1MSD_corr",&fj1MSD_corr,"fj1MSD_corr/F");
+		treePtr->Branch("fj1DoubleCSV",&fj1DoubleCSV,"fj1DoubleCSV/F");
 	}
 	treePtr->Branch("fj1sjPt",&fj1sjPt,"fj1sjPt/F");
 	treePtr->Branch("fj1sjPhi",&fj1sjPhi,"fj1sjPhi/F");
@@ -1471,6 +1569,8 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("looseLep2PdgId",&looseLep2PdgId,"looseLep2PdgId/I");
 	treePtr->Branch("looseLep1IsTight",&looseLep1IsTight,"looseLep1IsTight/I");
 	treePtr->Branch("looseLep2IsTight",&looseLep2IsTight,"looseLep2IsTight/I");
+	treePtr->Branch("looseLep1IsHLTSafe",&looseLep1IsHLTSafe,"looseLep1IsHLTSafe/I");
+	treePtr->Branch("looseLep2IsHLTSafe",&looseLep2IsHLTSafe,"looseLep2IsHLTSafe/I");
 	treePtr->Branch("looseLep1Pt",&looseLep1Pt,"looseLep1Pt/F");
 	treePtr->Branch("looseLep1Eta",&looseLep1Eta,"looseLep1Eta/F");
 	treePtr->Branch("looseLep1Phi",&looseLep1Phi,"looseLep1Phi/F");
@@ -1478,14 +1578,20 @@ void GeneralTree::WriteTree(TTree *t) {
 	treePtr->Branch("looseLep2Eta",&looseLep2Eta,"looseLep2Eta/F");
 	treePtr->Branch("looseLep2Phi",&looseLep2Phi,"looseLep2Phi/F");
 	treePtr->Branch("diLepMass",&diLepMass,"diLepMass/F");
+	treePtr->Branch("mT",&mT,"mT/F");
 	treePtr->Branch("nTau",&nTau,"nTau/I");
 	if (monohiggs) {
 		treePtr->Branch("hbbpt",&hbbpt,"hbbpt/F");
 		treePtr->Branch("hbbeta",&hbbeta,"hbbeta/F");
 		treePtr->Branch("hbbphi",&hbbphi,"hbbphi/F");
 		treePtr->Branch("hbbm",&hbbm,"hbbm/F");
-		treePtr->Branch("hbbjtidx",hbbjtidx,"hbbjtidx/F");
+		treePtr->Branch("hbbjtidx",hbbjtidx,"hbbjtidx[2]/I");
 	}
+	treePtr->Branch("scaleUp",&scaleUp,"scaleUp/F");
+	treePtr->Branch("scaleDown",&scaleDown,"scaleDown/F");
+	treePtr->Branch("pdfUp",&pdfUp,"pdfUp/F");
+	treePtr->Branch("pdfDown",&pdfDown,"pdfDown/F");
+	treePtr->Branch("scale",scale,"scale[6]/F");
 
 	for (auto beta : betas) {
 		for (auto N : Ns) {
