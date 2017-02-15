@@ -19,19 +19,20 @@ if __name__ == "__main__":
 
 		skimmer = root.PandaAnalyzer()
 	 
-#		skimmer.firstEvent=0
-#		skimmer.lastEvent=10
-		skimmer.isData=True
+		skimmer.firstEvent=0
+		skimmer.lastEvent=10
+		skimmer.isData=False
 		skimmer.SetFlag('puppi',True)
 		skimmer.SetFlag('fatjet',True)
 		skimmer.SetFlag('firstGen',False)
-		if skimmer.isData:
+		skimmer.SetFlag('applyJSON',False)
+		if skimmer.isData and False:
 			with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt') as jsonFile:
 				payload = json.load(jsonFile)
 				for run,lumis in payload.iteritems():
 					for l in lumis:
 						skimmer.AddGoodLumiRange(int(run),l[0],l[1])
-		skimmer.processType = root.PandaAnalyzer.kW
+#		skimmer.processType = root.PandaAnalyzer.kW
 #		skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
 		fin = root.TFile.Open(fullPath)
 

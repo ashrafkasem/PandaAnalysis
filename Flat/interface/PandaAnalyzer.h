@@ -106,7 +106,6 @@ private:
 	void calcBJetSFs(TString readername, int flavor, double eta, double pt, 
 			             double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
 	BTagCalibration *btagCalib=0;
-	BTagCalibration *btagCalib_alt=0;
 	BTagCalibration *sj_btagCalib=0;
 
 	std::map<TString,BTagCalibrationReader*> btagReaders; //!< maps "JETTYPE_WP" to a reader 
@@ -166,6 +165,7 @@ private:
 	panda::VTau *taus=0;
 	panda::VPhoton *photons=0;
 	panda::PMET *pfmet=0, *puppimet=0;
+	panda::PGenInfo *geninfo=0;
 
 	// configuration read from output tree
 	std::vector<double> betas;
