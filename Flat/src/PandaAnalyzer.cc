@@ -428,56 +428,55 @@ void PandaAnalyzer::Run() {
         Binner btagpt(vbtagpt);
         Binner btageta(vbtageta);
 
-        // these are triggers. at some point these ought to be read from the file
         std::vector<unsigned int> metTriggers;
         std::vector<unsigned int> eleTriggers;
         std::vector<unsigned int> phoTriggers;
         std::vector<unsigned int> muTriggers;
 
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NoiseCleaned"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_NoiseCleaned_PFMHTNoMu110_IDTight"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHECleaned"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMET170_JetIdCleaned"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NotCleaned"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHE_BeamHaloCleaned"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight"));
-        // metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight"));
-        // muTriggers.push_back(event.registerTrigger("HLT_IsoMu20"));
-        // muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu20"));
-        // muTriggers.push_back(event.registerTrigger("HLT_IsoMu22"));
-        // muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu22"));
-        // muTriggers.push_back(event.registerTrigger("HLT_IsoMu24"));
-        // muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu24"));
-        // muTriggers.push_back(event.registerTrigger("HLT_IsoMu27"));
-        // muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu27"));
-        // muTriggers.push_back(event.registerTrigger("HLT_Mu45_eta2p1"));
-        // muTriggers.push_back(event.registerTrigger("HLT_Mu50"));
-        // muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"));
-        // muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"));
-        // muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ"));
-        // muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_Ele25_eta2p1_WPTight_Gsf"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_Ele27_eta2p1_WPLoose_Gsf"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_Ele27_WPTight_Gsf"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_Ele30_WPTight_Gsf"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_Ele32_eta2p1_WPTight_Gsf"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_Ele35_WPLoose_Gsf"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_Ele105_CaloIdVT_GsfTrkIdT"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_ECALHT800"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon175"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon165_HE10"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon36_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon50_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon75_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon90_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon120_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon165_R9Id90_HE10_IsoM"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NoiseCleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_NoiseCleaned_PFMHTNoMu110_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHECleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_JetIdCleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NotCleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHE_BeamHaloCleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoMu20"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu20"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoMu22"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu22"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoMu24"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu24"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoMu27"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu27"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu45_eta2p1"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu50"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele25_eta2p1_WPTight_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele27_eta2p1_WPLoose_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele27_WPTight_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele30_WPTight_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele32_eta2p1_WPTight_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele35_WPLoose_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"));
+        eleTriggers.push_back(event.registerTrigger("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele105_CaloIdVT_GsfTrkIdT"));
+        eleTriggers.push_back(event.registerTrigger("HLT_ECALHT800"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon175"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon165_HE10"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon36_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon50_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon75_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon90_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon120_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon165_R9Id90_HE10_IsoM"));
 
         // set up reporters
         unsigned int iE=0;
@@ -552,8 +551,8 @@ void PandaAnalyzer::Run() {
                 }
 
                 // met
-                gt->pfmet = event.met.pt;
-                gt->pfmetphi = event.met.phi;
+                gt->pfmet = event.pfMet.pt;
+                gt->pfmetphi = event.pfMet.phi;
                 gt->calomet = event.caloMet.pt;
                 gt->puppimet = event.puppiMet.pt;
                 gt->puppimetphi = event.puppiMet.phi;
@@ -586,7 +585,7 @@ void PandaAnalyzer::Run() {
                                 continue;
                         if (!mu.loose)
                                 continue;
-                        if (!MuonIsolation(pt,eta,mu.combiso(),panda::kLoose))
+                        if (!MuonIsolation(pt,eta,mu.combIso(),panda::kLoose))
                                 continue;
                         looseLeps.push_back(&mu);
                         gt->nLooseMuon++;
@@ -621,10 +620,10 @@ void PandaAnalyzer::Run() {
                         panda::Muon *mu = dynamic_cast<panda::Muon*>(lep);
                         if (mu!=NULL) {
                                 bool isTight = ( mu->tight &&
-                                                 MuonIsolation(mu->pt(),mu->eta(),mu->combiso(),panda::kTight) &&
+                                                 MuonIsolation(mu->pt(),mu->eta(),mu->combIso(),panda::kTight) &&
                                                  mu->pt()>20 && fabs(mu->eta())<2.4 );
                                 if (lep_counter==1) {
-                                        gt->looseLep1PdgId = mu->q*-13;
+                                        gt->looseLep1PdgId = mu->charge*-13;
                                         gt->looseLep1IsHLTSafe = 1;
                                         if (isTight) {
                                                 gt->nTightMuon++;
@@ -632,7 +631,7 @@ void PandaAnalyzer::Run() {
                                                 matchLeps.push_back(lep);
                                         }
                                 } else if (lep_counter==2) {
-                                        gt->looseLep2PdgId = mu->q*-13;
+                                        gt->looseLep2PdgId = mu->charge*-13;
                                         gt->looseLep2IsHLTSafe = 1;
                                         if (isTight) {
                                                 gt->nTightMuon++;
@@ -647,7 +646,7 @@ void PandaAnalyzer::Run() {
                                                  /*ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&*/
                                                  ele->pt()>40 && fabs(ele->eta())<2.5 );
                                 if (lep_counter==1) {
-                                        gt->looseLep1PdgId = ele->q*-11;
+                                        gt->looseLep1PdgId = ele->charge*-11;
                                         gt->looseLep1IsHLTSafe = ele->hltsafe ? 1 : 0;
                                         if (isTight) {
                                                 gt->nTightElectron++;
@@ -656,7 +655,7 @@ void PandaAnalyzer::Run() {
                                                 matchEles.push_back(lep);
                                         }
                                 } else if (lep_counter==2) {
-                                        gt->looseLep2PdgId = ele->q*-11;
+                                        gt->looseLep2PdgId = ele->charge*-11;
                                         gt->looseLep2IsHLTSafe = ele->hltsafe ? 1 : 0;
                                         if (isTight) {
                                                 gt->nTightElectron++;
