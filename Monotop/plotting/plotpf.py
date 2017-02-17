@@ -64,12 +64,19 @@ weight = sel.weights[region]%lumi
 plot.SetMCWeight(root.TCut(weight))
 PInfo(sname,'using weight: '+weight)
 
+plot.AddSyst(tTIMES('scaleUp',weight),
+		tTIMES('scaleDown',weight),
+		'QCD scale',root.kRed+2)
+
+plot.AddSyst(tTIMES('pdfUp',weight),
+		tTIMES('pdfDown',weight),
+		'PDF',root.kBlue+2)
 
 ### DEFINE PROCESSES ###
 zjets     = root.Process('Z+jets',root.kZjets)
 wjets     = root.Process('W+jets',root.kWjets)
 diboson   = root.Process('Diboson',root.kDiboson)
-ttbar     = root.Process('t#bar{t}',root.kTTbar)
+ttbar     = root.Process('t#bar{t}',root.kTTbar); ttbar.additionalWeight = root.TCut('730/831.')
 # uttbar    = root.Process('t#bar{t} [unmatched]',root.kExtra1)
 singletop = root.Process('Single t',root.kST)
 qcd       = root.Process("QCD",root.kQCD)
@@ -88,7 +95,7 @@ else:
   zjets.AddFile(baseDir+'ZJets.root')
 wjets.AddFile(baseDir+'WJets.root')
 diboson.AddFile(baseDir+'Diboson.root')
-ttbar.AddFile(baseDir+'TTbar%s.root'%(args.tt))
+ttbar.AddFile(baseDir+'TTbar.root')
 singletop.AddFile(baseDir+'SingleTop.root')
 if 'pho' in region:
   processes = [qcd,gjets]

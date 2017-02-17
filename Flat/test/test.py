@@ -32,7 +32,7 @@ if __name__ == "__main__":
 				for run,lumis in payload.iteritems():
 					for l in lumis:
 						skimmer.AddGoodLumiRange(int(run),l[0],l[1])
-#		skimmer.processType = root.PandaAnalyzer.kW
+		skimmer.processType = root.PandaAnalyzer.kTT
 #		skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
 		fin = root.TFile.Open(fullPath)
 
