@@ -1414,7 +1414,7 @@ void PandaAnalyzer::Run() {
 		// and the other from calculation
 		gt->sf_tt = 1; gt->sf_tt_ext = 1; gt->sf_tt_bound = 1;
 		gt->sf_tt8TeV = 1; gt->sf_tt8TeV_ext = 1; gt->sf_tt8TeV_bound = 1;
-		gt->sf_qcdTT = 0;
+		gt->sf_qcdTT = 1;
 		if (!isData && processType==kTT) {
 			gt->genWPlusPt = -1; gt->genWMinusPt = -1;
 			for (auto *gen : *genparts) {
