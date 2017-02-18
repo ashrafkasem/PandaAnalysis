@@ -1,5 +1,5 @@
 #ifndef GENERICTREE
-#define GENERICTREE 1
+#define GENERICTREE 
 
 #include "TFile.h"
 #include "TTree.h"
