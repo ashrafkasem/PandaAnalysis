@@ -12,7 +12,7 @@
 #include <vector>
 #include "PandaCore/Tools/interface/Common.h"
 
-int treeCounter=0; // used to give distinct names to trees
+static int treeCounter=0; // used to give distinct names to trees
 
 class xformula {
 	public:

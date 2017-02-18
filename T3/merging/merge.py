@@ -34,12 +34,14 @@ system('mkdir -p /tmp/%s/merged'%user) # tmp dir
 inbase = environ['SUBMIT_OUTDIR']
 outbase = environ['PANDA_FLATDIR']
 
+#suffix = ' > /dev/null '
+suffix = ''
+
 def hadd(inpath,outpath):
   if type(inpath)==type('str'):
     infiles = glob(inpath)
     PInfo(sname,'hadding %s into %s'%(inpath,outpath))
-    #cmd = 'hadd -k -ff -n 100 -f %s %s > /dev/null'%(outpath,inpath)
-    cmd = 'hadd -k -ff -n 100 -f %s %s'%(outpath,inpath)
+    cmd = 'hadd -k -ff -n 100 -f %s %s %s'%(outpath,inpath,suffix)
     system(cmd)
     return
   else:
@@ -55,8 +57,7 @@ def hadd(inpath,outpath):
       if path.isfile(f):
         cmd += '%s '%f
   if VERBOSE: PInfo(sname,cmd)
-  #system(cmd+' >/dev/null 2>/dev/null')
-  system(cmd)
+  system(cmd+suffix)
 
 def normalizeFast(fpath,opt):
   xsec=-1
@@ -108,16 +109,20 @@ d = {
   'TTbar_isrdown'       : ['TTbar_PowhegISRDown'],
   'TTbar_tuneup'        : ['TTbar_PowhegTuneUp'],
   'TTbar_tunedown'      : ['TTbar_PowhegTuneDown'],
-  'TTbar_FXFX'					: ['TTbar_FXFX'],
+  'TTbar_FXFX'		: ['TTbar_FXFX'],
   'TTbar_Herwig'        : ['TTbar_Herwig'],
   'SingleTop'           : ['SingleTop_tT','SingleTop_tTbar','SingleTop_tbarW','SingleTop_tW'],
-  'QCD'                 : ['QCD_ht200to300','QCD_ht300to500','QCD_ht500to700','QCD_ht700to1000','QCD_ht1000to1500','QCD_ht1500to2000','QCD_ht2000toinf'],
+  'QCD'                 : ['QCD_ht100to200','QCD_ht200to300','QCD_ht300to500','QCD_ht500to700','QCD_ht700to1000','QCD_ht1000to1500','QCD_ht1500to2000','QCD_ht2000toinf'],
   'MET'                 : ['MET'],
   'SingleElectron'      : ['SingleElectron'],
   'DoubleEG'            : ['DoubleEG'],
   'SinglePhoton'        : ['SinglePhoton'],
   'ZJets_nlo'           : ['ZJets_nlo'],
   'WJets_nlo'           : ['WJets_pt%sto%s'%(str(x[0]),str(x[1])) for x in [(100,250),(250,400),(400,600),(600,'inf')] ],
+  'ZHbb'                : ['ZHbb_mH125'],
+  'ggZHbb'              : ['ggZHbb_mH125'],
+  'WpH'                 : ['WpLNuHbb'],
+  'WmH'                 : ['WmLNuHbb'],
 }
 
 args = {}

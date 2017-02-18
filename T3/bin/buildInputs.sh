@@ -5,18 +5,11 @@ rm -rf $WD/*
 
 doTar=0
 filesetSize=20
-while getopts ":tn:" opt; do
+while getopts ":t:" opt; do
   case $opt in
     t)
       doTar=1
       ;;
-		n)
-			filesetSize=$OPTARG
-			;;
-		:)
-			echo "Error: option -n must have an argument"
-			exit(1)
-			;;
   esac 
 done
 

@@ -143,6 +143,10 @@ def stageout(outdir,outfilename):
 		PInfo(sname+'.stageout','Move exited with code %i'%ret)
 	else:
 		PError(sname+'.stageout','Move exited with code %i'%ret)
+		return ret
+	if not path.isfile('%s/%s'%(outdir,outfilename)):
+		PError(sname+'.stageout','Output file is missing!')
+		ret = 1
 	return ret
 
 
@@ -172,7 +176,8 @@ if __name__ == "__main__":
 
 	hadd(list(processed))
 	add_bdt()
-	stageout(outdir,outfilename)
-	write_lock(outdir,outfilename,processed)
+	ret = stageout(outdir,outfilename)
+	if not ret:
+		write_lock(outdir,outfilename,processed)
 
 	exit(0)
