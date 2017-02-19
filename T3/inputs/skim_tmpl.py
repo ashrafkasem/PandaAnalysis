@@ -45,7 +45,7 @@ def copy_local(long_name):
 
     # rely on pxrdcp for local and remote copies
     # default behavior: drop PF candidates
-    system("pxrdcp %s %s '!pfCandidates'"%(full_path,input_name)
+    system("pxrdcp %s %s '!pfCandidates'"%(full_path,input_name))
 
     if path.isfile(input_name):
         PInfo(sname+'.copy_local','Successfully copied to %s'%(input_name))
