@@ -3,6 +3,7 @@
 from sys import argv
 from os import system,getenv,getuid
 from time import time
+from PandaCore.Tools.Misc import *
 
 cmssw_base=getenv('CMSSW_BASE')
 logpath=getenv('SUBMIT_LOGDIR')
@@ -38,7 +39,8 @@ accounting_group = group_cmsuser.snarayan
 queue {3}
 '''.format(workpath,logpath,uid,njobs,frozen_cfgpath)
 
-print classad
+for line in classad.split('\n'):
+    PInfo(argv[0]+' CLASSAD',line)
 
 with open(logpath+'/condor.jdl','w') as jdlfile:
   jdlfile.write(classad)
