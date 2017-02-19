@@ -39,8 +39,8 @@ accounting_group = group_cmsuser.snarayan
 queue {3}
 '''.format(workpath,logpath,uid,njobs,frozen_cfgpath)
 
-for line in classad.split('\n'):
-    PInfo(argv[0]+' CLASSAD',line)
+PInfo(argv[0],"CLASSAD:")
+print classad
 
 with open(logpath+'/condor.jdl','w') as jdlfile:
   jdlfile.write(classad)
