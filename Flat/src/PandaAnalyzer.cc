@@ -57,14 +57,19 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
     event.setStatus(*t, {"!*"}); // turn everything off first
 
     TString jetname = (flags["puppi"]) ? "puppi" : "chs";
-    panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", "isData", "npv", "weight", "triggers", "genReweight",
+    panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", "isData", "npv", "weight",
                                        "chsAK4Jets", "electrons", "muons", "taus", "photons", "met", "caloMet", "puppiMet"});
+
+    if (isData)
+        readlist.push_back("triggers");
 
     if (flags["fatjet"])
       readlist += {jetname+"CA15Jets", "subjets"};
 
-    if (!isData)
+    if (!isData) {
       readlist.push_back("genParticles");
+      readlist.push_back("genReweight");
+    }
 
     event.setAddress(*t, readlist); // pass the readlist so only the relevant branches are turned on
 
@@ -441,50 +446,52 @@ void PandaAnalyzer::Run() {
     std::vector<unsigned int> phoTriggers;
     std::vector<unsigned int> muTriggers;
 
-    metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NoiseCleaned"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_NoiseCleaned_PFMHTNoMu110_IDTight"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHECleaned"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMET170_JetIdCleaned"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NotCleaned"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHE_BeamHaloCleaned"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight"));
-    metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight"));
-    muTriggers.push_back(event.registerTrigger("HLT_IsoMu20"));
-    muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu20"));
-    muTriggers.push_back(event.registerTrigger("HLT_IsoMu22"));
-    muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu22"));
-    muTriggers.push_back(event.registerTrigger("HLT_IsoMu24"));
-    muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu24"));
-    muTriggers.push_back(event.registerTrigger("HLT_IsoMu27"));
-    muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu27"));
-    muTriggers.push_back(event.registerTrigger("HLT_Mu45_eta2p1"));
-    muTriggers.push_back(event.registerTrigger("HLT_Mu50"));
-    muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"));
-    muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"));
-    muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ"));
-    muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"));
-    eleTriggers.push_back(event.registerTrigger("HLT_Ele25_eta2p1_WPTight_Gsf"));
-    eleTriggers.push_back(event.registerTrigger("HLT_Ele27_eta2p1_WPLoose_Gsf"));
-    eleTriggers.push_back(event.registerTrigger("HLT_Ele27_WPTight_Gsf"));
-    eleTriggers.push_back(event.registerTrigger("HLT_Ele30_WPTight_Gsf"));
-    eleTriggers.push_back(event.registerTrigger("HLT_Ele32_eta2p1_WPTight_Gsf"));
-    eleTriggers.push_back(event.registerTrigger("HLT_Ele35_WPLoose_Gsf"));
-    eleTriggers.push_back(event.registerTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"));
-    eleTriggers.push_back(event.registerTrigger("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf"));
-    eleTriggers.push_back(event.registerTrigger("HLT_Ele105_CaloIdVT_GsfTrkIdT"));
-    eleTriggers.push_back(event.registerTrigger("HLT_ECALHT800"));
-    phoTriggers.push_back(event.registerTrigger("HLT_Photon175"));
-    phoTriggers.push_back(event.registerTrigger("HLT_Photon165_HE10"));
-    phoTriggers.push_back(event.registerTrigger("HLT_Photon36_R9Id90_HE10_IsoM"));
-    phoTriggers.push_back(event.registerTrigger("HLT_Photon50_R9Id90_HE10_IsoM"));
-    phoTriggers.push_back(event.registerTrigger("HLT_Photon75_R9Id90_HE10_IsoM"));
-    phoTriggers.push_back(event.registerTrigger("HLT_Photon90_R9Id90_HE10_IsoM"));
-    phoTriggers.push_back(event.registerTrigger("HLT_Photon120_R9Id90_HE10_IsoM"));
-    phoTriggers.push_back(event.registerTrigger("HLT_Photon165_R9Id90_HE10_IsoM"));
+    if (isData) {
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NoiseCleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_NoiseCleaned_PFMHTNoMu110_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHECleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_JetIdCleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NotCleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHE_BeamHaloCleaned"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight"));
+        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoMu20"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu20"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoMu22"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu22"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoMu24"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu24"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoMu27"));
+        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu27"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu45_eta2p1"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu50"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ"));
+        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele25_eta2p1_WPTight_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele27_eta2p1_WPLoose_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele27_WPTight_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele30_WPTight_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele32_eta2p1_WPTight_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele35_WPLoose_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"));
+        eleTriggers.push_back(event.registerTrigger("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf"));
+        eleTriggers.push_back(event.registerTrigger("HLT_Ele105_CaloIdVT_GsfTrkIdT"));
+        eleTriggers.push_back(event.registerTrigger("HLT_ECALHT800"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon175"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon165_HE10"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon36_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon50_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon75_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon90_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon120_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon165_R9Id90_HE10_IsoM"));
+    }
 
     // set up reporters
     unsigned int iE=0;
