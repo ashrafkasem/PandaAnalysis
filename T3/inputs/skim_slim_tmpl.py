@@ -211,7 +211,7 @@ if __name__ == "__main__":
 
     hadd(list(processed))
     add_bdt()
-    if drop_branches(to_drop=''):
+    if drop_branches(to_drop='fj1ECFN'):
         exit(1)
     ret = stageout(outdir,outfilename)
     if not ret:
