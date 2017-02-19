@@ -34,7 +34,9 @@ if skimmer.isData and False:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
 skimmer.processType = root.PandaAnalyzer.kTT
 #        skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
-fin = root.TFile.Open(torun)
+system("pxrdcp %s input.root '!pfCandidates'"%(torun))
+fin = root.TFile.Open('input.root')
+#fin = root.TFile.Open(torun)
 
 print torun
 print fin
