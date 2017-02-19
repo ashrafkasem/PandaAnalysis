@@ -45,8 +45,8 @@ def copy_local(long_name):
 
     # rely on pxrdcp for local and remote copies
     # default behavior: drop PF candidates
-    system("pxrdcp %s %s '!pfCandidates'"%(full_path,input_name)
-
+    system("pxrdcp %s %s '!pfCandidates'"%(full_path,input_name))
+            
     if path.isfile(input_name):
         PInfo(sname+'.copy_local','Successfully copied to %s'%(input_name))
         return input_name
@@ -62,8 +62,8 @@ def fn(input_name,isData,full_path):
     # now we instantiate and configure the analyzer
     skimmer = root.PandaAnalyzer()
     skimmer.isData=isData
-    skimmer.SetFlag('firstGen',False)
-    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+    skimmer.SetFlag('firstGen',True)
+    #skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
     #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
