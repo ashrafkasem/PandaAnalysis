@@ -60,21 +60,21 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
     panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", "isData", "npv", "weight",
                                        "chsAK4Jets", "electrons", "muons", "taus", "photons", "met", "caloMet", "puppiMet"});
 
-    if (isData)
-        readlist.push_back("triggers");
-
     if (flags["fatjet"])
       readlist += {jetname+"CA15Jets", "subjets"};
 
-    if (!isData) {
+    if (isData) {
+        readlist.push_back("triggers");
+    } else {
       readlist.push_back("genParticles");
       readlist.push_back("genReweight");
     }
 
     event.setAddress(*t, readlist); // pass the readlist so only the relevant branches are turned on
 
-    TH1F *hDTotalMCWeight = new TH1F("hDTotalMCWeight","hDTotalMCWeight",1,0,2);
-    hDTotalMCWeight->Fill(1,hweights->GetBinContent(1));
+    TH1F hDTotalMCWeight("hDTotalMCWeight","hDTotalMCWeight",1,0,2);
+    hDTotalMCWeight.SetBinContent(1,hweights->GetBinContent(1));
+    fOut->WriteTObject(&hDTotalMCWeight);    
 
 
     // manipulate the output tree
@@ -85,7 +85,7 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
         gt->SetBranchStatus("sf_phoPurity",true); // important!
     }
     if (flags["genOnly"]) {
-        std::vector<TString> keepable = {"mcWeight","scale","scaleUp","scaleDown","pdf*","gen*"};
+        std::vector<TString> keepable = {"mcWeight","scale","scaleUp","scaleDown","pdf*","gen*","fj1*","nFatjet"};
         gt->SetBranchStatus("*",false);
         for (auto &keep : keepable)
             gt->SetBranchStatus(keep,true);
@@ -731,7 +731,7 @@ void PandaAnalyzer::Run() {
             }
         }
 
-        // TODO - store in a TH1
+        // TODO - store in a THCorr
         if (isData && gt->nLoosePhoton>0) {
             if (gt->loosePho1Pt>=175 && gt->loosePho1Pt<200)
                 gt->sf_phoPurity = 0.04802;
@@ -1247,7 +1247,7 @@ void PandaAnalyzer::Run() {
 
                     bool isHadronic = (iQ1>=0 && iQ2>=0); // both quarks were found
 
-                    // add to coll0ection
+                    // add to collection
                     if (isHadronic)
                         genObjects[&part] = size;
                 }

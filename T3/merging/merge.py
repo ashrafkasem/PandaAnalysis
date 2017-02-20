@@ -10,13 +10,12 @@ sname = argv[0]
 arguments = [x for x in argv[1:]] # deep copy
 argv=[]
 
-from ROOT import gSystem, gROOT
 import ROOT as root
 from PandaCore.Tools.process import *
 from PandaCore.Tools.Misc import *
+from PandaCore.Tools.Load import Load
 
-gROOT.LoadMacro("${CMSSW_BASE}/src/PandaCore/Tools/interface/Normalizer.h")
-gSystem.Load('libPandaCoreTools.so')
+Load('Normalizer')
 
 pds = {}
 for k,v in processes.iteritems():
@@ -34,8 +33,8 @@ system('mkdir -p /tmp/%s/merged'%user) # tmp dir
 inbase = environ['SUBMIT_OUTDIR']
 outbase = environ['PANDA_FLATDIR']
 
-#suffix = ' > /dev/null '
-suffix = ''
+suffix = ' > /dev/null '
+#suffix = ''
 
 def hadd(inpath,outpath):
   if type(inpath)==type('str'):
