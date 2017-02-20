@@ -63,6 +63,7 @@ def fn(input_name,isData,full_path):
     skimmer = root.PandaAnalyzer()
     skimmer.isData=isData
     skimmer.SetFlag('firstGen',True)
+    skimmer.SetFlag('genOnly',True)
     #skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
     #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
