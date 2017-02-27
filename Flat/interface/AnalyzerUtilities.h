@@ -139,8 +139,8 @@ class btagcand {
 };
 
 
-inline void EvalBtagSF(std::vector<btagcand> cands, std::vector<double> sfs, float &sf0, float &sf1) {
-    sf0 = 1; sf1 = 1;
+inline void EvalBtagSF(std::vector<btagcand> cands, std::vector<double> sfs, float &sf0, float &sf1, float &sfGT0) {
+    sf0 = 1; sf1 = 1; sfGT0 = 1;
     float prob_mc0=1, prob_data0=1;
     float prob_mc1=0, prob_data1=0;
     unsigned int nC = cands.size();
@@ -165,11 +165,12 @@ inline void EvalBtagSF(std::vector<btagcand> cands, std::vector<double> sfs, flo
     if (nC>0) {
         sf0 = prob_data0/prob_mc0;
         sf1 = prob_data1/prob_mc1;
+        sfGT0 = (1-prob_data0)/(1-prob_mc0);
     }
 }
 
-inline void EvalBtagSF(std::vector<btagcand> cands, std::vector<double> sfs, float &sf0, float &sf1, float &sf2) { 
-    EvalBtagSF(cands,sfs,sf0,sf1); // get 0,1
+inline void EvalBtagSF(std::vector<btagcand> cands, std::vector<double> sfs, float &sf0, float &sf1, float &sf2, float &sfGT0) { 
+    EvalBtagSF(cands,sfs,sf0,sf1,sfGT0); // get 0,1
 
     sf2=1;
     float prob_mc2=0, prob_data2=0;
