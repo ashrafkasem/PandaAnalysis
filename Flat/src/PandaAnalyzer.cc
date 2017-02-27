@@ -85,7 +85,7 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
         gt->SetBranchStatus("sf_phoPurity",true); // important!
     }
     if (flags["genOnly"]) {
-        std::vector<TString> keepable = {"mcWeight","scale","scaleUp","scaleDown","pdf*","gen*","fj1*","nFatjet"};
+        std::vector<TString> keepable = {"mcWeight","scale","scaleUp","scaleDown","pdf*","gen*","fj1*","nFatjet","sf_tt*","sf_qcdTT*"};
         gt->SetBranchStatus("*",false);
         for (auto &keep : keepable)
             gt->SetBranchStatus(keep,true);
@@ -505,7 +505,7 @@ void PandaAnalyzer::Run() {
         tr.Start();
         pr.Report();
         ResetBranches();
-        event.getEntry(iE);
+        event.getEntry(*tIn,iE);
         tr.TriggerEvent("GetEntry");
 
         // event info
@@ -1352,15 +1352,15 @@ void PandaAnalyzer::Run() {
             gt->sf_sjcsvWeightBDown = 0.95 * gt->sf_sjcsvWeightB;
 
             EvalBtagSF(sj_btagcands,sj_sf_cent,
-                                    gt->sf_sjbtag0,gt->sf_sjbtag1,gt->sf_sjbtag2);
+                        gt->sf_sjbtag0,gt->sf_sjbtag1,gt->sf_sjbtag2,gt->sf_sjbtagGT0);
             EvalBtagSF(sj_btagcands,sj_sf_bUp,
-                                    gt->sf_sjbtag0BUp,gt->sf_sjbtag1BUp,gt->sf_sjbtag2BUp);
+                        gt->sf_sjbtag0BUp,gt->sf_sjbtag1BUp,gt->sf_sjbtag2BUp,gt->sf_sjbtagGT0BUp);
             EvalBtagSF(sj_btagcands,sj_sf_bDown,
-                                    gt->sf_sjbtag0BDown,gt->sf_sjbtag1BDown,gt->sf_sjbtag2BDown);
+                        gt->sf_sjbtag0BDown,gt->sf_sjbtag1BDown,gt->sf_sjbtag2BDown,gt->sf_sjbtagGT0BDown);
             EvalBtagSF(sj_btagcands,sj_sf_mUp,
-                                    gt->sf_sjbtag0MUp,gt->sf_sjbtag1MUp,gt->sf_sjbtag2MUp);
+                        gt->sf_sjbtag0MUp,gt->sf_sjbtag1MUp,gt->sf_sjbtag2MUp,gt->sf_sjbtagGT0MUp);
             EvalBtagSF(sj_btagcands,sj_sf_mDown,
-                                    gt->sf_sjbtag0MDown,gt->sf_sjbtag1MDown,gt->sf_sjbtag2MDown);
+                        gt->sf_sjbtag0MDown,gt->sf_sjbtag1MDown,gt->sf_sjbtag2MDown,gt->sf_sjbtagGT0MDown);
 
         }
 
@@ -1466,27 +1466,27 @@ void PandaAnalyzer::Run() {
             gt->sf_csvWeightBDown = 0.95 * gt->sf_csvWeightB;
 
             EvalBtagSF(btagcands,sf_cent,
-                                    gt->sf_btag0,gt->sf_btag1,gt->sf_btag2);
+                        gt->sf_btag0,gt->sf_btag1,gt->sf_btag2,gt->sf_btagGT0);
             EvalBtagSF(btagcands,sf_bUp,
-                                    gt->sf_btag0BUp,gt->sf_btag1BUp,gt->sf_btag2BUp);
+                        gt->sf_btag0BUp,gt->sf_btag1BUp,gt->sf_btag2BUp,gt->sf_btagGT0BUp);
             EvalBtagSF(btagcands,sf_bDown,
-                                    gt->sf_btag0BDown,gt->sf_btag1BDown,gt->sf_btag2BDown);
+                        gt->sf_btag0BDown,gt->sf_btag1BDown,gt->sf_btag2BDown,gt->sf_btagGT0BDown);
             EvalBtagSF(btagcands,sf_mUp,
-                                    gt->sf_btag0MUp,gt->sf_btag1MUp,gt->sf_btag2MUp);
+                        gt->sf_btag0MUp,gt->sf_btag1MUp,gt->sf_btag2MUp,gt->sf_btagGT0MUp);
             EvalBtagSF(btagcands,sf_mDown,
-                                    gt->sf_btag0MDown,gt->sf_btag1MDown,gt->sf_btag2MDown);
+                        gt->sf_btag0MDown,gt->sf_btag1MDown,gt->sf_btag2MDown,gt->sf_btagGT0MDown);
 
             if (flags["monohiggs"]){
                 EvalBtagSF(btagcands_alt,sf_cent_alt,
-                                     gt->sf_btag0_alt,gt->sf_btag1_alt,gt->sf_btag2_alt);
+                            gt->sf_btag0_alt,gt->sf_btag1_alt,gt->sf_btag2_alt,gt->sf_btagGT0_alt);
                 EvalBtagSF(btagcands_alt,sf_bUp_alt,
-                                     gt->sf_btag0BUp_alt,gt->sf_btag1BUp_alt,gt->sf_btag2BUp_alt);
+                            gt->sf_btag0BUp_alt,gt->sf_btag1BUp_alt,gt->sf_btag2BUp_alt,gt->sf_btagGT0BUp_alt);
                 EvalBtagSF(btagcands_alt,sf_bDown_alt,
-                                     gt->sf_btag0BDown_alt,gt->sf_btag1BDown_alt,gt->sf_btag2BDown_alt);
+                            gt->sf_btag0BDown_alt,gt->sf_btag1BDown_alt,gt->sf_btag2BDown_alt,gt->sf_btagGT0BDown_alt);
                 EvalBtagSF(btagcands_alt,sf_mUp_alt,
-                                     gt->sf_btag0MUp_alt,gt->sf_btag1MUp_alt,gt->sf_btag2MUp_alt);
+                            gt->sf_btag0MUp_alt,gt->sf_btag1MUp_alt,gt->sf_btag2MUp_alt,gt->sf_btagGT0MUp_alt);
                 EvalBtagSF(btagcands_alt,sf_mDown_alt,
-                                     gt->sf_btag0MDown_alt,gt->sf_btag1MDown_alt,gt->sf_btag2MDown_alt);
+                            gt->sf_btag0MDown_alt,gt->sf_btag1MDown_alt,gt->sf_btag2MDown_alt,gt->sf_btagGT0MDown_alt);
             }
         }
 

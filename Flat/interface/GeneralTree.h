@@ -73,6 +73,11 @@ class GeneralTree : public genericTree {
 	float sf_btag1BDown=0;
 	float sf_btag1MUp=0;
 	float sf_btag1MDown=0;
+	float sf_btagGT0=0;
+	float sf_btagGT0BUp=0;
+	float sf_btagGT0BDown=0;
+	float sf_btagGT0MUp=0;
+	float sf_btagGT0MDown=0;
 	float sf_btag2=0;
 	float sf_btag2BUp=0;
 	float sf_btag2BDown=0;
@@ -88,6 +93,11 @@ class GeneralTree : public genericTree {
 	float sf_btag1BDown_alt=0;
 	float sf_btag1MUp_alt=0;
 	float sf_btag1MDown_alt=0;
+	float sf_btagGT0_alt=0;
+	float sf_btagGT0BUp_alt=0;
+	float sf_btagGT0BDown_alt=0;
+	float sf_btagGT0MUp_alt=0;
+	float sf_btagGT0MDown_alt=0;
 	float sf_btag2_alt=0;
 	float sf_btag2BUp_alt=0;
 	float sf_btag2BDown_alt=0;
@@ -103,6 +113,11 @@ class GeneralTree : public genericTree {
 	float sf_sjbtag1BDown=0;
 	float sf_sjbtag1MUp=0;
 	float sf_sjbtag1MDown=0;
+	float sf_sjbtagGT0=0;
+	float sf_sjbtagGT0BUp=0;
+	float sf_sjbtagGT0BDown=0;
+	float sf_sjbtagGT0MUp=0;
+	float sf_sjbtagGT0MDown=0;
 	float sf_sjbtag2=0;
 	float sf_sjbtag2BUp=0;
 	float sf_sjbtag2BDown=0;
