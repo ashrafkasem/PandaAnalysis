@@ -212,7 +212,8 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 	btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_C,"lt");
 	btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
-	btagReaders["jet_M"] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM,"central",{"up","down"});
+	//btagReaders["jet_M"] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM,"central",{"up","down"});
+	btagReaders["jet_M"] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
 	btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
 	btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
 	btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
@@ -883,9 +884,9 @@ void PandaAnalyzer::Run() {
 				continue;
 			if ((jet->id&PJet::kLoose)==0)
 				continue; // apply loose selection to all jets
-			if (IsMatched(&matchLeps,0.16,jet->eta,jet->phi) ||
-					IsMatched(&matchPhos,0.16,jet->eta,jet->phi))
-				continue;
+//			if (IsMatched(&matchLeps,0.16,jet->eta,jet->phi) ||
+//					IsMatched(&matchPhos,0.16,jet->eta,jet->phi))
+//				continue;
 
 			cleanedJets.push_back(jet);
 			float csv = (fabs(jet->eta)<2.5) ? jet->csv : -1;
@@ -929,7 +930,7 @@ void PandaAnalyzer::Run() {
 				gt->dphipfUZ = std::min(fabs(vJet.DeltaPhi(vpfUZ)),(double)gt->dphipfUZ);
 			}
 			// btags
-			if (csv>0.8484) { 
+			if (csv>0.5426) { 
 				++gt->jetNBtags;
 				if (flags["monohiggs"]) {
 					btaggedJets.push_back(jet);
@@ -1415,7 +1416,7 @@ void PandaAnalyzer::Run() {
 		gt->sf_tt = 1; gt->sf_tt_ext = 1; gt->sf_tt_bound = 1;
 		gt->sf_tt8TeV = 1; gt->sf_tt8TeV_ext = 1; gt->sf_tt8TeV_bound = 1;
 		gt->sf_qcdTT = 1;
-		if (!isData && processType==kTT) {
+		if (!isData && (processType==kTT || processType==kTop)) {
 			gt->genWPlusPt = -1; gt->genWMinusPt = -1;
 			for (auto *gen : *genparts) {
 				if (abs(gen->pdgid)!=24)
@@ -1461,41 +1462,43 @@ void PandaAnalyzer::Run() {
 						break;
 				}
 			}
-			if (pt_t>0 && pt_tbar>0) {
-				TLorentzVector vTT = vT+vTbar;
-				gt->genTTPt = vTT.Pt(); gt->genTTEta = vTT.Eta();
-				gt->sf_tt8TeV = TMath::Sqrt( 
-                          TMath::Exp(0.156-0.00137*TMath::Min((float)400.,pt_t)) * 
-                          TMath::Exp(0.156-0.00137*TMath::Min((float)400.,pt_tbar)) 
-                          );
-				gt->sf_tt = TMath::Sqrt( 
-                          TMath::Exp(0.0615-0.0005*TMath::Min((float)400.,pt_t)) * 
-                          TMath::Exp(0.0615-0.0005*TMath::Min((float)400.,pt_tbar)) 
-                          );
-				gt->sf_tt8TeV_ext = TMath::Sqrt( 
-                          TMath::Exp(0.156-0.00137*pt_t) * 
-                          TMath::Exp(0.156-0.00137*pt_tbar) 
-                          );
-				gt->sf_tt_ext = TMath::Sqrt( 
-                          TMath::Exp(0.0615-0.0005*pt_t) * 
-                          TMath::Exp(0.0615-0.0005*pt_tbar) 
-                          );
-				gt->sf_tt8TeV_bound = TMath::Sqrt( 
-                          ((pt_t>400) ? 1 : TMath::Exp(0.156-0.00137*pt_t)) * 
-                          ((pt_tbar>400) ? 1 : TMath::Exp(0.156-0.00137*pt_tbar))
-                          );
-				gt->sf_tt_bound = TMath::Sqrt( 
-                          ((pt_t>400) ? 1 : TMath::Exp(0.0615-0.0005*pt_t)) * 
-                          ((pt_tbar>400) ? 1 : TMath::Exp(0.0615-0.0005*pt_tbar))
-                          );
+			if (processType==kTT) {
+				if (pt_t>0 && pt_tbar>0) {
+					TLorentzVector vTT = vT+vTbar;
+					gt->genTTPt = vTT.Pt(); gt->genTTEta = vTT.Eta();
+					gt->sf_tt8TeV = TMath::Sqrt( 
+							  TMath::Exp(0.156-0.00137*TMath::Min((float)400.,pt_t)) * 
+							  TMath::Exp(0.156-0.00137*TMath::Min((float)400.,pt_tbar)) 
+							  );
+					gt->sf_tt = TMath::Sqrt( 
+							  TMath::Exp(0.0615-0.0005*TMath::Min((float)400.,pt_t)) * 
+							  TMath::Exp(0.0615-0.0005*TMath::Min((float)400.,pt_tbar)) 
+							  );
+					gt->sf_tt8TeV_ext = TMath::Sqrt( 
+							  TMath::Exp(0.156-0.00137*pt_t) * 
+							  TMath::Exp(0.156-0.00137*pt_tbar) 
+							  );
+					gt->sf_tt_ext = TMath::Sqrt( 
+							  TMath::Exp(0.0615-0.0005*pt_t) * 
+							  TMath::Exp(0.0615-0.0005*pt_tbar) 
+							  );
+					gt->sf_tt8TeV_bound = TMath::Sqrt( 
+							  ((pt_t>400) ? 1 : TMath::Exp(0.156-0.00137*pt_t)) * 
+							  ((pt_tbar>400) ? 1 : TMath::Exp(0.156-0.00137*pt_tbar))
+							  );
+					gt->sf_tt_bound = TMath::Sqrt( 
+							  ((pt_t>400) ? 1 : TMath::Exp(0.0615-0.0005*pt_t)) * 
+							  ((pt_tbar>400) ? 1 : TMath::Exp(0.0615-0.0005*pt_tbar))
+							  );
+				}
+
+				if (pt_t>0)
+					gt->sf_qcdTT *= TTNLOToNNLO(pt_t);
+				if (pt_tbar>0) 
+					gt->sf_qcdTT *= TTNLOToNNLO(pt_tbar);
+
+				gt->sf_qcdTT = TMath::Sqrt(gt->sf_qcdTT);
 			}
-
-			if (pt_t>0)
-				gt->sf_qcdTT *= TTNLOToNNLO(pt_t);
-			if (pt_tbar>0) 
-				gt->sf_qcdTT *= TTNLOToNNLO(pt_tbar);
-
-			gt->sf_qcdTT = TMath::Sqrt(gt->sf_qcdTT);
 
 			tr.TriggerEvent("tt SFs");
 		} 
