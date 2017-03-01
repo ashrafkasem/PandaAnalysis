@@ -19,13 +19,14 @@ if __name__ == "__main__":
 
 		skimmer = root.PandaAnalyzer()
 	 
-		skimmer.firstEvent=0
-		skimmer.lastEvent=10
+#		skimmer.firstEvent=0
+#		skimmer.lastEvent=10
 		skimmer.isData=False
 		skimmer.SetFlag('puppi',True)
 		skimmer.SetFlag('fatjet',True)
 		skimmer.SetFlag('firstGen',False)
 		skimmer.SetFlag('applyJSON',False)
+		skimmer.SetFlag('monohiggs',True)
 		if skimmer.isData and False:
 			with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt') as jsonFile:
 				payload = json.load(jsonFile)
