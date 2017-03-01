@@ -10,11 +10,12 @@ triggers = {
 metFilter='metFilter==1'
 topTagSF = '1'
 ak4bTagSF = '1*(isojetNBtags==0)+1*(isojetNBtags==1)+1*(isojetNBtags>1)'
-presel = 'nFatjet==1 && fj1Pt>250 && fabs(fj1Eta)<2.4'
-#presel = 'nJet>=1 && jet1IsTight==1 && jet1Pt>100 && fabs(jet1Eta)<2.4'
+#presel = 'nFatjet==1 && fj1Pt>250 && fabs(fj1Eta)<2.4'
+presel = 'nJet>=1 && jet1IsTight==1 && jet1Pt>100 && fabs(jet1Eta)<2.4'
 
 cuts = {
-    'signal'             : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>0.5 && nLooseLep==0 && nLoosePhoton==0 && nTau==0 && fabs(calomet-pfmet)/pfmet<0.5 && fj1MaxCSV>0.46 && isojetNBtags==1')), 
+    'signal'             : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>0.5 && nLooseLep==0 && nLoosePhoton==0 && nTau==0 && fabs(calomet-pfmet)/pfmet<0.5')), 
+    #'signal'             : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>0.5 && nLooseLep==0 && nLoosePhoton==0 && nTau==0 && fabs(calomet-pfmet)/pfmet<0.5 && fj1MaxCSV>0.46 && isojetNBtags==1')), 
 #    'signal'             : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>0.5 && nLooseLep==0 && nLoosePhoton==0 && nTau==0 && fabs(calomet-pfmet)/pfmet<0.5 && jetNBtags==2')), 
     'singlemuon'         : tAND(metFilter,tAND(presel,'pfUWmag>250 && dphipfUW>0.5 && nLoosePhoton==0 && nTau==0 && nLooseLep==1 && looseLep1IsTight==1 && abs(looseLep1PdgId)==13 && fabs(calomet-pfmet)/pfUWmag<0.5 && mT<160')),
     'singleelectron'     : tAND(metFilter,tAND(presel,'pfUWmag>250 && dphipfUW>0.5 && nLoosePhoton==0 && nTau==0 && nLooseLep==1 && looseLep1IsTight==1 && looseLep1IsHLTSafe==1 && abs(looseLep1PdgId)==11 && pfmet>50 && fabs(calomet-pfmet)/pfUWmag<0.5 && mT<160')),
@@ -23,35 +24,37 @@ cuts = {
     'photon'            : tAND(metFilter,tAND(presel,'pfUAmag>250 && dphipfUA>0.5 && nLooseLep==0 && nTau==0 && nLoosePhoton==1 && loosePho1IsTight==1 && fabs(loosePho1Eta)<1.4442 && fabs(calomet-pfmet)/pfUAmag<0.5')),
 }
 for r in ['singlemuon','singleelectron']:
-	cuts[r+'w'] = tAND(cuts[r],'fj1MaxCSV<0.46 && isojetNBtags==0')
-	cuts[r+'top'] = tAND(cuts[r],'fj1MaxCSV>0.46 && isojetNBtags==1')
-	#cuts[r+'w'] = tAND(cuts[r],'jetNBtags==0')
-	#cuts[r+'top'] = tAND(cuts[r],'jetNBtags==2')
+    cuts[r+'w'] = tAND(cuts[r],'fj1MaxCSV<0.46 && isojetNBtags==0')
+    cuts[r+'top'] = tAND(cuts[r],'fj1MaxCSV>0.46 && isojetNBtags==1')
+    #cuts[r+'top'] = tAND(cuts[r],'isojetNBtags==1')
+    #cuts[r+'w'] = tAND(cuts[r],'jetNBtags==0')
+    #cuts[r+'top'] = tAND(cuts[r],'jetNBtags==2')
 
 
 weights = {
-  'signal'         : tTIMES(topTagSF,'%f*sf_qcdTT*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV*sf_metTrig*sf_sjbtag1*sf_btag1'),
-  'top'            : tTIMES(topTagSF,'%f*sf_qcdTT*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV*sf_sjbtag1*sf_btag1'),
-  'w'              : tTIMES(topTagSF,'%f*sf_qcdTT*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV*sf_sjbtag0*sf_btag0'),
-  'notag'          : tTIMES(topTagSF,'%f*sf_qcdTT*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV'),
+  #'signal'         : tTIMES(topTagSF,'%f*sf_tt*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV*sf_metTrig*sf_sjbtag1*sf_btag1'),
+  'signal'         : tTIMES(topTagSF,'%f*sf_tt*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV*sf_metTrig'),
+  'top'            : tTIMES(topTagSF,'%f*sf_tt*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV*sf_sjbtag1*sf_btag1'),
+  'w'              : tTIMES(topTagSF,'%f*sf_tt*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV*sf_sjbtag0*sf_btag0'),
+  'notag'          : tTIMES(topTagSF,'%f*sf_tt*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV'),
   'photon'         : tTIMES(topTagSF,'%f*normalizedWeight*sf_ewkV*sf_qcdV*sf_pho*sf_phoTrig'),
 }
 
 for x in ['singlemuontop','singleelectrontop']:
-	if 'electron' in x:
-	  weights[x] = tTIMES(weights['top'],'sf_eleTrig')
-	else:
-	  weights[x] = tTIMES(weights['top'],'sf_metTrig')
+    if 'electron' in x:
+      weights[x] = tTIMES(weights['top'],'sf_eleTrig')
+    else:
+      weights[x] = tTIMES(weights['top'],'sf_metTrig')
 for x in ['singlemuonw','singleelectronw']:
-	if 'electron' in x:
-	  weights[x] = tTIMES(weights['w'],'sf_eleTrig')
-	else:
-	  weights[x] = tTIMES(weights['w'],'sf_metTrig')
+    if 'electron' in x:
+      weights[x] = tTIMES(weights['w'],'sf_eleTrig')
+    else:
+      weights[x] = tTIMES(weights['w'],'sf_metTrig')
 for x in ['dimuon','dielectron','singleelectron','singlemuon']:
-	if 'electron' in x:
-	  weights[x] = tTIMES(weights['notag'],'sf_eleTrig')
-	else:
-	  weights[x] = tTIMES(weights['notag'],'sf_metTrig')
+    if 'electron' in x:
+      weights[x] = tTIMES(weights['notag'],'sf_eleTrig')
+    else:
+      weights[x] = tTIMES(weights['notag'],'sf_metTrig')
 
 for r in ['signal','top','w','singlemuontop','singleelectrontop','singlemuonw','singleelectronw']:
   for shift in ['BUp','BDown','MUp','MDown']:

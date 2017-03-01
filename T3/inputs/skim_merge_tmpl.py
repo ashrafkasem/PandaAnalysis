@@ -71,6 +71,8 @@ def fn(input_name,isData,full_path):
 			processType=root.PandaAnalyzer.kA
 		elif 'TTJets' in full_path or 'TT_' in full_path:
 			processType=root.PandaAnalyzer.kTT
+		elif 'Vector' in full_path:
+			processType=root.PandaAnalyzer.kTop
 	skimmer.processType=processType 
 
 	# read the inputs
