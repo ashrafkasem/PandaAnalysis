@@ -11,8 +11,8 @@ variables = [ (x,'F') for x in
 #        'avg_secfN_1_3_20',
       ]
 ]
-variables.append(['tau32SD','F','fj1Tau32SD'])
-variables.append(['htt_frec','F','fj1HTTFRec'])
+#variables.append(['tau32SD','F','fj1Tau32SD'])
+#variables.append(['htt_frec','F','fj1HTTFRec'])
 
 formulae = [ (x,'F',x.replace('ecfN','fj1ECFN')) for x in 
     [   
