@@ -3,11 +3,11 @@
 import argparse
 from sys import argv
 
-NBINS=30
+NBINS=20
 
 parser = argparse.ArgumentParser(description='fit stuff')
 parser.add_argument('--indir',metavar='indir',type=str)
-parser.add_argument('--shower',metavar='shower',type=str,default='pythia')
+parser.add_argument('--syst',metavar='syst',type=str,default=None)
 args = parser.parse_args()
 basedir = args.indir
 argv=[]
@@ -19,6 +19,18 @@ Load('Drawers','HistogramDrawer')
 
 def imp(w_):
   return getattr(w_,'import')
+
+if args.syst:
+  if args.syst=='smeared':
+    postfix = 'Smeared'
+  if args.syst=='scaleUp':
+    postfix = 'ScaleUp'
+  if args.syst=='scaleDown':
+    postfix = 'ScaleDown'
+  args.syst += '_'
+else:
+  postfix = ''
+  args.syst = ''
 
 plot = {}
 for iC in [0,1]:
@@ -34,37 +46,43 @@ for iC in [0,1]:
   plot[iC].AddLumiLabel(True)
   plot[iC].InitLegend()
 
-# masscorr = 'L2L3'
-masscorr = ''
-
 hprong = {}; dhprong = {}; pdfprong = {}; norm = {}; smeared = {}; smear = {}; mu = {}; hdata = {}; dh_data={}
 mcnorms = {}; mcerrs = {}
 mass = root.RooRealVar("m","m_{SD} [GeV]",50,450)
 
-if args.shower.upper()=='HERWIG':
-  ftemplate = {
-        'pass' : root.TFile(basedir+'top_ecf_bdt_pass_herwig_hists.root'),
-        'fail' : root.TFile(basedir+'top_ecf_bdt_fail_herwig_hists.root')
-      }
-  basedir += 'herwig_'
-else:
-  ftemplate = {
-        'pass' : root.TFile(basedir+'top_ecf_bdt_pass_hists.root'),
-        'fail' : root.TFile(basedir+'top_ecf_bdt_fail_hists.root')
-      }
+ftemplate = {
+      'pass' : root.TFile(basedir+'tag_pass_%shists.root'%args.syst),
+      'fail' : root.TFile(basedir+'tag_fail_%shists.root'%args.syst),
+    }
+
+inputs = {
+    1 : ['QCD','Z+g','Z+q','W+g','W+q','Top [unmatched]'],
+    2 : ['Diboson', 'Top [W-matched]'],
+    3 : ['Top [t-matched]'],
+    }
+
+def build_sum_hist(cat,nprong):
+  f = ftemplate[cat]
+  hsum = None
+  for i in inputs[nprong]:
+    if not hsum:
+      hsum = f.Get('h_fj1MSD%s_%s'%(postfix,i)).Clone('h_%s_%i'%(cat,nprong))
+    else:
+      hsum.Add(f.Get('h_fj1MSD%s_%s'%(postfix,i)))
+  return hsum
 
 # get histograms
-hdata[1] = ftemplate['pass'].Get('h_fj1MSD%s_Data'%masscorr)
+hdata[1] = ftemplate['pass'].Get('h_fj1MSD%s_Data'%postfix)
 dh_data[1] = root.RooDataHist('dh_data1','dh_data1',root.RooArgList(mass),hdata[1])
-hprong[(3,1)] = ftemplate['pass'].Get('h_fj1MSD%s_3-prong'%masscorr)
-hprong[(2,1)] = ftemplate['pass'].Get('h_fj1MSD%s_2-prong'%masscorr)
-hprong[(1,1)] = ftemplate['pass'].Get('h_fj1MSD%s_1-prong'%masscorr)
+hprong[(3,1)] = build_sum_hist('pass',3) 
+hprong[(2,1)] = build_sum_hist('pass',2) 
+hprong[(1,1)] = build_sum_hist('pass',1) 
 
-hdata[0] = ftemplate['fail'].Get('h_fj1MSD%s_Data'%masscorr)
+hdata[0] = ftemplate['fail'].Get('h_fj1MSD%s_Data'%postfix)
 dh_data[0] = root.RooDataHist('dh_data0','dh_data0',root.RooArgList(mass),hdata[0])
-hprong[(3,0)] = ftemplate['fail'].Get('h_fj1MSD%s_3-prong'%masscorr)
-hprong[(2,0)] = ftemplate['fail'].Get('h_fj1MSD%s_2-prong'%masscorr)
-hprong[(1,0)] = ftemplate['fail'].Get('h_fj1MSD%s_1-prong'%masscorr)
+hprong[(3,0)] = build_sum_hist('fail',3) 
+hprong[(2,0)] = build_sum_hist('fail',2) 
+hprong[(1,0)] = build_sum_hist('fail',1) 
 
 # build pdfs
 for iC in [0,1]:
@@ -89,7 +107,7 @@ jesr = root.RooGaussian('jesr','jesr',mass,jesr_mu,jesr_sigma)
 for iP in [3,2,1]:
   for iC in [0,1]:
     cat = (iP,iC)
-    if iP>1:
+    if iP>1 and False:
       smeared[cat] = root.RooFFTConvPdf('conv%i%i'%cat,'conv%i%i'%cat,mass,pdfprong[cat],jesr)
     else:
       smeared[cat] = pdfprong[cat]
@@ -168,8 +186,8 @@ colors = {
   3:root.kOrange
 }
 labels = {
-  1:'W+jets',
-  2:'Unmatched top/VV',
+  1:'Unmatched',
+  2:'Matched W',
   3:'Matched top',
 }
 
@@ -209,10 +227,7 @@ for iC in [0,1]:
   hmodel = root.TH1D(); hmodel_.Copy(hmodel)
   hmodel.SetLineWidth(3);
   hmodel.SetLineColor(root.kBlue+10)
-  if masscorr=='':
-    hmodel.GetXaxis().SetTitle('fatjet m_{SD} [GeV]')
-  else:
-    hmodel.GetXaxis().SetTitle('L2L3-corr fatjet m_{SD} [GeV]')
+  hmodel.GetXaxis().SetTitle('fatjet m_{SD} %s [GeV]'%postfix)
   hmodel.GetYaxis().SetTitle('Events/10 GeV')
   hmodel.Scale(sum([norm[(x,iC)].getVal() for x in [1,2,3]])/hmodel.Integral())
   hmodel.SetFillStyle(0)
@@ -233,8 +248,10 @@ for iC in [0,1]:
 
 plot[1].AddPlotLabel('Pass category',.18,.77,False,42,.05)
 plot[0].AddPlotLabel('Fail category',.18,.77,False,42,.05)
-plot[1].Draw(basedir,'pass%s'%masscorr)
-plot[0].Draw(basedir,'fail%s'%masscorr)
+if postfix:
+  postfix = '_'+postfix
+plot[1].Draw(basedir,'/fits/pass%s'%postfix)
+plot[0].Draw(basedir,'/fits/fail%s'%postfix)
 
 # save outpuat
 w = root.RooWorkspace('w','workspace')
@@ -253,7 +270,7 @@ for iC in [0,1]:
     w.imp(pdfprong[cat])
     w.imp(norm[cat])
 #    w.imp(smeared[cat])
-w.writeToFile(basedir+'wspace.root')
+w.writeToFile(basedir+'/fits/wspace.root')
 
 print 'Tagging cut:'
 print '\tPre-fit efficiency was %f'%(eff_)
