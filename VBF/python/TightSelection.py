@@ -22,13 +22,12 @@ cuts['pho'] = tAND(baseline,'photonPt>175 && fabs(photonEta)<1.4442 && n_mediump
 cuts['zll'] = tOR(cuts['zmm'],cuts['zee'])
 cuts['wlv'] = tOR(cuts['wmn'],cuts['wen'])
 
-weights['signal'] = 'normalizedWeight*lepton_SF1*lepton_SF2*METTrigger*puWeight*topPtReweighting'
-weights['zmm'] = tTIMES(weights['signal'],'1')
-weights['wmn'] = tTIMES(weights['signal'],'1')
-weights['zee'] = tTIMES(weights['signal'],'1')
-weights['wen'] = tTIMES(weights['signal'],'1')
-weights['pho'] = 'normalizedWeight*PhoTrigger*topPtReweighting*photon_SF*puWeight'
+weights['signal'] = '%f*normalizedWeight*METTrigger*topPtReweighting'
+weights['zmm'] = '%f*normalizedWeight*lepton_SF1_id*lepton_SF1_iso*lepton_SF2_id*lepton_SF2_iso*METTrigger*topPtReweighting' 
+weights['wmn'] = '%f*normalizedWeight*lepton_SF1_id*lepton_SF1_iso*METTrigger*topPtReweighting' 
+weights['zee'] = '%f*normalizedWeight*lepton_SF1_v2*gsfTracking_SF1_v2*lepton_SF2_v2*gsfTracking_SF2_v2*topPtReweighting' 
+weights['wen'] = '%f*normalizedWeight*lepton_SF1_v2*gsfTracking_SF1_v2*EleTrigger*topPtReweighting' 
 
-triggers['met'] = ' || '.join(['triggerFired[%i]'%x for x in [54,58,59,61,62,63,64,65]])
-triggers['ele'] = ' || '.join(['triggerFired[%i]'%x for x in [11,45]])
-triggers['pho'] = ' || '.join(['triggerFired[%i]'%x for x in [75,76]])
+triggers['met'] = ' || '.join(['triggerFired[%i]'%x for x in range(56,68)])
+triggers['ele'] = ' || '.join(['triggerFired[%i]'%x for x in [7,8,11,12,13,43,44,45,46]])
+triggers['pho'] = ' || '.join(['triggerFired[%i]'%x for x in range(75,80)]) 

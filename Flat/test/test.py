@@ -26,17 +26,19 @@ skimmer.SetFlag('puppi',True)
 skimmer.SetFlag('fatjet',True)
 skimmer.SetFlag('firstGen',False)
 skimmer.SetFlag('applyJSON',False)
+skimmer.SetFlag('pfCands',True)
 if skimmer.isData and False:
     with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt') as jsonFile:
         payload = json.load(jsonFile)
         for run,lumis in payload.iteritems():
             for l in lumis:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
-skimmer.processType = root.PandaAnalyzer.kTT
+#skimmer.processType = root.PandaAnalyzer.kTT
+skimmer.processType = root.PandaAnalyzer.kNone
 #        skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
-system("pxrdcp %s input.root '!pfCandidates'"%(torun))
-fin = root.TFile.Open('input.root')
-#fin = root.TFile.Open(torun)
+#system("pxrdcp %s input.root '!pfCandidates'"%(torun))
+#fin = root.TFile.Open('input.root')
+fin = root.TFile.Open(torun)
 
 print torun
 print fin
