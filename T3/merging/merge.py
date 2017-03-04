@@ -74,6 +74,7 @@ def normalizeFast(fpath,opt):
     return
   PInfo(sname,'normalizing %s (%s) ...'%(fpath,opt))
   n = root.Normalizer();
+  n.inWeightName = ''
   n.NormalizeTree(fpath,xsec)
 
 def merge(shortnames,mergedname):
@@ -108,7 +109,7 @@ d = {
   'TTbar_isrdown'       : ['TTbar_PowhegISRDown'],
   'TTbar_tuneup'        : ['TTbar_PowhegTuneUp'],
   'TTbar_tunedown'      : ['TTbar_PowhegTuneDown'],
-  'TTbar_FXFX'		: ['TTbar_FXFX'],
+  'TTbar_FXFX'		    : ['TTbar_FXFX'],
   'TTbar_Herwig'        : ['TTbar_Herwig'],
   'SingleTop'           : ['SingleTop_tT','SingleTop_tTbar','SingleTop_tbarW','SingleTop_tW'],
   'QCD'                 : ['QCD_ht100to200','QCD_ht200to300','QCD_ht300to500','QCD_ht500to700','QCD_ht700to1000','QCD_ht1000to1500','QCD_ht1500to2000','QCD_ht2000toinf'],
@@ -122,6 +123,7 @@ d = {
   'ggZHbb'              : ['ggZHbb_mH125'],
   'WpH'                 : ['WpLNuHbb'],
   'WmH'                 : ['WmLNuHbb'],
+  'ZpTT'                : ['ZpTT_med-%i'%m for m in [1000,1250,1500,2000,2500,3000,3500,4000,500,750]],
 }
 
 args = {}

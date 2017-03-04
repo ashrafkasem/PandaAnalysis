@@ -20,6 +20,7 @@ PandaAnalyzer::PandaAnalyzer() {
     flags["firstGen"]    = true;
     flags["applyJSON"]   = true;
     flags["genOnly"]     = false;
+    flags["pfCands"]      = false;
 }
 
 
@@ -51,17 +52,25 @@ void PandaAnalyzer::SetOutputFile(TString fOutName) {
 
 void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
 {
-    if (!t) return;
+    if (!t || !hweights) {
+        PError("PandaAnalyzer::Init","Malformed input!");
+        return;
+    }
     tIn = t;
 
     event.setStatus(*t, {"!*"}); // turn everything off first
 
     TString jetname = (flags["puppi"]) ? "puppi" : "chs";
-    panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", "isData", "npv", "weight",
-                                       "chsAK4Jets", "electrons", "muons", "taus", "photons", "met", "caloMet", "puppiMet"});
+    panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", 
+                                       "isData", "npv", "weight", "chsAK4Jets", 
+                                       "electrons", "muons", "taus", "photons", 
+                                       "met", "caloMet", "puppiMet"});
 
     if (flags["fatjet"])
       readlist += {jetname+"CA15Jets", "subjets"};
+
+    if (flags["pfCands"])
+        readlist.push_back("pfCandidates");
 
     if (isData) {
         readlist.push_back("triggers");
@@ -79,16 +88,32 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
 
     // manipulate the output tree
     if (isData) {
-        std::vector<TString> droppable = {"mcWeight","scale","scaleUp","scaleDown","pdf*","gen*","sf_*"};
+        std::vector<TString> droppable = {"mcWeight","scale","scaleUp",
+                                          "scaleDown","pdf*","gen*","sf_*"};
         for (auto &drop : droppable)
             gt->SetBranchStatus(drop,false);
         gt->SetBranchStatus("sf_phoPurity",true); // important!
     }
     if (flags["genOnly"]) {
-        std::vector<TString> keepable = {"mcWeight","scale","scaleUp","scaleDown","pdf*","gen*","fj1*","nFatjet","sf_tt*","sf_qcdTT*"};
+        std::vector<TString> keepable = {"mcWeight","scale","scaleUp",
+                                         "scaleDown","pdf*","gen*","fj1*",
+                                         "nFatjet","sf_tt*","sf_qcdTT*"};
         gt->SetBranchStatus("*",false);
         for (auto &keep : keepable)
             gt->SetBranchStatus(keep,true);
+    }
+
+    if (flags["pfCands"]) {
+        int activeAreaRepeats = 1;
+        double ghostArea = 0.01;
+        double ghostEtaMax = 7.0;
+        double radius = 1.5;
+        double sdZcut = 0.15;
+        double sdBeta = 1.;
+        activeArea = new fastjet::GhostedAreaSpec(ghostEtaMax,activeAreaRepeats,ghostArea);
+        areaDef = new fastjet::AreaDefinition(fastjet::active_area_explicit_ghosts,*activeArea);
+        jetDef = new fastjet::JetDefinition(fastjet::cambridge_algorithm,radius);
+        softDrop = new fastjet::contrib::SoftDrop(sdBeta,sdZcut,radius);
     }
 }
 
@@ -133,6 +158,11 @@ void PandaAnalyzer::Terminate() {
         delete iter.second;
 
     delete ak8JERReader;
+
+    delete activeArea;
+    delete areaDef;
+    delete jetDef;
+    delete softDrop;
 }
 
 
@@ -312,6 +342,10 @@ bool PandaAnalyzer::PassPreselection() {
         return true;
     bool isGood=false;
 
+    if (preselBits & kFatjet) {
+        if (gt->fj1Pt>200)
+            isGood = true;
+    }
     if (preselBits & kRecoil) {
         if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
                     (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
@@ -506,7 +540,7 @@ void PandaAnalyzer::Run() {
         pr.Report();
         ResetBranches();
         event.getEntry(*tIn,iE);
-        tr.TriggerEvent("GetEntry");
+        tr.TriggerEvent(TString::Format("GetEntry %u",iE));
 
         // event info
         gt->mcWeight = (event.weight>0) ? 1 : -1;
@@ -947,6 +981,50 @@ void PandaAnalyzer::Run() {
                         }
                     }
                 }
+            }
+            tr.TriggerSubEvent("fatjet basics");
+
+            if (flags["pfCands"] && fj1) {
+                VPseudoJet particles = ConvertPFCands(event.pfCandidates,flags["puppi"],0);
+                fastjet::ClusterSequenceArea seq(particles,*jetDef,*areaDef);
+                VPseudoJet allJets(seq.inclusive_jets(0.));
+                fastjet::PseudoJet *pj1=0;
+                double minDR2 = 999;
+                for (auto &jet : allJets) {
+                    double dr2 = DeltaR2(jet.eta(),jet.phi_std(),fj1->eta(),fj1->phi());
+                    if (dr2<minDR2) {
+                        minDR2 = dr2;
+                        pj1 = &jet;
+                    }
+                }
+                if (pj1) {
+                    VPseudoJet constituents = fastjet::sorted_by_pt(pj1->constituents());
+
+                    gt->fj1NConst = constituents.size();
+                    double eTot=0, eTrunc=0;
+                    for (unsigned iC=0; iC!=gt->fj1NConst; ++iC) {
+                        double e = constituents.at(iC).E();
+                        eTot += e;
+                        if (iC<100)
+                            eTrunc += e;
+                    }
+                    gt->fj1EFrac100 = eTrunc/eTot;
+
+
+                    fastjet::PseudoJet sdJet = (*softDrop)(*pj1);
+                    VPseudoJet sdConstituents = fastjet::sorted_by_pt(sdJet.constituents());
+                    gt->fj1NSDConst = sdConstituents.size();
+                    eTot=0; eTrunc=0;
+                    for (unsigned iC=0; iC!=gt->fj1NSDConst; ++iC) {
+                        double e = sdConstituents.at(iC).E();
+                        eTot += e;
+                        if (iC<100)
+                            eTrunc += e;
+                    }
+                    gt->fj1SDEFrac100 = eTrunc/eTot;
+
+                }
+                tr.TriggerSubEvent("fatjet reclustering");
             }
         }
 

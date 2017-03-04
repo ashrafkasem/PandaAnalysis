@@ -74,11 +74,9 @@ zjets.additional_weight = 'zkfactor*ewk_z'
 wjets.additional_weight = 'wkfactor*ewk_w'
 # hack the old EWK
 zewk.use_common_weight = False
-zewk.additional_weight = tTIMES('zkfactor*ewk_z',
-	                            weight.replace('_v2','').replace('_id','').replace('lepton_SF1_iso','1').replace('lepton_SF2_iso','1')).replace('EleTrigger','')
+zewk.additional_weight = weight.replace('_v2','').replace('_id','').replace('lepton_SF1_iso','1').replace('lepton_SF2_iso','1').replace('EleTrigger','')
 wewk.use_common_weight = False
-wewk.additional_weight = tTIMES('wkfactor*ewk_w',
-	                            weight.replace('_v2','').replace('_id','').replace('lepton_SF1_iso','1').replace('lepton_SF2_iso','1')).replace('EleTrigger','')
+wewk.additional_weight = weight.replace('_v2','').replace('_id','').replace('lepton_SF1_iso','1').replace('lepton_SF2_iso','1').replace('EleTrigger','')
 
 ### ASSIGN FILES TO PROCESSES ###
 if 'signal' in region:
@@ -135,6 +133,8 @@ plot.add_distribution(FDistribution('jjDEta',0,10,20,'#Delta#eta(j_{1},j_{2})','
 plot.add_distribution(FDistribution("fabs(SignedDeltaPhi(jot1Phi,jot2Phi))",0,3.142,20,"#Delta #phi leading jets","Events",filename='jjDPhi'))
 plot.add_distribution(FDistribution("jot1Eta",-5,5,20,"Jet 1 #eta","Events"))
 plot.add_distribution(FDistribution("jot2Eta",-5,5,20,"Jet 2 #eta","Events"))
+plot.add_distribution(FDistribution("jot1Pt",80,500,20,"Jet 1 p_{T} [GeV]","Events"))
+plot.add_distribution(FDistribution("jot2Pt",40,500,20,"Jet 2 p_{T} [GeV]","Events"))
 plot.add_distribution(FDistribution("1",0,2,1,"dummy","dummy"))
 
 ### DRAW AND CATALOGUE ###
