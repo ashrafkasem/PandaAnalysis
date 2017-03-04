@@ -44,7 +44,8 @@ public :
      kMonojet    =(1<<3),
      kTriggers   =(1<<4),
      kVBF        =(1<<5),
-     kRecoil     =(1<<6)
+     kRecoil     =(1<<6),
+     kFatjet     =(1<<7)
     };
 
     enum ProcessType { 
@@ -102,6 +103,12 @@ private:
     float getMSDcorr(Float_t puppipt, Float_t puppieta);
     std::vector<panda::Particle*> matchPhos, matchEles, matchLeps;
     
+    // fastjet reclustering
+    fastjet::JetDefinition *jetDef=0;
+    fastjet::contrib::SoftDrop *softDrop=0;
+    fastjet::AreaDefinition *areaDef=0;
+    fastjet::GhostedAreaSpec *activeArea=0;
+
     // CMSSW-provided utilities
 
     void calcBJetSFs(TString readername, int flavor, double eta, double pt, 
@@ -110,7 +117,6 @@ private:
     BTagCalibration *sj_btagCalib=0;
 
     std::map<TString,BTagCalibrationReader*> btagReaders; //!< maps "JETTYPE_WP" to a reader 
-                                                                                                                // I think we can load multiple flavors in a single reader 
     
     std::map<TString,JetCorrectionUncertainty*> ak8UncReader;            //!< calculate JES unc on the fly
     JERReader *ak8JERReader; //!< fatjet jet energy resolution reader
