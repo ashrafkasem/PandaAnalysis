@@ -256,6 +256,10 @@ class GeneralTree : public genericTree {
 	float fj1HTTMass=0;
 	float fj1HTTFRec=0;
 	int fj1IsClean=0;
+	int fj1NConst=0;
+	int fj1NSDConst=0;
+	float fj1EFrac100=-1;
+	float fj1SDEFrac100=-1;
 	int isHF=0;
 	int nLoosePhoton=0;
 	int nTightPhoton=0;
