@@ -7,6 +7,7 @@ from time import clock,time
 import json
 
 which = int(argv[1])
+submit_id = int(argv[2])
 sname = argv[0]
 argv=[]
 
@@ -228,7 +229,7 @@ if __name__ == "__main__":
     sample_list = cb.read_sample_config('local.cfg',as_dict=False)
     to_run = sample_list[which]
     outdir = 'XXXX' # will be replaced when building the job
-    outfilename = to_run.name+'_%i.root'%(now)
+    outfilename = to_run.name+'_%i.root'%(submit_id)
     processed = {}
 
     for f in to_run.files:
