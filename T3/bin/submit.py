@@ -15,7 +15,7 @@ frozen_cfgpath = cfgpath.replace('local','local_%i'%now)
 system('cp %s %s'%(cfgpath,frozen_cfgpath)) 
 
 s = Submission(frozen_cfgpath,workpath+'/submission.pkl')
-s.execute(1)
+s.execute()
 s.save()
 
 statii = s.query_status()
