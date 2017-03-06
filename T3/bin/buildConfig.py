@@ -5,7 +5,7 @@ import subprocess
 import sys
 import argparse
 from re import sub
-from PandaCore.Tools.ConfigBuilding import DataSample,convert_catalog
+from PandaCore.Tools.job_management import DataSample,convert_catalog
 
 workdir = getenv('SUBMIT_WORKDIR')
 parser = argparse.ArgumentParser(description='convert configuration')
