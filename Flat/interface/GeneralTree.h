@@ -14,301 +14,342 @@
 #define NSUBJET 2
 
 class GeneralTree : public genericTree {
-	private:
-		std::vector<double> betas = {0.5, 1.0, 2.0, 4.0};
-		std::vector<int> Ns = {1,2,3,4}; 
-		std::vector<int> orders = {1,2,3};
-		TString makeECFString(int order, int N, float beta) {
-			return TString::Format("ECFN_%i_%i_%.2i",order,N,int(10*beta));
-		}
+    public:
+      // public objects
+      struct ECFParams {
+        int ibeta;
+        int N;
+        int order;
+        bool operator==(const ECFParams &o) const {
+          return ibeta==o.ibeta && N==o.N && order==o.order;
+        }
+        bool operator<(const ECFParams &o) const {
+          return ( N<o.N ||
+                   (N==o.N && order<o.order) ||
+                   (N==o.N && order==o.order && ibeta<o.ibeta) );
+        }
+        bool operator>(const ECFParams &o) const {
+          return ! operator<(o);
+        }
+      };
 
-	public:
-		bool monohiggs=false, monojet=false, fatjet=true;
-		GeneralTree();
-		~GeneralTree();
-		void ReadTree(TTree *t);
-		void WriteTree(TTree *t);
-		void Fill() { treePtr->Fill(); }
-        void SetBranchStatus(const char *bname, bool status, UInt_t *ret=0) { treePtr->SetBranchStatus(bname,status,ret); }
-		void Reset();
+      enum BTagShift {
+        bCent=0,
+        bBUp,
+        bBDown,
+        bMUp,
+        bMDown,
+        bNShift
+      };
+      enum BTagJet {
+        bJet=0,
+        bSubJet,
+        bNJet
+      };
+      enum BTagTags {
+        b0=0,
+        b1,
+        b2,
+        bGT0,
+        bNTags
+      };
+        
+      struct BTagParams {
+        BTagJet jet;
+        BTagTags tag;
+        BTagShift shift=(BTagShift)0;
+        bool operator==(const BTagParams &o) const {
+          return jet==o.jet && tag==o.tag && shift==o.shift;
+        }
+        bool operator<(const BTagParams &o) const {
+          return ( jet<o.jet ||
+                   (jet==o.jet && tag<o.tag) ||
+                   (jet==o.jet && tag==o.tag && shift<o.shift) ); 
+        }
+        bool operator>(const BTagParams &o) const {
+          return ! operator<(o);
+        }
+      };
+        
+    private:
+        std::vector<double> betas = {0.5, 1.0, 2.0, 4.0};
+        std::vector<int> ibetas = {0,1,2,3};
+        std::vector<int> Ns = {1,2,3,4}; 
+        std::vector<int> orders = {1,2,3};
+        std::vector<ECFParams> ecfParams;
+        std::vector<BTagParams> btagParams;
 
-		std::vector<double> get_betas() const { return betas; }
-		std::vector<int> get_Ns() const { return Ns; }
-		std::vector<int> get_orders() const { return orders; }
-		
-	int runNumber=0;
-	int lumiNumber=0;
-	ULong64_t eventNumber=0;
-	int npv=0;
-	float mcWeight=0;
-	float filter_maxRecoil=0;
-	int filter_whichRecoil=-1;
-	int trigger=0;
-	int metFilter=0;
-	float sf_ewkV=0;
-	float sf_qcdV=0;
-	float sf_qcdTT=0;
-	float sf_lep=0;
-	float sf_pho=0;
-	float sf_lepReco=0;
-	float sf_sjcsvWeightB=0;
-	float sf_sjcsvWeightM=0;
-	float sf_csvWeightB=0;
-	float sf_csvWeightM=0;
-	float sf_sjcsvWeightBUp=0;
-	float sf_sjcsvWeightMUp=0;
-	float sf_csvWeightBUp=0;
-	float sf_csvWeightMUp=0;
-	float sf_sjcsvWeightBDown=0;
-	float sf_sjcsvWeightMDown=0;
-	float sf_csvWeightBDown=0;
-	float sf_csvWeightMDown=0;
-	float sf_btag0=0;
-	float sf_btag0BUp=0;
-	float sf_btag0BDown=0;
-	float sf_btag0MUp=0;
-	float sf_btag0MDown=0;
-	float sf_btag1=0;
-	float sf_btag1BUp=0;
-	float sf_btag1BDown=0;
-	float sf_btag1MUp=0;
-	float sf_btag1MDown=0;
-	float sf_btagGT0=0;
-	float sf_btagGT0BUp=0;
-	float sf_btagGT0BDown=0;
-	float sf_btagGT0MUp=0;
-	float sf_btagGT0MDown=0;
-	float sf_btag2=0;
-	float sf_btag2BUp=0;
-	float sf_btag2BDown=0;
-	float sf_btag2MUp=0;
-	float sf_btag2MDown=0;
-	float sf_btag0_alt=0;
-	float sf_btag0BUp_alt=0;
-	float sf_btag0BDown_alt=0;
-	float sf_btag0MUp_alt=0;
-	float sf_btag0MDown_alt=0;
-	float sf_btag1_alt=0;
-	float sf_btag1BUp_alt=0;
-	float sf_btag1BDown_alt=0;
-	float sf_btag1MUp_alt=0;
-	float sf_btag1MDown_alt=0;
-	float sf_btagGT0_alt=0;
-	float sf_btagGT0BUp_alt=0;
-	float sf_btagGT0BDown_alt=0;
-	float sf_btagGT0MUp_alt=0;
-	float sf_btagGT0MDown_alt=0;
-	float sf_btag2_alt=0;
-	float sf_btag2BUp_alt=0;
-	float sf_btag2BDown_alt=0;
-	float sf_btag2MUp_alt=0;
-	float sf_btag2MDown_alt=0;
-	float sf_sjbtag0=0;
-	float sf_sjbtag0BUp=0;
-	float sf_sjbtag0BDown=0;
-	float sf_sjbtag0MUp=0;
-	float sf_sjbtag0MDown=0;
-	float sf_sjbtag1=0;
-	float sf_sjbtag1BUp=0;
-	float sf_sjbtag1BDown=0;
-	float sf_sjbtag1MUp=0;
-	float sf_sjbtag1MDown=0;
-	float sf_sjbtagGT0=0;
-	float sf_sjbtagGT0BUp=0;
-	float sf_sjbtagGT0BDown=0;
-	float sf_sjbtagGT0MUp=0;
-	float sf_sjbtagGT0MDown=0;
-	float sf_sjbtag2=0;
-	float sf_sjbtag2BUp=0;
-	float sf_sjbtag2BDown=0;
-	float sf_sjbtag2MUp=0;
-	float sf_sjbtag2MDown=0;
-	float sf_eleTrig=0;
-	float sf_phoTrig=0;
-	float sf_metTrig=0;
-	float sf_pu=0;
-	float sf_tt=0;
-	float sf_tt_ext=0;
-	float sf_tt_bound=0;
-	float sf_tt8TeV=0;
-	float sf_tt8TeV_ext=0;
-	float sf_tt8TeV_bound=0;
-	float sf_phoPurity=0;
-	float finalWeight=0;
-	float pfmet=0;
-	float pfmetphi=0;
-	float pfmetnomu=0;
-	float puppimet=0;
-	float puppimetphi=0;
-	float calomet=0;
-	float calometphi=0;
-	float pfcalobalance=0;
-	float sumET=0;
-	float trkmet=0;
-	float UWmag=0;
-	float UWphi=0;
-	float UZmag=0;
-	float UZphi=0;
-	float UAmag=0;
-	float UAphi=0;
-	float Uperp=0;
-	float Upara=0;
-	float pfUWmag=0;
-	float pfUWphi=0;
-	float pfUZmag=0;
-	float pfUZphi=0;
-	float pfUAmag=0;
-	float pfUAphi=0;
-	float pfUperp=0;
-	float pfUpara=0;
-	float dphipfmet=0;
-	float dphipuppimet=0;
-	float dphiUW=0;
-	float dphiUZ=0;
-	float dphiUA=0;
-	float dphipfUW=0;
-	float dphipfUZ=0;
-	float dphipfUA=0;
-	float trueGenBosonPt=0;
-	float genBosonPt=0;
-	float genBosonEta=0;
-	float genBosonMass=0;
-	float genBosonPhi=0;
-	float genWPlusPt=0;
-	float genWMinusPt=0;
-	float genWPlusEta=0;
-	float genWMinusEta=0;
-	float genTopIsHad=0;
-	float genTopPt=0;
-	float genAntiTopIsHad=0;
-	float genAntiTopPt=0;
-	float genTopEta=0;
-	float genAntiTopEta=0;
-	float genTTPt=0;
-	float genTTEta=0;
-	int nJet=0;
-	int nIsoJet=0;
-	float jet1Phi=0;
-	int jet1Flav=0;
-	float jet1GenPt=0;
-	float jet1Pt=0;
-	float jet1Eta=0;
-	float jet1CSV=0;
-	float jet2Phi=0;
-	int jet2Flav=0;
-	float jet2GenPt=0;
-	float jet2Pt=0;
-	float jet2Eta=0;
-	float jet2CSV=0;
-	int jet1IsTight=0;
-	float isojet1Pt=0;
-	float isojet1CSV=0;
-	int isojet1Flav=0;
-	float isojet2Pt=0;
-	float isojet2CSV=0;
-	int isojet2Flav=0;
-	float jet12Mass=0;
-	float jet12DEta=0;
-	int jetNBtags=0;
-	int isojetNBtags=0;
-	int nFatjet=0;
-	float fj1Tau32=0;
-	float fj1Tau21=0;
-	float fj1Tau32SD=0;
-	float fj1Tau21SD=0;
-	float fj1MSD=0;
-	float fj1MSD_corr=0;
-	float fj1Pt=0;
-	float fj1PtScaleUp=0;
-	float fj1PtScaleDown=0;
-	float fj1PtSmeared=0;
-	float fj1PtSmearedUp=0;
-	float fj1PtSmearedDown=0;
-	float fj1MSDScaleUp=0;
-	float fj1MSDScaleDown=0;
-	float fj1MSDSmeared=0;
-	float fj1MSDSmearedUp=0;
-	float fj1MSDSmearedDown=0;
-	float fj1Phi=0;
-	float fj1Eta=0;
-	float fj1M=0;
-	float fj1MaxCSV=0;
-	float fj1MinCSV=0;
-	float fj1DoubleCSV=0;
-	float fj1GenPt=0;
-	float fj1GenSize=0;
-	int fj1IsMatched=0;
-	float fj1sjPt[NSUBJET];
-	float fj1sjEta[NSUBJET];
-	float fj1sjPhi[NSUBJET];
-	float fj1sjM[NSUBJET];
-	float fj1sjCSV[NSUBJET];
-	float fj1sjQGL[NSUBJET];
-	float fj1GenWPt=0;
-	float fj1GenWSize=0;
-	int fj1IsWMatched=0;
-	int fj1HighestPtGen=0;
-	float fj1HighestPtGenPt=-1;
-	int fj1IsTight=0;
-	int fj1IsLoose=0;
-	float fj1RawPt=0;
-	int fj1IsHF=0;
-	float fj1HTTMass=0;
-	float fj1HTTFRec=0;
-	int fj1IsClean=0;
-	int fj1NConst=0;
-	int fj1NSDConst=0;
-	float fj1EFrac100=-1;
-	float fj1SDEFrac100=-1;
-	int isHF=0;
-	int nLoosePhoton=0;
-	int nTightPhoton=0;
-	int loosePho1IsTight=0;
-	float loosePho1Pt=0;
-	float loosePho1Eta=0;
-	float loosePho1Phi=0;
-	int nLooseLep=0;
-	int nLooseElectron=0;
-	int nLooseMuon=0;
-	int nTightLep=0;
-	int nTightElectron=0;
-	int nTightMuon=0;
-	int looseLep1PdgId=0;
-	int looseLep2PdgId=0;
-	int looseLep1IsTight=0;
-	int looseLep2IsTight=0;
-	int looseLep1IsHLTSafe=0;
-	int looseLep2IsHLTSafe=0;
-	float looseLep1Pt=0;
-	float looseLep1Eta=0;
-	float looseLep1Phi=0;
-	float looseLep2Pt=0;
-	float looseLep2Eta=0;
-	float looseLep2Phi=0;
-	float diLepMass=0;
-	float mT=0;
-	int nTau=0;
-	float jetPt[NJET];
-	float jetEta[NJET];
-	float jetPhi[NJET];
-	float jetE[NJET];
-	float jetCSV[NJET];
-	float jetIso[NJET];
-	float jetQGL[NJET];
-	float hbbpt;
-	float hbbeta;
-	float hbbphi;
-	float hbbm;
-	int hbbjtidx[2];
-	float scaleUp;
-	float scaleDown;
-	float pdfUp;
-	float pdfDown;
-	float scale[6];
-		
-	std::map<TString,float> fj1ECFNs;
+        TString makeECFString(ECFParams p) {
+            return TString::Format("ECFN_%i_%i_%.2i",p.order,p.N,int(10*betas.at(p.ibeta)));
+        }
+        TString makeBTagSFString(BTagParams p) {
+          TString s = "sf_";
+          if (p.jet==bSubJet)
+            s += "sj";
+          s += "btag";
+          switch (p.tag) {
+            case b0:
+              s += "0"; break;
+            case b1:
+              s += "1"; break;
+            case b2:
+              s += "2"; break;
+            case bGT0:
+              s += "GT0"; break;
+            default:
+              break;
+          }
+          if (p.shift==bCent)
+            return s;
+          switch (p.shift) {
+            case bBUp:
+              s += "BUp"; break;
+            case bBDown:
+              s += "BDown"; break;
+            case bMUp:
+              s += "MUp"; break;
+            case bMDown:
+              s += "MDown"; break;
+            default: break;
+          }
+          return s;
+        }
+    public:
+      GeneralTree();
+      ~GeneralTree();
+      void WriteTree(TTree *t);
+      void Fill() { treePtr->Fill(); }
+      void SetBranchStatus(const char *bname, bool status, UInt_t *ret=0) 
+      { 
+        treePtr->SetBranchStatus(bname,status,ret); 
+      }
+      void Reset();
 
-//ENDDEF
+      std::vector<double> get_betas() const { return betas; }
+      std::vector<int> get_ibetas() const { return ibetas; }
+      std::vector<int> get_Ns() const { return Ns; }
+      std::vector<int> get_orders() const { return orders; }
+        
+      // public config
+      bool monohiggs=false, monojet=false, fatjet=true;
+
+//STARTCUSTOMDEF
+      std::map<ECFParams,float> fj1ECFNs;
+      std::map<BTagParams,float> sf_btags;
+      std::map<BTagParams,float> sf_alt_btags;
+
+      float fj1sjPt[NSUBJET];
+      float fj1sjEta[NSUBJET];
+      float fj1sjPhi[NSUBJET];
+      float fj1sjM[NSUBJET];
+      float fj1sjCSV[NSUBJET];
+      float fj1sjQGL[NSUBJET];
+
+      float jetPt[NJET];
+      float jetEta[NJET];
+      float jetPhi[NJET];
+      float jetE[NJET];
+      float jetCSV[NJET];
+      float jetIso[NJET];
+      float jetQGL[NJET];
+
+      int hbbjtidx[2];
+
+      float scale[6];
+//ENDCUSTOMDEF
+    int looseLep1IsHLTSafe = -1;
+    int looseLep2IsHLTSafe = -1;
+    int runNumber = -1;
+    int lumiNumber = -1;
+    ULong64_t eventNumber = -1;
+    int npv = -1;
+    int pu = -1;
+    float mcWeight = -1;
+    int trigger = -1;
+    int metFilter = -1;
+    int egmFilter = -1;
+    float filter_maxRecoil = -1;
+    float filter_whichRecoil = -1;
+    float sf_ewkV = -1;
+    float sf_qcdV = -1;
+    float sf_ewkV2j = -1;
+    float sf_qcdV2j = -1;
+    float sf_qcdTT = -1;
+    float sf_lepID = -1;
+    float sf_lepIso = -1;
+    float sf_lepTrack = -1;
+    float sf_pho = -1;
+    float sf_eleTrig = -1;
+    float sf_phoTrig = -1;
+    float sf_metTrig = -1;
+    float sf_pu = -1;
+    float sf_npv = -1;
+    float sf_tt = -1;
+    float sf_tt_ext = -1;
+    float sf_tt_bound = -1;
+    float sf_tt8TeV = -1;
+    float sf_tt8TeV_ext = -1;
+    float sf_tt8TeV_bound = -1;
+    float sf_phoPurity = -1;
+    float pfmet = -1;
+    float pfmetphi = -1;
+    float pfmetnomu = -1;
+    float puppimet = -1;
+    float puppimetphi = -1;
+    float calomet = -1;
+    float calometphi = -1;
+    float pfcalobalance = -1;
+    float sumET = -1;
+    float trkmet = -1;
+    float puppiUWmag = -1;
+    float puppiUWphi = -1;
+    float puppiUZmag = -1;
+    float puppiUZphi = -1;
+    float puppiUAmag = -1;
+    float puppiUAphi = -1;
+    float puppiUperp = -1;
+    float puppiUpara = -1;
+    float puppiUmag = -1;
+    float puppiUphi = -1;
+    float pfUWmag = -1;
+    float pfUWphi = -1;
+    float pfUZmag = -1;
+    float pfUZphi = -1;
+    float pfUAmag = -1;
+    float pfUAphi = -1;
+    float pfUperp = -1;
+    float pfUpara = -1;
+    float pfUmag = -1;
+    float pfUphi = -1;
+    float dphipfmet = -1;
+    float dphipuppimet = -1;
+    float dphipuppiUW = -1;
+    float dphipuppiUZ = -1;
+    float dphipuppiUA = -1;
+    float dphipfUW = -1;
+    float dphipfUZ = -1;
+    float dphipfUA = -1;
+    float dphipuppiU = -1;
+    float dphipfU = -1;
+    float trueGenBosonPt = -1;
+    float genBosonPt = -1;
+    float genBosonEta = -1;
+    float genBosonMass = -1;
+    float genBosonPhi = -1;
+    float genWPlusPt = -1;
+    float genWMinusPt = -1;
+    float genWPlusEta = -1;
+    float genWMinusEta = -1;
+    float genTopPt = -1;
+    int genTopIsHad = -1;
+    float genTopEta = -1;
+    float genAntiTopPt = -1;
+    int genAntiTopIsHad = -1;
+    float genAntiTopEta = -1;
+    float genTTPt = -1;
+    float genTTEta = -1;
+    int nJet = -1;
+    int nIsoJet = -1;
+    int jet1Flav = -1;
+    float jet1Phi = -1;
+    float jet1Pt = -1;
+    float jet1GenPt = -1;
+    float jet1Eta = -1;
+    float jet1CSV = -1;
+    int jet1IsTight = -1;
+    int jet2Flav = -1;
+    float jet2Phi = -1;
+    float jet2Pt = -1;
+    float jet2GenPt = -1;
+    float jet2Eta = -1;
+    float jet2CSV = -1;
+    float isojet1Pt = -1;
+    float isojet1CSV = -1;
+    int isojet1Flav = -1;
+    float isojet2Pt = -1;
+    float isojet2CSV = -1;
+    int isojet2Flav = -1;
+    float jet12Mass = -1;
+    float jet12DEta = -1;
+    int jetNBtags = -1;
+    int isojetNBtags = -1;
+    int nFatjet = -1;
+    float fj1Tau32 = -1;
+    float fj1Tau21 = -1;
+    float fj1Tau32SD = -1;
+    float fj1Tau21SD = -1;
+    float fj1MSD = -1;
+    float fj1MSDScaleUp = -1;
+    float fj1MSDScaleDown = -1;
+    float fj1MSDSmeared = -1;
+    float fj1MSDSmearedUp = -1;
+    float fj1MSDSmearedDown = -1;
+    float fj1MSD_corr = -1;
+    float fj1Pt = -1;
+    float fj1PtScaleUp = -1;
+    float fj1PtScaleDown = -1;
+    float fj1PtSmeared = -1;
+    float fj1PtSmearedUp = -1;
+    float fj1PtSmearedDown = -1;
+    float fj1Phi = -1;
+    float fj1Eta = -1;
+    float fj1M = -1;
+    float fj1MaxCSV = -1;
+    float fj1MinCSV = -1;
+    float fj1DoubleCSV = -1;
+    float fj1GenPt = -1;
+    float fj1GenSize = -1;
+    int fj1IsMatched = -1;
+    float fj1GenWPt = -1;
+    float fj1GenWSize = -1;
+    int fj1IsWMatched = -1;
+    int fj1HighestPtGen = -1;
+    float fj1HighestPtGenPt = -1;
+    int fj1IsTight = -1;
+    int fj1IsLoose = -1;
+    float fj1RawPt = -1;
+    int fj1IsHF = -1;
+    float fj1HTTMass = -1;
+    float fj1HTTFRec = -1;
+    int fj1IsClean = -1;
+    int fj1NConst = -1;
+    int fj1NSDConst = -1;
+    float fj1EFrac100 = -1;
+    float fj1SDEFrac100 = -1;
+    int isHF = -1;
+    int nLoosePhoton = -1;
+    int nTightPhoton = -1;
+    int loosePho1IsTight = -1;
+    float loosePho1Pt = -1;
+    float loosePho1Eta = -1;
+    float loosePho1Phi = -1;
+    int nLooseLep = -1;
+    int nLooseElectron = -1;
+    int nLooseMuon = -1;
+    int nTightLep = -1;
+    int nTightElectron = -1;
+    int nTightMuon = -1;
+    int looseLep1PdgId = -1;
+    int looseLep2PdgId = -1;
+    int looseLep1IsTight = -1;
+    int looseLep2IsTight = -1;
+    float looseLep1Pt = -1;
+    float looseLep1Eta = -1;
+    float looseLep1Phi = -1;
+    float looseLep2Pt = -1;
+    float looseLep2Eta = -1;
+    float looseLep2Phi = -1;
+    float diLepMass = -1;
+    int nTau = -1;
+    float mT = -1;
+    float hbbpt = -1;
+    float hbbeta = -1;
+    float hbbphi = -1;
+    float hbbm = -1;
+    float scaleUp = -1;
+    float scaleDown = -1;
+    float pdfUp = -1;
+    float pdfDown = -1;
 };
 
 #endif
