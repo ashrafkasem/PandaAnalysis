@@ -10,13 +10,13 @@ while getopts ":tn:" opt; do
     t)
       doTar=1
       ;;
-		n)
-			filesetSize=$OPTARG
-			;;
-		:)
-			PError -n "$0"  "Option -n must specify number of files"
-			exit 1
-			;;
+    n)
+      filesetSize=$OPTARG
+      ;;
+    :)
+      PError -n "$0"  "Option -n must specify number of files"
+      exit 1
+      ;;
   esac 
 done
 

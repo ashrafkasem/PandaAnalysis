@@ -26,6 +26,10 @@ if not args.infile:
 if not args.outfile:
   args.outfile = workdir+'/local.cfg'
 
+WIDTH=50
+header = '%-48s'%('Sample')
+header += ('%%-%is'%(WIDTH+2))%('Progress')
+header += ' %10s %10s %10s %10s %10s'%('Total','Running','Idle','Missing','Done')
 
 class Output:
   def __init__(self,name):
@@ -46,10 +50,9 @@ class Output:
     elif state=='missing':
         self.missing += 1
   def __str__(self):
-    WIDTH=50
     if self.total==0:
       return ''
-    s = '%-80s'%self.name
+    s = '%-40s'%self.name[:40]
     d_frac = 1.*WIDTH*self.done/self.total
     r_frac = 1.*WIDTH*(self.done+self.running)/self.total
     i_frac = 1.*WIDTH*(self.idle+self.done+self.running)/self.total
@@ -63,7 +66,13 @@ class Output:
         if i>=i_frac:
             s += '\033[0;41m'
         s += ' '
-    s += '\033[0m] %i/%i (%.2f%%)'%(self.done,self.total,d_frac)
+    s += '\033[0m] '
+    s += '%10i '%self.total
+    s += '%10i '%self.running
+    s += '%10i '%self.idle
+    s += '%10i '%self.missing
+    s += '%10i '%self.done
+    s += '(done=%.2f%%)'%(d_frac)
     return s
 
 
@@ -159,6 +168,7 @@ else:
             outfile.write(c%(counter,counter))
             counter += 1
 
+print header
 for n in sorted(outputs):
   print str(outputs[n])
 print str(data)
