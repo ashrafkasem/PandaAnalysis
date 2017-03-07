@@ -2,13 +2,13 @@
 
 export PANDA="${CMSSW_BASE}/src/PandaAnalysis"
 #export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170205.cfg"
-export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170302_zptt.cfg"
-export PANDA_FLATDIR="${HOME}/home000/store/panda/v_8026_0_0_scimitar/"
+export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170306_data.cfg"
+export PANDA_FLATDIR="${HOME}/home000/store/panda/v_8026_0_1/"
 mkdir -p $PANDA_FLATDIR
 
-#export SUBMIT_TMPL="skim_csv_tmpl.py"
-export SUBMIT_TMPL="skim_scimitar_tmpl.py"
-export SUBMIT_NAME="v_test"
+export SUBMIT_TMPL="skim_slim_tmpl.py"
+#export SUBMIT_TMPL="skim_scimitar_tmpl.py"
+export SUBMIT_NAME="v_8026_0_1"
 export SUBMIT_WORKDIR="/data/t3serv014/snarayan/condor/"${SUBMIT_NAME}"/work/"
 export SUBMIT_LOGDIR="/data/t3serv014/snarayan/condor/"${SUBMIT_NAME}"/logs/"
 export SUBMIT_OUTDIR="/data/t3serv014/snarayan/panda/"${SUBMIT_NAME}"/batch/"

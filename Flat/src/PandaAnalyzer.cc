@@ -10,7 +10,7 @@ using namespace std;
 
 PandaAnalyzer::PandaAnalyzer() {
     gt = new GeneralTree();
-    betas = gt->get_betas();
+    ibetas = gt->get_ibetas();
     Ns = gt->get_Ns();
     orders = gt->get_orders();
     flags["fatjet"]      = true;
@@ -20,7 +20,8 @@ PandaAnalyzer::PandaAnalyzer() {
     flags["firstGen"]    = true;
     flags["applyJSON"]   = true;
     flags["genOnly"]     = false;
-    flags["pfCands"]      = false;
+    flags["pfCands"]     = false;
+    flags["applyEGCorr"] = true;
 }
 
 
@@ -44,7 +45,6 @@ void PandaAnalyzer::SetOutputFile(TString fOutName) {
     gt->monohiggs = flags["monohiggs"];
     gt->monojet   = flags["monojet"];
     gt->fatjet    = flags["fatjet"];
-    gt->Reset(); // to be extra safe and fill the map before setting addresses
     gt->WriteTree(tOut);
 
 }
@@ -64,16 +64,18 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
     panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", 
                                        "isData", "npv", "weight", "chsAK4Jets", 
                                        "electrons", "muons", "taus", "photons", 
-                                       "met", "caloMet", "puppiMet"});
+                                       "met", "caloMet", "puppiMet", "recoil"});
 
     if (flags["fatjet"])
       readlist += {jetname+"CA15Jets", "subjets"};
-
+    
     if (flags["pfCands"])
         readlist.push_back("pfCandidates");
 
     if (isData) {
         readlist.push_back("triggers");
+        if (flags["applyEGCorr"])
+            readlist.push_back("metMuOnlyFix");
     } else {
       readlist.push_back("genParticles");
       readlist.push_back("genReweight");
@@ -142,17 +144,18 @@ void PandaAnalyzer::Terminate() {
     fOut->WriteTObject(tOut);
     fOut->Close();
 
-    for (TFile *f :openFiles)
-        f->Close();
-    openFiles.clear();
+    for (auto *f : fCorrs)
+        if (f)
+            f->Close();
+    for (auto *h : h1Corrs)
+        delete h;
+    for (auto *h : h2Corrs)
+        delete h;
 
     delete btagCalib;
-    delete btagReaders["jet_L"];
-
-    delete btagReaders["jet_M"];
-
     delete sj_btagCalib;
-    delete btagReaders["sj_L"];
+    for (auto *reader : btagReaders )
+        delete reader;
 
     for (auto& iter : ak8UncReader)
         delete iter.second;
@@ -165,141 +168,127 @@ void PandaAnalyzer::Terminate() {
     delete softDrop;
 }
 
+void PandaAnalyzer::OpenCorrection(CorrectionType ct, TString fpath, TString hname, int dim) {
+    fCorrs[ct] = TFile::Open(fpath);
+    if (dim==1) 
+        h1Corrs[ct] = new THCorr1((TH1D*)fCorrs[ct]->Get(hname));
+    else
+        h2Corrs[ct] = new THCorr2((TH2D*)fCorrs[ct]->Get(hname));
+}
+
+double PandaAnalyzer::GetCorr(CorrectionType ct, double x, double y) {
+    if (h1Corrs[ct]!=0) {
+        return h1Corrs[ct]->Eval(x); 
+    } else if (h2Corrs[ct]!=0) {
+        return h2Corrs[ct]->Eval(x,y);
+    } else {
+        PError("PandaAnalyzer::GetCorr",
+               TString::Format("No correction is defined for CorrectionType=%u",ct));
+        return 1;
+    }
+}
 
 void PandaAnalyzer::SetDataDir(const char *s) {
     TString dirPath(s);
+    dirPath += "/";
 
-    fEleTrigB    = new TFile(dirPath+"/trigger_eff/ele_trig_lowpt_rebinned.root");
-    fEleTrigE    = new TFile(dirPath+"/trigger_eff/ele_trig_lowpt_rebinned.root");
-    fPhoTrig     = new TFile(dirPath+"/trigger_eff/pho_trig.root");
-    fMetTrig     = new TFile(dirPath+"/trigger_eff/met_trig.root");
-    fEleTrigLow    = new TFile(dirPath+"/trigger_eff/ele_trig_lowpt.root");
-    openFiles.push_back(fEleTrigB);
-    openFiles.push_back(fEleTrigE);
-    openFiles.push_back(fPhoTrig);
-    openFiles.push_back(fMetTrig);
-    openFiles.push_back(fEleTrigLow);
+    // pileup
+    OpenCorrection(cNPV,dirPath+"moriond17/normalized_npv.root","data_npv_Wmn",1);
+    OpenCorrection(cPU,dirPath+"moriond17/puWeights_80x_37ifb.root","puWeights",1);
 
-    fLepSF        = new TFile(dirPath+"/scalefactors_lepton_moriond.root");
-    fLepRecoSF    = new TFile(dirPath+"/scalefactors_reco_lepton_moriond.root");
-    fEleSF        = new TFile(dirPath+"/scalefactors_80x_egpog_37ifb.root");
-    openFiles.push_back(fLepSF);
-    openFiles.push_back(fLepRecoSF);
-    openFiles.push_back(fEleSF);
+    // electrons
+    OpenCorrection(cEleVeto,dirPath+"moriond17/scaleFactor_electron_summer16.root",
+                   "scaleFactor_electron_vetoid_RooCMSShape_pu_0_100",2);
+    OpenCorrection(cEleTight,dirPath+"moriond17/scaleFactor_electron_summer16.root",
+                   "scaleFactor_electron_tightid_RooCMSShape_pu_0_100",2);
+    OpenCorrection(cEleReco,dirPath+"moriond17/scaleFactor_electron_reco_summer16.root",
+                   "scaleFactor_electron_reco_RooCMSShape_pu_0_100",2);
 
-    fPhoSF     = new TFile(dirPath+"/scalefactors_80x_medium_photon_37ifb.root");
-    openFiles.push_back(fPhoSF);
+    // muons
+    OpenCorrection(cMuLooseID,dirPath+"moriond17/muon_scalefactors_37ifb.root",
+                   "scalefactors_MuonLooseId_Muon",2);
+    OpenCorrection(cMuLooseIso,"moriond17/muon_scalefactors_37ifb.root",
+                   "scalefactors_Iso_MuonLooseId",2);
+    OpenCorrection(cMuTightID,dirPath+"moriond17/muon_scalefactors_37ifb.root",
+                   "scalefactors_TightId_Muon",2);
+    OpenCorrection(cMuTightIso,dirPath+"moriond17/muon_scalefactors_37ifb.root",
+                   "scalefactors_Iso_MuonTightId",2);
+    OpenCorrection(cMuReco,dirPath+"files_moriond/Tracking_12p9.root","htrack2",1);
 
-    fPU        = new TFile(dirPath+"/puWeights_npv.root");
-    openFiles.push_back(fPU);
+    // photons
+    OpenCorrection(cPho,dirPath+"moriond17/scalefactors_80x_medium_photon_37ifb.root",
+                   "EGamma_SF2D",2);
 
-    fKFactor = new TFile(dirPath+"/kfactors.root");
-    openFiles.push_back(fKFactor);
+    // triggers
+    OpenCorrection(cTrigMET,dirPath+"moriond17/metTriggerEfficiency_recoil_monojet_TH1F.root",
+                   "hden_monojet_recoil_clone_passed",1);
+    OpenCorrection(cTrigEle,"moriond17/eleTrig.root","hEffEtaPt",2);
+    OpenCorrection(cTrigPho,"moriond17/photonTriggerEfficiency_photon_TH1F.root",
+                   "hden_photonpt_clone_passed",1);
 
-    hEleTrigB = new THCorr1((TH1D*) fEleTrigB->Get("h_num"));
-    hEleTrigE = new THCorr1((TH1D*) fEleTrigE->Get("h_num_endcap"));
-    gc.push_back(hEleTrigB); gc.push_back(hEleTrigE);
+    // kfactors
+    TFile *fKFactor = new TFile(dirPath+"/kfactors.root"); 
+    fCorrs[cZNLO] = fKFactor; // just for garbage collection
 
-    hPhoTrig    = new THCorr1((TH1D*) fPhoTrig->Get("h_num"));
-    hMetTrig    = new THCorr1((TH1D*) fMetTrig->Get("numer"));
-    hEleTrigLow = new THCorr2((TH2D*) fEleTrigLow->Get("hEffEtaPt"));
-    gc.push_back(hPhoTrig); gc.push_back(hMetTrig); gc.push_back(hEleTrigLow);
+    TH1D *hZLO    = (TH1D*)fKFactor->Get("ZJets_LO/inv_pt");
+    TH1D *hWLO    = (TH1D*)fKFactor->Get("WJets_LO/inv_pt");
+    TH1D *hALO    = (TH1D*)fKFactor->Get("GJets_LO/inv_pt_G");
 
-    hEleVeto    = new THCorr2((TH2D*) fEleSF->Get("scalefactors_Veto_Electron"));
-    hEleTight    = new THCorr2((TH2D*) fEleSF->Get("scalefactors_Tight_Electron"));
-    hMuLooseLoPU    = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_muon_looseid_pu_0_17"));
-    hMuLooseHiPU    = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_muon_looseid_pu_17_50"));
-    hMuTightLoPU    = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_muon_tightid_pu_0_17"));
-    hMuTightHiPU    = new THCorr2((TH2D*) fLepSF->Get("scaleFactor_muon_tightid_pu_17_50"));
-
-    hRecoEle      = new THCorr2((TH2D*) fEleSF->Get("scalefactors_Reco_Electron"));
-    hRecoMuLoPU    = new THCorr2((TH2D*) fLepRecoSF->Get("scaleFactor_muon_trackerid_pu_0_17"));
-    hRecoMuHiPU    = new THCorr2((TH2D*) fLepRecoSF->Get("scaleFactor_muon_trackerid_pu_17_50"));
-
-    hPho = new THCorr2((TH2D*) fPhoSF->Get("EGamma_SF2D"));
-    gc.push_back(hPho);
-
-    hPUWeight = new THCorr1((TH1D*)fPU->Get("data_npv_Wmn"));
-    gc.push_back(hPUWeight);
-
-    hZNLO = new THCorr1((TH1D*)fKFactor->Get("ZJets_012j_NLO/nominal"));
-    hWNLO = new THCorr1((TH1D*)fKFactor->Get("WJets_012j_NLO/nominal"));
-    hANLO = new THCorr1((TH1D*)fKFactor->Get("GJets_1j_NLO/nominal_G"));
-
-    hZLO    = new THCorr1((TH1D*)fKFactor->Get("ZJets_LO/inv_pt"));
-    hWLO    = new THCorr1((TH1D*)fKFactor->Get("WJets_LO/inv_pt"));
-    hALO    = new THCorr1((TH1D*)fKFactor->Get("GJets_LO/inv_pt_G"));
+    h1Corrs[cZNLO] = new THCorr1((TH1D*)fKFactor->Get("ZJets_012j_NLO/nominal"));
+    h1Corrs[cWNLO] = new THCorr1((TH1D*)fKFactor->Get("WJets_012j_NLO/nominal"));
+    h1Corrs[cANLO] = new THCorr1((TH1D*)fKFactor->Get("GJets_1j_NLO/nominal_G"));
  
-    hZEWK = new THCorr1((TH1D*)fKFactor->Get("EWKcorr/Z"));
-    hWEWK = new THCorr1((TH1D*)fKFactor->Get("EWKcorr/W"));
-    hAEWK = new THCorr1((TH1D*)fKFactor->Get("EWKcorr/photon"));
+    h1Corrs[cZEWK] = new THCorr1((TH1D*)fKFactor->Get("EWKcorr/Z"));
+    h1Corrs[cWEWK] = new THCorr1((TH1D*)fKFactor->Get("EWKcorr/W"));
+    h1Corrs[cAEWK] = new THCorr1((TH1D*)fKFactor->Get("EWKcorr/photon"));
 
-    hZEWK->GetHist()->Divide(hZNLO->GetHist());     
-    hWEWK->GetHist()->Divide(hWNLO->GetHist());     
-    hAEWK->GetHist()->Divide(hANLO->GetHist());
-    hZNLO->GetHist()->Divide(hZLO->GetHist());    
-    hWNLO->GetHist()->Divide(hWLO->GetHist());    
-    hANLO->GetHist()->Divide(hALO->GetHist());
+    h1Corrs[cZEWK]->GetHist()->Divide(h1Corrs[cZNLO]->GetHist());     
+    h1Corrs[cWEWK]->GetHist()->Divide(h1Corrs[cWNLO]->GetHist());     
+    h1Corrs[cAEWK]->GetHist()->Divide(h1Corrs[cANLO]->GetHist());
 
-    fCSVLF = new TFile(dirPath+"/csvWeights/csvweight_fake.root"); openFiles.push_back(fCSVLF);
-    hCSVLF = new THCorr1( (TH1D*)fCSVLF->Get("hratio") ); gc.push_back(hCSVLF);
+    h1Corrs[cZNLO]->GetHist()->Divide(hZLO);    
+    h1Corrs[cWNLO]->GetHist()->Divide(hWLO);    
+    h1Corrs[cANLO]->GetHist()->Divide(hALO);
 
-    fCSVHF = new TFile(dirPath+"/csvWeights/csvweight_tag_iterative.root"); openFiles.push_back(fCSVHF);
-    hCSVHF = new THCorr1( (TH1D*)fCSVHF->Get("hratio") ); gc.push_back(hCSVHF);
+    OpenCorrection(cANLO2j,"moriond17/histo_photons_2j.root","Func",1);
 
+    // btag SFs
     btagCalib = new BTagCalibration("csvv2",(dirPath+"/CSVv2_Moriond17_B_H.csv").Data());
-    btagReaders["jet_L"] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
-    btagReaders["jet_L"]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
-    btagReaders["jet_L"]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
-    btagReaders["jet_L"]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
+    btagReaders[bJetL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
+    btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
+    btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
+    btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
     sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"/subjet_CSVv2_Moriond17_B_H.csv").Data());
-    btagReaders["sj_L"] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
-    btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_B,"lt");
-    btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_C,"lt");
-    btagReaders["sj_L"]->load(*sj_btagCalib,BTagEntry::FLAV_UDSG,"incl");
+    btagReaders[bSubJetL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
+    btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_B,"lt");
+    btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_C,"lt");
+    btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
-    btagReaders["jet_M"] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM,"central",{"up","down"});
-    btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
-    btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
-    btagReaders["jet_M"]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
+    btagReaders[bJetM] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM,"central",{"up","down"});
+    btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
+    btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
+    btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
-    if (flags["monohiggs"]) {
+    // mSD corr
     MSDcorr = new TFile(dirPath+"/puppiCorr.root");
     puppisd_corrGEN = (TF1*)MSDcorr->Get("puppiJECcorr_gen");;
     puppisd_corrRECO_cen = (TF1*)MSDcorr->Get("puppiJECcorr_reco_0eta1v3");
     puppisd_corrRECO_for = (TF1*)MSDcorr->Get("puppiJECcorr_reco_1v3eta2v5");
-    }
 
     ak8UncReader["MC"] = new JetCorrectionUncertainty(
           (dirPath+"/jec/23Sep2016V2/Spring16_23Sep2016V2_MC_Uncertainty_AK8PFPuppi.txt").Data()
         );
     std::vector<TString> eraGroups = {"BCD","EF","G","H"};
     for (auto e : eraGroups) {
-    ak8UncReader["data"+e] = new JetCorrectionUncertainty(
-          (dirPath+"/jec/23Sep2016V2/Spring16_23Sep2016"+e+"V2_DATA_Uncertainty_AK8PFPuppi.txt").Data()
-        );
+        ak8UncReader["data"+e] = new JetCorrectionUncertainty(
+              (dirPath+"/jec/23Sep2016V2/Spring16_23Sep2016"+e+"V2_DATA_Uncertainty_AK8PFPuppi.txt").Data()
+            );
     }
 
     ak8JERReader = new JERReader(dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_SF_AK8PFPuppi.txt",
-                   dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK8PFPuppi.txt");
+                                 dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK8PFPuppi.txt");
 
-    // load only L2L3 JEC
-    /*
-    std::string jecPath = (dirPath+"/jec/").Data();
-    std::vector<JetCorrectorParameters> mcParams;
-    std::vector<JetCorrectorParameters> dataParams;
-    mcParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_MC_L2Relative_AK8PFPuppi.txt"));
-    mcParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_MC_L3Absolute_AK8PFPuppi.txt"));
-    mcParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_MC_L2L3Residual_AK8PFPuppi.txt"));
-    dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L2Relative_AK8PFPuppi.txt"));
-    dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L3Absolute_AK8PFPuppi.txt"));
-    dataParams.push_back(JetCorrectorParameters(jecPath + "Spring16_25nsV6_DATA_L2L3Residual_AK8PFPuppi.txt"));
-    ak8MCCorrector = new FactorizedJetCorrector(mcParams);
-    ak8DataCorrector = new FactorizedJetCorrector(dataParams);
-    */
-//    ak8jec = new JetCorrectorParameters((dirPath+"/Spring16_25nsV6_MC_Uncertainty_AK8PFPuppi.txt").Data());
-//    ak8UncReader = new JetCorrectionUncertainty(*ak8jec);
 }
 
 
@@ -319,20 +308,23 @@ bool PandaAnalyzer::PassGoodLumis(int run, int lumi) {
     auto run_ = goodLumis.find(run);
     if (run_==goodLumis.end()) {
         // matched no run
-        if (DEBUG) PDebug("PandaAnalyzer::PassGoodLumis",TString::Format("Failing run=%i",run));
+        if (DEBUG) 
+            PDebug("PandaAnalyzer::PassGoodLumis",TString::Format("Failing run=%i",run));
         return false;
     }
 
     // found the run, now look for a lumi range
     for (auto &range : run_->second) {
         if (range.Contains(lumi)) {
-            if (DEBUG) PDebug("PandaAnalyzer::PassGoodLumis",TString::Format("Accepting run=%i, lumi=%i",run,lumi));
+            if (DEBUG) 
+                PDebug("PandaAnalyzer::PassGoodLumis",TString::Format("Accepting run=%i, lumi=%i",run,lumi));
             return true;
         }
     }
 
     // matched no lumi range
-    if (DEBUG) PDebug("PandaAnalyzer::PassGoodLumis",TString::Format("Failing run=%i, lumi=%i",run,lumi));
+    if (DEBUG) 
+        PDebug("PandaAnalyzer::PassGoodLumis",TString::Format("Failing run=%i, lumi=%i",run,lumi));
     return false;
 }
 
@@ -347,14 +339,14 @@ bool PandaAnalyzer::PassPreselection() {
             isGood = true;
     }
     if (preselBits & kRecoil) {
-        if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
+        if ( (gt->puppimet>200 || gt->puppiUZmag>200 || gt->puppiUWmag>200 || gt->puppiUAmag>200) ||
                     (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
                     isGood = true;
         }
     }
     if (preselBits & kMonotop) {
         if (gt->nFatjet>=1 && gt->fj1Pt>200) {
-            if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
+            if ( (gt->puppimet>200 || gt->puppiUZmag>200 || gt->puppiUWmag>200 || gt->puppiUAmag>200) ||
                         (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
                         isGood = true;
             }
@@ -362,7 +354,7 @@ bool PandaAnalyzer::PassPreselection() {
     }
     if (preselBits & kMonojet) {
         if (true) {
-            if ( (gt->puppimet>200 || gt->UZmag>200 || gt->UWmag>200 || gt->UAmag>200) ||
+            if ( (gt->puppimet>200 || gt->puppiUZmag>200 || gt->puppiUWmag>200 || gt->puppiUAmag>200) ||
                         (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
                         isGood = true;
             }
@@ -370,7 +362,7 @@ bool PandaAnalyzer::PassPreselection() {
     }
     if (preselBits & kMonohiggs) {
         if ((gt->nFatjet>=1 && gt->fj1Pt>200) || gt->hbbpt>150 ) {
-            if ( (gt->puppimet>175 || gt->UZmag>175 || gt->UWmag>175 || gt->UAmag>175) ||
+            if ( (gt->puppimet>175 || gt->puppiUZmag>175 || gt->puppiUWmag>175 || gt->puppiUAmag>175) ||
                         (gt->pfmet>175 || gt->pfUZmag>175 || gt->pfUWmag>175 || gt->pfUAmag>175) ) {
                         isGood = true;
             }
@@ -381,21 +373,22 @@ bool PandaAnalyzer::PassPreselection() {
 }
 
 
-void PandaAnalyzer::calcBJetSFs(TString readername, int flavor,
+void PandaAnalyzer::CalcBJetSFs(BTagType bt, int flavor,
                                 double eta, double pt, double eff, double uncFactor,
-                                double &sf, double &sfUp, double &sfDown) {
+                                double &sf, double &sfUp, double &sfDown) 
+{
     if (flavor==5) {
-        sf     = btagReaders[readername]->eval_auto_bounds("central",BTagEntry::FLAV_B,eta,pt);
-        sfUp   = btagReaders[readername]->eval_auto_bounds("up",BTagEntry::FLAV_B,eta,pt);
-        sfDown = btagReaders[readername]->eval_auto_bounds("down",BTagEntry::FLAV_B,eta,pt);
+        sf     = btagReaders[bt]->eval_auto_bounds("central",BTagEntry::FLAV_B,eta,pt);
+        sfUp   = btagReaders[bt]->eval_auto_bounds("up",BTagEntry::FLAV_B,eta,pt);
+        sfDown = btagReaders[bt]->eval_auto_bounds("down",BTagEntry::FLAV_B,eta,pt);
     } else if (flavor==4) {
-        sf     = btagReaders[readername]->eval_auto_bounds("central",BTagEntry::FLAV_C,eta,pt);
-        sfUp   = btagReaders[readername]->eval_auto_bounds("up",BTagEntry::FLAV_C,eta,pt);
-        sfDown = btagReaders[readername]->eval_auto_bounds("down",BTagEntry::FLAV_C,eta,pt);
+        sf     = btagReaders[bt]->eval_auto_bounds("central",BTagEntry::FLAV_C,eta,pt);
+        sfUp   = btagReaders[bt]->eval_auto_bounds("up",BTagEntry::FLAV_C,eta,pt);
+        sfDown = btagReaders[bt]->eval_auto_bounds("down",BTagEntry::FLAV_C,eta,pt);
     } else {
-        sf     = btagReaders[readername]->eval_auto_bounds("central",BTagEntry::FLAV_UDSG,eta,pt);
-        sfUp   = btagReaders[readername]->eval_auto_bounds("up",BTagEntry::FLAV_UDSG,eta,pt);
-        sfDown = btagReaders[readername]->eval_auto_bounds("down",BTagEntry::FLAV_UDSG,eta,pt);
+        sf     = btagReaders[bt]->eval_auto_bounds("central",BTagEntry::FLAV_UDSG,eta,pt);
+        sfUp   = btagReaders[bt]->eval_auto_bounds("up",BTagEntry::FLAV_UDSG,eta,pt);
+        sfDown = btagReaders[bt]->eval_auto_bounds("down",BTagEntry::FLAV_UDSG,eta,pt);
     }
 
     sfUp = uncFactor*(sfUp-sf)+sf;
@@ -403,8 +396,74 @@ void PandaAnalyzer::calcBJetSFs(TString readername, int flavor,
     return;
 }
 
+void PandaAnalyzer::EvalBTagSF(std::vector<btagcand> &cands, std::vector<double> &sfs,
+                               GeneralTree::BTagShift shift,GeneralTree::BTagJet jettype, bool do2) 
+{
+    float sf0 = 1, sf1 = 1, sfGT0 = 1, sf2=1;
+    float prob_mc0=1, prob_data0=1;
+    float prob_mc1=0, prob_data1=0;
+    unsigned int nC = cands.size();
 
-float PandaAnalyzer::getMSDcorr(Float_t puppipt, Float_t puppieta) {
+    for (unsigned int iC=0; iC!=nC; ++iC) {
+        double sf_i = sfs[iC];
+        double eff_i = cands[iC].eff;
+        prob_mc0 *= (1-eff_i);
+        prob_data0 *= (1-sf_i*eff_i);
+        float tmp_mc1=1, tmp_data1=1;
+        for (unsigned int jC=0; jC!=nC; ++jC) {
+            if (iC==jC) continue;
+            double sf_j = sfs[jC];
+            double eff_j = cands[jC].eff;
+            tmp_mc1 *= (1-eff_j);
+            tmp_data1 *= (1-eff_j*sf_j);
+        }
+        prob_mc1 += eff_i * tmp_mc1;
+        prob_data1 += eff_i * sf_i * tmp_data1;
+    }
+    
+    if (nC>0) {
+        sf0 = prob_data0/prob_mc0;
+        sf1 = prob_data1/prob_mc1;
+        sfGT0 = (1-prob_data0)/(1-prob_mc0);
+    }
+
+    GeneralTree::BTagParams p;
+    p.shift = shift;
+    p.jet = jettype;
+    p.tag=GeneralTree::b0; gt->sf_btags[p] = sf0;
+    p.tag=GeneralTree::b1; gt->sf_btags[p] = sf1;
+    p.tag=GeneralTree::bGT0; gt->sf_btags[p] = sfGT0;
+
+    if (do2) {
+        float prob_mc2=0, prob_data2=0;
+        unsigned int nC = cands.size();
+
+        for (unsigned int iC=0; iC!=nC; ++iC) {
+            double sf_i = sfs[iC], eff_i = cands[iC].eff;
+            for (unsigned int jC=iC+1; jC!=nC; ++jC) {
+                double sf_j = sfs[jC], eff_j = cands[jC].eff;
+                float tmp_mc2=1, tmp_data2=1;
+                for (unsigned int kC=0; kC!=nC; ++kC) {
+                    if (kC==iC || kC==jC) continue;
+                    double sf_k = sfs[kC], eff_k = cands[kC].eff;
+                    tmp_mc2 *= (1-eff_k);
+                    tmp_data2 *= (1-eff_k*sf_k);
+                }
+                prob_mc2 += eff_i * eff_j * tmp_mc2;
+                prob_data2 += eff_i * sf_i * eff_j * sf_j * tmp_data2;
+            }
+        }
+
+        if (nC>1) {
+            sf2 = prob_data2/prob_mc2;
+        }
+
+        p.tag=GeneralTree::b2; gt->sf_btags[p] = sf2;
+    }
+
+}
+
+float PandaAnalyzer::GetMSDCorr(Float_t puppipt, Float_t puppieta) {
 
     float genCorr   = 1.;
     float recoCorr = 1.;
@@ -443,8 +502,8 @@ void PandaAnalyzer::Run() {
     // get bounds
     float genBosonPtMin=150, genBosonPtMax=1000;
     if (!isData) {
-        genBosonPtMin = hZNLO->GetHist()->GetBinCenter(1);
-        genBosonPtMax = hZNLO->GetHist()->GetBinCenter(hZNLO->GetHist()->GetNbinsX());
+        genBosonPtMin = h1Corrs[cZNLO]->GetHist()->GetBinCenter(1);
+        genBosonPtMax = h1Corrs[cZNLO]->GetHist()->GetBinCenter(h1Corrs[cZNLO]->GetHist()->GetNbinsX());
     }
 
     panda::FatJetCollection* fatjets(0);
@@ -474,6 +533,8 @@ void PandaAnalyzer::Run() {
                                              {0.739,0.767,0.780,0.789,0.776,0.771,0.779,0.787,0.806}};
     Binner btagpt(vbtagpt);
     Binner btageta(vbtageta);
+
+    JetCorrectionUncertainty *uncReader=0;
 
     std::vector<unsigned int> metTriggers;
     std::vector<unsigned int> eleTriggers;
@@ -533,6 +594,10 @@ void PandaAnalyzer::Run() {
     TimeReporter tr("PandaAnalyzer::Run",DEBUG);
 
     bool applyJSON = flags["applyJSON"];
+    bool applyEGCorr = flags["applyEGCorr"];
+    bool doMonoH = flags["monohiggs"];
+    bool doMonoJ = flags["monojet"];
+    bool doFatjet = flags["fatjet"];
 
     // EVENTLOOP --------------------------------------------------------------------------
     for (iE=nZero; iE!=nEvents; ++iE) {
@@ -542,16 +607,30 @@ void PandaAnalyzer::Run() {
         event.getEntry(*tIn,iE);
         tr.TriggerEvent(TString::Format("GetEntry %u",iE));
 
+        if ( ((preselBits&kMonotop) || (preselBits&kMonohiggs) 
+               || (preselBits&kMonojet) || (preselBits&kRecoil)) 
+            && event.recoil.max<175 )
+        {
+            continue;
+        }
+
         // event info
         gt->mcWeight = (event.weight>0) ? 1 : -1;
         gt->runNumber = event.runNumber;
         gt->lumiNumber = event.lumiNumber;
         gt->eventNumber = event.eventNumber;
         gt->npv = event.npv;
+        gt->pu = event.npvTrue;
         gt->metFilter = (event.metFilters.pass()) ? 1 : 0;
-        if (!isData)
-            gt->sf_pu = hPUWeight->Eval(gt->npv);
-        if (isData) {
+        gt->metFilter = (gt->metFilter==1 && 0==event.metFilters.badMuons) ? 1 : 0;
+        gt->metFilter = (gt->metFilter==1 && 0==event.metFilters.duplicateMuons) ? 1 : 0;
+        gt->egmFilter = (0==event.metFilters.dupECALClusters) ? 1 : 0;
+        gt->egmFilter = (gt->egmFilter==1 && 0==event.metFilters.unfixedECALHits) ? 1 : 0;
+
+        if (!isData) {
+            gt->sf_npv = GetCorr(cNPV,gt->npv);
+            gt->sf_pu = GetCorr(cPU,gt->pu);
+        } else {
             // check the json
             if (applyJSON && !PassGoodLumis(gt->runNumber,gt->lumiNumber))
                 continue;
@@ -577,31 +656,32 @@ void PandaAnalyzer::Run() {
             }
         }
 
-        tr.TriggerEvent("initialize");
-
-        // default values for arrays
-        for(unsigned int i=0;i<20;i++){
-            gt->jetPt[i]=-99;
-            gt->jetEta[i]=-99;
-            gt->jetPhi[i]=-99;
-            gt->jetE[i]=-99;
-            gt->jetCSV[i]=-99;
-            gt->jetIso[i]=-99;
-            gt->jetQGL[i]=-99;
-            if(i<2){
-                gt->fj1sjPt[i]=-99;
-                gt->fj1sjEta[i]=-99;
-                gt->fj1sjPhi[i]=-99;
-                gt->fj1sjM[i]=-99;
-                gt->fj1sjCSV[i]=-99;
-                gt->fj1sjQGL[i]=-99;
-                gt->hbbjtidx[i]=-99;
+        if (uncReader==0) {
+            if (isData) {
+                TString thisEra = eras.getEra(gt->runNumber);
+                for (auto &iter : ak8UncReader) {
+                    if (! iter.first.Contains("data"))
+                        continue;
+                    if (iter.first.Contains(thisEra)) {
+                        uncReader = iter.second;
+                        break;
+                    }
+                }
+            } else {
+                uncReader = ak8UncReader["MC"];
             }
         }
 
+        tr.TriggerEvent("initialize");
+
         // met
-        gt->pfmet = event.pfMet.pt;
-        gt->pfmetphi = event.pfMet.phi;
+        if (isData && applyEGCorr) {
+            gt->pfmet = event.metMuOnlyFix.pt;
+            gt->pfmetphi = event.metMuOnlyFix.phi;
+        } else {
+            gt->pfmet = event.pfMet.pt;
+            gt->pfmetphi = event.pfMet.phi;
+        }
         gt->calomet = event.caloMet.pt;
         gt->puppimet = event.puppiMet.pt;
         gt->puppimetphi = event.puppiMet.phi;
@@ -612,19 +692,24 @@ void PandaAnalyzer::Run() {
 
         tr.TriggerEvent("met");
 
+        TLorentzVector vType1EGCorr;
+
         //electrons
         std::vector<panda::Lepton*> looseLeps, tightLeps;
         for (auto& ele : event.electrons) {
           float pt = ele.pt(); float eta = ele.eta(); float aeta = fabs(eta);
-            if (pt<10 || aeta>2.5)
-            //if (pt<10 || aeta>2.5 || (aeta>1.4442 && aeta<1.566))
+            if (pt<10 || aeta>2.5 /* || (aeta>1.4442 && aeta<1.566) */)
                 continue;
             if (!ele.veto)
                 continue;
-            // if (!ElectronIsolation(pt,eta,ele.iso,PElectron::kVeto))
-            //      continue;
             looseLeps.push_back(&ele);
             gt->nLooseElectron++;
+            if (isData && applyEGCorr) {
+                // GS correction is raw (GS fixed but no regression) minus PF
+                float diffPt = ele.rawPt - ele.pfPt; 
+                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
+                vType1EGCorr -= vCorr; // propagate the negative correction to MET
+            }
         }
 
         // muons
@@ -756,6 +841,12 @@ void PandaAnalyzer::Run() {
                 gt->loosePho1Eta = eta;
                 gt->loosePho1Phi = phi;
             }
+            if (isData && applyEGCorr) {
+                // GS correction is raw (GS fixed but no regression) minus PF
+                float diffPt = pho.rawPt - pho.pfPt; 
+                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
+                vType1EGCorr -= vCorr; // propagate the negative correction to MET
+            }
             if ( pho.medium &&
                  pt>175 /*&& fabs(eta)<1.4442*/ ) { // apply eta cut offline
                 if (gt->nLoosePhoton==1)
@@ -784,52 +875,42 @@ void PandaAnalyzer::Run() {
         // trigger efficiencies
         gt->sf_eleTrig=1; gt->sf_metTrig=1; gt->sf_phoTrig=1;
         if (!isData) {
-            gt->sf_metTrig = hMetTrig->Eval(gt->pfmetnomu);
+            gt->sf_metTrig = GetCorr(cTrigMET,gt->pfmetnomu);
 
-            if (gt->nLooseElectron>0 && abs(gt->looseLep1PdgId)==1
+            if (gt->nLooseElectron>0 && abs(gt->looseLep1PdgId)==11
                     && gt->looseLep1IsTight==1 && gt->nLooseMuon==0) {
                 float eff1=0, eff2=0;
-                if (gt->looseLep1Pt<100) {
-                    eff1 = hEleTrigLow->Eval(gt->looseLep1Eta,gt->looseLep1Pt);
-                } else {
-                    if (fabs(gt->looseLep1Eta)<1.4442) {
-                        eff1 = hEleTrigB->Eval(gt->looseLep1Pt);
-                    }
-                    if (1.5660<fabs(gt->looseLep1Eta) && fabs(gt->looseLep1Eta)<2.5) {
-                        eff1 = hEleTrigE->Eval(gt->looseLep1Pt);
-                    }
-                }
+                eff1 = GetCorr(cTrigEle,gt->looseLep1Eta,gt->looseLep1Pt);
                 if (gt->nLooseElectron>1 && abs(gt->looseLep2PdgId)==11) {
-                    if (gt->looseLep2Pt<100) {
-                        eff2 = hEleTrigLow->Eval(gt->looseLep2Eta,gt->looseLep2Pt);
-                    } else {
-                        if (fabs(gt->looseLep2Eta)<1.4442) {
-                            eff2 = hEleTrigB->Eval(gt->looseLep2Pt);
-                        }
-                        if (1.5660<fabs(gt->looseLep2Eta) && fabs(gt->looseLep2Eta)<2.5) {
-                            eff2 = hEleTrigE->Eval(gt->looseLep2Pt);
-                        }
-                    }
+                    eff2 = GetCorr(cTrigEle,gt->looseLep2Eta,gt->looseLep2Pt);
                 }
                 gt->sf_eleTrig = 1 - (1-eff1)*(1-eff2);
             } // done with ele trig SF
 
             if (gt->nLoosePhoton>0 && gt->loosePho1IsTight)
-                gt->sf_phoTrig = hPhoTrig->Eval(gt->loosePho1Pt);
+                gt->sf_phoTrig = GetCorr(cTrigPho,gt->loosePho1Pt);
         }
 
         tr.TriggerEvent("triggers");
 
         // recoil!
+        if (isData and applyEGCorr) {
+            vPFMET += vType1EGCorr;
+            gt->pfmet = vPFMET.Pt();
+            gt->pfmetphi = vPFMET.Phi();
+            gt->mT = MT(gt->looseLep1Pt,gt->looseLep1Eta,gt->pfmet,gt->pfmetphi);
+        }
         TLorentzVector vObj1, vObj2;
-        TLorentzVector vUW, vUZ, vUA;
+        TLorentzVector vpuppiUW, vpuppiUZ, vpuppiUA;
         TLorentzVector vpfUW, vpfUZ, vpfUA;
+        TLorentzVector vpuppiU, vpfU;
+        int whichRecoil = 0; // -1=photon, 0=MET, 1,2=nLep
         if (gt->nLooseLep>0) {
             panda::Lepton *lep1 = looseLeps.at(0);
             vObj1.SetPtEtaPhiM(lep1->pt(),lep1->eta(),lep1->phi(),lep1->m());
 
             // one lep => W
-            vUW = vPuppiMET+vObj1; gt->UWmag=vUW.Pt(); gt->UWphi=vUW.Phi();
+            vpuppiUW = vPuppiMET+vObj1; gt->puppiUWmag=vpuppiUW.Pt(); gt->puppiUWphi=vpuppiUW.Phi();
             vpfUW = vPFMET+vObj1; gt->pfUWmag=vpfUW.Pt(); gt->pfUWphi=vpfUW.Phi();
 
             if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
@@ -837,23 +918,42 @@ void PandaAnalyzer::Run() {
                 panda::Lepton *lep2 = looseLeps.at(1);
                 vObj2.SetPtEtaPhiM(lep2->pt(),lep2->eta(),lep2->phi(),lep2->m());
 
-                vUZ=vUW+vObj2; gt->UZmag=vUZ.Pt(); gt->UZphi=vUZ.Phi();
+                vpuppiUZ=vpuppiUW+vObj2; gt->puppiUZmag=vpuppiUZ.Pt(); gt->puppiUZphi=vpuppiUZ.Phi();
                 vpfUZ=vpfUW+vObj2; gt->pfUZmag=vpfUZ.Pt(); gt->pfUZphi=vpfUZ.Phi();
+
+                vpuppiU = vpuppiUZ; vpfU = vpfUZ;
+                whichRecoil = 2;
+            } else {
+                vpuppiU = vpuppiUW; vpfU = vpfUW;
+                whichRecoil = 1;
             }
         }
         if (gt->nLoosePhoton>0) {
             panda::Photon *pho = loosePhos.at(0);
             vObj1.SetPtEtaPhiM(pho->pt(),pho->eta(),pho->phi(),0.);
 
-            vUA=vPuppiMET+vObj1; gt->UAmag=vUA.Pt(); gt->UAphi=vUA.Phi();
+            vpuppiUA=vPuppiMET+vObj1; gt->puppiUAmag=vpuppiUA.Pt(); gt->puppiUAphi=vpuppiUA.Phi();
             vpfUA=vPFMET+vObj1; gt->pfUAmag=vpfUA.Pt(); gt->pfUAphi=vpfUA.Phi();
+            if (gt->nLooseLep==0) {
+                vpuppiU = vpuppiUA; vpfU = vpfUA;
+                whichRecoil = -1;
+            }
         }
+        if (gt->nLooseLep==0 && gt->nLoosePhoton==0) {
+            vpuppiU = vPuppiMET;
+            vpfU = vPFMET;
+            whichRecoil = 0;
+        }
+        gt->puppiUmag = vpuppiU.Pt();
+        gt->puppiUphi = vpuppiU.Phi();
+        gt->pfUmag = vpfU.Pt();
+        gt->pfUphi = vpfU.Phi();
 
         tr.TriggerEvent("recoils");
 
         panda::FatJet *fj1=0;
         gt->nFatjet=0;
-        if (flags["fatjet"]) {
+        if (doFatjet) {
             int fatjet_counter=-1;
             for (auto& fj : *fatjets) {
                 ++fatjet_counter;
@@ -862,7 +962,7 @@ void PandaAnalyzer::Run() {
                 float eta = fj.eta();
                 float mass = fj.m();
                 float ptcut = 200;
-                if (flags["monohiggs"])
+                if (doMonoH)
                     ptcut = 200;
 
                 if (pt<ptcut || fabs(eta)>2.4 || !fj.monojet)
@@ -888,20 +988,6 @@ void PandaAnalyzer::Run() {
                     gt->fj1RawPt = rawpt;
 
                     // do a bit of jet energy scaling
-                    JetCorrectionUncertainty *uncReader=0;
-                    if (isData) {
-                        TString thisEra = eras.getEra(gt->runNumber);
-                        for (auto &iter : ak8UncReader) {
-                            if (! iter.first.Contains("data"))
-                                continue;
-                            if (iter.first.Contains(thisEra)) {
-                                uncReader = iter.second;
-                                break;
-                            }
-                        }
-                    } else {
-                        uncReader = ak8UncReader["MC"];
-                    }
                     uncReader->setJetEta(eta); uncReader->setJetPt(pt);
                     double scaleUnc = uncReader->getUncertainty(true);
                     gt->fj1PtScaleUp    = gt->fj1Pt  * (1 + 2*scaleUnc);
@@ -931,11 +1017,9 @@ void PandaAnalyzer::Run() {
                     }
 
                     // mSD correction
-                    if (flags["monohiggs"]) {
-                        float corrweight=1.;
-                        corrweight = getMSDcorr(pt,eta);
-                        gt->fj1MSD_corr = corrweight*gt->fj1MSD;
-                    }
+                    float corrweight=1.;
+                    corrweight = GetMSDCorr(pt,eta);
+                    gt->fj1MSD_corr = corrweight*gt->fj1MSD;
 
                     // now we do substructure
                     gt->fj1Tau32 = clean(fj.tau3/fj.tau2);
@@ -943,14 +1027,15 @@ void PandaAnalyzer::Run() {
                     gt->fj1Tau21 = clean(fj.tau2/fj.tau1);
                     gt->fj1Tau21SD = clean(fj.tau2SD/fj.tau1SD);
 
-                    for (unsigned int iB=0; iB!=betas.size(); ++iB) {
-                        float beta = betas.at(iB);
+                    for (auto ibeta : ibetas) {
                         for (auto N : Ns) {
                             for (auto order : orders) {
+                                GeneralTree::ECFParams p;
+                                p.order = order; p.N = N; p.ibeta = ibeta;
                                 if (gt->fj1IsClean || true)
-                                    gt->fj1ECFNs[makeECFString(order,N,beta)] = fj.get_ecf(order,N,iB);
+                                    gt->fj1ECFNs[p] = fj.get_ecf(order,N,ibeta);
                                 else
-                                    gt->fj1ECFNs[makeECFString(order,N,beta)] = -1;
+                                    gt->fj1ECFNs[p] = fj.get_ecf(order,N,ibeta);
                             }
                         }
                     } //loop over betas
@@ -969,7 +1054,7 @@ void PandaAnalyzer::Run() {
                     gt->fj1MaxCSV = subjets.at(0)->csv;
                     gt->fj1MinCSV = subjets.back()->csv;
 
-                    if (flags["monohiggs"]) {
+                    if (doMonoH) {
                         for (unsigned int iSJ=0; iSJ!=fj.subjets.size(); ++iSJ) {
                             auto& subjet = fj.subjets.objAt(iSJ);
                             gt->fj1sjPt[iSJ]=subjet.pt();
@@ -1036,9 +1121,9 @@ void PandaAnalyzer::Run() {
         TLorentzVector vJet;
         panda::Jet *jet1=0, *jet2=0;
         gt->dphipuppimet=999; gt->dphipfmet=999;
-        gt->dphiUW=999; gt->dphipfUW=999;
-        gt->dphiUZ=999; gt->dphipfUZ=999;
-        gt->dphiUA=999; gt->dphipfUA=999;
+        gt->dphipuppiUW=999; gt->dphipfUW=999;
+        gt->dphipuppiUZ=999; gt->dphipfUZ=999;
+        gt->dphipuppiUA=999; gt->dphipfUA=999;
         for (auto& jet : *jets) {
           if (jet.pt()<30 || abs(jet.eta())>4.5)
                 continue;
@@ -1066,23 +1151,23 @@ void PandaAnalyzer::Run() {
                 }
             }
 
-            if (flags["monohiggs"]) {
-              gt->jetPt[cleanedJets.size()-1]=jet.pt();
-              gt->jetEta[cleanedJets.size()-1]=jet.eta();
-              gt->jetPhi[cleanedJets.size()-1]=jet.phi();
-              gt->jetE[cleanedJets.size()-1]=jet.m();
+            if (doMonoH) {
+                gt->jetPt[cleanedJets.size()-1]=jet.pt();
+                gt->jetEta[cleanedJets.size()-1]=jet.eta();
+                gt->jetPhi[cleanedJets.size()-1]=jet.phi();
+                gt->jetE[cleanedJets.size()-1]=jet.m();
                 gt->jetCSV[cleanedJets.size()-1]=csv;
                 gt->jetQGL[cleanedJets.size()-1]=jet.qgl;
             }
 
             // compute dphi wrt mets
             if (cleanedJets.size()<5) {
-              vJet.SetPtEtaPhiM(jet.pt(),jet.eta(),jet.phi(),jet.m());
+                vJet.SetPtEtaPhiM(jet.pt(),jet.eta(),jet.phi(),jet.m());
                 gt->dphipuppimet = std::min(fabs(vJet.DeltaPhi(vPuppiMET)),(double)gt->dphipuppimet);
                 gt->dphipfmet = std::min(fabs(vJet.DeltaPhi(vPFMET)),(double)gt->dphipfmet);
-                gt->dphiUA = std::min(fabs(vJet.DeltaPhi(vUA)),(double)gt->dphiUA);
-                gt->dphiUW = std::min(fabs(vJet.DeltaPhi(vUW)),(double)gt->dphiUW);
-                gt->dphiUZ = std::min(fabs(vJet.DeltaPhi(vUZ)),(double)gt->dphiUZ);
+                gt->dphipuppiUA = std::min(fabs(vJet.DeltaPhi(vpuppiUA)),(double)gt->dphipuppiUA);
+                gt->dphipuppiUW = std::min(fabs(vJet.DeltaPhi(vpuppiUW)),(double)gt->dphipuppiUW);
+                gt->dphipuppiUZ = std::min(fabs(vJet.DeltaPhi(vpuppiUZ)),(double)gt->dphipuppiUZ);
                 gt->dphipfUA = std::min(fabs(vJet.DeltaPhi(vpfUA)),(double)gt->dphipfUA);
                 gt->dphipfUW = std::min(fabs(vJet.DeltaPhi(vpfUW)),(double)gt->dphipfUW);
                 gt->dphipfUZ = std::min(fabs(vJet.DeltaPhi(vpfUZ)),(double)gt->dphipfUZ);
@@ -1090,20 +1175,15 @@ void PandaAnalyzer::Run() {
             // btags
             if (csv>0.5426) {
                 ++gt->jetNBtags;
-                if (flags["monohiggs"]) {
+                if (doMonoH) {
                     btaggedJets.push_back(&jet);
                     btagindices.push_back(cleanedJets.size()-1);
                 }
             }
 
-            bool isIsoJet = false;
-            if (gt->nFatjet==0) {
-                isIsoJet = true;
-            } else if (fabs(jet.eta())<2.5
-                   && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet.eta(),jet.phi())>2.25) {
-                isIsoJet = true;
-
-            }
+            bool isIsoJet = ( (gt->nFatjet==0) || 
+                              (fabs(jet.eta())<2.5 
+                               && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet.eta(),jet.phi())>2.25) ); 
 
             if (isIsoJet) {
                 isoJets.push_back(&jet);
@@ -1116,17 +1196,17 @@ void PandaAnalyzer::Run() {
                   gt->isojet2Pt = jet.pt();
                   gt->isojet2CSV = jet.csv;
                 }
-                if (flags["monohiggs"])
+                if (doMonoH)
                     gt->jetIso[cleanedJets.size()-1]=1;
             } else {
-                if (flags["monohiggs"])
+                if (doMonoH)
                     gt->jetIso[cleanedJets.size()-1]=0;
             }
 
         } // VJet loop
 
         gt->nJet = cleanedJets.size();
-        if (gt->nJet>1 && flags["monojet"]) {
+        if (gt->nJet>1 && doMonoJ) {
           gt->jet12DEta = fabs(jet1->eta()-jet2->eta());
           TLorentzVector vj1, vj2;
           vj1.SetPtEtaPhiM(jet1->pt(),jet1->eta(),jet1->phi(),jet1->m());
@@ -1137,8 +1217,8 @@ void PandaAnalyzer::Run() {
         tr.TriggerEvent("jets");
 
 
-        if (flags["monohiggs"]){
-            // Higgs reconstrcution for resolved analysis - highest pt pair of b jets
+        if (doMonoH) {
+            // Higgs reconstruction for resolved analysis - highest pt pair of b jets
             float tmp_hbbpt=-99;
             float tmp_hbbeta=-99;
             float tmp_hbbphi=-99;
@@ -1258,7 +1338,6 @@ void PandaAnalyzer::Run() {
                         }
                     } // looking for W
                     if (!lastW) {// ???
-//                          PWarning("","Could not find W");
                         continue;
                     }
                     auto& partW(*lastW);
@@ -1279,12 +1358,16 @@ void PandaAnalyzer::Run() {
                         } else if (abspdgidQ<5 && partQ.parent.get() == &partW) {
                             if (iQ1<0) {
                                 iQ1 = jG;
-                                size = TMath::Max(DeltaR2(part.eta(),part.phi(),partQ.eta(),partQ.phi()),size);
-                                sizeW = TMath::Max(DeltaR2(partW.eta(),partW.phi(),partQ.eta(),partQ.phi()),sizeW);
+                                size = TMath::Max(DeltaR2(part.eta(),part.phi(),partQ.eta(),partQ.phi()),
+                                                  size);
+                                sizeW = TMath::Max(DeltaR2(partW.eta(),partW.phi(),partQ.eta(),partQ.phi()),
+                                                   sizeW);
                             } else if (iQ2<0) {
                                 iQ2 = jG;
-                                size = TMath::Max(DeltaR2(part.eta(),part.phi(),partQ.eta(),partQ.phi()),size);
-                                sizeW = TMath::Max(DeltaR2(partW.eta(),partW.phi(),partQ.eta(),partQ.phi()),sizeW);
+                                size = TMath::Max(DeltaR2(part.eta(),part.phi(),partQ.eta(),partQ.phi()),
+                                                  size);
+                                sizeW = TMath::Max(DeltaR2(partW.eta(),partW.phi(),partQ.eta(),partQ.phi()),
+                                                   sizeW);
                             }
                         }
                         if (iB>=0 && iQ1>=0 && iQ2>=0)
@@ -1313,10 +1396,12 @@ void PandaAnalyzer::Run() {
                         if (partQ.parent.get() == &part) {
                             if (iQ1<0) {
                                 iQ1=jG;
-                                size = TMath::Max(DeltaR2(part.eta(),part.phi(),partQ.eta(),partQ.phi()),size);
+                                size = TMath::Max(DeltaR2(part.eta(),part.phi(),partQ.eta(),partQ.phi()),
+                                                  size);
                             } else if (iQ2<0) {
                                 iQ2=jG;
-                                size = TMath::Max(DeltaR2(part.eta(),part.phi(),partQ.eta(),partQ.phi()),size);
+                                size = TMath::Max(DeltaR2(part.eta(),part.phi(),partQ.eta(),partQ.phi()),
+                                                  size);
                             }
                         }
                         if (iQ1>=0 && iQ2>=0)
@@ -1335,7 +1420,6 @@ void PandaAnalyzer::Run() {
 
         tr.TriggerEvent("gen matching");
 
-        // do gen matching now that presel is passed
         if (!isData && gt->nFatjet>0) {
             // first see if jet is matched
             auto* matched = MatchToGen(fj1->eta(),fj1->phi(),1.5,pdgidTarget);
@@ -1403,7 +1487,7 @@ void PandaAnalyzer::Run() {
                 } else {
                     eff = lfeff[bineta][binpt];
                 }
-                calcBJetSFs("sj_L",flavor,eta,pt,eff,btagUncFactor,sf,sfUp,sfDown);
+                CalcBJetSFs(bSubJetL,flavor,eta,pt,eff,btagUncFactor,sf,sfUp,sfDown);
                 sj_btagcands.push_back(btagcand(iSJ,flavor,eff,sf,sfUp,sfDown));
                 sj_sf_cent.push_back(sf);
                 if (flavor>0) {
@@ -1414,31 +1498,13 @@ void PandaAnalyzer::Run() {
                     sj_sf_mUp.push_back(sfUp); sj_sf_mDown.push_back(sfDown);
                 }
 
-                // evaluate the CSV weight
-                if (subjet.csv>0) {
-                    if (flavor==0) {
-                        gt->sf_sjcsvWeightM *= hCSVLF->Eval(subjet.csv);
-                    } else {
-                        gt->sf_sjcsvWeightB *= hCSVHF->Eval(subjet.csv);
-                    }
-                }
-
             } // loop over subjets
-            gt->sf_sjcsvWeightMUp = 1.05 * gt->sf_sjcsvWeightM;
-            gt->sf_sjcsvWeightMDown = 0.95 * gt->sf_sjcsvWeightM;
-            gt->sf_sjcsvWeightBUp = 1.05 * gt->sf_sjcsvWeightB;
-            gt->sf_sjcsvWeightBDown = 0.95 * gt->sf_sjcsvWeightB;
 
-            EvalBtagSF(sj_btagcands,sj_sf_cent,
-                        gt->sf_sjbtag0,gt->sf_sjbtag1,gt->sf_sjbtag2,gt->sf_sjbtagGT0);
-            EvalBtagSF(sj_btagcands,sj_sf_bUp,
-                        gt->sf_sjbtag0BUp,gt->sf_sjbtag1BUp,gt->sf_sjbtag2BUp,gt->sf_sjbtagGT0BUp);
-            EvalBtagSF(sj_btagcands,sj_sf_bDown,
-                        gt->sf_sjbtag0BDown,gt->sf_sjbtag1BDown,gt->sf_sjbtag2BDown,gt->sf_sjbtagGT0BDown);
-            EvalBtagSF(sj_btagcands,sj_sf_mUp,
-                        gt->sf_sjbtag0MUp,gt->sf_sjbtag1MUp,gt->sf_sjbtag2MUp,gt->sf_sjbtagGT0MUp);
-            EvalBtagSF(sj_btagcands,sj_sf_mDown,
-                        gt->sf_sjbtag0MDown,gt->sf_sjbtag1MDown,gt->sf_sjbtag2MDown,gt->sf_sjbtagGT0MDown);
+            EvalBTagSF(sj_btagcands,sj_sf_cent,GeneralTree::bCent,GeneralTree::bSubJet);
+            EvalBTagSF(sj_btagcands,sj_sf_bUp,GeneralTree::bBUp,GeneralTree::bSubJet);
+            EvalBTagSF(sj_btagcands,sj_sf_bDown,GeneralTree::bBDown,GeneralTree::bSubJet);
+            EvalBTagSF(sj_btagcands,sj_sf_mUp,GeneralTree::bMUp,GeneralTree::bSubJet);
+            EvalBTagSF(sj_btagcands,sj_sf_mDown,GeneralTree::bMDown,GeneralTree::bSubJet);
 
         }
 
@@ -1499,7 +1565,7 @@ void PandaAnalyzer::Run() {
                     else if (jet==isoJets.at(1))
                         gt->isojet2Flav = flavor;
 
-                    calcBJetSFs("jet_L",flavor,eta,pt,eff,btagUncFactor,sf,sfUp,sfDown);
+                    CalcBJetSFs(bJetL,flavor,eta,pt,eff,btagUncFactor,sf,sfUp,sfDown);
                     btagcands.push_back(btagcand(iJ,flavor,eff,sf,sfUp,sfDown));
                     sf_cent.push_back(sf);
 
@@ -1511,21 +1577,13 @@ void PandaAnalyzer::Run() {
                         sf_mUp.push_back(sfUp); sf_mDown.push_back(sfDown);
                     }
 
-                    // evaluate the CSV weight
-                    if (jet->csv>0) {
-                        if (flavor==0) {
-                            gt->sf_csvWeightM *= hCSVLF->Eval(jet->csv);
-                        } else {
-                            gt->sf_csvWeightB *= hCSVHF->Eval(jet->csv);
-                        }
-                    }
-
                 }
 
-                if (flags["monohiggs"]){
+                /* // I'm killing this temporarily as we don't use it -SN
+                if (doMonoH){
                     // alternate stuff for inclusive jet collection (also different b tagging WP)
                     double sf_alt(1),sfUp_alt(1),sfDown_alt(1);
-                    calcBJetSFs("jet_M",flavor,eta,pt,eff,btagUncFactor,sf_alt,sfUp_alt,sfDown_alt);
+                    CalcBJetSFs("jet_M",flavor,eta,pt,eff,btagUncFactor,sf_alt,sfUp_alt,sfDown_alt);
                     btagcands_alt.push_back(btagcand(iJ,flavor,eff,sf_alt,sfUp_alt,sfDown_alt));
                     sf_cent_alt.push_back(sf_alt);
                     if (flavor>0) {
@@ -1536,36 +1594,29 @@ void PandaAnalyzer::Run() {
                         sf_mUp_alt.push_back(sfUp_alt); sf_mDown_alt.push_back(sfDown_alt);
                     }
                 }
+                */
             } // loop over jets
 
-            gt->sf_csvWeightMUp = 1.05 * gt->sf_csvWeightM;
-            gt->sf_csvWeightMDown = 0.95 * gt->sf_csvWeightM;
-            gt->sf_csvWeightBUp = 1.05 * gt->sf_csvWeightB;
-            gt->sf_csvWeightBDown = 0.95 * gt->sf_csvWeightB;
+            EvalBTagSF(btagcands,sf_cent,GeneralTree::bCent,GeneralTree::bJet);
+            EvalBTagSF(btagcands,sf_bUp,GeneralTree::bBUp,GeneralTree::bJet);
+            EvalBTagSF(btagcands,sf_bDown,GeneralTree::bBDown,GeneralTree::bJet);
+            EvalBTagSF(btagcands,sf_mUp,GeneralTree::bMUp,GeneralTree::bJet);
+            EvalBTagSF(btagcands,sf_mDown,GeneralTree::bMDown,GeneralTree::bJet);
 
-            EvalBtagSF(btagcands,sf_cent,
-                        gt->sf_btag0,gt->sf_btag1,gt->sf_btag2,gt->sf_btagGT0);
-            EvalBtagSF(btagcands,sf_bUp,
-                        gt->sf_btag0BUp,gt->sf_btag1BUp,gt->sf_btag2BUp,gt->sf_btagGT0BUp);
-            EvalBtagSF(btagcands,sf_bDown,
-                        gt->sf_btag0BDown,gt->sf_btag1BDown,gt->sf_btag2BDown,gt->sf_btagGT0BDown);
-            EvalBtagSF(btagcands,sf_mUp,
-                        gt->sf_btag0MUp,gt->sf_btag1MUp,gt->sf_btag2MUp,gt->sf_btagGT0MUp);
-            EvalBtagSF(btagcands,sf_mDown,
-                        gt->sf_btag0MDown,gt->sf_btag1MDown,gt->sf_btag2MDown,gt->sf_btagGT0MDown);
-
-            if (flags["monohiggs"]){
-                EvalBtagSF(btagcands_alt,sf_cent_alt,
+            /* // see above, also needs to use the new functions -SN
+            if (flags["monohiggs"]) {
+                EvalBTagSF(btagcands_alt,sf_cent_alt,
                             gt->sf_btag0_alt,gt->sf_btag1_alt,gt->sf_btag2_alt,gt->sf_btagGT0_alt);
-                EvalBtagSF(btagcands_alt,sf_bUp_alt,
+                EvalBTagSF(btagcands_alt,sf_bUp_alt,
                             gt->sf_btag0BUp_alt,gt->sf_btag1BUp_alt,gt->sf_btag2BUp_alt,gt->sf_btagGT0BUp_alt);
-                EvalBtagSF(btagcands_alt,sf_bDown_alt,
+                EvalBTagSF(btagcands_alt,sf_bDown_alt,
                             gt->sf_btag0BDown_alt,gt->sf_btag1BDown_alt,gt->sf_btag2BDown_alt,gt->sf_btagGT0BDown_alt);
-                EvalBtagSF(btagcands_alt,sf_mUp_alt,
+                EvalBTagSF(btagcands_alt,sf_mUp_alt,
                             gt->sf_btag0MUp_alt,gt->sf_btag1MUp_alt,gt->sf_btag2MUp_alt,gt->sf_btagGT0MUp_alt);
-                EvalBtagSF(btagcands_alt,sf_mDown_alt,
+                EvalBTagSF(btagcands_alt,sf_mDown_alt,
                             gt->sf_btag0MDown_alt,gt->sf_btag1MDown_alt,gt->sf_btag2MDown_alt,gt->sf_btagGT0MDown_alt);
             }
+            */
         }
 
         tr.TriggerEvent("ak4 gen-matching");
@@ -1664,22 +1715,23 @@ void PandaAnalyzer::Run() {
                     if (processType==kZ) {
                       gt->trueGenBosonPt = gen.pt();
                       gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
-                      gt->sf_qcdV = hZNLO->Eval(gt->genBosonPt);
-                      gt->sf_ewkV = hZEWK->Eval(gt->genBosonPt);
+                      gt->sf_qcdV = GetCorr(cZNLO,gt->genBosonPt);
+                      gt->sf_ewkV = GetCorr(cZEWK,gt->genBosonPt);
                         found=true;
                     } else if (processType==kW) {
                       gt->trueGenBosonPt = gen.pt();
                       gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
-                      gt->sf_qcdV = hWNLO->Eval(gt->genBosonPt);
-                      gt->sf_ewkV = hWEWK->Eval(gt->genBosonPt);
+                      gt->sf_qcdV = GetCorr(cWNLO,gt->genBosonPt);
+                      gt->sf_ewkV = GetCorr(cWEWK,gt->genBosonPt);
                         found=true;
                     } else if (processType==kA) {
                         // take the highest pT
                         if (gen.pt() > gt->trueGenBosonPt) {
                           gt->trueGenBosonPt = gen.pt();
                           gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
-                          gt->sf_qcdV = hANLO->Eval(gt->genBosonPt);
-                          gt->sf_ewkV = hAEWK->Eval(gt->genBosonPt);
+                          gt->sf_qcdV = GetCorr(cANLO,gt->genBosonPt);
+                          gt->sf_ewkV = GetCorr(cAEWK,gt->genBosonPt);
+                          gt->sf_qcdV2j = GetCorr(cANLO2j,gt->genBosonPt);
                         }
                     }
                 } // target matches
@@ -1689,7 +1741,7 @@ void PandaAnalyzer::Run() {
         tr.TriggerEvent("qcd/ewk SFs");
 
         //lepton SFs
-        gt->sf_lep=1; gt->sf_lepReco=1;
+        gt->sf_lepID=1; gt->sf_lepIso=1; gt->sf_lepTrack=1;
         if (!isData) {
             for (unsigned int iL=0; iL!=TMath::Min(gt->nLooseLep,2); ++iL) {
                 auto* lep = looseLeps.at(iL);
@@ -1697,25 +1749,21 @@ void PandaAnalyzer::Run() {
                 bool isTight = (iL==0 && gt->looseLep1IsTight) || (iL==1 && gt->looseLep2IsTight);
                 auto* mu = dynamic_cast<panda::Muon*>(lep);
                 if (mu!=NULL) {
-                    if (gt->npv<=17) {
-                        if (isTight)
-                            gt->sf_lep *= hMuTightLoPU->Eval(aeta,pt);
-                        else
-                            gt->sf_lep *= hMuLooseLoPU->Eval(aeta,pt);
-                        gt->sf_lepReco *= hRecoMuLoPU->Eval(aeta,pt);
+                    if (isTight) {
+                        gt->sf_lepID *= GetCorr(cMuTightID,aeta,pt);
+                        gt->sf_lepIso *= GetCorr(cMuTightIso,eta,pt);
                     } else {
-                        if (isTight)
-                            gt->sf_lep *= hMuTightHiPU->Eval(aeta,pt);
-                        else
-                            gt->sf_lep *= hMuLooseHiPU->Eval(aeta,pt);
-                        gt->sf_lepReco *= hRecoMuHiPU->Eval(aeta,pt);
+                        gt->sf_lepID *= GetCorr(cMuLooseID,aeta,pt);
+                        gt->sf_lepIso *= GetCorr(cMuLooseIso,eta,pt);
                     }
+                    gt->sf_lepTrack *= GetCorr(cMuReco,gt->npv);
                 } else {
-                    if (isTight)
-                        gt->sf_lep *= hEleTight->Eval(eta,pt);
-                    else
-                        gt->sf_lep *= hEleVeto->Eval(eta,pt);
-                    gt->sf_lepReco *= hRecoEle->Eval(eta,pt);
+                    if (isTight) {
+                        gt->sf_lepID *= GetCorr(cEleTight,eta,pt);
+                    } else {
+                        gt->sf_lepID *= GetCorr(cEleVeto,eta,pt);
+                    }
+                    gt->sf_lepTrack *= GetCorr(cEleReco,eta,pt);
                 }
             }
         }
@@ -1727,7 +1775,7 @@ void PandaAnalyzer::Run() {
         if (!isData && gt->nLoosePhoton>0) {
             float pt = gt->loosePho1Pt, eta = gt->loosePho1Eta;
             if (gt->loosePho1IsTight)
-                gt->sf_pho = hPho->Eval(eta,pt);
+                gt->sf_pho = GetCorr(cPho,eta,pt);
         }
 
         tr.TriggerEvent("photon SFs");

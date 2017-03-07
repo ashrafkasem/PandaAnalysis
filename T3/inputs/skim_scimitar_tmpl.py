@@ -14,7 +14,7 @@ argv=[]
 import ROOT as root
 from PandaCore.Tools.Misc import *
 from PandaCore.Tools.Load import *
-import PandaCore.Tools.ConfigBuilding as cb
+import PandaCore.Tools.job_management as cb
 import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 
 now = int(time())
@@ -238,7 +238,7 @@ if __name__ == "__main__":
             success = fn(input_name,(to_run.dtype!='MC'),f)
             if success:
                 processed[input_name] = f
-        cleanup(input_name)
+            cleanup(input_name)
     
     if len(processed)==0:
         exit(1)
