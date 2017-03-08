@@ -9,6 +9,7 @@ using namespace panda;
 using namespace std;
 
 PandaAnalyzer::PandaAnalyzer() {
+    if (DEBUG) PDebug("PandaAnalyzer::PandaAnalyzer","Calling constructor");
     gt = new GeneralTree();
     ibetas = gt->get_ibetas();
     Ns = gt->get_Ns();
@@ -22,10 +23,12 @@ PandaAnalyzer::PandaAnalyzer() {
     flags["genOnly"]     = false;
     flags["pfCands"]     = false;
     flags["applyEGCorr"] = true;
+    if (DEBUG) PDebug("PandaAnalyzer::PandaAnalyzer","Called constructor");
 }
 
 
 PandaAnalyzer::~PandaAnalyzer() {
+    if (DEBUG) PDebug("PandaAnalyzer::~PandaAnalyzer","Calling destructor");
 }
 
 
@@ -35,6 +38,7 @@ void PandaAnalyzer::ResetBranches() {
     matchEles.clear();
     matchLeps.clear();
     gt->Reset();
+    if (DEBUG) PDebug("PandaAnalyzer::ResetBranches","Reset");
 }
 
 
@@ -47,11 +51,13 @@ void PandaAnalyzer::SetOutputFile(TString fOutName) {
     gt->fatjet    = flags["fatjet"];
     gt->WriteTree(tOut);
 
+    if (DEBUG) PDebug("PandaAnalyzer::SetOutputFile","Created output in "+fOutName);
 }
 
 
 void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
 {
+    if (DEBUG) PDebug("PandaAnalyzer::Init","Starting initialization");
     if (!t || !hweights) {
         PError("PandaAnalyzer::Init","Malformed input!");
         return;
@@ -82,6 +88,7 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
     }
 
     event.setAddress(*t, readlist); // pass the readlist so only the relevant branches are turned on
+    if (DEBUG) PDebug("PandaAnalyzer::Init","Set addresses");
 
     TH1F hDTotalMCWeight("hDTotalMCWeight","hDTotalMCWeight",1,0,2);
     hDTotalMCWeight.SetBinContent(1,hweights->GetBinContent(1));
@@ -116,7 +123,12 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
         areaDef = new fastjet::AreaDefinition(fastjet::active_area_explicit_ghosts,*activeArea);
         jetDef = new fastjet::JetDefinition(fastjet::cambridge_algorithm,radius);
         softDrop = new fastjet::contrib::SoftDrop(sdBeta,sdZcut,radius);
+    } else { 
+        std::vector<TString> droppable = {"fj1NConst","fj1NSDConst","fj1EFrac100","fj1SDEFrac100"};
+        for (auto &drop : droppable)
+            gt->SetBranchStatus(drop,false);
     }
+    if (DEBUG) PDebug("PandaAnalyzer::Init","Finished configuration");
 }
 
 
@@ -166,6 +178,7 @@ void PandaAnalyzer::Terminate() {
     delete areaDef;
     delete jetDef;
     delete softDrop;
+    if (DEBUG) PDebug("PandaAnalyzer::Terminate","Finished with output");
 }
 
 void PandaAnalyzer::OpenCorrection(CorrectionType ct, TString fpath, TString hname, int dim) {
@@ -192,6 +205,8 @@ void PandaAnalyzer::SetDataDir(const char *s) {
     TString dirPath(s);
     dirPath += "/";
 
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Starting loading of data");
+
     // pileup
     OpenCorrection(cNPV,dirPath+"moriond17/normalized_npv.root","data_npv_Wmn",1);
     OpenCorrection(cPU,dirPath+"moriond17/puWeights_80x_37ifb.root","puWeights",1);
@@ -207,13 +222,13 @@ void PandaAnalyzer::SetDataDir(const char *s) {
     // muons
     OpenCorrection(cMuLooseID,dirPath+"moriond17/muon_scalefactors_37ifb.root",
                    "scalefactors_MuonLooseId_Muon",2);
-    OpenCorrection(cMuLooseIso,"moriond17/muon_scalefactors_37ifb.root",
+    OpenCorrection(cMuLooseIso,dirPath+"moriond17/muon_scalefactors_37ifb.root",
                    "scalefactors_Iso_MuonLooseId",2);
     OpenCorrection(cMuTightID,dirPath+"moriond17/muon_scalefactors_37ifb.root",
                    "scalefactors_TightId_Muon",2);
     OpenCorrection(cMuTightIso,dirPath+"moriond17/muon_scalefactors_37ifb.root",
                    "scalefactors_Iso_MuonTightId",2);
-    OpenCorrection(cMuReco,dirPath+"files_moriond/Tracking_12p9.root","htrack2",1);
+    OpenCorrection(cMuReco,dirPath+"moriond17/Tracking_12p9.root","htrack2",1);
 
     // photons
     OpenCorrection(cPho,dirPath+"moriond17/scalefactors_80x_medium_photon_37ifb.root",
@@ -222,12 +237,14 @@ void PandaAnalyzer::SetDataDir(const char *s) {
     // triggers
     OpenCorrection(cTrigMET,dirPath+"moriond17/metTriggerEfficiency_recoil_monojet_TH1F.root",
                    "hden_monojet_recoil_clone_passed",1);
-    OpenCorrection(cTrigEle,"moriond17/eleTrig.root","hEffEtaPt",2);
-    OpenCorrection(cTrigPho,"moriond17/photonTriggerEfficiency_photon_TH1F.root",
+    OpenCorrection(cTrigEle,dirPath+"moriond17/eleTrig.root","hEffEtaPt",2);
+    OpenCorrection(cTrigPho,dirPath+"moriond17/photonTriggerEfficiency_photon_TH1F.root",
                    "hden_photonpt_clone_passed",1);
 
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded scale factors");
+
     // kfactors
-    TFile *fKFactor = new TFile(dirPath+"/kfactors.root"); 
+    TFile *fKFactor = new TFile(dirPath+"kfactors.root"); 
     fCorrs[cZNLO] = fKFactor; // just for garbage collection
 
     TH1D *hZLO    = (TH1D*)fKFactor->Get("ZJets_LO/inv_pt");
@@ -250,16 +267,18 @@ void PandaAnalyzer::SetDataDir(const char *s) {
     h1Corrs[cWNLO]->GetHist()->Divide(hWLO);    
     h1Corrs[cANLO]->GetHist()->Divide(hALO);
 
-    OpenCorrection(cANLO2j,"moriond17/histo_photons_2j.root","Func",1);
+    OpenCorrection(cANLO2j,dirPath+"moriond17/histo_photons_2jet.root","Func",1);
+
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded k factors");
 
     // btag SFs
-    btagCalib = new BTagCalibration("csvv2",(dirPath+"/CSVv2_Moriond17_B_H.csv").Data());
+    btagCalib = new BTagCalibration("csvv2",(dirPath+"moriond17/CSVv2_Moriond17_B_H.csv").Data());
     btagReaders[bJetL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
     btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
     btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
     btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
-    sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"/subjet_CSVv2_Moriond17_B_H.csv").Data());
+    sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"moriond17/subjet_CSVv2_Moriond17_B_H.csv").Data());
     btagReaders[bSubJetL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
     btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_B,"lt");
     btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_C,"lt");
@@ -270,11 +289,15 @@ void PandaAnalyzer::SetDataDir(const char *s) {
     btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
     btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded btag SFs");
+
     // mSD corr
     MSDcorr = new TFile(dirPath+"/puppiCorr.root");
     puppisd_corrGEN = (TF1*)MSDcorr->Get("puppiJECcorr_gen");;
     puppisd_corrRECO_cen = (TF1*)MSDcorr->Get("puppiJECcorr_reco_0eta1v3");
     puppisd_corrRECO_for = (TF1*)MSDcorr->Get("puppiJECcorr_reco_1v3eta2v5");
+
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded mSD correction");
 
     ak8UncReader["MC"] = new JetCorrectionUncertainty(
           (dirPath+"/jec/23Sep2016V2/Spring16_23Sep2016V2_MC_Uncertainty_AK8PFPuppi.txt").Data()
@@ -288,6 +311,8 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 
     ak8JERReader = new JERReader(dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_SF_AK8PFPuppi.txt",
                                  dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK8PFPuppi.txt");
+
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded JES/R");
 
 }
 
