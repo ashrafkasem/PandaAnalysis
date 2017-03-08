@@ -25,7 +25,7 @@ def print_time(label):
     global stopwatch
     now_ = clock()
     PDebug(sname+'.print_time:'+str(time()),
-           '%.3f s elapsed performing "%s"'%((now-stopwatch)/1000.,label))
+           '%.3f s elapsed performing "%s"'%((now_-stopwatch)/1000.,label))
     stopwatch = now_
 
 def copy_local(long_name):
