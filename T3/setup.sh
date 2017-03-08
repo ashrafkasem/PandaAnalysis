@@ -24,3 +24,4 @@ export PRIVATE_CFGDIR="${HOME}/cms/condor/monotop_private_panda/"
 export PANDA_FIT=/data/t3serv014/snarayan/CMSSW_7_4_7/
 export PANDA_FITSCAN=${PANDA_FLATDIR}/scans/
 export PANDA_LIMITS=${PANDA_FLATDIR}/limits/
+export PANDA_XSECS=/home/snarayan/cms/cmssw/analysis/MonoTop_Xsec/
