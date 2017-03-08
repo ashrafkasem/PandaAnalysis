@@ -23,10 +23,10 @@ ba.treename='events'
 ba.defaultValue=-1.2
 ba.presel='fj1ECFN_2_4_20>0'
 
-for v in cfg.variables[:nextra]:
+for v in cfg.variables:
   ba.AddVariable(v[0],v[2])
 
-for v in cfg.formulae[:12]:
+for v in cfg.formulae:
   ba.AddFormula(v[0],v[2])
 
 for s in cfg.spectators:
@@ -35,7 +35,7 @@ for s in cfg.spectators:
 #ba.BookMVA('top_ecfv6_bdt',workdir+'/training/top_ecfbdt_v6_BDT.weights.xml')
 #ba.BookMVA('top_ecfv7_bdt',workdir+'/training/top_ecfbdt_v7_BDT.weights.xml')
 #ba.BookMVA('top_ecfv8_bdt',workdir+'/training/top_ecfbdt_v8_BDT.weights.xml')
-ba.BookMVA('top_ecfAll_bdt',trainingdir+'scans50/top_ecfbdt_50_BDT.weights.xml')
+ba.BookMVA('top_ecfAll_bdt',trainingdir+'scan50/top_ecfbdt_50_BDT.weights.xml')
 
 ba.RunFile(workdir+'/'+sample+'.root')
 

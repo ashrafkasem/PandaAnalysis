@@ -31,5 +31,5 @@ cp higgs*root $limitdir/scans
 #cp scan_*txt $limitdir/scans
 
 cd $WD
-cp -r MonoXFit_CSV $limitdir/scans/fit_${mV}_${mChi}_${model}
+#cp -r MonoXFit_CSV $limitdir/scans/fit_${mV}_${mChi}_${model}
 rm -rf MonoXFit_CSV
