@@ -13,7 +13,7 @@ import ROOT as root
 from PandaCore.Tools.Misc import *
 from PandaCore.Tools.Load import *
 import PandaCore.Tools.Functions # kinematics
-import PandaAnalysis.Monotop.NewPFSelection as sel
+import PandaAnalysis.Monotop.CombinedSelection as sel
 
 Load('PandaAnalysisFlat','LimitTreeBuilder')
 
@@ -65,27 +65,6 @@ def shiftBtags(label,tree,varmap,cut,baseweight):
       ps.append(shiftedProcess)
   return ps
 
-def shiftCSV(label,tree,varmap,cut,baseweight):
-  ps = []
-  for shift in ['Up','Down']:
-    for cent in ['sf_csvWeightB','sf_csvWeightM','sf_sjcsvWeightB','sf_sjcsvWeightM']:
-      shiftedlabel = '_'
-      if 'sj' in cent:
-        shiftedlabel += 'sj'
-      if 'B' in cent:
-        shiftedlabel += 'btag'
-      else:
-        shiftedlabel += 'mistag'
-      if 'Up' in shift:
-        shiftedlabel += 'Up'
-      else:
-        shiftedlabel += 'Down'
-      weight = sel.weights[baseweight+'_'+cent+shift]%lumi
-      shiftedProcess = root.Process(label,tree,varmap,cut,weight)
-      shiftedProcess.syst = shiftedlabel
-      ps.append(shiftedProcess)
-  return ps
-
 # input
 tZll,fZll = getTree('ZJets')
 tZvv,fZvv = getTree('ZtoNuNu')
@@ -98,14 +77,22 @@ tST,fST = getTree('SingleTop')
 tMET,fMET = getTree('MET')
 tSingleEle,fSEle = getTree('SingleElectron')
 tSinglePho,fSPho = getTree('SinglePhoton')
-tSig,fSig = getTree('monotop-nr-v3-1700-100_med-1700_dm-100') # this is just a sample point
+#tSig,fSig = getTree('monotop-nr-v3-1700-100_med-1700_dm-100') # this is just a sample point
 
 tAllSig = {}; fAllSig = {}
 if enable('signal'):
-  signalFiles = glob(baseDir+'/monotop*root')
+  signalFiles = glob(baseDir+'/Vector*root')
   for f in signalFiles:
     fname = f.split('/')[-1].replace('.root','')
-    tAllSig[fname],fAllSig[fname] = getTree(fname)
+    signame = fname
+    replacements = {
+      'Vector_MonoTop_NLO_Mphi-':'',
+      '_gSM-0p25_gDM-1p0_13TeV-madgraph':'',
+      '_Mchi-':'_',
+      }
+    for k,v in replacements.iteritems():
+      signame = signame.replace(k,v)
+    tAllSig[signame],fAllSig[signame] = getTree(fname)
 
 factory.cd()
 regions = {}
@@ -159,7 +146,7 @@ if enable('signal'):
     root.Process('ST',tST,vm,cut,weight),
     root.Process('Diboson',tVV,vm,cut,weight),
     root.Process('QCD',tQCD,vm,cut,weight),
-    root.Process('signal',tSig,vm,cut,weight),
+#    root.Process('signal',tSig,vm,cut,weight),
   ]
   for signame,tsig in tAllSig.iteritems():
     processes['signal'].append( root.Process(signame,tsig,vm,cut,weight) )
@@ -167,8 +154,8 @@ if enable('signal'):
   for p in processes['signal']:
     if p.name=='Data':
       continue
-    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'signal')
-    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'signal')
+    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'signal')
+    #btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'signal')
   processes['signal'] += btag_shifts
 
   for p in processes['signal']:
@@ -195,8 +182,8 @@ if enable('singlemuonw'):
   for p in processes['singlemuonw']:
     if p.name=='Data':
       continue
-    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singlemuonw')
-    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singlemuonw')
+    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singlemuonw')
+    #btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singlemuonw')
   processes['singlemuonw'] += btag_shifts
 
   for p in processes['singlemuonw']:
@@ -223,8 +210,8 @@ if enable('singleelectronw'):
   for p in processes['singleelectronw']:
     if p.name=='Data':
       continue
-    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singleelectronw')
-    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singleelectronw')
+    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singleelectronw')
+    #btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singleelectronw')
   processes['singleelectronw'] += btag_shifts
 
   for p in processes['singleelectronw']:
@@ -251,8 +238,8 @@ if enable('singlemuontop'):
   for p in processes['singlemuontop']:
     if p.name=='Data':
       continue
-    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singlemuontop')
-    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singlemuontop')
+    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singlemuontop')
+    #btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singlemuontop')
   processes['singlemuontop'] += btag_shifts
 
   for p in processes['singlemuontop']:
@@ -279,8 +266,8 @@ if enable('singleelectrontop'):
   for p in processes['singleelectrontop']:
     if p.name=='Data':
       continue
-    #btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singleelectrontop')
-    btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singleelectrontop')
+    btag_shifts += shiftBtags(p.name,p.GetInput(),vm,cut,'singleelectrontop')
+    #btag_shifts += shiftCSV(p.name,p.GetInput(),vm,cut,'singleelectrontop')
   processes['singleelectrontop'] += btag_shifts
 
   for p in processes['singleelectrontop']:

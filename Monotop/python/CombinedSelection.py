@@ -10,7 +10,7 @@ triggers = {
 metFilter='metFilter==1'
 topTagSF = '1'
 ak4bTagSF = 'sf_btag0*(isojetNBtags==0)+sf_btag1*(isojetNBtags==1)+1*(isojetNBtags>1)'
-presel = 'nFatjet==1 && fj1Pt>250 && fabs(fj1Eta)<2.4 && 110<fj1MSD && fj1MSD<210 && 0.1<top_ecf_bdt && top_ecf_bdt<0.45'
+presel = 'nFatjet==1 && fj1Pt>250 && fabs(fj1Eta)<2.4 && 110<fj1MSD && fj1MSD<210 && 0.1<top_ecf_bdt'
 
 cuts = {
     'signal'             : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>0.5 && nLooseLep==0 && nLoosePhoton==0 && nTau==0 && fabs(calomet-pfmet)/pfmet<0.5 && fj1MaxCSV>0.46 && isojetNBtags==0')), 
@@ -19,7 +19,6 @@ cuts = {
     'dimuon'            : tAND(metFilter,tAND(presel,'pfUZmag>250 && dphipfUZ>0.5 && nLooseElectron==0 && nLoosePhoton==0 && nTau==0 && nLooseMuon==2 && nTightLep>0 && 60<diLepMass && diLepMass<120 && fabs(calomet-pfmet)/pfUZmag<0.5')),
     'dielectron'        : tAND(metFilter,tAND(presel,'pfUZmag>250 && dphipfUZ>0.5 && nLooseMuon==0 && nLoosePhoton==0 && nTau==0 && nLooseElectron==2 && nTightLep>0 && 60<diLepMass && diLepMass<120 && fabs(calomet-pfmet)/pfUZmag<0.5')),
     'photon'            : tAND(metFilter,tAND(presel,'pfUAmag>250 && dphipfUA>0.5 && nLooseLep==0 && nTau==0 && nLoosePhoton==1 && loosePho1IsTight==1 && fabs(loosePho1Eta)<1.4442 && fabs(calomet-pfmet)/pfUAmag<0.5')),
-    'qcd'               : tAND(metFilter,tAND(removeCut(removeCut(presel,'top_ecf_bdt'),'fj1MSD'),'pfmet>250 && dphipfmet<0.1 && nLooseLep==0 && nLoosePhoton==0 && nTau==0 && fabs(calomet-pfmet)/pfmet<0.5')), 
 }
 for r in ['singlemuon','singleelectron']:
 	cuts[r+'w'] = tAND(cuts[r],'fj1MaxCSV<0.46 && isojetNBtags==0')
@@ -33,7 +32,6 @@ weights = {
   'z'              : tTIMES(topTagSF,'%f*sf_pu2016_fixed*sf_tt*normalizedWeight*sf_lep*sf_lepReco*sf_ewkV*sf_qcdV'),
   'photon'         : tTIMES(topTagSF,'%f*sf_pu2016_fixed*normalizedWeight*sf_ewkV*sf_qcdV*sf_pho*sf_phoTrig'),
 }
-weights['qcd'] = weights['signal']
 
 for x in ['singlemuontop','singleelectrontop']:
 	if 'electron' in x:
