@@ -1229,6 +1229,26 @@ void PandaAnalyzer::Run() {
             }
 
         } // VJet loop
+        switch (whichRecoil) {
+            case -1: // photon
+                gt->dphipuppiU = gt->dphipuppiUA;
+                gt->dphipfU = gt->dphipfUA;
+                break;
+            case 0: // MET
+                gt->dphipuppiU = gt->dphipuppimet;
+                gt->dphipfU = gt->dphipfmet;
+                break;
+            case 1:
+                gt->dphipuppiU = gt->dphipuppiUW;
+                gt->dphipfU = gt->dphipfUW;
+                break;
+            case 2:
+                gt->dphipuppiU = gt->dphipuppiUZ;
+                gt->dphipfU = gt->dphipfUZ;
+                break;
+            default: // impossible
+                break;
+        }
 
         gt->nJet = cleanedJets.size();
         if (gt->nJet>1 && doMonoJ) {
