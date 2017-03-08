@@ -11,7 +11,6 @@ argv = []
 import ROOT as root
 from PandaCore.Tools.Load import *
 
-
 Load('PandaAnalyzer')
 print 'loaded'
 
@@ -55,4 +54,3 @@ skimmer.Run()
 print 'done running'
 skimmer.Terminate()
 print 'done terminating'
-
