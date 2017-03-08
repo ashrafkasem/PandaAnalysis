@@ -79,7 +79,7 @@ class Output:
     s += '%10i '%self.idle
     s += '%10i '%self.missing
     s += '%10i '%self.done
-    s += '(done=%.2f%%)'%(d_frac)
+    s += '(done=%.2f%%)'%(d_frac*100./WIDTH)
     return s
 
 
