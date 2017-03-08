@@ -3,6 +3,7 @@
 from os import system,getenv
 from sys import argv,exit
 import argparse
+from collections import namedtuple
 
 ### SET GLOBAL VARIABLES ###
 rerecoDir = '/home/snarayan/home000/store/panda/v_8020_2_3/' 
@@ -27,14 +28,16 @@ import PandaCore.Tools.Functions
 import PandaAnalysis.Monotop.NoMassPFSelection as sel
 Load('Drawers','PlotUtility')
 
-all_runs = {
-    'B' : (272007,275376),
-    'C' : (275657,276283),
-    'D' : (276315,276811),
-    'E' : (276831,277420),
-    'F' : (277772,278808),
-    'G' : (278820,280385),
-    'H' : (280919,284044),
+Era = namedtuple('Era',['lo','hi','lumi'])
+
+all_eras = {
+    'B' : Era(272007,275376,5927.9),
+    'C' : Era(275657,276283,2628.9),
+    'D' : Era(276315,276811,4341.9),
+    'E' : Era(276831,277420,4040.3),
+    'F' : Era(277772,278808,3160.1),
+    'G' : Era(278820,280385,7552.5),
+    'H' : Era(280919,284044,8761.8),
     }
 
 run_boundaries = []
