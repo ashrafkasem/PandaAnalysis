@@ -39,7 +39,7 @@ plotr.AddCMSLabel()
 plotr.SetLumi(lumi/1000)
 plotr.AddLumiLabel(True)
 
-fin = root.TFile('~/home000/store/nero/v0/TTbar.root')
+fin = root.TFile('/home/snarayan/home000/store/panda/v_8026_0_0_gen/TTbar.root')
 tree = fin.Get('events')
 
 def build_hist(name,color,width,style=1):
@@ -51,7 +51,7 @@ def build_hist(name,color,width,style=1):
   hnew.SetLineStyle(style)
   return hnew
 
-plotstring = 'min(999,max(0,(pt_top+pt_antitop)/2)) >> %s'
+plotstring = 'min(999,max(0,(genTopPt+genAntiTopPt)/2)) >> %s'
 
 integrals = {}
 hists = {}
