@@ -31,6 +31,13 @@ header = '%-48s'%('Sample')
 header += ('%%-%is'%(WIDTH+2))%('Progress')
 header += ' %10s %10s %10s %10s %10s'%('Total','Running','Idle','Missing','Done')
 
+colors = {
+    'green' : 42,
+    'blue' : 44,
+    'grey' : 47, 
+    'red' : 41,
+    }
+
 class Output:
   def __init__(self,name):
     self.name = name
@@ -56,15 +63,15 @@ class Output:
     d_frac = 1.*WIDTH*self.done/self.total
     r_frac = 1.*WIDTH*(self.done+self.running)/self.total
     i_frac = 1.*WIDTH*(self.idle+self.done+self.running)/self.total
-    s += '\t[\033[0;42m'
+    s += '\t[\033[0;%im'%colors['green']
     state = 0
     for i in xrange(WIDTH):
         if i>=d_frac:
-            s += '\033[0;44m'
+            s += '\033[0;%im'%colors['blue']
         if i>=r_frac:
-            s += '\033[0;47m'
+            s += '\033[0;%im'%colors['grey']
         if i>=i_frac:
-            s += '\033[0;41m'
+            s += '\033[0;%im'%colors['red']
         s += ' '
     s += '\033[0m] '
     s += '%10i '%self.total
@@ -171,8 +178,11 @@ else:
 print header
 for n in sorted(outputs):
   print str(outputs[n])
+print
 print str(data)
 print str(mc)
+print
+print 'Legend: Done=\033[0;%im    \033[0m, Running=\033[0;%im    \033[0m, Idle=\033[0;%im    \033[0m, Missing=\033[0;%im    \033[0m, '%(colors['green'],colors['blue'],colors['grey'],colors['red'])
 
 outfile.close()
 
