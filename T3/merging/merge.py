@@ -3,7 +3,7 @@
 from array import array
 from glob import glob
 from re import sub
-from sys import argv
+from sys import argv,exit
 from os import environ,system,path
 
 sname = argv[0]
@@ -77,11 +77,28 @@ def normalizeFast(fpath,opt):
   n.inWeightName = ''
   n.NormalizeTree(fpath,xsec)
 
+# Vector_MonoTop_NLO_Mphi-1000_Mchi-1_gSM-0p25_gDM-1p0_13TeV-madgraph.root
 def merge(shortnames,mergedname):
   for shortname in shortnames:
     if 'monotop' in shortname:
       pd = shortname
       xsec = 1
+    elif 'Vector' in shortname:
+      tmp_ = shortname
+      replacements = {
+        'Vector_MonoTop_NLO_Mphi-':'',
+        '_gSM-0p25_gDM-1p0_13TeV-madgraph':'',
+        '_Mchi-':'_',
+        }
+      for k,v in replacements.iteritems():
+        tmp_ = tmp_.replace(k,v)
+      print tmp_
+      m_V,m_DM = [int(x) for x in tmp_.split('_')]
+      params = read_nr_model(m_V,m_DM)
+      if params:
+        xsec = params.sigma
+      else:
+        exit(1)
     elif shortname in pds:
       pd = pds[shortname][0]
       xsec = pds[shortname][1]
@@ -109,7 +126,7 @@ d = {
   'TTbar_isrdown'       : ['TTbar_PowhegISRDown'],
   'TTbar_tuneup'        : ['TTbar_PowhegTuneUp'],
   'TTbar_tunedown'      : ['TTbar_PowhegTuneDown'],
-  'TTbar_FXFX'		    : ['TTbar_FXFX'],
+  'TTbar_FXFX'          : ['TTbar_FXFX'],
   'TTbar_Herwig'        : ['TTbar_Herwig'],
   'SingleTop'           : ['SingleTop_tT','SingleTop_tTbar','SingleTop_tbarW','SingleTop_tW'],
   'QCD'                 : ['QCD_ht100to200','QCD_ht200to300','QCD_ht300to500','QCD_ht500to700','QCD_ht700to1000','QCD_ht1000to1500','QCD_ht1500to2000','QCD_ht2000toinf'],

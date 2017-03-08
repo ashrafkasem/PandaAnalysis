@@ -9,7 +9,7 @@ limitdir = environ['PANDA_LIMITS']
 scramdir = environ['PANDA_FIT']
 flatdir  = environ['PANDA_FLATDIR']
 
-sigfiles = glob(flatdir+'/monotop*root')
+sigfiles = glob(flatdir+'/Vector*root')
 
 iC=0
 for ff in sigfiles:
@@ -17,8 +17,15 @@ for ff in sigfiles:
   model = ''
   mV = ''
   mChi = ''
-  if 'nr' in f:
-    mV,mChi = f.replace('monotop-nr-v3-','').split('_')[0].split('-')
+  if 'Vector' in f:
+    replacements = {
+      'Vector_MonoTop_NLO_Mphi-':'',
+      '_gSM-0p25_gDM-1p0_13TeV-madgraph':'',
+      '_Mchi-':'_',
+      }
+    for k,v in replacements.iteritems():
+      f = f.replace(k,v)
+    mV,mChi = map(int,f.split('_'))
     model = '--isFCNC'
   else:
     mV = f.split('_')[1].split('-')[1]
