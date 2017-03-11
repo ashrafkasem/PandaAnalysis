@@ -25,6 +25,9 @@
 #pragma link C++ enum PandaAnalyzer::PreselectionBit;
 #pragma link C++ enum PandaAnalyzer::ProcessType;
 #pragma link C++ enum PandaAnalyzer::TriggerBits;
+#pragma link C++ enum GeneralTree::BTagShift;
+#pragma link C++ enum GeneralTree::BTagJet;
+#pragma link C++ enum GeneralTree::BTagTags;
 
 #pragma link C++ class LumiRange;
 #pragma link C++ class THCorr;
@@ -36,6 +39,8 @@
 #pragma link C++ class SFTreeBuilder;
 #pragma link C++ class BTagTree;
 #pragma link C++ class GeneralTree;
+#pragma link C++ class GeneralTree::ECFParams;
+#pragma link C++ class GeneralTree::BTagParams;
 #pragma link C++ class KFactorTree;
 #pragma link C++ class genericTree;
 #pragma link C++ class LimitTreeBuilder;
