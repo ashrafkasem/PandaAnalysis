@@ -68,7 +68,7 @@ public :
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    PandaAnalyzer();
+    PandaAnalyzer(int debug_=0);
     ~PandaAnalyzer();
     void Init(TTree *tree, TH1D *hweights);
     void SetOutputFile(TString fOutName);
@@ -149,7 +149,9 @@ private:
                     GeneralTree::BTagShift shift,GeneralTree::BTagJet jettype, bool do2=false);
     void OpenCorrection(CorrectionType,TString,TString,int);
     double GetCorr(CorrectionType ct,double x, double y=0);
+    void RegisterTrigger(TString path, std::vector<unsigned> &idxs); 
 
+    int DEBUG = 0; //!< debug verbosity level
     std::map<TString,bool> flags;
 
     std::map<panda::GenParticle const*,float> genObjects;                 //!< particles we want to match the jets to, and the 'size' of the daughters
