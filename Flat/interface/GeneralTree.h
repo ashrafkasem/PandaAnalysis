@@ -157,6 +157,7 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    float fj1SubMaxCSV = -1;
     int looseLep1IsHLTSafe = -1;
     int looseLep2IsHLTSafe = -1;
     int runNumber = -1;

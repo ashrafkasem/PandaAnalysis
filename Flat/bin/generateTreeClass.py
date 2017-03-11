@@ -13,7 +13,7 @@ args = parser.parse_args()
 suffixes = { 'float':'F', 
                          'int':'I',
                          'uint':'i',
-                         'uint64':'Ulong64_t',
+                         'uint64':'l',
                      }
 ctypes = {    
                         'uint':'unsigned int',
@@ -116,7 +116,7 @@ with open(def_path,'w') as fdef:
         fdef.write(line)
         if '//ENDCUSTOMCONST' in line:
             for b in branches:
-                fdef.write(b.create_write())
+                fdef.write(b.create_constructor())
         elif '//ENDCUSTOMRESET' in line:
             for b in branches:
                 fdef.write(b.create_reset())

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from os import getenv
+from os import getenv,path
 from PandaCore.Tools.job_management import *
 import subprocess
 import sys
@@ -95,8 +95,11 @@ for lock in locks:
 # determine what samples from previous resubmissions are still running
 running_samples = []
 idle_samples = []
-with open(workdir+'/submission.pkl','rb') as fpkl:
-  submissions = pickle.load(fpkl)
+if path.isfile(workdir+'/submission.pkl'): 
+  with open(workdir+'/submission.pkl','rb') as fpkl:
+    submissions = pickle.load(fpkl)
+else:
+  submissions = []
 for s in submissions:
   results = s.query_status()
   running_samples += results['running']
