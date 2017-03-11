@@ -25,7 +25,7 @@ import ROOT as root
 root.gROOT.SetBatch()
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-import PandaAnalysis.Monotop.OneFatJetSelection as sel
+import PandaAnalysis.Monotop.LooseSelection as sel
 from PandaCore.Drawers.plot_utility import *
 
 ### DEFINE REGIONS ###
@@ -59,6 +59,9 @@ plot.do_underflow = True
 weight = sel.weights[region]%lumi
 plot.mc_weight = weight
 
+PInfo('cut',plot.cut)
+PInfo('weight',plot.mc_weight)
+
 #plot.add_systematic('QCD scale','scaleUp','scaleDown',root.kRed+2)
 #plot.add_systematic('PDF','pdfUp','pdfDown',root.kBlue+2)
 
@@ -85,13 +88,13 @@ else:
     zjets.add_file(baseDir+'ZJets.root')
 wjets.add_file(baseDir+'WJets.root')
 diboson.add_file(baseDir+'Diboson.root')
-ttbar.add_file(baseDir+'TTbar%s.root'%(args.tt))
+ttbar.add_file(baseDir+'TTbar%s.root'%(args.tt)); ttbar.additional_weight = '831.76/730'
 singletop.add_file(baseDir+'SingleTop.root')
 if 'pho' in region:
     processes = [qcd,gjets]
     gjets.add_file(baseDir+'GJets.root')
     qcd.add_file(baseDir+'SinglePhoton.root')
-    qcd.additional_cut = sel.triggers['pho']
+    #qcd.additional_cut = sel.triggers['pho']
     qcd.use_common_weight = False
     qcd.additional_weight = 'sf_phoPurity'
 else:
@@ -102,18 +105,18 @@ if any([x in region for x in ['singlemuonw','singleelectronw']]):
 if any([x in region for x in ['singlemuontop','singleelectrontop']]):
     processes = [qcd,diboson,singletop,zjets,wjets,ttbar]
 if any([x in region for x in ['signal','muon','qcd']]):
-    data.additional_cut = sel.triggers['met']
+#    data.additional_cut = sel.triggers['met']
     data.add_file(baseDir+'MET.root')
     lep='#mu'
 elif 'electron' in region:
-    if 'di' in region:
-        data.additional_cut = tOR(sel.triggers['ele'],sel.triggers['pho'])
-    else:
-        data.additional_cut = sel.triggers['ele']
+#    if 'di' in region:
+#        data.additional_cut = tOR(sel.triggers['ele'],sel.triggers['pho'])
+#    else:
+#        data.additional_cut = sel.triggers['ele']
     data.add_file(baseDir+'SingleElectron.root')
     lep='e'
 elif region=='photon':
-    data.additional_cut = sel.triggers['pho']
+    #data.additional_cut = sel.triggers['pho']
     data.add_file(baseDir+'SinglePhoton.root')
 
 
@@ -152,7 +155,4 @@ plot.add_distribution(FDistribution('dphipfmet',0,3.14,20,'min#Delta#phi(jet,E_{
 plot.add_distribution(FDistribution("1",0,2,1,"dummy","dummy"))
 
 ### DRAW AND CATALOGUE ###
-if args.era:
-    plot.draw_all(args.outdir+'/'+region+'_'+args.era+'_')
-else:
-    plot.draw_all(args.outdir+'/'+region+'_')
+plot.draw_all(args.outdir+'/'+region+'_')

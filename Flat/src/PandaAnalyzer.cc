@@ -4,13 +4,15 @@
 #include <algorithm>
 #include <vector>
 
-#define DEBUG 0
 using namespace panda;
 using namespace std;
 
-PandaAnalyzer::PandaAnalyzer() {
+PandaAnalyzer::PandaAnalyzer(int debug_/*=0*/) {
+    DEBUG = debug_;
+
     if (DEBUG) PDebug("PandaAnalyzer::PandaAnalyzer","Calling constructor");
     gt = new GeneralTree();
+    if (DEBUG) PDebug("PandaAnalyzer::PandaAnalyzer","Built GeneralTree");
     ibetas = gt->get_ibetas();
     Ns = gt->get_Ns();
     orders = gt->get_orders();
@@ -68,12 +70,13 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
 
     TString jetname = (flags["puppi"]) ? "puppi" : "chs";
     panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", 
-                                       "isData", "npv", "weight", "chsAK4Jets", 
+                                       "isData", "npv", "npvTrue", "weight", "chsAK4Jets", 
                                        "electrons", "muons", "taus", "photons", 
-                                       "met", "caloMet", "puppiMet", "recoil"});
+                                       "pfMet", "caloMet", "puppiMet", 
+                                       "recoil","metFilters",});
 
     if (flags["fatjet"])
-      readlist += {jetname+"CA15Jets", "subjets"};
+      readlist += {jetname+"CA15Jets", "subjets", jetname+"CA15Subjets","Subjets"};
     
     if (flags["pfCands"])
         readlist.push_back("pfCandidates");
@@ -132,7 +135,7 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
 }
 
 
-panda::GenParticle const* PandaAnalyzer::MatchToGen(double eta, double phi, double radius, int pdgid) {
+panda::GenParticle const *PandaAnalyzer::MatchToGen(double eta, double phi, double radius, int pdgid) {
     panda::GenParticle const* found=NULL;
     double r2 = radius*radius;
     pdgid = abs(pdgid);
@@ -506,6 +509,12 @@ float PandaAnalyzer::GetMSDCorr(Float_t puppipt, Float_t puppieta) {
     return totalWeight;
 }
 
+void PandaAnalyzer::RegisterTrigger(TString path, std::vector<unsigned> &idxs) {
+    unsigned idx = event.registerTrigger(path);
+    if (DEBUG>1) PDebug("PandaAnalyzer::RegisterTrigger",
+                        TString::Format("At %u found trigger=%s",idx,path.Data()));
+    idxs.push_back(idx);
+}
 
 // run
 void PandaAnalyzer::Run() {
@@ -544,7 +553,7 @@ void PandaAnalyzer::Run() {
     jets = &event.chsAK4Jets;
 
     // these are bins of b-tagging eff in pT and eta, derived in 8024 TT MC
-    // why don't I store these in TH2s...?
+    // TODO: don't hardcode these 
     std::vector<double> vbtagpt {20.0,50.0,80.0,120.0,200.0,300.0,400.0,500.0,700.0,1000.0};
     std::vector<double> vbtageta {0.0,0.5,1.5,2.5};
     std::vector<std::vector<double>> lfeff  = {{0.081,0.065,0.060,0.063,0.072,0.085,0.104,0.127,0.162},
@@ -567,6 +576,55 @@ void PandaAnalyzer::Run() {
     std::vector<unsigned int> muTriggers;
 
     if (isData) {
+        std::vector<TString> metTriggerPaths = {
+                     "HLT_PFMET170_NoiseCleaned",
+                     "HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight",
+                     "HLT_PFMETNoMu110_NoiseCleaned_PFMHTNoMu110_IDTight",
+                     "HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight",
+                     "HLT_PFMET170_HBHECleaned",
+                     "HLT_PFMET170_JetIdCleaned",
+                     "HLT_PFMET170_NotCleaned",
+                     "HLT_PFMET170_HBHE_BeamHaloCleaned",
+                     "HLT_PFMETNoMu90_PFMHTNoMu90_IDTight",
+                     "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight",
+                     "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight",
+                     "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight"
+        };
+        std::vector<TString> eleTriggerPaths = {
+                     "HLT_Ele25_eta2p1_WPTight_Gsf",
+                     "HLT_Ele27_eta2p1_WPLoose_Gsf",
+                     "HLT_Ele27_WPTight_Gsf",
+                     "HLT_Ele30_WPTight_Gsf",
+                     "HLT_Ele32_eta2p1_WPTight_Gsf",
+                     "HLT_Ele35_WPLoose_Gsf",
+                     "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
+        };
+        std::vector<TString> phoTriggerPaths = {
+                     "HLT_Photon175",
+                     "HLT_Photon165_HE10",
+                     "HLT_Photon36_R9Id90_HE10_IsoM",
+                     "HLT_Photon50_R9Id90_HE10_IsoM",
+                     "HLT_Photon75_R9Id90_HE10_IsoM",
+                     "HLT_Photon90_R9Id90_HE10_IsoM",
+                     "HLT_Photon120_R9Id90_HE10_IsoM",
+                     "HLT_Photon165_R9Id90_HE10_IsoM",
+                     "HLT_Photon300_NoHE"
+        };
+
+        if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading MET triggers");
+        for (auto path : metTriggerPaths) {
+            RegisterTrigger(path,metTriggers);
+        }
+        if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading SingleElectron triggers");
+        for (auto path : eleTriggerPaths) {
+            RegisterTrigger(path,eleTriggers);
+        }
+        if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading SinglePhoton triggers");
+        for (auto path : phoTriggerPaths) {
+            RegisterTrigger(path,phoTriggers);
+        }
+
+        /*
         metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NoiseCleaned"));
         metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight"));
         metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_NoiseCleaned_PFMHTNoMu110_IDTight"));
@@ -600,17 +658,19 @@ void PandaAnalyzer::Run() {
         eleTriggers.push_back(event.registerTrigger("HLT_Ele32_eta2p1_WPTight_Gsf"));
         eleTriggers.push_back(event.registerTrigger("HLT_Ele35_WPLoose_Gsf"));
         eleTriggers.push_back(event.registerTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"));
-        eleTriggers.push_back(event.registerTrigger("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf"));
-        eleTriggers.push_back(event.registerTrigger("HLT_Ele105_CaloIdVT_GsfTrkIdT"));
-        eleTriggers.push_back(event.registerTrigger("HLT_ECALHT800"));
+        // eleTriggers.push_back(event.registerTrigger("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf"));
+        // eleTriggers.push_back(event.registerTrigger("HLT_Ele105_CaloIdVT_GsfTrkIdT"));
+        // eleTriggers.push_back(event.registerTrigger("HLT_ECALHT800"));
         phoTriggers.push_back(event.registerTrigger("HLT_Photon175"));
         phoTriggers.push_back(event.registerTrigger("HLT_Photon165_HE10"));
-        phoTriggers.push_back(event.registerTrigger("HLT_Photon36_R9Id90_HE10_IsoM"));
-        phoTriggers.push_back(event.registerTrigger("HLT_Photon50_R9Id90_HE10_IsoM"));
-        phoTriggers.push_back(event.registerTrigger("HLT_Photon75_R9Id90_HE10_IsoM"));
-        phoTriggers.push_back(event.registerTrigger("HLT_Photon90_R9Id90_HE10_IsoM"));
-        phoTriggers.push_back(event.registerTrigger("HLT_Photon120_R9Id90_HE10_IsoM"));
-        phoTriggers.push_back(event.registerTrigger("HLT_Photon165_R9Id90_HE10_IsoM"));
+        phoTriggers.push_back(event.registerTrigger("HLT_Photon300_NoHE"));
+        // phoTriggers.push_back(event.registerTrigger("HLT_Photon36_R9Id90_HE10_IsoM"));
+        // phoTriggers.push_back(event.registerTrigger("HLT_Photon50_R9Id90_HE10_IsoM"));
+        // phoTriggers.push_back(event.registerTrigger("HLT_Photon75_R9Id90_HE10_IsoM"));
+        // phoTriggers.push_back(event.registerTrigger("HLT_Photon90_R9Id90_HE10_IsoM"));
+        // phoTriggers.push_back(event.registerTrigger("HLT_Photon120_R9Id90_HE10_IsoM"));
+        // phoTriggers.push_back(event.registerTrigger("HLT_Photon165_R9Id90_HE10_IsoM"));
+        */
     }
 
     // set up reporters
@@ -632,12 +692,12 @@ void PandaAnalyzer::Run() {
         event.getEntry(*tIn,iE);
         tr.TriggerEvent(TString::Format("GetEntry %u",iE));
 
-        if ( ((preselBits&kMonotop) || (preselBits&kMonohiggs) 
-               || (preselBits&kMonojet) || (preselBits&kRecoil)) 
-            && event.recoil.max<175 )
+        if ( (preselBits&kMonotop) || (preselBits&kMonohiggs) || 
+             (preselBits&kMonojet) || (preselBits&kRecoil) ) 
         {
-            continue;
-        }
+           if (event.recoil.max<175)
+              continue;
+        } 
 
         // event info
         gt->mcWeight = (event.weight>0) ? 1 : -1;
@@ -647,15 +707,12 @@ void PandaAnalyzer::Run() {
         gt->npv = event.npv;
         gt->pu = event.npvTrue;
         gt->metFilter = (event.metFilters.pass()) ? 1 : 0;
-        gt->metFilter = (gt->metFilter==1 && 0==event.metFilters.badMuons) ? 1 : 0;
-        gt->metFilter = (gt->metFilter==1 && 0==event.metFilters.duplicateMuons) ? 1 : 0;
-        gt->egmFilter = (0==event.metFilters.dupECALClusters) ? 1 : 0;
-        gt->egmFilter = (gt->egmFilter==1 && 0==event.metFilters.unfixedECALHits) ? 1 : 0;
+        gt->metFilter = (gt->metFilter==1 && !event.metFilters.badMuons) ? 1 : 0;
+        gt->metFilter = (gt->metFilter==1 && !event.metFilters.duplicateMuons) ? 1 : 0;
+        gt->egmFilter = (!event.metFilters.dupECALClusters) ? 1 : 0;
+        gt->egmFilter = (gt->egmFilter==1 && !event.metFilters.unfixedECALHits) ? 1 : 0;
 
-        if (!isData) {
-            gt->sf_npv = GetCorr(cNPV,gt->npv);
-            gt->sf_pu = GetCorr(cPU,gt->pu);
-        } else {
+        if (isData) {
             // check the json
             if (applyJSON && !PassGoodLumis(gt->runNumber,gt->lumiNumber))
                 continue;
@@ -679,6 +736,9 @@ void PandaAnalyzer::Run() {
                 break;
               }
             }
+        } else {
+            gt->sf_npv = GetCorr(cNPV,gt->npv);
+            gt->sf_pu = GetCorr(cPU,gt->pu);
         }
 
         if (uncReader==0) {
@@ -919,11 +979,24 @@ void PandaAnalyzer::Run() {
         tr.TriggerEvent("triggers");
 
         // recoil!
-        if (isData and applyEGCorr) {
+        if (isData && applyEGCorr) {
+            float old_mT = gt->mT;
+            float old_pfmet = gt->pfmet;
             vPFMET += vType1EGCorr;
             gt->pfmet = vPFMET.Pt();
             gt->pfmetphi = vPFMET.Phi();
-            gt->mT = MT(gt->looseLep1Pt,gt->looseLep1Eta,gt->pfmet,gt->pfmetphi);
+            if (gt->nLooseLep>0)
+                gt->mT = MT(gt->looseLep1Pt,gt->looseLep1Phi,gt->pfmet,gt->pfmetphi);
+            if (DEBUG>1) {
+                PDebug("PandaAnalyzer::Run::applyEGCorr)",
+                        TString::Format("nLooseLep=%i, nLoosePhoton=%i",gt->nLooseLep,gt->nLoosePhoton));
+                PDebug("PandaAnalyzer::Run::applyEGCorr)",
+                        TString::Format("Offline MET corr: %.3f -> %.3f",old_pfmet,gt->pfmet));
+                PDebug("PandaAnalyzer::Run::applyEGCorr)",
+                        TString::Format("CMSSW MET corr: %.3f -> %.3f",old_pfmet,event.pfMet.pt));
+                PDebug("PandaAnalyzer::Run::applyEGCorr)",
+                        TString::Format("Offline mT corr: %.3f -> %.3f",old_mT,gt->mT));
+            }
         }
         TLorentzVector vObj1, vObj2;
         TLorentzVector vpuppiUW, vpuppiUZ, vpuppiUA;
@@ -1030,7 +1103,7 @@ void PandaAnalyzer::Run() {
                         gt->fj1MSDSmearedDown = gt->fj1MSD;
                     } else {
                         double smear=1, smearUp=1, smearDown=1;
-                      ak8JERReader->getStochasticSmear(pt,eta,15,smear,smearUp,smearDown);
+                        ak8JERReader->getStochasticSmear(pt,eta,15,smear,smearUp,smearDown);
 
                         gt->fj1PtSmeared = smear*gt->fj1Pt;
                         gt->fj1PtSmearedUp = smearUp*gt->fj1Pt;
@@ -1076,8 +1149,14 @@ void PandaAnalyzer::Run() {
                       });
 
                     std::sort(subjets.begin(),subjets.end(),csvsort);
-                    gt->fj1MaxCSV = subjets.at(0)->csv;
-                    gt->fj1MinCSV = subjets.back()->csv;
+                    if (subjets.size()>0) {
+                        gt->fj1MaxCSV = subjets.at(0)->csv;
+                        gt->fj1MinCSV = subjets.back()->csv;
+                        if (subjets.size()>1) {
+                            gt->fj1SubMaxCSV = subjets.at(1)->csv;
+                        }
+                    }
+                    gt->fj1DoubleCSV = fj.double_sub;
 
                     if (doMonoH) {
                         for (unsigned int iSJ=0; iSJ!=fj.subjets.size(); ++iSJ) {

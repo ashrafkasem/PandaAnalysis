@@ -8,7 +8,3 @@ statii = s.query_status()
 print 'Job summary:'
 for k,v in statii.iteritems():
       print '\t %10s : %5i'%(k,len(v))
-      for j in v:
-            if 'MET' in j.name:
-                  print j.name
-

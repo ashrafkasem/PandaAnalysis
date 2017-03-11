@@ -5,7 +5,10 @@ from sys import argv,exit
 from os import system,getenv
 import json
 
+debug_level = 2
 torun = argv[1]
+if len(argv)>2:
+    debug_level = int(argv[2])
 argv = []
 
 import ROOT as root
@@ -14,13 +17,13 @@ from PandaCore.Tools.Load import *
 Load('PandaAnalyzer')
 print 'loaded'
 
-skimmer = root.PandaAnalyzer()
+skimmer = root.PandaAnalyzer(debug_level)
 
 print 'created'
 
 skimmer.firstEvent=0
-skimmer.lastEvent=100
-skimmer.isData=False
+skimmer.lastEvent=1000
+skimmer.isData=True
 skimmer.SetFlag('puppi',True)
 skimmer.SetFlag('fatjet',True)
 skimmer.SetFlag('firstGen',False)
@@ -34,7 +37,7 @@ if skimmer.isData and False:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
 #skimmer.processType = root.PandaAnalyzer.kTT
 skimmer.processType = root.PandaAnalyzer.kNone
-#        skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
+skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
 #system("pxrdcp %s input.root '!pfCandidates'"%(torun))
 #fin = root.TFile.Open('input.root')
 fin = root.TFile.Open(torun)

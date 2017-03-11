@@ -94,6 +94,7 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    fj1SubMaxCSV = -1;
     looseLep1IsHLTSafe = 0;
     looseLep2IsHLTSafe = 0;
     runNumber = 0;
@@ -326,11 +327,12 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    treePtr->Branch("fj1SubMaxCSV",&fj1SubMaxCSV,"fj1SubMaxCSV/F");
     treePtr->Branch("looseLep1IsHLTSafe",&looseLep1IsHLTSafe,"looseLep1IsHLTSafe/I");
     treePtr->Branch("looseLep2IsHLTSafe",&looseLep2IsHLTSafe,"looseLep2IsHLTSafe/I");
     treePtr->Branch("runNumber",&runNumber,"runNumber/I");
     treePtr->Branch("lumiNumber",&lumiNumber,"lumiNumber/I");
-    treePtr->Branch("eventNumber",&eventNumber,"eventNumber/Ulong64_t");
+    treePtr->Branch("eventNumber",&eventNumber,"eventNumber/l");
     treePtr->Branch("npv",&npv,"npv/I");
     treePtr->Branch("pu",&pu,"pu/I");
     treePtr->Branch("mcWeight",&mcWeight,"mcWeight/F");

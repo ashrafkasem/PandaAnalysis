@@ -43,6 +43,11 @@ def copy_local(long_name):
     panda_id = long_name.split('/')[-1].split('_')[-1].replace('.root','')
     input_name = 'input_%s.root'%panda_id
 
+    # if the file is cached locally, why not use it?
+    local_path = full_path.replace('root://xrootd.cmsaf.mit.edu/','/mnt/hadoop/cms')
+    if path.isfile(local_path):
+        full_path = local_path
+
     '''
     # xrdcp if remote, copy if local - DEPRECATED
     if 'root://' in full_path:
@@ -53,9 +58,6 @@ def copy_local(long_name):
 
     # rely on pxrdcp for local and remote copies
     # default behavior: drop PF candidates
-    local_path = full_path.replace('root://xrootd.cmsaf.mit.edu/','/mnt/hadoop/cms')
-    if path.isfile(local_path):
-        full_path = local_path
     cmd = "pxrdcp %s %s '!pfCandidates'"%(full_path,input_name)
     PInfo(sname+'.copy_local',cmd)
 
