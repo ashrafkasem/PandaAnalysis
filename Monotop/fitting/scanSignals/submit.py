@@ -5,11 +5,12 @@ from sys import exit,stdout
 from glob import glob
 
 user = environ['USER']
-limitdir = environ['PANDA_LIMITS']
+fittingdir = environ['PANDA_FITTING']
 scramdir = environ['PANDA_FIT']
 flatdir  = environ['PANDA_FLATDIR']
 
-sigfiles = glob(flatdir+'/Vector*root')
+sigfiles = glob(flatdir+'/Scalar*root')
+sigfiles += glob(flatdir+'/Vector*root')
 
 iC=0
 for ff in sigfiles:
@@ -28,10 +29,16 @@ for ff in sigfiles:
     mV,mChi = map(int,f.split('_'))
     model = '--isFCNC'
   else:
-    mV = f.split('_')[1].split('-')[1]
-    mChi = '100'
+    replacements = {
+                'Scalar_MonoTop_LO_Mphi-':'',
+                '_13TeV-madgraph':'',
+                '_Mchi-':'_',
+      }
+    for k,v in replacements.iteritems():
+      f = f.replace(k,v)
+    mV,mChi = map(int,f.split('_'))
     model = '--isRes'
-  logpath = limitdir+'/logs/%i.'%(iC)
+  logpath = fittingdir+'/logs/%i.'%(iC)
   condorJDLString = '''Executable = runLimit.sh
 Universe  = vanilla
 requirements = UidDomain == \\\"mit.edu\\\" && Arch == \\\"X86_64\\\" && OpSysAndVer == \\\"SL6\\\"
@@ -43,6 +50,6 @@ should_transfer_files = YES
 when_to_transfer_output = ON_EXIT
 GetEnv = True
 accounting_group = group_cmsuser.{6}
-Queue 1'''.format(logpath,limitdir,scramdir,model,mV,mChi,user)
+Queue 1'''.format(logpath,fittingdir,scramdir,model,mV,mChi,user)
   system('echo "%s" | condor_submit'%(condorJDLString))
   iC+=1
