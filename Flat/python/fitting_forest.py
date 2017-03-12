@@ -99,7 +99,7 @@ class RegionFactory:
         variables_ = self.variables.copy()
         if not is_data:
             variables_.update(self.mc_variables)
-        pname = self.name + '_' + pname
+        pname += '_' + self.name
         proc = Process(pname,tree,cut,variables_,weights)
         if is_data:
             self.__data_procs.append(proc)

@@ -71,9 +71,9 @@ for d in sorted(glob(args.catalog+'/*')):
           continue
     dtype = 'MC' if 'MINIAODSIM' in dirname else 'Data'
     if not checkDS(properties[0],args.include,args.exclude):
-        if not found:
-          could_not_find.append(shortname)
         continue
+    if not found:
+      could_not_find.append(shortname)
     if properties[0] not in samples:
         samples[properties[0]] = CatalogSample(*properties)
     sample = samples[properties[0]]
