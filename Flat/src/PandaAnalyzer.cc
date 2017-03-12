@@ -700,7 +700,8 @@ void PandaAnalyzer::Run() {
         } 
 
         // event info
-        gt->mcWeight = (event.weight>0) ? 1 : -1;
+        //gt->mcWeight = (event.weight>0) ? 1 : -1;
+        gt->mcWeight = event.weight;
         gt->runNumber = event.runNumber;
         gt->lumiNumber = event.lumiNumber;
         gt->eventNumber = event.eventNumber;
