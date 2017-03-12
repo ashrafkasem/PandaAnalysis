@@ -31,7 +31,7 @@ def shift_btags():
         return shifted_weights 
     for shift in ['BUp','BDown','MUp','MDown']:
         for cent in ['sf_btag','sf_sjbtag']:
-            shiftedlabel = '_'
+            shiftedlabel = ''
             if 'sj' in cent:
                 shiftedlabel += 'sj'
             if 'B' in shift:
@@ -101,6 +101,18 @@ else:
             for k,v in replacements.iteritems():
                 signame = signame.replace(k,v)
             factory.add_process(f,signame)
+        signal_files = glob(basedir+'/Scalar*root')
+        for f in signal_files:
+            fname = f.split('/')[-1].replace('.root','')
+            signame = fname
+            replacements = {
+                'Scalar_MonoTop_LO_Mphi-':'',
+                '_13TeV-madgraph':'',
+                '_Mchi-':'_',
+            }
+            for k,v in replacements.iteritems():
+                signame = signame.replace(k,v)
+            factory.add_process(f,'scalar_'+signame)
 
 
 if is_test:
