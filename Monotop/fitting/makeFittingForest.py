@@ -6,7 +6,8 @@ from glob import glob
 import argparse
 parser = argparse.ArgumentParser(description='make forest')
 parser.add_argument('--region',metavar='region',type=str,default=None)
-region = parser.parse_args().region
+out_region = parser.parse_args().region
+region = out_region.split('_')[0]
 if region=='test':
     is_test = True 
     region = 'signal'
@@ -57,7 +58,7 @@ elif 'single' in region:
     u,uphi = ('pfUWmag','pfUWphi')
 elif 'di' in region:
     u,uphi = ('pfUZmag','pfUZphi')
-vmap['met'] = u 
+vmap['met'] = 'min(%s,999.9999)'%u 
 
 weights = {'nominal' : sel.weights[region]%lumi}
 weights.update(shift_btags())
@@ -74,9 +75,10 @@ if is_test:
     factory.add_process(f('Diboson'),'Diboson')
 elif region=='photon':
     factory.add_process(f('GJets'),'Pho')
-    factory.add_process(f('SinglePhoton'),'Data',is_data=True)
-    factory.add_process(f('SinglePhoton'),'QCD',is_data=True,extra_weights='sf_phoPurity')
-else:
+    factory.add_process(f('SinglePhoton'),'Data',is_data=True,extra_cut=sel.triggers['pho'])
+    factory.add_process(f('SinglePhoton'),'QCD',is_data=True,
+                        extra_weights='sf_phoPurity',extra_cut=sel.triggers['pho'])
+elif out_region not in ['signal_scalar','signal_vector']:
     factory.add_process(f('ZtoNuNu'),'Zvv')
     factory.add_process(f('ZJets'),'Zll')
     factory.add_process(f('WJets'),'Wlv')
@@ -85,37 +87,38 @@ else:
     factory.add_process(f('Diboson'),'Diboson')
     factory.add_process(f('QCD'),'QCD')
     if 'electron' in region:
-        factory.add_process(f('SingleElectron'),'Data',is_data=True)
+        factory.add_process(f('SingleElectron'),'Data',is_data=True,extra_cut=sel.triggers['ele'])
     else:
-        factory.add_process(f('MET'),'Data',is_data=True)
-    if region=='signal':
-        signal_files = glob(basedir+'/Vector*root')
-        for f in signal_files:
-            fname = f.split('/')[-1].replace('.root','')
-            signame = fname
-            replacements = {
-                'Vector_MonoTop_NLO_Mphi-':'',
-                '_gSM-0p25_gDM-1p0_13TeV-madgraph':'',
-                '_Mchi-':'_',
-            }
-            for k,v in replacements.iteritems():
-                signame = signame.replace(k,v)
-            factory.add_process(f,signame)
-        signal_files = glob(basedir+'/Scalar*root')
-        for f in signal_files:
-            fname = f.split('/')[-1].replace('.root','')
-            signame = fname
-            replacements = {
-                'Scalar_MonoTop_LO_Mphi-':'',
-                '_13TeV-madgraph':'',
-                '_Mchi-':'_',
-            }
-            for k,v in replacements.iteritems():
-                signame = signame.replace(k,v)
-            factory.add_process(f,'scalar_'+signame)
+        factory.add_process(f('MET'),'Data',is_data=True,extra_cut=sel.triggers['met'])
+elif out_region=='signal_vector':
+    signal_files = glob(basedir+'/Vector*root')
+    for f in signal_files:
+        fname = f.split('/')[-1].replace('.root','')
+        signame = fname
+        replacements = {
+            'Vector_MonoTop_NLO_Mphi-':'',
+            '_gSM-0p25_gDM-1p0_13TeV-madgraph':'',
+            '_Mchi-':'_',
+        }
+        for k,v in replacements.iteritems():
+            signame = signame.replace(k,v)
+        factory.add_process(f,signame)
+elif out_region=='signal_scalar':
+    signal_files = glob(basedir+'/Scalar*root')
+    for f in signal_files:
+        fname = f.split('/')[-1].replace('.root','')
+        signame = fname
+        replacements = {
+            'Scalar_MonoTop_LO_Mphi-':'',
+            '_13TeV-madgraph':'',
+            '_Mchi-':'_',
+        }
+        for k,v in replacements.iteritems():
+            signame = signame.replace(k,v)
+        factory.add_process(f,'scalar_'+signame)
 
 
 if is_test:
     region = 'test'
-factory.run(basedir+'/fitting/fittingForest_%s.root'%region)
+factory.run(basedir+'/fitting/fittingForest_%s.root'%out_region)
 

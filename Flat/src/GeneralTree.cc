@@ -94,6 +94,7 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    isGS = 0;
     fj1SubMaxCSV = -1;
     looseLep1IsHLTSafe = 0;
     looseLep2IsHLTSafe = 0;
@@ -327,6 +328,7 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    treePtr->Branch("isGS",&isGS,"isGS/I");
     treePtr->Branch("fj1SubMaxCSV",&fj1SubMaxCSV,"fj1SubMaxCSV/F");
     treePtr->Branch("looseLep1IsHLTSafe",&looseLep1IsHLTSafe,"looseLep1IsHLTSafe/I");
     treePtr->Branch("looseLep2IsHLTSafe",&looseLep2IsHLTSafe,"looseLep2IsHLTSafe/I");

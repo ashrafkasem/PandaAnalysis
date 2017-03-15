@@ -21,8 +21,8 @@ skimmer = root.PandaAnalyzer(debug_level)
 
 print 'created'
 
-skimmer.firstEvent=0
-skimmer.lastEvent=1000
+#skimmer.firstEvent=0
+#skimmer.lastEvent=10000
 skimmer.isData=True
 skimmer.SetFlag('puppi',True)
 skimmer.SetFlag('fatjet',True)
