@@ -811,7 +811,7 @@ void PandaAnalyzer::Run() {
                 // i.e. reg - raw (==reg-pf in absence of gain switch)
                 float diffPt = ele.regPt - ele.rawPt;
                 TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
-                vType1EGCorr -= vCorr*sign(diffPt); // propagate the negative correction to MET
+                vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
             } 
             if (isData && applyEGCorr) {
                 // if data, further apply GS correction
@@ -826,7 +826,7 @@ void PandaAnalyzer::Run() {
                 // GS correction is raw (GS fixed but no regression) minus PF
                 float diffPt = ele.rawPt - ele.pfPt; 
                 TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
-                vType1EGCorr -= vCorr*sign(diffPt); // propagate the negative correction to MET
+                vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
             }
         }
 
@@ -964,7 +964,7 @@ void PandaAnalyzer::Run() {
                 // i.e. reg - raw (==reg-pf in absence of gain switch)
                 float diffPt = pho.regPt - pho.rawPt;
                 TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
-                vType1EGCorr -= vCorr*sign(diffPt); // propagate the negative correction to MET
+                vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
             } 
             if (isData && applyEGCorr) {
                 // if data, further apply GS correction
@@ -979,7 +979,7 @@ void PandaAnalyzer::Run() {
                 // GS correction is raw (GS fixed but no regression) minus PF
                 float diffPt = pho.rawPt - pho.pfPt; 
                 TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
-                vType1EGCorr -= vCorr*sign(diffPt); // propagate the negative correction to MET
+                vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
             }
             if ( pho.medium &&
                  pt>175 /*&& fabs(eta)<1.4442*/ ) { // apply eta cut offline
