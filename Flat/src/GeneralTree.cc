@@ -294,6 +294,7 @@ void GeneralTree::Reset() {
 void GeneralTree::WriteTree(TTree *t) {
   treePtr = t;
 //STARTCUSTOMWRITE
+  treePtr->Branch("nJet",&nJet,"nJet/I");
   if (monohiggs) {
     treePtr->Branch("jetPt",jetPt,"jetPt[nJet]/F");
     treePtr->Branch("jetEta",jetEta,"jetEta[nJet]/F");
@@ -421,7 +422,6 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch("genAntiTopEta",&genAntiTopEta,"genAntiTopEta/F");
     treePtr->Branch("genTTPt",&genTTPt,"genTTPt/F");
     treePtr->Branch("genTTEta",&genTTEta,"genTTEta/F");
-    treePtr->Branch("nJet",&nJet,"nJet/I");
     treePtr->Branch("nIsoJet",&nIsoJet,"nIsoJet/I");
     treePtr->Branch("jet1Flav",&jet1Flav,"jet1Flav/I");
     treePtr->Branch("jet1Phi",&jet1Phi,"jet1Phi/F");

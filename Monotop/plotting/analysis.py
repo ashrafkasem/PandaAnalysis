@@ -26,8 +26,8 @@ import ROOT as root
 root.gROOT.SetBatch()
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-import PandaAnalysis.Monotop.MonojetSelection as sel
-#import PandaAnalysis.Monotop.TightSelection as sel
+#import PandaAnalysis.Monotop.MonojetSelection as sel
+import PandaAnalysis.Monotop.TightSelection as sel
 from PandaCore.Drawers.plot_utility import *
 
 ### DEFINE REGIONS ###
@@ -153,6 +153,7 @@ elif region=='photon':
     plot.add_distribution(FDistribution('loosePho1Pt',0,1000,20,'Leading #gamma p_{T} [GeV]','Events/40 GeV'))
     plot.add_distribution(FDistribution('loosePho1Eta',-2.5,2.5,20,'Leading #gamma #eta','Events/bin'))
 
+recoil.calc_chi2 = True
 plot.add_distribution(recoil)
 
 plot.add_distribution(FDistribution('npv',0,45,45,'N_{PV}','Events'))
