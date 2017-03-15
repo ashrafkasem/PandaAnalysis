@@ -311,8 +311,8 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch("fj1sjM",fj1sjM,"fj1sjM[2]/F");
     treePtr->Branch("fj1sjCSV",fj1sjCSV,"fj1sjCSV[2]/F");
     treePtr->Branch("fj1sjQGL",fj1sjQGL,"fj1sjQGL[2]/F");
-    treePtr->Branch("fj1MSD_corr",&fj1MSD_corr,"fj1MSD_corr/F");
-    treePtr->Branch("fj1DoubleCSV",&fj1DoubleCSV,"fj1DoubleCSV/F");
+    treePtr->Branch("fj1Nbs",&fj1Nbs,"fj1Nbs/I");
+    treePtr->Branch("fj1gbb",&fj1gbb,"fj1gbb/I");
     treePtr->Branch("hbbpt",&hbbpt,"hbbpt/F");
     treePtr->Branch("hbbeta",&hbbeta,"hbbeta/F");
     treePtr->Branch("hbbphi",&hbbphi,"hbbphi/F");
@@ -472,8 +472,6 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch("fj1MaxCSV",&fj1MaxCSV,"fj1MaxCSV/F");
     treePtr->Branch("fj1MinCSV",&fj1MinCSV,"fj1MinCSV/F");
     treePtr->Branch("fj1DoubleCSV",&fj1DoubleCSV,"fj1DoubleCSV/F");
-    treePtr->Branch("fj1Nbs",&fj1Nbs,"fj1Nbs/I");
-    treePtr->Branch("fj1gbb",&fj1gbb,"fj1gbb/I");
     treePtr->Branch("fj1GenPt",&fj1GenPt,"fj1GenPt/F");
     treePtr->Branch("fj1GenSize",&fj1GenSize,"fj1GenSize/F");
     treePtr->Branch("fj1IsMatched",&fj1IsMatched,"fj1IsMatched/I");
