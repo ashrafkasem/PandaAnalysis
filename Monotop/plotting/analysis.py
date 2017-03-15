@@ -6,6 +6,7 @@ import argparse
 
 ### SET GLOBAL VARIABLES ###
 baseDir = getenv('PANDA_FLATDIR')+'/' 
+dataDir = baseDir.replace('8026_0_3','8026_0_3_triggers')
 parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--basedir',metavar='basedir',type=str,default=None)
 parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
@@ -25,7 +26,8 @@ import ROOT as root
 root.gROOT.SetBatch()
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-import PandaAnalysis.Monotop.LooseSelection as sel
+import PandaAnalysis.Monotop.MonojetSelection as sel
+#import PandaAnalysis.Monotop.TightSelection as sel
 from PandaCore.Drawers.plot_utility import *
 
 ### DEFINE REGIONS ###
@@ -68,12 +70,12 @@ PInfo('weight',plot.mc_weight)
 ### DEFINE PROCESSES ###
 zjets         = Process('Z+jets',root.kZjets)
 wjets         = Process('W+jets',root.kWjets)
-diboson     = Process('Diboson',root.kDiboson)
+diboson       = Process('Diboson',root.kDiboson)
 ttbar         = Process('t#bar{t}',root.kTTbar)
-singletop = Process('Single t',root.kST)
-qcd             = Process("QCD",root.kQCD)
+singletop     = Process('Single t',root.kST)
+qcd           = Process("QCD",root.kQCD)
 gjets         = Process('#gamma+jets',root.kGjets)
-data            = Process("Data",root.kData)
+data          = Process("Data",root.kData)
 signal        = Process('m_{V}=1.75 TeV, m_{#chi}=1 GeV',root.kSignal)
 #processes = [qcd,diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
 processes = [qcd,diboson,singletop,wjets,ttbar,zjets]
@@ -88,13 +90,13 @@ else:
     zjets.add_file(baseDir+'ZJets.root')
 wjets.add_file(baseDir+'WJets.root')
 diboson.add_file(baseDir+'Diboson.root')
-ttbar.add_file(baseDir+'TTbar%s.root'%(args.tt)); ttbar.additional_weight = '831.76/730'
+ttbar.add_file(baseDir+'TTbar%s.root'%(args.tt));
 singletop.add_file(baseDir+'SingleTop.root')
 if 'pho' in region:
     processes = [qcd,gjets]
     gjets.add_file(baseDir+'GJets.root')
     qcd.add_file(baseDir+'SinglePhoton.root')
-    #qcd.additional_cut = sel.triggers['pho']
+    qcd.additional_cut = sel.triggers['pho']
     qcd.use_common_weight = False
     qcd.additional_weight = 'sf_phoPurity'
 else:
@@ -105,19 +107,19 @@ if any([x in region for x in ['singlemuonw','singleelectronw']]):
 if any([x in region for x in ['singlemuontop','singleelectrontop']]):
     processes = [qcd,diboson,singletop,zjets,wjets,ttbar]
 if any([x in region for x in ['signal','muon','qcd']]):
-#    data.additional_cut = sel.triggers['met']
-    data.add_file(baseDir+'MET.root')
+    data.additional_cut = sel.triggers['met']
+    data.add_file(dataDir+'MET.root')
     lep='#mu'
 elif 'electron' in region:
-#    if 'di' in region:
-#        data.additional_cut = tOR(sel.triggers['ele'],sel.triggers['pho'])
-#    else:
-#        data.additional_cut = sel.triggers['ele']
-    data.add_file(baseDir+'SingleElectron.root')
+    if 'di' in region:
+        data.additional_cut = tOR(sel.triggers['ele'],sel.triggers['pho'])
+    else:
+        data.additional_cut = sel.triggers['ele']
+    data.add_file(dataDir+'SingleElectron.root')
     lep='e'
 elif region=='photon':
-    #data.additional_cut = sel.triggers['pho']
-    data.add_file(baseDir+'SinglePhoton.root')
+    data.additional_cut = sel.triggers['pho']
+    data.add_file(dataDir+'SinglePhoton.root')
 
 
 if 'signal' not in region:
@@ -137,11 +139,19 @@ if 'signal' in region or 'qcd' in region:
     recoil=VDistribution("pfmet",recoilBins,"PF MET [GeV]","Events/GeV")
 elif any([x in region for x in ['singlemuonw','singleelectronw','singlemuontop','singleelectrontop','singlemuon','singleelectron']]):
     recoil=VDistribution("pfUWmag",recoilBins,"PF U(%s) [GeV]"%(lep),"Events/GeV")
+    plot.add_distribution(FDistribution('looseLep1Pt',0,1000,20,'Leading %s p_{T} [GeV]'%lep,'Events/40 GeV'))
+    plot.add_distribution(FDistribution('looseLep1Eta',-2.5,2.5,20,'Leading %s #eta'%lep,'Events/bin'))
 elif any([x in region for x in ['dielectron','dimuon']]):
     recoil=VDistribution("pfUZmag",recoilBins,"PF U(%s%s) [GeV]"%(lep,lep),"Events/GeV")
     plot.add_distribution(FDistribution('diLepMass',60,120,20,'m_{ll} [GeV]','Events/3 GeV'))
+    plot.add_distribution(FDistribution('looseLep1Pt',0,1000,20,'Leading %s p_{T} [GeV]'%lep,'Events/40 GeV'))
+    plot.add_distribution(FDistribution('looseLep1Eta',-2.5,2.5,20,'Leading %s #eta'%lep,'Events/bin'))
+    plot.add_distribution(FDistribution('looseLep2Pt',0,1000,20,'Subleading %s p_{T} [GeV]'%lep,'Events/40 GeV'))
+    plot.add_distribution(FDistribution('looseLep2Eta',-2.5,2.5,20,'Subleading %s #eta'%lep,'Events/bin'))
 elif region=='photon':
     recoil=VDistribution("pfUAmag",recoilBins,"PF U(#gamma) [GeV]","Events/GeV")
+    plot.add_distribution(FDistribution('loosePho1Pt',0,1000,20,'Leading #gamma p_{T} [GeV]','Events/40 GeV'))
+    plot.add_distribution(FDistribution('loosePho1Eta',-2.5,2.5,20,'Leading #gamma #eta','Events/bin'))
 
 plot.add_distribution(recoil)
 
