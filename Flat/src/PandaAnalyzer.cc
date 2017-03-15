@@ -16,15 +16,16 @@ PandaAnalyzer::PandaAnalyzer(int debug_/*=0*/) {
     ibetas = gt->get_ibetas();
     Ns = gt->get_Ns();
     orders = gt->get_orders();
-    flags["fatjet"]      = true;
-    flags["puppi"]       = true;
-    flags["monohiggs"]   = false;
-    flags["monojet"]     = false;
-    flags["firstGen"]    = true;
-    flags["applyJSON"]   = true;
-    flags["genOnly"]     = false;
-    flags["pfCands"]     = false;
-    flags["applyEGCorr"] = true;
+    flags["fatjet"]         = true;
+    flags["puppi"]          = true;
+    flags["monohiggs"]      = false;
+    flags["monojet"]        = false;
+    flags["firstGen"]       = true;
+    flags["applyJSON"]      = true;
+    flags["genOnly"]        = false;
+    flags["pfCands"]        = false;
+    flags["applyEGCorr"]    = true;
+    flags["applyEGRegCorr"] = false;
     if (DEBUG) PDebug("PandaAnalyzer::PandaAnalyzer","Called constructor");
 }
 
@@ -578,27 +579,38 @@ void PandaAnalyzer::Run() {
     if (isData) {
         std::vector<TString> metTriggerPaths = {
                      "HLT_PFMET170_NoiseCleaned",
-                     "HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight",
-                     "HLT_PFMETNoMu110_NoiseCleaned_PFMHTNoMu110_IDTight",
-                     "HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight",
                      "HLT_PFMET170_HBHECleaned",
                      "HLT_PFMET170_JetIdCleaned",
                      "HLT_PFMET170_NotCleaned",
                      "HLT_PFMET170_HBHE_BeamHaloCleaned",
+                     "HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight",
+                     "HLT_PFMETNoMu110_NoiseCleaned_PFMHTNoMu110_IDTight",
+                     "HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight",
                      "HLT_PFMETNoMu90_PFMHTNoMu90_IDTight",
                      "HLT_PFMETNoMu100_PFMHTNoMu100_IDTight",
                      "HLT_PFMETNoMu110_PFMHTNoMu110_IDTight",
                      "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight"
         };
         std::vector<TString> eleTriggerPaths = {
-                     "HLT_Ele25_eta2p1_WPTight_Gsf",
-                     "HLT_Ele27_eta2p1_WPLoose_Gsf",
-                     "HLT_Ele27_WPTight_Gsf",
-                     "HLT_Ele30_WPTight_Gsf",
-                     "HLT_Ele32_eta2p1_WPTight_Gsf",
-                     "HLT_Ele35_WPLoose_Gsf",
-                     "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"
+//                    "HLT_Ele25_eta2p1_WPTight_Gsf",
+//                     "HLT_Ele27_eta2p1_WPLoose_Gsf",
+
+//                    "HLT_Ele23_CaloIdL_TrackIdL_IsoVL",
+//                    "HLT_Ele22_eta2p1_WP75_Gsf",
+//                    "HLT_Ele23_WPLoose_Gsf",
+                    "HLT_Ele27_WP85_Gsf",
+                    "HLT_Ele27_WPLoose_Gsf",
+                    "HLT_Ele105_CaloIdVT_GsfTrkIdT",
+                    "HLT_Ele27_WPTight_Gsf",
+                    "HLT_Ele30_WPTight_Gsf",
+                    "HLT_Ele27_eta2p1_WPTight_Gsf",
+                    "HLT_Ele32_eta2p1_WPTight_Gsf",
+                    "HLT_Ele35_WPLoose_Gsf",
+//                    "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
+
+                    "HLT_ECALHT800"
         };
+
         std::vector<TString> phoTriggerPaths = {
                      "HLT_Photon175",
                      "HLT_Photon165_HE10",
@@ -608,7 +620,9 @@ void PandaAnalyzer::Run() {
                      "HLT_Photon90_R9Id90_HE10_IsoM",
                      "HLT_Photon120_R9Id90_HE10_IsoM",
                      "HLT_Photon165_R9Id90_HE10_IsoM",
-                     "HLT_Photon300_NoHE"
+                     "HLT_Photon300_NoHE",
+
+                    "HLT_ECALHT800"
         };
 
         if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading MET triggers");
@@ -680,6 +694,7 @@ void PandaAnalyzer::Run() {
 
     bool applyJSON = flags["applyJSON"];
     bool applyEGCorr = flags["applyEGCorr"];
+    bool applyEGRegCorr = applyEGCorr && flags["applyEGRegCorr"];
     bool doMonoH = flags["monohiggs"];
     bool doMonoJ = flags["monojet"];
     bool doFatjet = flags["fatjet"];
@@ -779,6 +794,7 @@ void PandaAnalyzer::Run() {
         tr.TriggerEvent("met");
 
         TLorentzVector vType1EGCorr;
+        gt->isGS = 0;
 
         //electrons
         std::vector<panda::Lepton*> looseLeps, tightLeps;
@@ -790,7 +806,23 @@ void PandaAnalyzer::Run() {
                 continue;
             looseLeps.push_back(&ele);
             gt->nLooseElectron++;
+            if (applyEGRegCorr) {
+                // apply the regression correction to everything
+                // i.e. reg - raw (==reg-pf in absence of gain switch)
+                float diffPt = ele.regPt - ele.rawPt;
+                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
+                vType1EGCorr -= vCorr; // propagate the negative correction to MET
+            } 
             if (isData && applyEGCorr) {
+                // if data, further apply GS correction
+                // i.e. raw - pf
+                // if we apply reg correction, then the final correction is
+                // (reg - raw) + (raw - pf) = (reg - pf)
+                if (fabs(ele.rawPt-ele.originalPt)/ele.rawPt < 0.01)
+                    continue;
+                if (ele.pfPt<0)
+                    continue;
+                gt->isGS = 1;
                 // GS correction is raw (GS fixed but no regression) minus PF
                 float diffPt = ele.rawPt - ele.pfPt; 
                 TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
@@ -927,7 +959,23 @@ void PandaAnalyzer::Run() {
                 gt->loosePho1Eta = eta;
                 gt->loosePho1Phi = phi;
             }
+            if (applyEGRegCorr) {
+                // apply the regression correction to everything
+                // i.e. reg - raw (==reg-pf in absence of gain switch)
+                float diffPt = pho.regPt - pho.rawPt;
+                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
+                vType1EGCorr -= vCorr; // propagate the negative correction to MET
+            } 
             if (isData && applyEGCorr) {
+                // if data, further apply GS correction
+                // i.e. raw - pf
+                // if we apply reg correction, then the final correction is
+                // (reg - raw) + (raw - pf) = (reg - pf)
+                if (fabs(pho.rawPt-pho.originalPt)/pho.rawPt < 0.01)
+                    continue;
+                if (pho.pfPt<0)
+                    continue;
+                gt->isGS = 1;
                 // GS correction is raw (GS fixed but no regression) minus PF
                 float diffPt = pho.rawPt - pho.pfPt; 
                 TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
@@ -980,7 +1028,7 @@ void PandaAnalyzer::Run() {
         tr.TriggerEvent("triggers");
 
         // recoil!
-        if (isData && applyEGCorr) {
+        if (applyEGRegCorr || (isData && applyEGCorr)) {
             float old_mT = gt->mT;
             float old_pfmet = gt->pfmet;
             vPFMET += vType1EGCorr;

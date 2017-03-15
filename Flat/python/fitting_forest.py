@@ -110,4 +110,5 @@ class RegionFactory:
         for proc in chain(self.__data_procs,self.__mc_procs):
             proc.run(f_out)
         f_out.Close() 
+        PInfo('fitting_forest.RegionFactory.run','Created output in %s'%f_out_path)
 
