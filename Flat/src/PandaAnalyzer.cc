@@ -1643,6 +1643,8 @@ void PandaAnalyzer::Run() {
 		      bs_inside_cone+=1;
                       has_gluon_splitting=1;
                     }
+		    else
+		      bs_inside_cone+=1;
                   }
                   else
                     bs_inside_cone+=1;
