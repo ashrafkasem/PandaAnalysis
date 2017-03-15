@@ -236,6 +236,8 @@ void GeneralTree::Reset() {
     fj1MaxCSV = -1;
     fj1MinCSV = -1;
     fj1DoubleCSV = -1;
+    fj1Nbs = 0;
+    fj1gbb = 0;
     fj1GenPt = -1;
     fj1GenSize = -1;
     fj1IsMatched = 0;
@@ -470,6 +472,8 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch("fj1MaxCSV",&fj1MaxCSV,"fj1MaxCSV/F");
     treePtr->Branch("fj1MinCSV",&fj1MinCSV,"fj1MinCSV/F");
     treePtr->Branch("fj1DoubleCSV",&fj1DoubleCSV,"fj1DoubleCSV/F");
+    treePtr->Branch("fj1Nbs",&fj1Nbs,"fj1Nbs/I");
+    treePtr->Branch("fj1gbb",&fj1gbb,"fj1gbb/I");
     treePtr->Branch("fj1GenPt",&fj1GenPt,"fj1GenPt/F");
     treePtr->Branch("fj1GenSize",&fj1GenSize,"fj1GenSize/F");
     treePtr->Branch("fj1IsMatched",&fj1IsMatched,"fj1IsMatched/I");
