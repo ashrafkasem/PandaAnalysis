@@ -1614,6 +1614,10 @@ void PandaAnalyzer::Run() {
                 }
             }
 
+	    bool found_b_from_g=false;
+            int bs_inside_cone=0;
+            int has_gluon_splitting=0;
+	    panda::GenParticle const* first_b_mo(0);
             // now get the highest pT gen particle inside the jet cone
             for (auto& gen : event.genParticles) {
                 float pt = gen.pt();
@@ -1623,8 +1627,37 @@ void PandaAnalyzer::Run() {
                     gt->fj1HighestPtGenPt = pt;
                     gt->fj1HighestPtGen = pdgid;
                 }
-            }
 
+
+		if (doMonoH){
+		  //count bs
+		  if (abs(pdgid)==5 && DeltaR2(gen.eta(),gen.phi(),fj1->eta(),fj1->phi())<2.25){
+		    if (gen.parent.isValid() && gen.parent->pdgid==gen.pdgid)
+		      continue;
+		    if (gen.parent.isValid() && gen.parent->pdgid==21 && gen.parent->pt()>20){
+		      if (!found_b_from_g){
+			found_b_from_g=true;
+			first_b_mo=gen.parent.get();
+			bs_inside_cone+=1;
+		      }
+		      else if (gen.parent.get()==first_b_mo){
+			bs_inside_cone+=1;
+			has_gluon_splitting=1;
+		      }
+		      else
+			bs_inside_cone+=1;
+		    }
+		    else
+		      bs_inside_cone+=1;
+		  }
+		}
+	    }
+
+	    if (doMonoH){
+	      gt->fj1Nbs=bs_inside_cone;
+	      gt->fj1gbb=has_gluon_splitting;
+	    }
+	    
             // now get the subjet btag SFs
             vector<btagcand> sj_btagcands;
             vector<double> sj_sf_cent, sj_sf_bUp, sj_sf_bDown, sj_sf_mUp, sj_sf_mDown;
