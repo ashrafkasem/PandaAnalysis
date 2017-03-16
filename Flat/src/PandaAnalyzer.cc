@@ -1334,8 +1334,10 @@ void PandaAnalyzer::Run() {
                 }
             }
 
+	    float maxIsoEta = (doMonoH) ? 4.5 : 2.5;
+
             bool isIsoJet = ( (gt->nFatjet==0) || 
-                              (fabs(jet.eta())<2.5 
+                              (fabs(jet.eta())<maxIsoEta 
                                && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet.eta(),jet.phi())>2.25) ); 
 
             if (isIsoJet) {
