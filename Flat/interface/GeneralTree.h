@@ -299,6 +299,8 @@ class GeneralTree : public genericTree {
     float fj1MaxCSV = -1;
     float fj1MinCSV = -1;
     float fj1DoubleCSV = -1;
+    int fj1Nbs = -1;
+    int fj1gbb = -1;
     float fj1GenPt = -1;
     float fj1GenSize = -1;
     int fj1IsMatched = -1;
