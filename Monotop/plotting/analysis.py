@@ -6,7 +6,7 @@ import argparse
 
 ### SET GLOBAL VARIABLES ###
 baseDir = getenv('PANDA_FLATDIR')+'/' 
-dataDir = baseDir.replace('8026_0_3','8026_0_3_triggers')
+dataDir = baseDir.replace('8026_0_3','8026_0_3_fixedeg')
 parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--basedir',metavar='basedir',type=str,default=None)
 parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
@@ -27,6 +27,7 @@ root.gROOT.SetBatch()
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
 #import PandaAnalysis.Monotop.MonojetSelection as sel
+#import PandaAnalysis.Monotop.LooseSelection as sel
 import PandaAnalysis.Monotop.TightSelection as sel
 from PandaCore.Drawers.plot_utility import *
 
@@ -72,7 +73,9 @@ zjets         = Process('Z+jets',root.kZjets)
 wjets         = Process('W+jets',root.kWjets)
 diboson       = Process('Diboson',root.kDiboson)
 ttbar         = Process('t#bar{t}',root.kTTbar)
+ttg           = Process('t#bar{t}#gamma',root.kTTbar)
 singletop     = Process('Single t',root.kST)
+singletopg    = Process('t#gamma',root.kST)
 qcd           = Process("QCD",root.kQCD)
 gjets         = Process('#gamma+jets',root.kGjets)
 data          = Process("Data",root.kData)
@@ -92,8 +95,10 @@ wjets.add_file(baseDir+'WJets.root')
 diboson.add_file(baseDir+'Diboson.root')
 ttbar.add_file(baseDir+'TTbar%s.root'%(args.tt));
 singletop.add_file(baseDir+'SingleTop.root')
+ttg.add_file(baseDir+'TTbar_Photon.root');
+singletopg.add_file(baseDir+'SingleTop_tG.root')
 if 'pho' in region:
-    processes = [qcd,gjets]
+    processes = [qcd,singletopg,ttg,gjets]
     gjets.add_file(baseDir+'GJets.root')
     qcd.add_file(baseDir+'SinglePhoton.root')
     qcd.additional_cut = sel.triggers['pho']
@@ -153,7 +158,7 @@ elif region=='photon':
     plot.add_distribution(FDistribution('loosePho1Pt',0,1000,20,'Leading #gamma p_{T} [GeV]','Events/40 GeV'))
     plot.add_distribution(FDistribution('loosePho1Eta',-2.5,2.5,20,'Leading #gamma #eta','Events/bin'))
 
-recoil.calc_chi2 = True
+#recoil.calc_chi2 = True
 plot.add_distribution(recoil)
 
 plot.add_distribution(FDistribution('npv',0,45,45,'N_{PV}','Events'))
