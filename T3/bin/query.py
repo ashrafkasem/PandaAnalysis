@@ -3,7 +3,7 @@ from os import getenv
 
 l = pickle.load(open(getenv('SUBMIT_WORKDIR')+'/submission.pkl'))
 s = l[-1]
-print s.cluster_id
+print 'ClusterID',s.cluster_id
 statii = s.query_status()
 print 'Job summary:'
 for k,v in statii.iteritems():
