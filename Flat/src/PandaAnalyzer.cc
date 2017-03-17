@@ -638,54 +638,9 @@ void PandaAnalyzer::Run() {
             RegisterTrigger(path,phoTriggers);
         }
 
-        /*
-        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NoiseCleaned"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_NoiseCleaned_PFMHTNoMu120_IDTight"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_NoiseCleaned_PFMHTNoMu110_IDTight"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_NoiseCleaned_PFMHTNoMu90_IDTight"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHECleaned"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_JetIdCleaned"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_NotCleaned"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMET170_HBHE_BeamHaloCleaned"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu90_PFMHTNoMu90_IDTight"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu100_PFMHTNoMu100_IDTight"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu110_PFMHTNoMu110_IDTight"));
-        metTriggers.push_back(event.registerTrigger("HLT_PFMETNoMu120_PFMHTNoMu120_IDTight"));
-        muTriggers.push_back(event.registerTrigger("HLT_IsoMu20"));
-        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu20"));
-        muTriggers.push_back(event.registerTrigger("HLT_IsoMu22"));
-        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu22"));
-        muTriggers.push_back(event.registerTrigger("HLT_IsoMu24"));
-        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu24"));
-        muTriggers.push_back(event.registerTrigger("HLT_IsoMu27"));
-        muTriggers.push_back(event.registerTrigger("HLT_IsoTkMu27"));
-        muTriggers.push_back(event.registerTrigger("HLT_Mu45_eta2p1"));
-        muTriggers.push_back(event.registerTrigger("HLT_Mu50"));
-        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL"));
-        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL"));
-        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_Mu8_TrkIsoVVL_DZ"));
-        muTriggers.push_back(event.registerTrigger("HLT_Mu17_TrkIsoVVL_TkMu8_TrkIsoVVL_DZ"));
-        eleTriggers.push_back(event.registerTrigger("HLT_Ele25_eta2p1_WPTight_Gsf"));
-        eleTriggers.push_back(event.registerTrigger("HLT_Ele27_eta2p1_WPLoose_Gsf"));
-        eleTriggers.push_back(event.registerTrigger("HLT_Ele27_WPTight_Gsf"));
-        eleTriggers.push_back(event.registerTrigger("HLT_Ele30_WPTight_Gsf"));
-        eleTriggers.push_back(event.registerTrigger("HLT_Ele32_eta2p1_WPTight_Gsf"));
-        eleTriggers.push_back(event.registerTrigger("HLT_Ele35_WPLoose_Gsf"));
-        eleTriggers.push_back(event.registerTrigger("HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_DoubleEle24_22_eta2p1_WPLoose_Gsf"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_Ele105_CaloIdVT_GsfTrkIdT"));
-        // eleTriggers.push_back(event.registerTrigger("HLT_ECALHT800"));
-        phoTriggers.push_back(event.registerTrigger("HLT_Photon175"));
-        phoTriggers.push_back(event.registerTrigger("HLT_Photon165_HE10"));
-        phoTriggers.push_back(event.registerTrigger("HLT_Photon300_NoHE"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon36_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon50_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon75_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon90_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon120_R9Id90_HE10_IsoM"));
-        // phoTriggers.push_back(event.registerTrigger("HLT_Photon165_R9Id90_HE10_IsoM"));
-        */
     }
+
+    float EGMSCALE = isData ? 1.02 : 1;
 
     // set up reporters
     unsigned int iE=0;
@@ -799,7 +754,7 @@ void PandaAnalyzer::Run() {
         //electrons
         std::vector<panda::Lepton*> looseLeps, tightLeps;
         for (auto& ele : event.electrons) {
-          float pt = ele.pt(); float eta = ele.eta(); float aeta = fabs(eta);
+          float pt = ele.pt()*EGMSCALE; float eta = ele.eta(); float aeta = fabs(eta);
             if (pt<10 || aeta>2.5 /* || (aeta>1.4442 && aeta<1.566) */)
                 continue;
             if (!ele.veto)
@@ -810,7 +765,7 @@ void PandaAnalyzer::Run() {
                 // apply the regression correction to everything
                 // i.e. reg - raw (==reg-pf in absence of gain switch)
                 float diffPt = ele.regPt - ele.rawPt;
-                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
+                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,0,ele.phi(),0);
                 vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
             } 
             if (isData && applyEGCorr) {
@@ -818,15 +773,18 @@ void PandaAnalyzer::Run() {
                 // i.e. raw - pf
                 // if we apply reg correction, then the final correction is
                 // (reg - raw) + (raw - pf) = (reg - pf)
-                if (fabs(ele.rawPt-ele.originalPt)/ele.rawPt < 0.01)
-                    continue;
-                if (ele.pfPt<0)
-                    continue;
-                gt->isGS = 1;
-                // GS correction is raw (GS fixed but no regression) minus PF
-                float diffPt = ele.rawPt - ele.pfPt; 
-                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
-                vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
+                if (fabs(ele.rawPt-ele.originalPt)/ele.rawPt > 0.01) {
+                    // ignore cases where there is no correction/it was less than a percent
+                    float basePt = ele.pfPt;
+                    if (basePt<1)
+                        // if we did not match to a PF, use the uncorrected supercluster
+                        basePt = ele.originalPt; 
+                    gt->isGS = 1;
+                    // GS correction is raw (GS fixed but no regression) minus PF
+                    float diffPt = ele.rawPt - ele.pfPt; 
+                    TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,0,ele.phi(),0);
+                    vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
+                }
             }
         }
 
@@ -898,6 +856,7 @@ void PandaAnalyzer::Run() {
                                  /*ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&*/
                                  ele->pt()>40 && fabs(ele->eta())<2.5 );
                 if (lep_counter==1) {
+                    gt->looseLep1Pt *= EGMSCALE;
                     gt->looseLep1PdgId = ele->charge*-11;
                     gt->looseLep1IsHLTSafe = ele->hltsafe ? 1 : 0;
                     if (isTight) {
@@ -907,6 +866,7 @@ void PandaAnalyzer::Run() {
                         matchEles.push_back(lep);
                     }
                 } else if (lep_counter==2) {
+                    gt->looseLep2Pt *= EGMSCALE;
                     gt->looseLep2PdgId = ele->charge*-11;
                     gt->looseLep2IsHLTSafe = ele->hltsafe ? 1 : 0;
                     if (isTight) {
@@ -943,7 +903,7 @@ void PandaAnalyzer::Run() {
         for (auto& pho : event.photons) {
             if (!pho.loose || !pho.csafeVeto)
                 continue;
-            float pt = pho.pt();
+            float pt = pho.pt() * EGMSCALE;
             if (pt<1) continue;
             float eta = pho.eta(), phi = pho.phi();
             if (pt<15 || fabs(eta)>2.5)
@@ -971,15 +931,18 @@ void PandaAnalyzer::Run() {
                 // i.e. raw - pf
                 // if we apply reg correction, then the final correction is
                 // (reg - raw) + (raw - pf) = (reg - pf)
-                if (fabs(pho.rawPt-pho.originalPt)/pho.rawPt < 0.01)
-                    continue;
-                if (pho.pfPt<0)
-                    continue;
-                gt->isGS = 1;
-                // GS correction is raw (GS fixed but no regression) minus PF
-                float diffPt = pho.rawPt - pho.pfPt; 
-                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
-                vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
+                if (fabs(pho.rawPt-pho.originalPt)/pho.rawPt > 0.01) {
+                    // ignore cases where there is no correction/it was less than a percent
+                    float basePt = pho.pfPt;
+                    if (basePt<1)
+                        // if we did not match to a PF, use the uncorrected supercluster
+                        basePt = pho.originalPt; 
+                    gt->isGS = 1;
+                    // GS correction is raw (GS fixed but no regression) minus PF
+                    float diffPt = pho.rawPt - pho.pfPt; 
+                    TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,0,pho.phi(),0);
+                    vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
+                }
             }
             if ( pho.medium &&
                  pt>175 /*&& fabs(eta)<1.4442*/ ) { // apply eta cut offline
@@ -1012,7 +975,7 @@ void PandaAnalyzer::Run() {
             gt->sf_metTrig = GetCorr(cTrigMET,gt->pfmetnomu);
 
             if (gt->nLooseElectron>0 && abs(gt->looseLep1PdgId)==11
-                    && gt->looseLep1IsTight==1 && gt->nLooseMuon==0) {
+                    && gt->looseLep1IsTight==1) {
                 float eff1=0, eff2=0;
                 eff1 = GetCorr(cTrigEle,gt->looseLep1Eta,gt->looseLep1Pt);
                 if (gt->nLooseElectron>1 && abs(gt->looseLep2PdgId)==11) {
