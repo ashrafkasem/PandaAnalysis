@@ -46,7 +46,10 @@ def copy_local(long_name):
     # if the file is cached locally, why not use it?
     local_path = full_path.replace('root://xrootd.cmsaf.mit.edu/','/mnt/hadoop/cms')
     if path.isfile(local_path):
-        full_path = local_path
+        # apparently SmartCached files can be corrupted...
+        ftest = root.TFile(local_path)
+        if ftest and not(ftest.IsZombie()):
+            full_path = local_path
 
     '''
     # xrdcp if remote, copy if local - DEPRECATED
@@ -78,11 +81,12 @@ def fn(input_name,isData,full_path):
     skimmer = root.PandaAnalyzer()
     skimmer.isData=isData
     skimmer.SetFlag('firstGen',True)
+#    skimmer.SetFlag('applyEGCorr',False)
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
     #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
-        if any([x in full_path for x in ['ST_','Vector_','ZprimeToTT']]):
+        if any([x in full_path for x in ['ST_','Vector_','Scalar_','ZprimeToTT']]):
             processType=root.PandaAnalyzer.kTop
         elif 'ZJets' in full_path or 'DY' in full_path:
             processType=root.PandaAnalyzer.kZ
