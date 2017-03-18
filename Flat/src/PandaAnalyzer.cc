@@ -19,7 +19,7 @@ PandaAnalyzer::PandaAnalyzer(int debug_/*=0*/) {
     flags["fatjet"]         = true;
     flags["puppi"]          = true;
     flags["monohiggs"]      = false;
-    flags["monojet"]        = false;
+    flags["vbf"]            = false;
     flags["firstGen"]       = true;
     flags["applyJSON"]      = true;
     flags["genOnly"]        = false;
@@ -50,7 +50,7 @@ void PandaAnalyzer::SetOutputFile(TString fOutName) {
     tOut = new TTree("events","events");
 
     gt->monohiggs = flags["monohiggs"];
-    gt->monojet   = flags["monojet"];
+    gt->vbf       = flags["vbf"];
     gt->fatjet    = flags["fatjet"];
     gt->WriteTree(tOut);
 
@@ -651,7 +651,7 @@ void PandaAnalyzer::Run() {
     bool applyEGCorr = flags["applyEGCorr"];
     bool applyEGRegCorr = applyEGCorr && flags["applyEGRegCorr"];
     bool doMonoH = flags["monohiggs"];
-    bool doMonoJ = flags["monojet"];
+    bool doVBF = flags["vbf"];
     bool doFatjet = flags["fatjet"];
 
     // EVENTLOOP --------------------------------------------------------------------------
@@ -1236,10 +1236,13 @@ void PandaAnalyzer::Run() {
         vector<int> btagindices;
         TLorentzVector vJet;
         panda::Jet *jet1=0, *jet2=0;
+        panda::Jet *jot1=0, *jot2=0;
         gt->dphipuppimet=999; gt->dphipfmet=999;
         gt->dphipuppiUW=999; gt->dphipfUW=999;
         gt->dphipuppiUZ=999; gt->dphipfUZ=999;
         gt->dphipuppiUA=999; gt->dphipfUA=999;
+        float maxIsoEta = (doMonoH) ? 4.5 : 2.5;
+
         for (auto& jet : *jets) {
           if (jet.pt()<30 || abs(jet.eta())>4.5)
                 continue;
@@ -1248,6 +1251,18 @@ void PandaAnalyzer::Run() {
                 continue;
 
             cleanedJets.push_back(&jet);
+            if (cleanedJets.size()==1) {
+                jot1 = &jet;
+                gt->jot1Pt = jet.pt();
+                gt->jot1Eta = jet.eta();
+                gt->jot1Phi = jet.phi();
+            } else if (cleanedJets.size()==2) {
+                jot2 = &jet;
+                gt->jot2Pt = jet.pt();
+                gt->jot2Eta = jet.eta();
+                gt->jot2Phi = jet.phi();
+            }
+
             float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
             if (fabs(jet.eta())<2.4) {
                 centralJets.push_back(&jet);
@@ -1297,8 +1312,6 @@ void PandaAnalyzer::Run() {
                 }
             }
 
-	    float maxIsoEta = (doMonoH) ? 4.5 : 2.5;
-
             bool isIsoJet = ( (gt->nFatjet==0) || 
                               (fabs(jet.eta())<maxIsoEta 
                                && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet.eta(),jet.phi())>2.25) ); 
@@ -1322,6 +1335,7 @@ void PandaAnalyzer::Run() {
             }
 
         } // VJet loop
+
         switch (whichRecoil) {
             case -1: // photon
                 gt->dphipuppiU = gt->dphipuppiUA;
@@ -1343,13 +1357,15 @@ void PandaAnalyzer::Run() {
                 break;
         }
 
-        gt->nJet = cleanedJets.size();
-        if (gt->nJet>1 && doMonoJ) {
-          gt->jet12DEta = fabs(jet1->eta()-jet2->eta());
+        gt->nJet = centralJets.size();
+        gt->nJot = cleanedJets.size();
+        if (gt->nJot>1 && doVBF) {
+          gt->jet12DEta = fabs(jot1->eta()-jot2->eta());
           TLorentzVector vj1, vj2;
-          vj1.SetPtEtaPhiM(jet1->pt(),jet1->eta(),jet1->phi(),jet1->m());
-          vj2.SetPtEtaPhiM(jet2->pt(),jet2->eta(),jet2->phi(),jet2->m());
+          vj1.SetPtEtaPhiM(jot1->pt(),jot1->eta(),jot1->phi(),jot1->m());
+          vj2.SetPtEtaPhiM(jot2->pt(),jot2->eta(),jot2->phi(),jot2->m());
           gt->jet12Mass = (vj1+vj2).M();
+          gt->jet12DPhi = vj1.DeltaPhi(vj2);
         }
 
         tr.TriggerEvent("jets");
@@ -1579,10 +1595,10 @@ void PandaAnalyzer::Run() {
                 }
             }
 
-	    bool found_b_from_g=false;
+            bool found_b_from_g=false;
             int bs_inside_cone=0;
             int has_gluon_splitting=0;
-	    panda::GenParticle const* first_b_mo(0);
+            panda::GenParticle const* first_b_mo(0);
             // now get the highest pT gen particle inside the jet cone
             for (auto& gen : event.genParticles) {
                 float pt = gen.pt();
@@ -1594,35 +1610,34 @@ void PandaAnalyzer::Run() {
                 }
 
 
-		if (doMonoH){
-		  //count bs
-		  if (abs(pdgid)==5 && DeltaR2(gen.eta(),gen.phi(),fj1->eta(),fj1->phi())<2.25){
-		    if (gen.parent.isValid() && gen.parent->pdgid==gen.pdgid)
-		      continue;
-		    if (gen.parent.isValid() && gen.parent->pdgid==21 && gen.parent->pt()>20){
-		      if (!found_b_from_g){
-			found_b_from_g=true;
-			first_b_mo=gen.parent.get();
-			bs_inside_cone+=1;
-		      }
-		      else if (gen.parent.get()==first_b_mo){
-			bs_inside_cone+=1;
-			has_gluon_splitting=1;
-		      }
-		      else
-			bs_inside_cone+=1;
-		    }
-		    else
-		      bs_inside_cone+=1;
-		  }
-		}
-	    }
+                if (doMonoH) {
+                    //count bs
+                    if (abs(pdgid)==5 && DeltaR2(gen.eta(),gen.phi(),fj1->eta(),fj1->phi())<2.25) {
+                      if (gen.parent.isValid() && gen.parent->pdgid==gen.pdgid)
+                        continue;
+                      if (gen.parent.isValid() && gen.parent->pdgid==21 && gen.parent->pt()>20) {
+                        if (!found_b_from_g) {
+                            found_b_from_g=true;
+                            first_b_mo=gen.parent.get();
+                            bs_inside_cone+=1;
+                        } else if (gen.parent.get()==first_b_mo) {
+                            bs_inside_cone+=1;
+                            has_gluon_splitting=1;
+                        } else {
+                            bs_inside_cone+=1;
+                        }
+                    } else {
+                      bs_inside_cone+=1;
+                    }
+                  }
+                }
+            }
 
-	    if (doMonoH){
-	      gt->fj1Nbs=bs_inside_cone;
-	      gt->fj1gbb=has_gluon_splitting;
-	    }
-	    
+            if (doMonoH) {
+              gt->fj1Nbs=bs_inside_cone;
+              gt->fj1gbb=has_gluon_splitting;
+            }
+        
             // now get the subjet btag SFs
             vector<btagcand> sj_btagcands;
             vector<double> sj_sf_cent, sj_sf_bUp, sj_sf_bDown, sj_sf_mUp, sj_sf_mDown;
