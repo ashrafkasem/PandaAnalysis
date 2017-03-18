@@ -734,9 +734,13 @@ void PandaAnalyzer::Run() {
         if (isData && applyEGCorr) {
             gt->pfmet = event.metMuOnlyFix.pt;
             gt->pfmetphi = event.metMuOnlyFix.phi;
+            gt->pfmetUp = event.metMuOnlyFix.ptCorrUp;
+            gt->pfmetDown = event.metMuOnlyFix.ptCorrDown;
         } else {
             gt->pfmet = event.pfMet.pt;
             gt->pfmetphi = event.pfMet.phi;
+            gt->pfmetUp = event.pfMet.ptCorrUp;
+            gt->pfmetDown = event.pfMet.ptCorrDown;
         }
         gt->calomet = event.caloMet.pt;
         gt->puppimet = event.puppiMet.pt;
@@ -999,6 +1003,14 @@ void PandaAnalyzer::Run() {
             gt->pfmetphi = vPFMET.Phi();
             if (gt->nLooseLep>0)
                 gt->mT = MT(gt->looseLep1Pt,gt->looseLep1Phi,gt->pfmet,gt->pfmetphi);
+            
+            TLorentzVector vUp; vUp.SetPtEtaPhiM(gt->pfmetUp,0,gt->pfmetphi,0);
+            vUp += vType1EGCorr; 
+            gt->pfmetUp = vUp.Pt();
+            TLorentzVector vDown; vDown.SetPtEtaPhiM(gt->pfmetDown,0,gt->pfmetphi,0);
+            vDown += vType1EGCorr; 
+            gt->pfmetDown = vDown.Pt();
+
             if (DEBUG>1) {
                 PDebug("PandaAnalyzer::Run::applyEGCorr)",
                         TString::Format("nLooseLep=%i, nLoosePhoton=%i",gt->nLooseLep,gt->nLoosePhoton));
@@ -1254,11 +1266,15 @@ void PandaAnalyzer::Run() {
             if (cleanedJets.size()==1) {
                 jot1 = &jet;
                 gt->jot1Pt = jet.pt();
+                gt->jot1PtUp = jet.ptCorrUp;
+                gt->jot1PtDown = jet.ptCorrDown;
                 gt->jot1Eta = jet.eta();
                 gt->jot1Phi = jet.phi();
             } else if (cleanedJets.size()==2) {
                 jot2 = &jet;
                 gt->jot2Pt = jet.pt();
+                gt->jot2PtUp = jet.ptCorrUp;
+                gt->jot2PtDown = jet.ptCorrDown;
                 gt->jot2Eta = jet.eta();
                 gt->jot2Phi = jet.phi();
             }
@@ -1366,6 +1382,13 @@ void PandaAnalyzer::Run() {
           vj2.SetPtEtaPhiM(jot2->pt(),jot2->eta(),jot2->phi(),jot2->m());
           gt->jet12Mass = (vj1+vj2).M();
           gt->jet12DPhi = vj1.DeltaPhi(vj2);
+
+          vj1.SetPtEtaPhiM(jot1->ptCorrUp,jot1->eta(),jot1->phi(),jot1->m());
+          vj2.SetPtEtaPhiM(jot2->ptCorrUp,jot2->eta(),jot2->phi(),jot2->m());
+          gt->jet12MassUp = (vj1+vj2).M();
+          vj1.SetPtEtaPhiM(jot1->ptCorrDown,jot1->eta(),jot1->phi(),jot1->m());
+          vj2.SetPtEtaPhiM(jot2->ptCorrDown,jot2->eta(),jot2->phi(),jot2->m());
+          gt->jet12MassDown = (vj1+vj2).M();
         }
 
         tr.TriggerEvent("jets");
