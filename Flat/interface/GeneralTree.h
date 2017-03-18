@@ -131,7 +131,7 @@ class GeneralTree : public genericTree {
       std::vector<int> get_orders() const { return orders; }
         
       // public config
-      bool monohiggs=false, monojet=false, fatjet=true;
+      bool monohiggs=false, vbf=false, fatjet=true;
 
 //STARTCUSTOMDEF
       std::map<ECFParams,float> fj1ECFNs;
@@ -157,6 +157,16 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    int nJot = -1;
+    float jot1Phi = -1;
+    float jot1Pt = -1;
+    float jot1GenPt = -1;
+    float jot1Eta = -1;
+    float jot2Phi = -1;
+    float jot2Pt = -1;
+    float jot2GenPt = -1;
+    float jot2Eta = -1;
+    float jet12DPhi = -1;
     int isGS = -1;
     float fj1SubMaxCSV = -1;
     int looseLep1IsHLTSafe = -1;
