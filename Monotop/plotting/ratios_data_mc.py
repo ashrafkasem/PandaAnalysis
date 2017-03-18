@@ -15,13 +15,17 @@ import ROOT as root
 from math import sqrt
 from collections import namedtuple 
 from array import array
-from PandaCore.Drawers.tdrStyle import *
 from PandaCore.Tools.Load import Load
 from PandaCore.Tools.root_interface import draw_hist, read_tree
-setTDRStyle()
 
 Load('PandaCoreTools')
 Load('PandaCoreDrawers')
+
+# create some global variables
+plot = root.HistogramDrawer()
+plot.SetTDRStyle()
+plot.InitLegend()
+plot.SetLumi(35.8)
 
 f_input = root.TFile(args.infile)
 fztow = root.TFile(getenv('PANDA')+'/data/theory_uncs/wtoz_unc.root')
@@ -29,7 +33,7 @@ fztoa = root.TFile(getenv('PANDA')+'/data/theory_uncs/atoz_unc.root')
 f_input.cd()
 
 recoil_bins = array('f',[250,280,310,350,400,450,600,1000])
-hbase = root.TH1F('dummy','',len(recoil_bins)-1,recoil_bins)
+hbase = root.TH1D('dummy','',len(recoil_bins)-1,recoil_bins)
 hbase.GetXaxis().SetTitle('U [Gev]')
 hbase.GetYaxis().SetTitle('')
 
@@ -70,6 +74,8 @@ cuts = {
         'tight' : 'top_ecf_bdt>0.45',
         }
 
+
+# helper functions
 trees = {}
 def get_tree(key):
     global trees, f_input
@@ -97,11 +103,13 @@ def build_unc(tree,branch_name,hist):
     if hasattr(tree,branch_name):
         return 
     ba = root.BranchAdder()
+    ba.verbose = False
     ba.formula = 'genBosonPt'
     ba.newBranchName = branch_name
     ba.AddBranchFromHistogram(tree,hist)
     return
 
+# main plotting function
 def plot_ratio(num_region,den_region,cat,flat_uncs=[],shape_uncs={}):
     num = regions[num_region]
     den = regions[den_region]
@@ -166,12 +174,9 @@ def plot_ratio(num_region,den_region,cat,flat_uncs=[],shape_uncs={}):
                         
     root.gStyle.SetOptStat(0)
 
-    c = root.TCanvas("c","c",600,700)  
-    root.SetOwnership(c,False)
-    c.cd()
+    plot.cd()
+    plot.Reset()
 
-    hdata.SetLineColor(1); hdata.SetLineWidth(2)
-    hdata.SetMarkerStyle(20)
     hmc_err.SetMinimum(0) 
     hmc_err.SetMaximum(2*max(hdata.GetMaximum(),hmc.GetMaximum()))
     hmc.SetLineWidth(2)
@@ -179,34 +184,15 @@ def plot_ratio(num_region,den_region,cat,flat_uncs=[],shape_uncs={}):
     hmc_err.SetLineWidth(0)
     hmc_err.SetLineColor(root.kGray)
     hmc_err.SetFillColor(root.kGray)
-    hmc_err.GetXaxis().SetTitle('U [GeV]')
-    hmc_err.GetYaxis().SetTitle('')
-    hmc_err.Draw('e2')
-    hmc.Draw('el same')
-    hdata.Draw('elp same')
-
-    legend = root.TLegend(.55,.75,.95,.90)
-    legend.AddEntry(hdata, "Data", "p")
-    legend.AddEntry(hmc, "Prediction", "le") 
-    legend.AddEntry(hmc_err,'Stat+sys unc','f')
-    legend.SetShadowColor(0);
-    legend.SetFillColor(0);
-    legend.SetFillStyle(0)
-    legend.SetBorderSize(0)
-    legend.SetLineColor(0);
-    legend.Draw('same')
-
-    latex = root.TLatex()
-    latex.SetNDC()
-    latex.SetTextFont(42)
-    latex.SetTextSize(0.8*c.GetTopMargin())
-    latex.DrawLatex(0.2, 0.8,'#frac{%s}{%s}'%(num.label,den.label))
+    plot.AddCMSLabel()
+    plot.AddLumiLabel(True)
+    plot.AddPlotLabel('#frac{%s}{%s}'%(num.label,den.label),0.18,0.77,False,42,0.05,11)
+    plot.AddHistogram(hmc_err,'Stat+sys unc',root.kExtra1,root.kGray,'e2')
+    plot.AddHistogram(hmc,'Prediction',root.kExtra2,root.kRed,'el')
+    plot.AddHistogram(hdata,'Data',root.kData,root.kBlack,'elp')
 
     plotname = 'ratio_%s_%s_%s'%(cat,num_region,den_region)
-    for ext in ['pdf','png','C']:
-        c.SaveAs(args.outdir+'/'+plotname+'.'+ext)
-
-    del c
+    plot.Draw(args.outdir+'/',plotname)
 
 plot_ratio('photon','dimuon','tight',flat_uncs=[0.02,0.01],shape_uncs=ztoa_uncs)
 plot_ratio('photon','dimuon','loose',flat_uncs=[0.02,0.01],shape_uncs=ztoa_uncs)
