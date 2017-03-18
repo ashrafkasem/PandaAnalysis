@@ -94,6 +94,26 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    jot1PtUp = -1;
+    jot1PtDown = -1;
+    jot2PtUp = -1;
+    jot2PtDown = -1;
+    jet12MassUp = -1;
+    jet12DEtaUp = -1;
+    jet12DPhiUp = -1;
+    jet12MassDown = -1;
+    jet12DEtaDown = -1;
+    jet12DPhiDown = -1;
+    pfmetUp = -1;
+    pfmetDown = -1;
+    pfUWmagUp = -1;
+    pfUZmagUp = -1;
+    pfUAmagUp = -1;
+    pfUmagUp = -1;
+    pfUWmagDown = -1;
+    pfUZmagDown = -1;
+    pfUAmagDown = -1;
+    pfUmagDown = -1;
     nJot = 0;
     jot1Phi = -1;
     jot1Pt = -1;
@@ -343,6 +363,16 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch("jet12DPhi",&jet12DPhi,"jet12DPhi/F");
     treePtr->Branch("jet12Mass",&jet12Mass,"jet12Mass/F");
     treePtr->Branch("jet12DEta",&jet12DEta,"jet12DEta/F");
+    treePtr->Branch("pfmetUp",&pfmetUp,"pfmetUp/F");
+    treePtr->Branch("pfmetDown",&pfmetDown,"pfmetDown/F");
+    treePtr->Branch("pfUWmagUp",&pfUWmagUp,"pfUWmagUp/F");
+    treePtr->Branch("pfUZmagUp",&pfUZmagUp,"pfUZmagUp/F");
+    treePtr->Branch("pfUAmagUp",&pfUAmagUp,"pfUAmagUp/F");
+    treePtr->Branch("pfUmagUp",&pfUmagUp,"pfUmagUp/F");
+    treePtr->Branch("pfUWmagDown",&pfUWmagDown,"pfUWmagDown/F");
+    treePtr->Branch("pfUZmagDown",&pfUZmagDown,"pfUZmagDown/F");
+    treePtr->Branch("pfUAmagDown",&pfUAmagDown,"pfUAmagDown/F");
+    treePtr->Branch("pfUmagDown",&pfUmagDown,"pfUmagDown/F");
   }
   treePtr->Branch("scale",scale,"scale[6]/F");
 
@@ -356,6 +386,16 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    treePtr->Branch("jot1PtUp",&jot1PtUp,"jot1PtUp/F");
+    treePtr->Branch("jot1PtDown",&jot1PtDown,"jot1PtDown/F");
+    treePtr->Branch("jot2PtUp",&jot2PtUp,"jot2PtUp/F");
+    treePtr->Branch("jot2PtDown",&jot2PtDown,"jot2PtDown/F");
+    treePtr->Branch("jet12MassUp",&jet12MassUp,"jet12MassUp/F");
+    treePtr->Branch("jet12DEtaUp",&jet12DEtaUp,"jet12DEtaUp/F");
+    treePtr->Branch("jet12DPhiUp",&jet12DPhiUp,"jet12DPhiUp/F");
+    treePtr->Branch("jet12MassDown",&jet12MassDown,"jet12MassDown/F");
+    treePtr->Branch("jet12DEtaDown",&jet12DEtaDown,"jet12DEtaDown/F");
+    treePtr->Branch("jet12DPhiDown",&jet12DPhiDown,"jet12DPhiDown/F");
     treePtr->Branch("isGS",&isGS,"isGS/I");
     treePtr->Branch("fj1SubMaxCSV",&fj1SubMaxCSV,"fj1SubMaxCSV/F");
     treePtr->Branch("looseLep1IsHLTSafe",&looseLep1IsHLTSafe,"looseLep1IsHLTSafe/I");
