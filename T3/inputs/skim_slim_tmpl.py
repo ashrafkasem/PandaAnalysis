@@ -244,7 +244,15 @@ def write_lock(outdir,outfilename,processed):
 
 if __name__ == "__main__":
     sample_list = cb.read_sample_config('local.cfg',as_dict=False)
-    to_run = sample_list[which]
+    to_run = None #sample_list[which]
+    for s in sample_list:
+        if which==s.get_id():
+            to_run = s
+            break
+    if not to_run:
+        PError(sname,'Could not find a job for PROCID=%i'%(which))
+        exit(3)
+
     outdir = 'XXXX' # will be replaced when building the job
     outfilename = to_run.name+'_%i.root'%(submit_id)
     processed = {}

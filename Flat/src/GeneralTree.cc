@@ -94,16 +94,20 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    jot2EtaUp = -1;
+    jot2EtaDown = -1;
+    jot1EtaUp = -1;
+    jot1EtaDown = -1;
     jot1PtUp = -1;
     jot1PtDown = -1;
     jot2PtUp = -1;
     jot2PtDown = -1;
-    jet12MassUp = -1;
-    jet12DEtaUp = -1;
-    jet12DPhiUp = -1;
-    jet12MassDown = -1;
-    jet12DEtaDown = -1;
-    jet12DPhiDown = -1;
+    jot12MassUp = -1;
+    jot12DEtaUp = -1;
+    jot12DPhiUp = -1;
+    jot12MassDown = -1;
+    jot12DEtaDown = -1;
+    jot12DPhiDown = -1;
     pfmetUp = -1;
     pfmetDown = -1;
     pfUWmagUp = -1;
@@ -123,7 +127,7 @@ void GeneralTree::Reset() {
     jot2Pt = -1;
     jot2GenPt = -1;
     jot2Eta = -1;
-    jet12DPhi = -1;
+    jot12DPhi = -1;
     isGS = 0;
     fj1SubMaxCSV = -1;
     looseLep1IsHLTSafe = 0;
@@ -238,8 +242,8 @@ void GeneralTree::Reset() {
     isojet2Pt = -1;
     isojet2CSV = -1;
     isojet2Flav = 0;
-    jet12Mass = -1;
-    jet12DEta = -1;
+    jot12Mass = -1;
+    jot12DEta = -1;
     jetNBtags = 0;
     isojetNBtags = 0;
     nFatjet = 0;
@@ -360,9 +364,9 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch("jot2Pt",&jot2Pt,"jot2Pt/F");
     treePtr->Branch("jot2GenPt",&jot2GenPt,"jot2GenPt/F");
     treePtr->Branch("jot2Eta",&jot2Eta,"jot2Eta/F");
-    treePtr->Branch("jet12DPhi",&jet12DPhi,"jet12DPhi/F");
-    treePtr->Branch("jet12Mass",&jet12Mass,"jet12Mass/F");
-    treePtr->Branch("jet12DEta",&jet12DEta,"jet12DEta/F");
+    treePtr->Branch("jot12DPhi",&jot12DPhi,"jot12DPhi/F");
+    treePtr->Branch("jot12Mass",&jot12Mass,"jot12Mass/F");
+    treePtr->Branch("jot12DEta",&jot12DEta,"jot12DEta/F");
     treePtr->Branch("pfmetUp",&pfmetUp,"pfmetUp/F");
     treePtr->Branch("pfmetDown",&pfmetDown,"pfmetDown/F");
     treePtr->Branch("pfUWmagUp",&pfUWmagUp,"pfUWmagUp/F");
@@ -373,6 +377,20 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch("pfUZmagDown",&pfUZmagDown,"pfUZmagDown/F");
     treePtr->Branch("pfUAmagDown",&pfUAmagDown,"pfUAmagDown/F");
     treePtr->Branch("pfUmagDown",&pfUmagDown,"pfUmagDown/F");
+    treePtr->Branch("jot1EtaUp",&jot1EtaUp,"jot1EtaUp/F");
+    treePtr->Branch("jot1EtaDown",&jot1EtaDown,"jot1EtaDown/F");
+    treePtr->Branch("jot1PtUp",&jot1PtUp,"jot1PtUp/F");
+    treePtr->Branch("jot1PtDown",&jot1PtDown,"jot1PtDown/F");
+    treePtr->Branch("jot2PtUp",&jot2PtUp,"jot2PtUp/F");
+    treePtr->Branch("jot2PtDown",&jot2PtDown,"jot2PtDown/F");
+    treePtr->Branch("jot12MassUp",&jot12MassUp,"jot12MassUp/F");
+    treePtr->Branch("jot12DEtaUp",&jot12DEtaUp,"jot12DEtaUp/F");
+    treePtr->Branch("jot12DPhiUp",&jot12DPhiUp,"jot12DPhiUp/F");
+    treePtr->Branch("jot12MassDown",&jot12MassDown,"jot12MassDown/F");
+    treePtr->Branch("jot12DEtaDown",&jot12DEtaDown,"jot12DEtaDown/F");
+    treePtr->Branch("jot12DPhiDown",&jot12DPhiDown,"jot12DPhiDown/F");
+    treePtr->Branch("jot2EtaUp",&jot2EtaUp,"jot2EtaUp/F");
+    treePtr->Branch("jot2EtaDown",&jot2EtaDown,"jot2EtaDown/F");
   }
   treePtr->Branch("scale",scale,"scale[6]/F");
 
@@ -386,16 +404,6 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
-    treePtr->Branch("jot1PtUp",&jot1PtUp,"jot1PtUp/F");
-    treePtr->Branch("jot1PtDown",&jot1PtDown,"jot1PtDown/F");
-    treePtr->Branch("jot2PtUp",&jot2PtUp,"jot2PtUp/F");
-    treePtr->Branch("jot2PtDown",&jot2PtDown,"jot2PtDown/F");
-    treePtr->Branch("jet12MassUp",&jet12MassUp,"jet12MassUp/F");
-    treePtr->Branch("jet12DEtaUp",&jet12DEtaUp,"jet12DEtaUp/F");
-    treePtr->Branch("jet12DPhiUp",&jet12DPhiUp,"jet12DPhiUp/F");
-    treePtr->Branch("jet12MassDown",&jet12MassDown,"jet12MassDown/F");
-    treePtr->Branch("jet12DEtaDown",&jet12DEtaDown,"jet12DEtaDown/F");
-    treePtr->Branch("jet12DPhiDown",&jet12DPhiDown,"jet12DPhiDown/F");
     treePtr->Branch("isGS",&isGS,"isGS/I");
     treePtr->Branch("fj1SubMaxCSV",&fj1SubMaxCSV,"fj1SubMaxCSV/F");
     treePtr->Branch("looseLep1IsHLTSafe",&looseLep1IsHLTSafe,"looseLep1IsHLTSafe/I");

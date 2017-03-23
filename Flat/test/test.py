@@ -25,14 +25,15 @@ skimmer = root.PandaAnalyzer(debug_level)
 
 print 'created'
 
-#skimmer.firstEvent=0
-#skimmer.lastEvent=10
-skimmer.isData=True
-skimmer.SetFlag('puppi',True)
-skimmer.SetFlag('fatjet',True)
+#skimmer.firstEvent=15074
+#skimmer.lastEvent=18000
+skimmer.isData=False
+skimmer.SetFlag('puppi',False)
+skimmer.SetFlag('fatjet',False)
+skimmer.SetFlag('vbf',True)
 skimmer.SetFlag('firstGen',False)
 skimmer.SetFlag('applyEGCorr',True)
-skimmer.SetFlag('applyJSON',False)
+#skimmer.SetFlag('applyJSON',False)
 #skimmer.SetFlag('pfCands',False)
 #skimmer.SetFlag('monohiggs',True)
 if skimmer.isData and False:
@@ -43,7 +44,7 @@ if skimmer.isData and False:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
 #skimmer.processType = root.PandaAnalyzer.kTT
 skimmer.processType = root.PandaAnalyzer.kNone
-#skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
 #system("pxrdcp %s input.root '!pfCandidates'"%(torun))
 #fin = root.TFile.Open('input.root')
 fin = root.TFile.Open(torun)
