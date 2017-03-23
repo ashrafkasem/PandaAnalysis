@@ -6,29 +6,26 @@ import argparse
 
 ### SET GLOBAL VARIABLES ###
 baseDir = getenv('PANDA_FLATDIR')+'/' 
-dataDir = baseDir.replace('8026_0_3','8026_0_3_fixedeg')
+dataDir = baseDir.replace('0_4','0_4_egfix')
 parser = argparse.ArgumentParser(description='plot stuff')
-parser.add_argument('--basedir',metavar='basedir',type=str,default=None)
 parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
 parser.add_argument('--region',metavar='region',type=str,default=None)
 parser.add_argument('--tt',metavar='tt',type=str,default='')
 args = parser.parse_args()
-lumi = 36560.
+lumi = 35800.
 blind=True
 region = args.region
 sname = argv[0]
-if args.basedir:
-    baseDir = args.basedir
 
 argv=[]
 import ROOT as root
 root.gROOT.SetBatch()
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-#import PandaAnalysis.Monotop.MonojetSelection as sel
+import PandaAnalysis.Monotop.MonojetSelection as sel
 #import PandaAnalysis.Monotop.LooseSelection as sel
-import PandaAnalysis.Monotop.TightSelection as sel
+#import PandaAnalysis.Monotop.TightSelection as sel
 from PandaCore.Drawers.plot_utility import *
 
 ### DEFINE REGIONS ###

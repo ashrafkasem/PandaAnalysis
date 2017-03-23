@@ -11,7 +11,7 @@ metFilter='metFilter==1 && egmFilter==1'
 #metFilter='metFilter==1'
 #metFilter = '1==1'
 topTagSF = '1'
-presel = 'nFatjet==1 && fj1Pt>250 && fabs(fj1Eta)<2.4 && 110<fj1MSD && fj1MSD<210 && top_ecf_bdt>0.1'
+presel = 'nFatjet==1 && fj1Pt>250 && fabs(fj1Eta)<2.4 && 110<fj1MSD && fj1MSD<210 && 0.1<top_ecf_bdt'
 
 cuts = {
     'signal'             : tAND(metFilter,tAND(presel,'pfmet>250 && dphipfmet>0.5 && nLooseLep==0 && nLoosePhoton==0 && nTau==0 && fabs(calomet-pfmet)/pfmet<0.5 && fj1MaxCSV>0.54 && isojetNBtags==0')), 
@@ -32,7 +32,7 @@ weights = {
   'top'            : '%f*sf_pu*sf_tt*normalizedWeight*sf_lepID*sf_lepIso*sf_lepTrack*sf_ewkV*sf_qcdV*sf_sjbtag1*sf_btag1',
   'w'              : '%f*sf_pu*sf_tt*normalizedWeight*sf_lepID*sf_lepIso*sf_lepTrack*sf_ewkV*sf_qcdV*sf_sjbtag0*sf_btag0',
   'z'              : '%f*sf_pu*sf_tt*normalizedWeight*sf_lepID*sf_lepIso*sf_lepTrack*sf_ewkV*sf_qcdV',
-  'photon'         : '%f*sf_pu*normalizedWeight*sf_ewkV*sf_qcdV*sf_pho*sf_phoTrig',
+  'photon'         : '%f*sf_pu*normalizedWeight*sf_ewkV*sf_qcdV*sf_pho*sf_phoTrig *sf_qcdV2j', # add the additional 2-jet kfactor
 }
 weights['qcd'] = weights['signal']
 

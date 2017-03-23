@@ -3,7 +3,7 @@
 export PANDA="${CMSSW_BASE}/src/PandaAnalysis"
 #export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170205.cfg"
 #export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170308.cfg"
-export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170316.cfg"
+export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170316_elpho.cfg"
 export PANDA_FLATDIR="${HOME}/home000/store/panda/v_8026_0_4/"
 mkdir -p $PANDA_FLATDIR
 
@@ -19,7 +19,7 @@ mkdir -p $SUBMIT_WORKDIR $SUBMIT_OUTDIR/locks/ $SUBMIT_LOGDIR
 
 #private production 
 export PRIVATE_LOGDIR="${HOME}/cms/logs/monotop_private_panda/"
-export PRIVATE_PRODDIR="${HOME}/cms/hist/monotop_private_panda/"
+export PRIVATE_PRODDIR="${HOME}/cms/hist/monotop_private_pandatree/"
 export PRIVATE_CFGDIR="${HOME}/cms/condor/monotop_private_panda/"
 
 # fitting
