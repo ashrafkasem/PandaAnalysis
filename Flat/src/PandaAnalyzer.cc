@@ -640,7 +640,7 @@ void PandaAnalyzer::Run() {
 
     }
 
-    float EGMSCALE = isData ? 1.02 : 1;
+    float EGMSCALE = isData ? 1 : 1;
 
     // set up reporters
     unsigned int iE=0;
@@ -752,7 +752,7 @@ void PandaAnalyzer::Run() {
 
         tr.TriggerEvent("met");
 
-        TLorentzVector vType1EGCorr(0,0,0,0);
+        TLorentzVector vType1EGCorr;
         gt->isGS = 0;
 
         //electrons
@@ -777,18 +777,23 @@ void PandaAnalyzer::Run() {
                 // i.e. raw - pf
                 // if we apply reg correction, then the final correction is
                 // (reg - raw) + (raw - pf) = (reg - pf)
-                if (fabs(ele.rawPt-ele.originalPt)/ele.rawPt > 0.01) {
+                // if (fabs(ele.rawPt-ele.originalPt)/ele.rawPt > 0.01) {
                     // ignore cases where there is no correction/it was less than a percent
                     float basePt = ele.pfPt;
-                    if (basePt<1)
-                        // if we did not match to a PF, use the uncorrected supercluster
-                        basePt = ele.originalPt; 
+                    // if (basePt<1)
+                    //     // if we did not match to a PF, use the uncorrected supercluster
+                    //     basePt = ele.originalPt; 
                     gt->isGS = 1;
                     // GS correction is raw (GS fixed but no regression) minus PF
-                    float diffPt = ele.rawPt - ele.pfPt; 
-                    TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,0,ele.phi(),0);
+                    float diffPt = ele.rawPt - basePt; 
+                    TLorentzVector vCorr; vCorr.SetPtEtaPhiM(fabs(diffPt),0,ele.phi(),0);
                     vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
-                }
+                // }
+                /*
+                float diffPt = ele.rawPt - ele.pfPt;
+                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
+                vType1EGCorr -= vCorr;
+                */
             }
         }
 
@@ -935,18 +940,23 @@ void PandaAnalyzer::Run() {
                 // i.e. raw - pf
                 // if we apply reg correction, then the final correction is
                 // (reg - raw) + (raw - pf) = (reg - pf)
-                if (fabs(pho.rawPt-pho.originalPt)/pho.rawPt > 0.01) {
+                // if (fabs(pho.rawPt-pho.originalPt)/pho.rawPt > 0.01) {
                     // ignore cases where there is no correction/it was less than a percent
                     float basePt = pho.pfPt;
-                    if (basePt<1)
-                        // if we did not match to a PF, use the uncorrected supercluster
-                        basePt = pho.originalPt; 
+                    // if (basePt<1)
+                    //     // if we did not match to a PF, use the uncorrected supercluster
+                    //     basePt = pho.originalPt; 
                     gt->isGS = 1;
                     // GS correction is raw (GS fixed but no regression) minus PF
-                    float diffPt = pho.rawPt - pho.pfPt; 
-                    TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,0,pho.phi(),0);
+                    float diffPt = pho.rawPt - basePt; 
+                    TLorentzVector vCorr; vCorr.SetPtEtaPhiM(fabs(diffPt),0,pho.phi(),0);
                     vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
-                }
+                // }
+                /*
+                float diffPt = pho.rawPt - pho.pfPt;
+                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
+                vType1EGCorr -= vCorr;
+                */
             }
             if ( pho.medium &&
                  pt>175 /*&& fabs(eta)<1.4442*/ ) { // apply eta cut offline
@@ -1249,6 +1259,8 @@ void PandaAnalyzer::Run() {
         TLorentzVector vJet;
         panda::Jet *jet1=0, *jet2=0;
         panda::Jet *jot1=0, *jot2=0;
+        panda::Jet *jotUp1=0, *jotUp2=0;
+        panda::Jet *jotDown1=0, *jotDown2=0;
         gt->dphipuppimet=999; gt->dphipfmet=999;
         gt->dphipuppiUW=999; gt->dphipfUW=999;
         gt->dphipuppiUZ=999; gt->dphipfUZ=999;
@@ -1266,17 +1278,41 @@ void PandaAnalyzer::Run() {
             if (cleanedJets.size()==1) {
                 jot1 = &jet;
                 gt->jot1Pt = jet.pt();
-                gt->jot1PtUp = jet.ptCorrUp;
-                gt->jot1PtDown = jet.ptCorrDown;
                 gt->jot1Eta = jet.eta();
                 gt->jot1Phi = jet.phi();
             } else if (cleanedJets.size()==2) {
                 jot2 = &jet;
                 gt->jot2Pt = jet.pt();
-                gt->jot2PtUp = jet.ptCorrUp;
-                gt->jot2PtDown = jet.ptCorrDown;
                 gt->jot2Eta = jet.eta();
                 gt->jot2Phi = jet.phi();
+            }
+            if (jet.ptCorrUp > gt->jot1PtUp) {
+                if (jotUp1) {
+                    jotUp2 = jotUp1;
+                    gt->jot2PtUp = gt->jot1PtUp;
+                    gt->jot2EtaUp = gt->jot1EtaUp;
+                }
+                jotUp1 = &jet;
+                gt->jot1PtUp = jet.ptCorrUp;
+                gt->jot1EtaUp = jet.eta();
+            } else if (jet.ptCorrUp > gt->jot2PtUp) {
+                jotUp2 = &jet;
+                gt->jot2PtUp = jet.ptCorrUp;
+                gt->jot2EtaUp = jet.eta();
+            }
+            if (jet.ptCorrDown > gt->jot1PtDown) {
+                if (jotDown1) {
+                    jotDown2 = jotDown1;
+                    gt->jot2PtDown = gt->jot1PtDown;
+                    gt->jot2EtaDown = gt->jot1EtaDown;
+                }
+                jotDown1 = &jet;
+                gt->jot1PtDown = jet.ptCorrDown;
+                gt->jot1EtaDown = jet.eta();
+            } else if (jet.ptCorrDown > gt->jot2PtDown) {
+                jotDown2 = &jet;
+                gt->jot2PtDown = jet.ptCorrDown;
+                gt->jot2EtaDown = jet.eta();
             }
 
             float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
@@ -1376,19 +1412,24 @@ void PandaAnalyzer::Run() {
         gt->nJet = centralJets.size();
         gt->nJot = cleanedJets.size();
         if (gt->nJot>1 && doVBF) {
-          gt->jet12DEta = fabs(jot1->eta()-jot2->eta());
           TLorentzVector vj1, vj2;
           vj1.SetPtEtaPhiM(jot1->pt(),jot1->eta(),jot1->phi(),jot1->m());
           vj2.SetPtEtaPhiM(jot2->pt(),jot2->eta(),jot2->phi(),jot2->m());
-          gt->jet12Mass = (vj1+vj2).M();
-          gt->jet12DPhi = vj1.DeltaPhi(vj2);
+          gt->jot12Mass = (vj1+vj2).M();
+          gt->jot12DPhi = vj1.DeltaPhi(vj2);
+          gt->jot12DEta = fabs(jot1->eta()-jot2->eta());
 
-          vj1.SetPtEtaPhiM(jot1->ptCorrUp,jot1->eta(),jot1->phi(),jot1->m());
-          vj2.SetPtEtaPhiM(jot2->ptCorrUp,jot2->eta(),jot2->phi(),jot2->m());
-          gt->jet12MassUp = (vj1+vj2).M();
-          vj1.SetPtEtaPhiM(jot1->ptCorrDown,jot1->eta(),jot1->phi(),jot1->m());
-          vj2.SetPtEtaPhiM(jot2->ptCorrDown,jot2->eta(),jot2->phi(),jot2->m());
-          gt->jet12MassDown = (vj1+vj2).M();
+          vj1.SetPtEtaPhiM(jotUp1->ptCorrUp,jotUp1->eta(),jotUp1->phi(),jotUp1->m());
+          vj2.SetPtEtaPhiM(jotUp2->ptCorrUp,jotUp2->eta(),jotUp2->phi(),jotUp2->m());
+          gt->jot12MassUp = (vj1+vj2).M();
+          gt->jot12DPhiUp = vj1.DeltaPhi(vj2);
+          gt->jot12DEtaUp = fabs(jotUp1->eta()-jotUp2->eta());
+          
+          vj1.SetPtEtaPhiM(jotDown1->ptCorrDown,jotDown1->eta(),jotDown1->phi(),jotDown1->m());
+          vj2.SetPtEtaPhiM(jotDown2->ptCorrDown,jotDown2->eta(),jotDown2->phi(),jotDown2->m());
+          gt->jot12MassDown = (vj1+vj2).M();
+          gt->jot12DPhiDown = vj1.DeltaPhi(vj2);
+          gt->jot12DEtaDown = fabs(jotDown1->eta()-jotDown2->eta());
         }
 
         tr.TriggerEvent("jets");

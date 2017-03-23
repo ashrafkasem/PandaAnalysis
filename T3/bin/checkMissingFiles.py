@@ -143,6 +143,8 @@ for name in sorted(all_samples):
             state = 'idle'
 
         if state=='missing' or (args.force and state!='done'):
+            if '06A8FEEE-78D0-E611-A23E-0CC47A78A426' in f:
+                print f,' is missing'
             # if '750' in f:
             #     print '|%s|'%f
             out_sample.add_file(f)
@@ -189,3 +191,5 @@ print 'Legend: Done=\033[0;%im    \033[0m, Running=\033[0;%im    \033[0m, Idle=\
 
 outfile.close()
 
+print '\nMost recent submission:'
+import query
