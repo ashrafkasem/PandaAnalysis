@@ -11,7 +11,7 @@ cfgName=argv[1]
 nPerJob = 50
 xrd='root://xrootd.cmsaf.mit.edu/'
 
-histdir = '/home/%s/cms/hist/monotop_private_panda/%s/'%(user,cfgName)
+histdir = '/home/%s/cms/hist/monotop_private_pandatree/%s/'%(user,cfgName)
 cfgdir = '/home/%s/cms/condor/monotop_private_panda/%s/'%(user,cfgName)
 logdir = '/home/%s/cms/logs/monotop_private_panda/%s/'%(user,cfgName)
 for dire in [histdir,cfgdir,logdir]:

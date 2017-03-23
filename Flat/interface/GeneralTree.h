@@ -157,16 +157,20 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    float jot2EtaUp = -1;
+    float jot2EtaDown = -1;
+    float jot1EtaUp = -1;
+    float jot1EtaDown = -1;
     float jot1PtUp = -1;
     float jot1PtDown = -1;
     float jot2PtUp = -1;
     float jot2PtDown = -1;
-    float jet12MassUp = -1;
-    float jet12DEtaUp = -1;
-    float jet12DPhiUp = -1;
-    float jet12MassDown = -1;
-    float jet12DEtaDown = -1;
-    float jet12DPhiDown = -1;
+    float jot12MassUp = -1;
+    float jot12DEtaUp = -1;
+    float jot12DPhiUp = -1;
+    float jot12MassDown = -1;
+    float jot12DEtaDown = -1;
+    float jot12DPhiDown = -1;
     float pfmetUp = -1;
     float pfmetDown = -1;
     float pfUWmagUp = -1;
@@ -186,7 +190,7 @@ class GeneralTree : public genericTree {
     float jot2Pt = -1;
     float jot2GenPt = -1;
     float jot2Eta = -1;
-    float jet12DPhi = -1;
+    float jot12DPhi = -1;
     int isGS = -1;
     float fj1SubMaxCSV = -1;
     int looseLep1IsHLTSafe = -1;
@@ -301,8 +305,8 @@ class GeneralTree : public genericTree {
     float isojet2Pt = -1;
     float isojet2CSV = -1;
     int isojet2Flav = -1;
-    float jet12Mass = -1;
-    float jet12DEta = -1;
+    float jot12Mass = -1;
+    float jot12DEta = -1;
     int jetNBtags = -1;
     int isojetNBtags = -1;
     int nFatjet = -1;
