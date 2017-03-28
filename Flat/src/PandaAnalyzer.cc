@@ -364,7 +364,7 @@ bool PandaAnalyzer::PassPreselection() {
     bool isGood=false;
 
     if (preselBits & kFatjet) {
-        if (gt->fj1Pt>200)
+        if (gt->fj1Pt>250)
             isGood = true;
     }
     if (preselBits & kRecoil) {
