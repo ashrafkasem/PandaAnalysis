@@ -6,7 +6,7 @@ import argparse
 
 ### SET GLOBAL VARIABLES ###
 baseDir = getenv('PANDA_FLATDIR')+'/' 
-dataDir = baseDir.replace('0_4','0_4_egfix')
+dataDir = baseDir#.replace('0_4','0_4_egfix')
 parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
@@ -57,10 +57,10 @@ plot.do_overflow = True
 plot.do_underflow = True
 
 weight = sel.weights[region]%lumi
-plot.mc_weight = weight
+plot.mc_weight = weight#.replace('sf_qcdV','1').replace('sf_ewkV','1')
 
-PInfo('cut',plot.cut)
-PInfo('weight',plot.mc_weight)
+#PInfo('cut',plot.cut)
+#PInfo('weight',plot.mc_weight)
 
 #plot.add_systematic('QCD scale','scaleUp','scaleDown',root.kRed+2)
 #plot.add_systematic('PDF','pdfUp','pdfDown',root.kBlue+2)
@@ -88,6 +88,7 @@ if 'signal' in region or 'qcd' in region:
     signal.add_file(baseDir+'Vector_MonoTop_NLO_Mphi-1750_Mchi-1_gSM-0p25_gDM-1p0_13TeV-madgraph.root')
 else:
     zjets.add_file(baseDir+'ZJets.root')
+    #zjets.add_file(baseDir+'ZJets_nlo.root')
 wjets.add_file(baseDir+'WJets.root')
 diboson.add_file(baseDir+'Diboson.root')
 ttbar.add_file(baseDir+'TTbar%s.root'%(args.tt));
@@ -163,6 +164,8 @@ plot.add_distribution(FDistribution('fj1MSD',50,250,10,'fatjet m_{SD} [GeV]','Ev
 plot.add_distribution(FDistribution('fj1Pt',200,1000,20,'fatjet p_{T} [GeV]','Events'))
 plot.add_distribution(FDistribution('top_ecf_bdt',-1,1,20,'Top BDT','Events'))
 plot.add_distribution(FDistribution('fj1MaxCSV',0,1,20,'fatjet max CSV','Events'))
+plot.add_distribution(FDistribution('fj1Tau32',0,1,20,'fatjet #tau_{32}','Events'))
+plot.add_distribution(FDistribution('fj1Tau32SD',0,1,20,'fatjet #tau_{32}^{SD}','Events'))
 plot.add_distribution(FDistribution('jet1CSV',0,1,20,'jet 1 CSV','Events',filename='jet1CSV'))
 plot.add_distribution(FDistribution('dphipfmet',0,3.14,20,'min#Delta#phi(jet,E_{T}^{miss})','Events'))
 plot.add_distribution(FDistribution("1",0,2,1,"dummy","dummy"))

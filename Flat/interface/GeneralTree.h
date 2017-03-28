@@ -137,6 +137,7 @@ class GeneralTree : public genericTree {
       std::map<ECFParams,float> fj1ECFNs;
       std::map<BTagParams,float> sf_btags;
       std::map<BTagParams,float> sf_alt_btags;
+      std::map<TString,float> signal_weights;
 
       float fj1sjPt[NSUBJET];
       float fj1sjEta[NSUBJET];

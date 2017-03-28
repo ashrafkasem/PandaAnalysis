@@ -25,11 +25,11 @@ skimmer = root.PandaAnalyzer(debug_level)
 
 print 'created'
 
-#skimmer.firstEvent=15074
-#skimmer.lastEvent=18000
+#skimmer.firstEvent=0
+#skimmer.lastEvent=18
 skimmer.isData=False
 skimmer.SetFlag('puppi',False)
-skimmer.SetFlag('fatjet',False)
+skimmer.SetFlag('fatjet',True)
 skimmer.SetFlag('vbf',True)
 skimmer.SetFlag('firstGen',False)
 skimmer.SetFlag('applyEGCorr',True)
