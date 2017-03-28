@@ -17,9 +17,16 @@ from PandaCore.Tools.Load import *
 import PandaCore.Tools.job_management as cb
 import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 
-now = int(time())
 Load('PandaAnalyzer')
 data_dir = getenv('CMSSW_BASE') + '/src/PandaAnalysis/data/'
+
+stopwatch = clock() 
+def print_time(label):
+    global stopwatch
+    now_ = clock()
+    PDebug(sname+'.print_time:'+str(time()),
+           '%.3f s elapsed performing "%s"'%((now_-stopwatch)/1000.,label))
+    stopwatch = now_
 
 def copy_local(long_name):
     replacements = {
@@ -36,17 +43,28 @@ def copy_local(long_name):
     panda_id = long_name.split('/')[-1].split('_')[-1].replace('.root','')
     input_name = 'input_%s.root'%panda_id
 
-    # xrdcp if remote, copy if local 
-    # xrdcp seems faster than pxrdcp, even if pf candidates are dropped
+    # if the file is cached locally, why not use it?
+    local_path = full_path.replace('root://xrootd.cmsaf.mit.edu/','/mnt/hadoop/cms')
+    if path.isfile(local_path):
+        # apparently SmartCached files can be corrupted...
+        ftest = root.TFile(local_path)
+        if ftest and not(ftest.IsZombie()):
+            full_path = local_path
+
+    '''
+    # xrdcp if remote, copy if local - DEPRECATED
     if 'root://' in full_path:
         system('xrdcp %s %s'%(full_path,input_name))
     else:
         system('cp %s %s'%(full_path,input_name))
+    '''
 
     # rely on pxrdcp for local and remote copies
     # default behavior: drop PF candidates
-    # system("pxrdcp %s %s '!pfCandidates'"%(full_path,input_name))
+    cmd = "pxrdcp %s %s '!pfCandidates'"%(full_path,input_name)
+    PInfo(sname+'.copy_local',cmd)
 
+    system(cmd)
             
     if path.isfile(input_name):
         PInfo(sname+'.copy_local','Successfully copied to %s'%(input_name))
@@ -57,19 +75,16 @@ def copy_local(long_name):
 
 
 def fn(input_name,isData,full_path):
-    start=clock()
     
     PInfo(sname+'.fn','Starting to process '+input_name)
     # now we instantiate and configure the analyzer
     skimmer = root.PandaAnalyzer()
     skimmer.isData=isData
     skimmer.SetFlag('firstGen',True)
-    skimmer.SetFlag('pfCands',True)
-    #skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kFatjet)
     processType=root.PandaAnalyzer.kNone
     if not isData:
-        if any([x in full_path for x in ['ST_','Vector_','ZprimeToTT']]):
+        if any([x in full_path for x in ['ST_','Vector_','Scalar_','ZprimeToTT']]):
             processType=root.PandaAnalyzer.kTop
         elif 'ZJets' in full_path or 'DY' in full_path:
             processType=root.PandaAnalyzer.kZ
@@ -114,7 +129,7 @@ def fn(input_name,isData,full_path):
 
     ret = path.isfile(output_name)
     if ret:
-        PInfo(sname+'.fn','Successfully created %s in %.2f sec'%(output_name,(clock()-start)/1000.))
+        PInfo(sname+'.fn','Successfully created %s'%(output_name))
         return True
     else:
         PError(sname+'.fn','Failed in creating %s!'%(output_name))
@@ -227,29 +242,47 @@ def write_lock(outdir,outfilename,processed):
 
 if __name__ == "__main__":
     sample_list = cb.read_sample_config('local.cfg',as_dict=False)
-    to_run = sample_list[which]
+    to_run = None #sample_list[which]
+    for s in sample_list:
+        if which==s.get_id():
+            to_run = s
+            break
+    if not to_run:
+        PError(sname,'Could not find a job for PROCID=%i'%(which))
+        exit(3)
+
     outdir = 'XXXX' # will be replaced when building the job
     outfilename = to_run.name+'_%i.root'%(submit_id)
     processed = {}
-
+    
+    print_time('loading')
     for f in to_run.files:
         input_name = copy_local(f)
+        print_time('copy %s'%input_name)
         if input_name:
             success = fn(input_name,(to_run.dtype!='MC'),f)
+            print_time('analyze %s'%input_name)
             if success:
                 processed[input_name] = f
             cleanup(input_name)
+            print_time('remove %s'%input_name)
     
     if len(processed)==0:
         exit(1)
 
     hadd(list(processed))
+    print_time('hadd')
+
     add_bdt()
-    if drop_branches(to_keep=['fj1*','top_ecf_bdt','*Number']):
+    print_time('add BDT')
+    if drop_branches(to_keep=['fj1*','*Number','top_ecf_bdt','mcWeight']):
         exit(2)
+    print_time('drop branches')
     ret = stageout(outdir,outfilename)
+    print_time('stageout')
     if not ret:
         write_lock(outdir,outfilename,processed)
+        print_time('create lock')
     else:
         exit(-1*ret)
 
