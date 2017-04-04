@@ -19,17 +19,15 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 
 Load('PandaAnalyzer')
-print 'loaded'
 
 skimmer = root.PandaAnalyzer(debug_level)
 
-print 'created'
 
-#skimmer.firstEvent=0
-#skimmer.lastEvent=18
+skimmer.firstEvent=0
+skimmer.lastEvent=20
 skimmer.isData=False
 skimmer.SetFlag('puppi',False)
-skimmer.SetFlag('fatjet',True)
+skimmer.SetFlag('fatjet',False)
 skimmer.SetFlag('vbf',True)
 skimmer.SetFlag('firstGen',False)
 skimmer.SetFlag('applyEGCorr',True)
@@ -44,23 +42,18 @@ if skimmer.isData and False:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
 #skimmer.processType = root.PandaAnalyzer.kTT
 skimmer.processType = root.PandaAnalyzer.kNone
-skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+#skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
 #system("pxrdcp %s input.root '!pfCandidates'"%(torun))
 #fin = root.TFile.Open('input.root')
 fin = root.TFile.Open(torun)
 
-print torun
-print fin
-
 tree = fin.FindObjectAny("events")
 hweights = fin.FindObjectAny("hSumW")
-print tree,hweights
+weights = fin.FindObjectAny('weights')
 
 skimmer.SetDataDir(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/')
 skimmer.SetOutputFile(output)
-skimmer.Init(tree,hweights)
+skimmer.Init(tree,hweights,weights)
 
 skimmer.Run()
-print 'done running'
 skimmer.Terminate()
-print 'done terminating'
