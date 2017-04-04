@@ -55,7 +55,10 @@ def hadd(inpath,outpath):
     system(cmd+suffix)
 
 def normalizeFast(fpath,nfiles):
-    nevts = nfiles * N_EVENTS_FILE
+    if 'unlops' not in fpath:
+        nevts = nfiles * N_EVENTS_FILE
+    else:
+        nevts = nfiles
     PInfo(sname,'normalizing %s (%s) ...'%(fpath,nfiles))
     f = root.TFile.Open(fpath,'UPDATE')
     t = f.Get('Events')
@@ -78,6 +81,8 @@ def merge(shortnames,mergedname):
 
 d = {
         'a_nlo' : ['unlops'],
+        'z_nlo' : ['z12j'],
+        'w_nlo' : ['w12j'],
 }
 
 args = {}
