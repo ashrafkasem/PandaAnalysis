@@ -52,13 +52,11 @@ void PandaAnalyzer::SetOutputFile(TString fOutName) {
     gt->monohiggs = flags["monohiggs"];
     gt->vbf       = flags["vbf"];
     gt->fatjet    = flags["fatjet"];
-    gt->WriteTree(tOut);
-
     if (DEBUG) PDebug("PandaAnalyzer::SetOutputFile","Created output in "+fOutName);
 }
 
 
-void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
+void PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
 {
     if (DEBUG) PDebug("PandaAnalyzer::Init","Starting initialization");
     if (!t || !hweights) {
@@ -98,6 +96,20 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights)
     hDTotalMCWeight.SetBinContent(1,hweights->GetBinContent(1));
     fOut->WriteTObject(&hDTotalMCWeight);    
 
+    if (weightNames) {
+        TString *id = new TString();
+        weightNames->SetBranchAddress("id",&id);
+        unsigned nW = weightNames->GetEntriesFast();
+        for (unsigned iW=0; iW!=nW; ++iW) {
+            weightNames->GetEntry(iW);
+            gt->signal_weights[*id] = 1;
+            wIDs.push_back(*id);
+        }
+    }
+
+
+    // Build the input tree here now, in case input is needed
+    gt->WriteTree(tOut);
 
     // manipulate the output tree
     if (isData) {
@@ -661,6 +673,29 @@ void PandaAnalyzer::Run() {
         ResetBranches();
         event.getEntry(*tIn,iE);
         tr.TriggerEvent(TString::Format("GetEntry %u",iE));
+        if (DEBUG>2) {
+            PDebug("PandaAnalyzer::Run::Dump","");
+            event.print(std::cout, 2);
+            std::cout << std::endl;
+            PDebug("PandaAnalyzer::Run::Dump","");
+            event.photons.print(std::cout, 2);
+            std::cout << std::endl;
+            PDebug("PandaAnalyzer::Run::Dump","");
+            event.muons.print(std::cout, 2);
+            std::cout << std::endl;
+            PDebug("PandaAnalyzer::Run::Dump","");
+            event.electrons.print(std::cout, 2);
+            std::cout << std::endl;
+            PDebug("PandaAnalyzer::Run::Dump","");
+            event.chsAK4Jets.print(std::cout, 2);
+            std::cout << std::endl;
+            PDebug("PandaAnalyzer::Run::Dump","");
+            event.pfMet.print(std::cout, 2);
+            std::cout << std::endl;
+            PDebug("PandaAnalyzer::Run::Dump","");
+            event.metMuOnlyFix.print(std::cout, 2);
+            std::cout << std::endl;
+        }
 
         if ( (preselBits&kMonotop) || (preselBits&kMonohiggs) || 
              (preselBits&kMonojet) || (preselBits&kRecoil) ) 
@@ -2060,6 +2095,13 @@ void PandaAnalyzer::Run() {
                 gt->scaleDown = min(float(gt->scaleDown),float(s));
             }
             tr.TriggerEvent("qcd uncertainties");
+
+            unsigned nW = wIDs.size();
+            if (nW) {
+                for (unsigned iW=0; iW!=nW; ++iW) {
+                    gt->signal_weights[wIDs[iW]] = event.genReweight.genParam[iW];
+                }
+            }
         }
 
         gt->Fill();

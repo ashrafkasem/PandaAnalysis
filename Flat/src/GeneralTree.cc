@@ -93,6 +93,10 @@ void GeneralTree::Reset() {
     jetQGL[iJ] = -99;
   }
 
+  for (auto iter=signal_weights.begin(); iter!=signal_weights.end(); ++iter) {
+    signal_weights[iter->first] = 1; // does pair::second return a reference?
+  }
+
 //ENDCUSTOMRESET
     jot2EtaUp = -1;
     jot2EtaDown = -1;
@@ -330,6 +334,10 @@ void GeneralTree::Reset() {
 void GeneralTree::WriteTree(TTree *t) {
   treePtr = t;
 //STARTCUSTOMWRITE
+  for (auto iter=signal_weights.begin(); iter!=signal_weights.end(); ++iter) {
+    treePtr->Branch(iter->first,&(signal_weights[iter->first]),iter->first+"/F");
+  }
+
   treePtr->Branch("nJet",&nJet,"nJet/I");
   if (monohiggs) {
     treePtr->Branch("jetPt",jetPt,"jetPt[nJet]/F");

@@ -70,7 +70,7 @@ public :
 
     PandaAnalyzer(int debug_=0);
     ~PandaAnalyzer();
-    void Init(TTree *tree, TH1D *hweights);
+    void Init(TTree *tree, TH1D *hweights, TTree *weightNames=0);
     void SetOutputFile(TString fOutName);
     void ResetBranches();
     void Run();
@@ -200,6 +200,9 @@ private:
     std::vector<int> ibetas;
     std::vector<int> Ns; 
     std::vector<int> orders;
+
+    // any extra signal weights we want
+    std::vector<TString> wIDs;
 
 };
 
