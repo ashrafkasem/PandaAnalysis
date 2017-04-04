@@ -23,6 +23,25 @@ translate = {
         'GJets_HT-400to600':'GJets_ht400to600',
         'GJets_HT-600toInf':'GJets_ht600toinf',
 
+        'DYJets_HT-100to200':'ZJets_ht100to200',
+        'DYJets_HT-200to400':'ZJets_ht200to400',
+        'DYJets_HT-400to600':'ZJets_ht400to600',
+        'DYJets_HT-600to800':'ZJets_ht600to800',
+        'DYJets_HT-600toInf':'ZJets_ht600toinf',
+        'DYJets_HT-800to1200':'ZJets_ht800to1200',
+        'DYJets_HT-1200to2500':'ZJets_ht1200to2500',
+        'DYJets_HT-2500toInf':'ZJets_ht2500toinf',
+
+        'WJetsToLNu_HT-100to200':'WJets_ht100to200',
+        'WJetsToLNu_HT-200to400':'WJets_ht200to400',
+        'WJetsToLNu_HT-400to600':'WJets_ht400to600',
+        'WJetsToLNu_HT-600to800':'WJets_ht600to800',
+        'WJetsToLNu_HT-800to1200':'WJets_ht800to1200',
+        'WJetsToLNu_HT-1200to2500':'WJets_ht1200to2500',
+        'WJetsToLNu_HT-2500toInf':'WJets_ht2500toinf',
+
+    #'ZtoNuNu'             : ['ZtoNuNu_ht100to200','ZtoNuNu_ht200to400','ZtoNuNu_ht400to600','ZtoNuNu_ht600to800','ZtoNuNu_ht800to1200','ZtoNuNu_ht1200to2500','ZtoNuNu_ht2500toinf'],
+
         }
 
 
@@ -105,6 +124,8 @@ def merge(shortnames,mergedname):
 
 d = {
     'a_lo'               : ['GJets_HT-100to200','GJets_HT-200to400','GJets_HT-400to600','GJets_HT-600toInf'],
+    'z_lo'               : ['DYJets_HT-100to200',    'DYJets_HT-200to400',    'DYJets_HT-400to600',    'DYJets_HT-600toInf'],
+    'w_lo'               : ['WJetsToLNu_HT-100to200',    'WJetsToLNu_HT-200to400',    'WJetsToLNu_HT-400to600',    'WJetsToLNu_HT-600to800',    'WJetsToLNu_HT-800to1200'],
 }
 
 args = {}
