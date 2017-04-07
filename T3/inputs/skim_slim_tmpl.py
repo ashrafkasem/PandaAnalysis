@@ -102,6 +102,7 @@ def fn(input_name,isData,full_path):
     try:
         fin = root.TFile.Open(input_name)
         tree = fin.FindObjectAny("events")
+        weight_table = fin.FindObjectAny('weights')
         hweights = fin.FindObjectAny("hSumW")
     except:
         PError(sname+'.fn','Could not read %s'%input_name)
@@ -123,7 +124,7 @@ def fn(input_name,isData,full_path):
                 for l in lumis:
                     skimmer.AddGoodLumiRange(run,l[0],l[1])
     skimmer.SetOutputFile(output_name)
-    skimmer.Init(tree,hweights)
+    skimmer.Init(tree,hweights,weight_table)
 
     # run and save output
     skimmer.Run()
