@@ -7,18 +7,26 @@ from time import clock,time
 import json
 
 which = int(argv[1])
+submit_id = int(argv[2])
 sname = argv[0]
 argv=[]
 
 import ROOT as root
 from PandaCore.Tools.Misc import *
 from PandaCore.Tools.Load import *
-import PandaCore.Tools.ConfigBuilding as cb
+import PandaCore.Tools.job_management as cb
 import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 
-now = int(time())
 Load('PandaAnalyzer')
 data_dir = getenv('CMSSW_BASE') + '/src/PandaAnalysis/data/'
+
+stopwatch = clock() 
+def print_time(label):
+    global stopwatch
+    now_ = clock()
+    PDebug(sname+'.print_time:'+str(time()),
+           '%.3f s elapsed performing "%s"'%((now_-stopwatch)/1000.,label))
+    stopwatch = now_
 
 def copy_local(long_name):
     replacements = {
@@ -35,6 +43,14 @@ def copy_local(long_name):
     panda_id = long_name.split('/')[-1].split('_')[-1].replace('.root','')
     input_name = 'input_%s.root'%panda_id
 
+    # if the file is cached locally, why not use it?
+    local_path = full_path.replace('root://xrootd.cmsaf.mit.edu/','/mnt/hadoop/cms')
+    if path.isfile(local_path):
+        # apparently SmartCached files can be corrupted...
+        ftest = root.TFile(local_path)
+        if ftest and not(ftest.IsZombie()):
+            full_path = local_path
+
     '''
     # xrdcp if remote, copy if local - DEPRECATED
     if 'root://' in full_path:
@@ -45,7 +61,10 @@ def copy_local(long_name):
 
     # rely on pxrdcp for local and remote copies
     # default behavior: drop PF candidates
-    system("pxrdcp %s %s '!pfCandidates'"%(full_path,input_name))
+    cmd = "pxrdcp %s %s '!pfCandidates'"%(full_path,input_name)
+    PInfo(sname+'.copy_local',cmd)
+
+    system(cmd)
             
     if path.isfile(input_name):
         PInfo(sname+'.copy_local','Successfully copied to %s'%(input_name))
@@ -56,19 +75,18 @@ def copy_local(long_name):
 
 
 def fn(input_name,isData,full_path):
-    start=clock()
     
     PInfo(sname+'.fn','Starting to process '+input_name)
     # now we instantiate and configure the analyzer
     skimmer = root.PandaAnalyzer()
     skimmer.isData=isData
     skimmer.SetFlag('firstGen',True)
-    skimmer.SetFlag('genOnly',True)
-    #skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+#    skimmer.SetFlag('applyEGCorr',False)
+    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
     #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
-        if 'ST_' in full_path:
+        if any([x in full_path for x in ['ST_','Vector_','Scalar_','ZprimeToTT']]):
             processType=root.PandaAnalyzer.kTop
         elif 'ZJets' in full_path or 'DY' in full_path:
             processType=root.PandaAnalyzer.kZ
@@ -84,6 +102,7 @@ def fn(input_name,isData,full_path):
     try:
         fin = root.TFile.Open(input_name)
         tree = fin.FindObjectAny("events")
+        weight_table = fin.FindObjectAny('weights')
         hweights = fin.FindObjectAny("hSumW")
     except:
         PError(sname+'.fn','Could not read %s'%input_name)
@@ -105,7 +124,7 @@ def fn(input_name,isData,full_path):
                 for l in lumis:
                     skimmer.AddGoodLumiRange(run,l[0],l[1])
     skimmer.SetOutputFile(output_name)
-    skimmer.Init(tree,hweights)
+    skimmer.Init(tree,hweights,weight_table)
 
     # run and save output
     skimmer.Run()
@@ -113,11 +132,20 @@ def fn(input_name,isData,full_path):
 
     ret = path.isfile(output_name)
     if ret:
-        PInfo(sname+'.fn','Successfully created %s in %.2f sec'%(output_name,(clock()-start)/1000.))
+        PInfo(sname+'.fn','Successfully created %s'%(output_name))
         return True
     else:
         PError(sname+'.fn','Failed in creating %s!'%(output_name))
         return False
+
+
+def cleanup(fname):
+    ret = system('rm -f %s'%(fname))
+    if ret:
+        PError(sname+'.cleanup','Removal of %s exited with code %i'%(fname,ret))
+    else:
+        PInfo(sname+'.cleanup','Removed '+fname)
+    return ret
 
 
 def hadd(good_inputs):
@@ -147,18 +175,34 @@ def add_bdt():
     ba.RunFile('output.root')
 
 
-def drop_branches(to_drop='fj1ECFN*'):
+def drop_branches(to_drop=None, to_keep=None):
     # remove any irrelevant branches from the final tree.
     # this MUST be the last step before stageout or you 
     # run the risk of breaking something
     
-    if to_drop=='':
-        return 0 
+    if not to_drop and not to_keep:
+        return 0
+
+    if to_drop and to_keep:
+        PError(sname+'.drop_branches','Can only provide to_drop OR to_keep')
+        return 0
 
     f = root.TFile('output.root','UPDATE')
     t = f.FindObjectAny('events')
     n_entries = t.GetEntriesFast() # to check the file wasn't corrupted
-    t.SetBranchStatus(to_drop,False)
+    if to_drop:
+        if type(to_drop)==str:
+            t.SetBranchStatus(to_drop,False)
+        else:
+            for b in to_drop:
+                t.SetBranchStatus(b,False)
+    elif to_keep:
+        t.SetBranchStatus('*',False)
+        if type(to_keep)==str:
+            t.SetBranchStatus(to_keep,True)
+        else:
+            for b in to_keep:
+                t.SetBranchStatus(b,True)
     t_clone = t.CloneTree()
     f.WriteTObject(t_clone,'events','overwrite')
     f.Close()
@@ -201,27 +245,48 @@ def write_lock(outdir,outfilename,processed):
 
 if __name__ == "__main__":
     sample_list = cb.read_sample_config('local.cfg',as_dict=False)
-    to_run = sample_list[which]
-    outdir = 'XXXX' # will be replaced when building the job
-    outfilename = to_run.name+'_%i.root'%(now)
-    processed = {}
+    to_run = None #sample_list[which]
+    for s in sample_list:
+        if which==s.get_id():
+            to_run = s
+            break
+    if not to_run:
+        PError(sname,'Could not find a job for PROCID=%i'%(which))
+        exit(3)
 
+    outdir = 'XXXX' # will be replaced when building the job
+    outfilename = to_run.name+'_%i.root'%(submit_id)
+    processed = {}
+    
+    print_time('loading')
     for f in to_run.files:
         input_name = copy_local(f)
+        print_time('copy %s'%input_name)
         if input_name:
             success = fn(input_name,(to_run.dtype!='MC'),f)
+            print_time('analyze %s'%input_name)
             if success:
                 processed[input_name] = f
+            cleanup(input_name)
+            print_time('remove %s'%input_name)
     
     if len(processed)==0:
         exit(1)
 
     hadd(list(processed))
+    print_time('hadd')
+
     add_bdt()
+    print_time('add BDT')
     if drop_branches(to_drop='fj1ECFN*'):
-        exit(1)
+        exit(2)
+    print_time('drop branches')
     ret = stageout(outdir,outfilename)
+    print_time('stageout')
     if not ret:
         write_lock(outdir,outfilename,processed)
+        print_time('create lock')
+    else:
+        exit(-1*ret)
 
     exit(0)
