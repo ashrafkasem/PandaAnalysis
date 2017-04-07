@@ -6,7 +6,12 @@ from glob import glob
 import argparse
 parser = argparse.ArgumentParser(description='make forest')
 parser.add_argument('--region',metavar='region',type=str,default=None)
-out_region = parser.parse_args().region
+parser.add_argument('--couplings',metavar='couplings',type=str,default=None)
+args = parser.parse_args()
+couplings = args.couplings
+if couplings=='nominal':
+    couplings = None
+out_region = args.region
 region = out_region.split('_')[0]
 if region=='test':
     is_test = True 
@@ -26,7 +31,7 @@ lumi = 35900
 def f(x):
     return basedir + x + '.root'
 
-def shift_btags():
+def shift_btags(additional=None):
     shifted_weights = {}
     if not any([x in region for x in ['signal','top','w']]):
         return shifted_weights 
@@ -44,6 +49,8 @@ def shift_btags():
             else:
                 shiftedlabel += 'Down'
             weight = sel.weights[region+'_'+cent+shift]%lumi
+            if additional:
+                weight = tTIMES(weight,additional)
             shifted_weights[shiftedlabel] = weight
     return shifted_weights
 
@@ -60,8 +67,12 @@ elif 'di' in region:
     u,uphi = ('pfUZmag','pfUZphi')
 vmap['met'] = 'min(%s,999.9999)'%u 
 
+
 weights = {'nominal' : sel.weights[region]%lumi}
-weights.update(shift_btags())
+if couplings:
+    weights['nominal'] = tTIMES(weights['nominal'],couplings)
+weights.update(shift_btags(couplings))
+
 
 factory = forest.RegionFactory(name = region if not(is_test) else 'test',
                                cut = sel.cuts[region],
@@ -78,7 +89,7 @@ elif region=='photon':
     factory.add_process(f('SinglePhoton'),'Data',is_data=True,extra_cut=sel.triggers['pho'])
     factory.add_process(f('SinglePhoton'),'QCD',is_data=True,
                         extra_weights='sf_phoPurity',extra_cut=sel.triggers['pho'])
-elif out_region not in ['signal_scalar','signal_vector']:
+elif out_region not in ['signal_scalar','signal_vector','signal_thq']:
     factory.add_process(f('ZtoNuNu'),'Zvv')
     factory.add_process(f('ZJets'),'Zll')
     factory.add_process(f('WJets'),'Wlv')
@@ -92,6 +103,8 @@ elif out_region not in ['signal_scalar','signal_vector']:
         factory.add_process(f('MET'),'Data',is_data=True,extra_cut=sel.triggers['met'])
 elif out_region=='signal_vector':
     signal_files = glob(basedir+'/Vector*root')
+    if couplings:
+        out_region += '_'+couplings
     for f in signal_files:
         fname = f.split('/')[-1].replace('.root','')
         signame = fname
@@ -105,6 +118,8 @@ elif out_region=='signal_vector':
         factory.add_process(f,signame)
 elif out_region=='signal_scalar':
     signal_files = glob(basedir+'/Scalar*root')
+    if couplings:
+        out_region += '_'+couplings
     for f in signal_files:
         fname = f.split('/')[-1].replace('.root','')
         signame = fname
@@ -116,6 +131,8 @@ elif out_region=='signal_scalar':
         for k,v in replacements.iteritems():
             signame = signame.replace(k,v)
         factory.add_process(f,'scalar_'+signame)
+elif out_region=='signal_thq':
+    factory.add_process(f('thq'),'thq')
 
 
 if is_test:

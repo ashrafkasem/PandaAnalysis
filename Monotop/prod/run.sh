@@ -10,7 +10,8 @@ echo $label $cfgName $outpath
 pwd
 rm *root
 
-executable=prod.py
+#executable=prod.py
+executable=mcCondor.py
 
 cd ${scramdir}/
 eval `scramv1 runtime -sh`
@@ -35,7 +36,7 @@ echo "##############################################################"
 
 touch local.cfg
 for f in $(ls *.root); do
-  echo -n "file:${PWD}/${f}," >> local.cfg
+  echo "file:${PWD}/${f}" >> local.cfg
 done
 
 cat local.cfg
@@ -46,7 +47,7 @@ ls
 
 echo "##############################################################"
 
-cmsRun ${pandadir}/${executable} inputFiles=$(cat local.cfg) outputFile=${PWD}/panda_${label}.root
+cmsRun ${pandadir}/${executable} filelist=local.cfg outfile=${PWD}/pandatree_${label}.root
 
 echo "##############################################################"
 

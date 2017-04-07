@@ -1,9 +1,11 @@
 #!/bin/bash
 
+export PATH=${PATH}:${CMSSW_BASE}/src/PandaCore/bin/
+
 export PANDA="${CMSSW_BASE}/src/PandaAnalysis"
 #export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170205.cfg"
 #export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170308.cfg"
-export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170323_zllnlo.cfg"
+export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170406_thiggs.cfg"
 export PANDA_FLATDIR="${HOME}/home000/store/panda/v_8026_0_4/"
 mkdir -p $PANDA_FLATDIR
 

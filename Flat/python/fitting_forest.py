@@ -52,14 +52,18 @@ class Process:
     def run(self,f_out):
         PInfo('fitting_forest.Process.run','Running '+self.name)
         branches = self.all_branches.values()
-        xarr = root_interface.read_tree(tree = self.tree,
-                                        branches = branches,
-                                        cut = self.cut)
-        fields = self.variables.keys()+['nominal']
-        self.__write_out(f_out,xarr,fields,'')
-        for shift,weight in self.weights.iteritems():
-            fields = self.variables.keys()+[shift]
-            self.__write_out(f_out,xarr,fields,'_'+shift)
+        try:
+            xarr = root_interface.read_tree(tree = self.tree,
+                                            branches = branches,
+                                            cut = self.cut)
+            fields = self.variables.keys()+['nominal']
+            self.__write_out(f_out,xarr,fields,'')
+            for shift,weight in self.weights.iteritems():
+                fields = self.variables.keys()+[shift]
+                self.__write_out(f_out,xarr,fields,'_'+shift)
+        except ValueError as e:
+            PError('fitting_forest.Process.run',str(e))
+            return
 
 
 class RegionFactory:

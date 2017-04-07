@@ -6,7 +6,7 @@ parser = argparse.ArgumentParser(description='plot stuff')
 parser.add_argument('--outdir',metavar='outdir',type=str)
 parser.add_argument('--process',metavar='process',type=str)
 parser.add_argument('--selection',metavar='selection',type=str,default='monojet')
-basedir = '/home/snarayan/home000/ajnlo/merged/'
+basedir = '/mnt/hadoop/scratch/snarayan/kfactors/'
 args = parser.parse_args()
 
 sname = argv[0]
@@ -40,12 +40,13 @@ labels = {
         'a' : '#gamma',
         'z' : 'Z',
         'w' : 'W',
-        'monofatjet' : 'fatjet p_{T}>200 GeV',
+        'monofatjet' : 'fatjet p_{T}>100 GeV',
         'inclusive' : 'Inclusive',
         'monojet' : 'jet p_{T}>100 GeV',
         'monojethigh' : 'jet p_{T}>200 GeV',
-        'mass' : 'fat jet p_{T}>200 GeV, m_{SD}>110',
-        'tag' : 'fat jet p_{T}>200 GeV, m_{SD}>110, #tau_{32}<0.7',
+        'mass' : 'fat jet p_{T}>100 GeV, m_{SD}>50',
+        'tag' : 'fat jet p_{T}>100 GeV, m_{SD}>110, #tau_{32}<0.7',
+        'tagonly' : 'fat jet p_{T}>100 GeV, #tau_{32}<0.7',
         }
 
 proc_cuts = {
@@ -64,9 +65,10 @@ selections = {
         'inclusive' : '1==1',
         'monojet' : 'jpt_1>100',
         'monojethigh' : 'jpt_1>200',
-        'monofatjet' : 'fjpt>200',
-        'mass' : 'fjm>110 && fjpt>200',
-        'tag'  : 'fjm>110 && fjt3t2<0.7 && fjpt>200',
+        'monofatjet' : 'fjpt>100',
+        'mass' : 'fjmsd>50 && fjpt>100',
+        'tag'  : 'fjmsd>110 && fjt3t2<0.7 && fjpt>100',
+        'tagonly'  : 'fjt3t2<0.7 && fjpt>100',
         }
 
 bins = array('f',[175,225,275,325,375,425,500,600,700,1000])
