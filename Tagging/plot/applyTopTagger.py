@@ -13,7 +13,7 @@ import ROOT as root
 from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 
-Load('Learning','TMVABranchAdder')
+Load('TMVABranchAdder')
 
 workdir = getenv('PANDA_FLATDIR')
 trainingdir = '/home/snarayan/home000/store/scramjet/v7/training/'

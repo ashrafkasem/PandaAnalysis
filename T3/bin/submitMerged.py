@@ -3,6 +3,7 @@
 from sys import argv
 from os import system,getenv,getuid
 from time import time
+from PandaCore.Tools.Misc import *
 
 cmssw_base=getenv('CMSSW_BASE')
 logpath=getenv('SUBMIT_LOGDIR')
@@ -15,6 +16,7 @@ njobs = 0
 for line in cfgfile:
 	if 'CONFIG' in line:
 		njobs += 1
+#njobs = 1
 
 now = int(time())
 frozen_cfgpath = cfgpath.replace('local','local_%i'%now)
@@ -34,10 +36,12 @@ requirements = UidDomain == "mit.edu" && Arch == "X86_64" && OpSysAndVer == "SL6
 arguments = "$(Process)"
 use_x509userproxy = True
 x509userproxy = /tmp/x509up_u{2}
-accounting_group = group_cmsuser.snarayan
+#accounting_group = group_cmsuser.snarayan
+accounting_group = group_t3mit.urgent
 queue {3}
 '''.format(workpath,logpath,uid,njobs,frozen_cfgpath)
 
+PInfo(argv[0],"CLASSAD:")
 print classad
 
 with open(logpath+'/condor.jdl','w') as jdlfile:
