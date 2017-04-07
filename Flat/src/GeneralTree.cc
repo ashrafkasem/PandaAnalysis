@@ -335,7 +335,7 @@ void GeneralTree::WriteTree(TTree *t) {
   treePtr = t;
 //STARTCUSTOMWRITE
   for (auto iter=signal_weights.begin(); iter!=signal_weights.end(); ++iter) {
-    treePtr->Branch(iter->first,&(signal_weights[iter->first]),iter->first+"/F");
+    treePtr->Branch("rw_"+iter->first,&(signal_weights[iter->first]),"rw_"+iter->first+"/F");
   }
 
   treePtr->Branch("nJet",&nJet,"nJet/I");
