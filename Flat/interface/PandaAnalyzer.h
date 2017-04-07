@@ -32,145 +32,177 @@
 /////////////////////////////////////////////////////////////////////////////
 // some misc definitions
 
+
 /////////////////////////////////////////////////////////////////////////////
 // PandaAnalyzer definition
 class PandaAnalyzer {
 public :
-	// configuration enums
-	enum PreselectionBit {
-	 kMonotop    =(1<<0),
-	 kMonohiggs  =(1<<2),
-	 kMonojet    =(1<<3),
-	 kTriggers   =(1<<4),
-	 kVBF        =(1<<5),
-	 kRecoil     =(1<<6)
-	};
+    // configuration enums
+    enum PreselectionBit {
+     kMonotop    =(1<<0),
+     kMonohiggs  =(1<<2),
+     kMonojet    =(1<<3),
+     kTriggers   =(1<<4),
+     kVBF        =(1<<5),
+     kRecoil     =(1<<6),
+     kFatjet     =(1<<7)
+    };
 
-	enum ProcessType { 
-		kNone,
-		kZ,
-		kW,
-		kA,
-		kTT,
-		kTop, // used for non-ttbar top
-		kV, // used for non V+jets W or Z
-		kH
-	};
+    enum ProcessType { 
+        kNone,
+        kZ,
+        kW,
+        kA,
+        kTT,
+        kTop, // used for non-ttbar top
+        kV, // used for non V+jets W or Z
+        kH
+    };
 
-	enum TriggerBits {
-		kMETTrig       =(1<<0),
-		kSingleEleTrig =(1<<1),
-		kSinglePhoTrig =(1<<2),
-		kSingleMuTrig	 =(1<<3)
-	};
+    enum TriggerBits {
+        kMETTrig       =(1<<0),
+        kSingleEleTrig =(1<<1),
+        kSinglePhoTrig =(1<<2),
+        kSingleMuTrig     =(1<<3)
+    };
 
-	//////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////
 
-	PandaAnalyzer();
-	~PandaAnalyzer();
-	void Init(TTree *tree, TTree *infotree);
-	void SetOutputFile(TString fOutName);
-	void ResetBranches();
-	void Run();
-	void Terminate();
-	void SetDataDir(const char *s);
-	void SetPreselectionBit(PreselectionBit b,bool on=true) {
-		if (on) 
-			preselBits |= b;
-		else 
-			preselBits &= ~b;
-	}
-	void AddGoodLumiRange(int run, int l0, int l1);
+    PandaAnalyzer(int debug_=0);
+    ~PandaAnalyzer();
+    void Init(TTree *tree, TH1D *hweights, TTree *weightNames=0);
+    void SetOutputFile(TString fOutName);
+    void ResetBranches();
+    void Run();
+    void Terminate();
+    void SetDataDir(const char *s);
+    void SetPreselectionBit(PreselectionBit b,bool on=true) {
+        if (on) 
+            preselBits |= b;
+        else 
+            preselBits &= ~b;
+    }
+    void AddGoodLumiRange(int run, int l0, int l1);
 
-	// public configuration
-	void SetFlag(TString flag, bool b=true) { flags[flag]=b; }
-	bool isData=false;												 // to do gen matching, etc
-	int firstEvent=-1;
-	int lastEvent=-1;													// max events to process; -1=>all
-	ProcessType processType=kNone;						 // determine what to do the jet matching to
+    // public configuration
+    void SetFlag(TString flag, bool b=true) { flags[flag]=b; }
+    bool isData=false;                                                 // to do gen matching, etc
+    int firstEvent=-1;
+    int lastEvent=-1;                                                    // max events to process; -1=>all
+    ProcessType processType=kNone;                         // determine what to do the jet matching to
 
 private:
+    enum CorrectionType { //!< enum listing relevant corrections applied to MC
+        cNPV=0,       //!< npv weight
+        cPU,          //!< true pu weight
+        cEleVeto,     //!< monojet SF, Veto ID for e
+        cEleTight,    //!< monojet SF, Tight ID for e
+        cEleReco,     //!< monojet SF, tracking for e
+        cMuLooseID,   //!< MUO POG SF, Loose ID for mu 
+        cMuTightID,   //!< MUO POG SF, Tight ID for mu 
+        cMuLooseIso,  //!< MUO POG SF, Loose Iso for mu 
+        cMuTightIso,  //!< MUO POG SF, Tight Iso for mu 
+        cMuReco,      //!< MUO POG SF, tracking for mu
+        cPho,         //!< EGM POG SF, contains ID for gamma
+        cTrigMET,     //!< MET trigger eff        
+        cTrigEle,     //!< Ele trigger eff        
+        cTrigPho,     //!< Pho trigger eff        
+        cZNLO,        //!< NLO weights for Z,W,A,A+2j
+        cWNLO,
+        cANLO,
+        cANLO2j,
+        cZEWK,        //!< EWK weights for Z,W,A,A+2j
+        cWEWK,
+        cAEWK,
+        cN
+    };
 
-	std::map<TString,bool> flags;
+    enum BTagType {
+        bJetL=0,
+        bSubJetL,
+        bJetM,
+        bN
+    };
 
-	std::map<panda::PGenParticle*,float> genObjects;				 //!< particles we want to match the jets to, and the 'size' of the daughters
-	panda::PGenParticle *MatchToGen(double eta, double phi, double r2, int pdgid=0);		//!< private function to match a jet; returns NULL if not found
-	std::map<int,std::vector<LumiRange>> goodLumis;
-	bool PassGoodLumis(int run, int lumi);
-	bool PassPreselection();
-	float getMSDcorr(Float_t puppipt, Float_t puppieta);
-	std::vector<panda::PObject*> matchPhos, matchEles, matchLeps;
-	
-	// CMSSW-provided utilities
+    class btagcand {
+        public:
+            btagcand(unsigned int i, int f,double e,double cent,double up,double down) {
+                idx = i;
+                flav = f;
+                eff = e;
+                sf = cent;
+                sfup = up;
+                sfdown = down;
+            }
+            ~btagcand() { }
+            int flav, idx;
+            double eff, sf, sfup, sfdown;
+    };
 
-	void calcBJetSFs(TString readername, int flavor, double eta, double pt, 
-			             double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
-	BTagCalibration *btagCalib=0;
-	BTagCalibration *sj_btagCalib=0;
 
-	std::map<TString,BTagCalibrationReader*> btagReaders; //!< maps "JETTYPE_WP" to a reader 
-																												// I think we can load multiple flavors in a single reader 
-	
-	std::map<TString,JetCorrectionUncertainty*> ak8UncReader;			//!< calculate JES unc on the fly
-	JERReader *ak8JERReader; //!< fatjet jet energy resolution reader
-	EraHandler eras = EraHandler(2016); //!< determining data-taking era, to be used for era-dependent JEC
+    bool PassGoodLumis(int run, int lumi);
+    bool PassPreselection();
+    float GetMSDCorr(Float_t puppipt, Float_t puppieta);
+    void CalcBJetSFs(BTagType bt, int flavor, double eta, double pt, 
+                         double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
+    void EvalBTagSF(std::vector<btagcand> &cands, std::vector<double> &sfs,
+                    GeneralTree::BTagShift shift,GeneralTree::BTagJet jettype, bool do2=false);
+    void OpenCorrection(CorrectionType,TString,TString,int);
+    double GetCorr(CorrectionType ct,double x, double y=0);
+    void RegisterTrigger(TString path, std::vector<unsigned> &idxs); 
 
-	std::vector<TFile*> openFiles; //!< anything that should be closed
-	std::vector<void*> gc; //!< used for misc garbage collection
+    int DEBUG = 0; //!< debug verbosity level
+    std::map<TString,bool> flags;
 
-	// files and histograms containing weights
-	TFile *fLepSF=0, *fLepRecoSF=0;
-	TFile *fEleSF=0;
-	THCorr2 *hEleVeto, *hEleTight;
-	THCorr2 *hMuLooseLoPU, *hMuTightLoPU;
-	THCorr2 *hMuLooseHiPU, *hMuTightHiPU;
-	THCorr2 *hRecoEle;
-	THCorr2 *hRecoMuLoPU,	*hRecoMuHiPU;
-	TFile *fPhoSF=0;
-	THCorr2 *hPho=0;
+    std::map<panda::GenParticle const*,float> genObjects;                 //!< particles we want to match the jets to, and the 'size' of the daughters
+    panda::GenParticle const* MatchToGen(double eta, double phi, double r2, int pdgid=0);        //!< private function to match a jet; returns NULL if not found
+    std::map<int,std::vector<LumiRange>> goodLumis;
+    std::vector<panda::Particle*> matchPhos, matchEles, matchLeps;
+    
+    // fastjet reclustering
+    fastjet::JetDefinition *jetDef=0;
+    fastjet::contrib::SoftDrop *softDrop=0;
+    fastjet::AreaDefinition *areaDef=0;
+    fastjet::GhostedAreaSpec *activeArea=0;
 
-	TFile *fPU=0;
-	THCorr1 *hPUWeight;
+    // CMSSW-provided utilities
 
-	TFile *fKFactor=0;
-	THCorr1 *hZNLO, *hANLO, *hWNLO;
-	THCorr1 *hZLO,	*hALO,	*hWLO;
-	THCorr1 *hZEWK, *hAEWK, *hWEWK;
-	TFile *fEleTrigB, *fEleTrigE, *fPhoTrig, *fEleTrigLow, *fMetTrig;
-	THCorr1 *hEleTrigB, *hEleTrigE, *hPhoTrig, *hMetTrig;
-	TFile *fCSVLF, *fCSVHF;
-	THCorr1 *hCSVLF, *hCSVHF;
-	//THCorr *hEleTrigBUp=0, *hEleTrigBDown=0, *hEleTrigEUp=0, *hEleTrigEDown=0;
-	THCorr2 *hEleTrigLow;
+    BTagCalibration *btagCalib=0;
+    BTagCalibration *sj_btagCalib=0;
 
-	TFile *MSDcorr;
-	TF1* puppisd_corrGEN;
-	TF1* puppisd_corrRECO_cen;
-	TF1* puppisd_corrRECO_for;
+    std::vector<BTagCalibrationReader*> btagReaders = std::vector<BTagCalibrationReader*>(bN,0); //!< maps BTagType to a reader 
+    
+    std::map<TString,JetCorrectionUncertainty*> ak8UncReader; //!< calculate JES unc on the fly
+    JERReader *ak8JERReader; //!< fatjet jet energy resolution reader
+    EraHandler eras = EraHandler(2016); //!< determining data-taking era, to be used for era-dependent JEC
 
-	// IO for the analyzer
-	TFile *fOut;	 // output file is owned by PandaAnalyzer
-	TTree *tOut;
-	GeneralTree *gt; // essentially a wrapper around tOut
-	TTree *tIn=0;	// input tree to read
-	unsigned int preselBits=0;
+    // files and histograms containing weights
+    std::vector<TFile*> fCorrs = std::vector<TFile*>(cN,0); //!< files containing corrections
+    std::vector<THCorr1*> h1Corrs = std::vector<THCorr1*>(cN,0); //!< histograms for binned corrections
+    std::vector<THCorr2*> h2Corrs = std::vector<THCorr2*>(cN,0); //!< histograms for binned corrections
 
-	// objects to read from the tree
-	panda::PEvent *event=0;												// event object
-	panda::VGenParticle *genparts=0;							 // gen particle objects
-	panda::VFatJet *fatjets=0;										 // CA15 fat jets
-	panda::VJet *jets=0;													 // AK4 narrow jets
-	panda::VElectron *electrons=0;
-	panda::VMuon *muons=0;
-	panda::VTau *taus=0;
-	panda::VPhoton *photons=0;
-	panda::PMET *pfmet=0, *puppimet=0;
-	panda::PGenInfo *geninfo=0;
+    TFile *MSDcorr;
+    TF1* puppisd_corrGEN;
+    TF1* puppisd_corrRECO_cen;
+    TF1* puppisd_corrRECO_for;
 
-	// configuration read from output tree
-	std::vector<double> betas;
-	std::vector<int> Ns; 
-	std::vector<int> orders;
+    // IO for the analyzer
+    TFile *fOut;     // output file is owned by PandaAnalyzer
+    TTree *tOut;
+    GeneralTree *gt; // essentially a wrapper around tOut
+    TTree *tIn=0;    // input tree to read
+    unsigned int preselBits=0;
+
+    // objects to read from the tree
+    panda::Event event;
+
+    // configuration read from output tree
+    std::vector<int> ibetas;
+    std::vector<int> Ns; 
+    std::vector<int> orders;
+
+    // any extra signal weights we want
+    std::vector<TString> wIDs;
 
 };
 
