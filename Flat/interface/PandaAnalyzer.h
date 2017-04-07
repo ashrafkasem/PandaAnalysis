@@ -68,9 +68,9 @@ public :
 
     //////////////////////////////////////////////////////////////////////////////////////
 
-    PandaAnalyzer();
+    PandaAnalyzer(int debug_=0);
     ~PandaAnalyzer();
-    void Init(TTree *tree, TH1D *hweights);
+    void Init(TTree *tree, TH1D *hweights, TTree *weightNames=0);
     void SetOutputFile(TString fOutName);
     void ResetBranches();
     void Run();
@@ -92,15 +92,71 @@ public :
     ProcessType processType=kNone;                         // determine what to do the jet matching to
 
 private:
+    enum CorrectionType { //!< enum listing relevant corrections applied to MC
+        cNPV=0,       //!< npv weight
+        cPU,          //!< true pu weight
+        cEleVeto,     //!< monojet SF, Veto ID for e
+        cEleTight,    //!< monojet SF, Tight ID for e
+        cEleReco,     //!< monojet SF, tracking for e
+        cMuLooseID,   //!< MUO POG SF, Loose ID for mu 
+        cMuTightID,   //!< MUO POG SF, Tight ID for mu 
+        cMuLooseIso,  //!< MUO POG SF, Loose Iso for mu 
+        cMuTightIso,  //!< MUO POG SF, Tight Iso for mu 
+        cMuReco,      //!< MUO POG SF, tracking for mu
+        cPho,         //!< EGM POG SF, contains ID for gamma
+        cTrigMET,     //!< MET trigger eff        
+        cTrigEle,     //!< Ele trigger eff        
+        cTrigPho,     //!< Pho trigger eff        
+        cZNLO,        //!< NLO weights for Z,W,A,A+2j
+        cWNLO,
+        cANLO,
+        cANLO2j,
+        cZEWK,        //!< EWK weights for Z,W,A,A+2j
+        cWEWK,
+        cAEWK,
+        cN
+    };
 
+    enum BTagType {
+        bJetL=0,
+        bSubJetL,
+        bJetM,
+        bN
+    };
+
+    class btagcand {
+        public:
+            btagcand(unsigned int i, int f,double e,double cent,double up,double down) {
+                idx = i;
+                flav = f;
+                eff = e;
+                sf = cent;
+                sfup = up;
+                sfdown = down;
+            }
+            ~btagcand() { }
+            int flav, idx;
+            double eff, sf, sfup, sfdown;
+    };
+
+
+    bool PassGoodLumis(int run, int lumi);
+    bool PassPreselection();
+    float GetMSDCorr(Float_t puppipt, Float_t puppieta);
+    void CalcBJetSFs(BTagType bt, int flavor, double eta, double pt, 
+                         double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
+    void EvalBTagSF(std::vector<btagcand> &cands, std::vector<double> &sfs,
+                    GeneralTree::BTagShift shift,GeneralTree::BTagJet jettype, bool do2=false);
+    void OpenCorrection(CorrectionType,TString,TString,int);
+    double GetCorr(CorrectionType ct,double x, double y=0);
+    void RegisterTrigger(TString path, std::vector<unsigned> &idxs); 
+
+    int DEBUG = 0; //!< debug verbosity level
     std::map<TString,bool> flags;
 
     std::map<panda::GenParticle const*,float> genObjects;                 //!< particles we want to match the jets to, and the 'size' of the daughters
     panda::GenParticle const* MatchToGen(double eta, double phi, double r2, int pdgid=0);        //!< private function to match a jet; returns NULL if not found
     std::map<int,std::vector<LumiRange>> goodLumis;
-    bool PassGoodLumis(int run, int lumi);
-    bool PassPreselection();
-    float getMSDcorr(Float_t puppipt, Float_t puppieta);
     std::vector<panda::Particle*> matchPhos, matchEles, matchLeps;
     
     // fastjet reclustering
@@ -111,44 +167,19 @@ private:
 
     // CMSSW-provided utilities
 
-    void calcBJetSFs(TString readername, int flavor, double eta, double pt, 
-                         double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
     BTagCalibration *btagCalib=0;
     BTagCalibration *sj_btagCalib=0;
 
-    std::map<TString,BTagCalibrationReader*> btagReaders; //!< maps "JETTYPE_WP" to a reader 
+    std::vector<BTagCalibrationReader*> btagReaders = std::vector<BTagCalibrationReader*>(bN,0); //!< maps BTagType to a reader 
     
-    std::map<TString,JetCorrectionUncertainty*> ak8UncReader;            //!< calculate JES unc on the fly
+    std::map<TString,JetCorrectionUncertainty*> ak8UncReader; //!< calculate JES unc on the fly
     JERReader *ak8JERReader; //!< fatjet jet energy resolution reader
     EraHandler eras = EraHandler(2016); //!< determining data-taking era, to be used for era-dependent JEC
 
-    std::vector<TFile*> openFiles; //!< anything that should be closed
-    std::vector<void*> gc; //!< used for misc garbage collection
-
     // files and histograms containing weights
-    TFile *fLepSF=0, *fLepRecoSF=0;
-    TFile *fEleSF=0;
-    THCorr2 *hEleVeto, *hEleTight;
-    THCorr2 *hMuLooseLoPU, *hMuTightLoPU;
-    THCorr2 *hMuLooseHiPU, *hMuTightHiPU;
-    THCorr2 *hRecoEle;
-    THCorr2 *hRecoMuLoPU,    *hRecoMuHiPU;
-    TFile *fPhoSF=0;
-    THCorr2 *hPho=0;
-
-    TFile *fPU=0;
-    THCorr1 *hPUWeight;
-
-    TFile *fKFactor=0;
-    THCorr1 *hZNLO, *hANLO, *hWNLO;
-    THCorr1 *hZLO,    *hALO,    *hWLO;
-    THCorr1 *hZEWK, *hAEWK, *hWEWK;
-    TFile *fEleTrigB, *fEleTrigE, *fPhoTrig, *fEleTrigLow, *fMetTrig;
-    THCorr1 *hEleTrigB, *hEleTrigE, *hPhoTrig, *hMetTrig;
-    TFile *fCSVLF, *fCSVHF;
-    THCorr1 *hCSVLF, *hCSVHF;
-    //THCorr *hEleTrigBUp=0, *hEleTrigBDown=0, *hEleTrigEUp=0, *hEleTrigEDown=0;
-    THCorr2 *hEleTrigLow;
+    std::vector<TFile*> fCorrs = std::vector<TFile*>(cN,0); //!< files containing corrections
+    std::vector<THCorr1*> h1Corrs = std::vector<THCorr1*>(cN,0); //!< histograms for binned corrections
+    std::vector<THCorr2*> h2Corrs = std::vector<THCorr2*>(cN,0); //!< histograms for binned corrections
 
     TFile *MSDcorr;
     TF1* puppisd_corrGEN;
@@ -166,9 +197,12 @@ private:
     panda::Event event;
 
     // configuration read from output tree
-    std::vector<double> betas;
+    std::vector<int> ibetas;
     std::vector<int> Ns; 
     std::vector<int> orders;
+
+    // any extra signal weights we want
+    std::vector<TString> wIDs;
 
 };
 

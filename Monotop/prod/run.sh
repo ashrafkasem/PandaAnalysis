@@ -10,9 +10,9 @@ echo $label $cfgName $outpath
 pwd
 rm *root
 
-executable=runNtuplerCondor.py
+#executable=prod.py
+executable=mcCondor.py
 
-#scramdir=/home/snarayan/cms/cmssw/analysis/CMSSW_8_0_20/src
 cd ${scramdir}/
 eval `scramv1 runtime -sh`
 cd -
@@ -23,10 +23,7 @@ voms-proxy-init -voms cms
 #export X509_USER_PROXY=${PWD}/x509up_u67051
 #echo "X509_USER_PROXY = $X509_USER_PROXY"
 
-pandadir=${scramdir}/PandaProd/Ntupler/test/
-
-cp -r ${pandadir}/jec .
-cp -r ${pandadir}/jer .
+pandadir=${scramdir}/PandaProd/Producer/cfg/
 
 cat $cfgName
 
@@ -39,7 +36,7 @@ echo "##############################################################"
 
 touch local.cfg
 for f in $(ls *.root); do
-  echo file:${PWD}/${f} >> local.cfg
+  echo "file:${PWD}/${f}" >> local.cfg
 done
 
 cat local.cfg
@@ -50,10 +47,10 @@ ls
 
 echo "##############################################################"
 
-cmsRun ${pandadir}/${executable} filelist=local.cfg outfile=${PWD}/panda_${label}.root
+cmsRun ${pandadir}/${executable} filelist=local.cfg outfile=${PWD}/pandatree_${label}.root
 
 echo "##############################################################"
 
 mv ${PWD}/panda_${label}.root ${outpath}
 
-rm -r jec *root local.cfg
+rm -r *root local.cfg
