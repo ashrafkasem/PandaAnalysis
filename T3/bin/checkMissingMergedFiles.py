@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from os import getenv
-from PandaCore.Tools.ConfigBuilding import *
+from PandaCore.Tools.job_management import *
 import subprocess
 import sys
 import argparse
@@ -52,9 +52,9 @@ processedfiles = []
 
 locks = glob(outdir+'/locks/*lock')
 for lock in locks:
-	flock = open(lock)
-	for l in flock:
-		processedfiles.append(l.strip())
+    flock = open(lock)
+    for l in flock:
+        processedfiles.append(l.strip())
 
 outputs = {}
 data = Output('Data')
@@ -65,60 +65,60 @@ filtered_samples = {}
 merged_samples = {}
 outfile = open(args.outfile,'w')
 for name in sorted(all_samples):
-	sample = all_samples[name]
-	out_sample = DataSample(name,sample.dtype,sample.xsec)
+    sample = all_samples[name]
+    out_sample = DataSample(name,sample.dtype,sample.xsec)
 
-	base_name = sub('_[0-9]+$','',name)
-	if base_name not in outputs:
-		outputs[base_name] = Output(base_name)
-	output = outputs[base_name]
-	if base_name not in merged_samples:
-		merged_samples[base_name] = DataSample(base_name,sample.dtype,sample.xsec)
-	merged_sample = merged_samples[base_name]
+    base_name = sub('_[0-9]+$','',name)
+    if base_name not in outputs:
+        outputs[base_name] = Output(base_name)
+    output = outputs[base_name]
+    if base_name not in merged_samples:
+        merged_samples[base_name] = DataSample(base_name,sample.dtype,sample.xsec)
+    merged_sample = merged_samples[base_name]
 
-	for f in sample.files:
-		found = (f in processedfiles)
-		if not found:
-			out_sample.add_file(f)
-			merged_sample.add_file(f)
-		output.add(found)
-		if sample.dtype=='MC':
-			mc.add(found)
-		else:
-			data.add(found)
+    for f in sample.files:
+        found = (f in processedfiles)
+        if not found:
+            out_sample.add_file(f)
+            merged_sample.add_file(f)
+        output.add(found)
+        if sample.dtype=='MC':
+            mc.add(found)
+        else:
+            data.add(found)
 
-	if not args.force: # do not resubmit if partial output doesn't exist
-		output_exists=False
-		for rf in root_files:
-			rf_base = sub('_[0-9]+$','',rf)
-			if name==rf_base:
-				output_exists = True
-				break
-		if not output_exists:
-			continue
-	if len(out_sample.files)>0:
-		filtered_samples[name] = out_sample
+    if not args.force: # do not resubmit if partial output doesn't exist
+        output_exists=False
+        for rf in root_files:
+            rf_base = sub('_[0-9]+$','',rf)
+            if name==rf_base:
+                output_exists = True
+                break
+        if not output_exists:
+            continue
+    if len(out_sample.files)>0:
+        filtered_samples[name] = out_sample
 
 if args.nfiles<0:
-	keys = sorted(filtered_samples)
-	for k in keys:
-		sample = filtered_samples[k]
-		if len(sample.files)==0:
-			continue
-		configs = sample.get_config(-1)
-		for c in configs:
-			outfile.write(c)
+    keys = sorted(filtered_samples)
+    for k in keys:
+        sample = filtered_samples[k]
+        if len(sample.files)==0:
+            continue
+        configs = sample.get_config(-1)
+        for c in configs:
+            outfile.write(c)
 else:
-	keys = sorted(merged_samples)
-	counter=0
-	for k in keys:
-		sample = merged_samples[k]
-		if len(sample.files)==0:
-			continue
-		configs = sample.get_config(args.nfiles,suffix='_%i')
-		for c in configs:
-			outfile.write(c%(counter,counter))
-			counter += 1
+    keys = sorted(merged_samples)
+    counter=0
+    for k in keys:
+        sample = merged_samples[k]
+        if len(sample.files)==0:
+            continue
+        configs = sample.get_config(args.nfiles,suffix='_%i')
+        for c in configs:
+            outfile.write(c%(counter,counter))
+            counter += 1
 
 for n in sorted(outputs):
   print str(outputs[n])
