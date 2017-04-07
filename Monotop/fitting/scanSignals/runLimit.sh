@@ -3,8 +3,10 @@
 fittingdir=$1
 scramdir=$2
 model=$3
-mV=$4
-mChi=$5
+mParams=$4
+couplings=$5
+
+echo "ARGS $@"
 
 echo -n "PWD "
 pwd
@@ -18,16 +20,27 @@ cd $scramdir/src/
 eval `scramv1 runtime -sh`
 # eval `/cvmfs/cms.cern.ch/common/scramv1 runtime -sh`
 echo $CMSSW_BASE
+echo -n "COMBINE "
 which combine
 
 cd $WD
 cp -r $scramdir/src/MonoXFit_CSV .
 cd MonoXFit_CSV/datacards
 
-python scanbatch.py tmpl.txt --mMed $mV --mChi $mChi --infile $fittingdir/fittingForest.root $model
+if [[ "${couplings}" == "" ]]; then 
+    python scanbatch.py correlated_tmpl.txt --mParams $mParams --infile $fittingdir/fittingForest.root $model
+else
+    python scanbatch.py correlated_tmpl.txt --mParams $mParams --infile $fittingdir/signals/fittingForest_signal_vector_${couplings}_nlo.root $model
+fi
 
 #cp signalmodel.root $fittingdir/scans/signal_${mV}_${mChi}.root
-cp higgs*root $fittingdir/scans
+if [[ "${couplings}" == "" ]]; then 
+    mkdir -p $fittingdir/scans/nominal/
+    cp higgs*root $fittingdir/scans/nominal/
+else
+    mkdir -p $fittingdir/scans/${couplings}/
+    cp higgs*root $fittingdir/scans/${couplings}/
+fi
 #cp scan_*txt $fittingdir/scans
 
 cd $WD
