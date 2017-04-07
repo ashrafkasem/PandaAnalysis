@@ -1,5 +1,5 @@
 #ifndef GENERICTREE
-#define GENERICTREE 1
+#define GENERICTREE 
 
 #include "TFile.h"
 #include "TTree.h"
@@ -15,7 +15,6 @@ class genericTree {
     genericTree() {};
     virtual ~genericTree() {};
     TTree *treePtr;
-    virtual void ReadTree(TTree *t)=0;
     virtual void WriteTree(TTree *t)=0;
 };
 

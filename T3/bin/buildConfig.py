@@ -5,7 +5,8 @@ import subprocess
 import sys
 import argparse
 from re import sub
-from PandaCore.Tools.ConfigBuilding import DataSample,convert_catalog
+from PandaCore.Tools.job_management import DataSample,convert_catalog
+from PandaCore.Tools.Misc import PInfo
 
 workdir = getenv('SUBMIT_WORKDIR')
 parser = argparse.ArgumentParser(description='convert configuration')
@@ -26,5 +27,7 @@ for k in keys:
 	for c in configs:
 		fout.write(c%(counter,counter))
 		counter += 1
+
+PInfo('buildConfig.py','Submission will have %i jobs'%(counter))
 
 fout.close()

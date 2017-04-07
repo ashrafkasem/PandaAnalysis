@@ -8,10 +8,10 @@ from time import sleep
 user = environ['USER']
 cmssw = environ['CMSSW_BASE']
 cfgName=argv[1]
-nPerJob = 50
+nPerJob = 10
 xrd='root://xrootd.cmsaf.mit.edu/'
 
-histdir = '/home/%s/cms/hist/monotop_private_panda/%s/'%(user,cfgName)
+histdir = '/home/%s/cms/hist/monotop_private_pandatree/%s/'%(user,cfgName)
 cfgdir = '/home/%s/cms/condor/monotop_private_panda/%s/'%(user,cfgName)
 logdir = '/home/%s/cms/logs/monotop_private_panda/%s/'%(user,cfgName)
 for dire in [histdir,cfgdir,logdir]:
@@ -30,6 +30,8 @@ Log                        = %s/\$(Process).log
 Arguments                  = \$(Process) %s/\$(Process).cfg %s %s
 should_transfer_files      = YES
 when_to_transfer_output    = ON_EXIT
+use_x509userproxy = True
+x509userproxy = /tmp/x509up_u67051
 GetEnv                     = True
 accounting_group           = group_cmsuser.%s
 Queue %i'''%(logdir,logdir,logdir,cfgdir,histdir,cmssw,user,l)
