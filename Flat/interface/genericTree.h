@@ -15,7 +15,6 @@ class genericTree {
     genericTree() {};
     virtual ~genericTree() {};
     TTree *treePtr;
-    virtual void ReadTree(TTree *t)=0;
     virtual void WriteTree(TTree *t)=0;
 };
 

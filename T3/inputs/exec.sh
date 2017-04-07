@@ -1,7 +1,5 @@
 #!/bin/bash
 
-THISPROCESS=$1
-
 WD=$PWD
 
 export SCRAM_ARCH=slc6_amd64_gcc530

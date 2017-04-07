@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 
+#TODO: replace TTree.Draw with read_tree and fill_hist
+
 from sys import argv
 from os import getenv
 which = argv[1]
@@ -10,14 +12,16 @@ from PandaCore.Tools.Load import *
 from PandaCore.Tools.Misc import *
 
 Load('BranchAdder')
+ 
+weight_name = '1' # 'normalizedWeight'
 
 def gethisto(tree,formula,binlo,binhi,additionalcut=None):
   nbins=50
   h = root.TH1D('h','h',nbins,binlo,binhi)
   if additionalcut:
-    tree.Draw(formula+'>>h',tTIMES('normalizedWeight',additionalcut))
+    tree.Draw(formula+'>>h',tTIMES(weight_name,additionalcut))
   else:
-    tree.Draw(formula+'>>h','normalizedWeight')
+    tree.Draw(formula+'>>h',weight_name)
 
   for iB in xrange(1,nbins+1):
     val = h.GetBinContent(iB);
@@ -48,7 +52,7 @@ def addbranches(fpath,additionalcut=None):
 
   hpt = gethisto(jets,'fj1Pt',250,1000,additionalcut)
   ba.formula = 'fj1Pt'
-  ba.newBranchName = 'ptweight_binned'
+  ba.newBranchName = 'ptweight_fixed'
   ba.AddBranchFromHistogram(jets,hpt)
 
   fin.WriteTObject(jets,'events','Overwrite')
@@ -56,11 +60,8 @@ def addbranches(fpath,additionalcut=None):
 
 basedir = getenv('PANDA_FLATDIR')
 
-if which=='ZpTT':
-  addbranches(basedir+'/ZpTT.root','fj1IsMatched==1&&fj1GenSize<1.44')
-elif which=='ZpWW':
-  addbranches(basedir+'/ZpWW.root','fj1IsMatched==1&&fj1GenSize<1.44')
-elif which=="ZpA0h":
-  addbranches(basedir+'/ZpA0h.root','fj1IsMatched==1&&fj1GenSize<1.44')
-else:
-  addbranchesFormula(basedir+'/'+which+'.root')
+additionalcut = None
+if any([x in which for x in ['Zp','Top']]):
+  additionalcut = 'fj1IsMatched==1&&fj1GenSize<1.44'
+addbranches(basedir+'/'+which+'.root',additionalcut)
+#addbranchesFormula(basedir+'/'+which+'.root')
