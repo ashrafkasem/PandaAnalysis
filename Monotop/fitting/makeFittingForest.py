@@ -23,7 +23,8 @@ argv=[]
 import PandaAnalysis.Flat.fitting_forest as forest 
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions # kinematics
-import PandaAnalysis.Monotop.CombinedSelection as sel
+import PandaAnalysis.Monotop.CombinedBVetoSelection as sel
+#import PandaAnalysis.Monotop.CombinedSelection as sel
 
 basedir = getenv('PANDA_FLATDIR')+'/'
 lumi = 35900
@@ -33,8 +34,8 @@ def f(x):
 
 def shift_btags(additional=None):
     shifted_weights = {}
-    if not any([x in region for x in ['signal','top','w']]):
-        return shifted_weights 
+    #if not any([x in region for x in ['signal','top','w']]):
+    #    return shifted_weights 
     for shift in ['BUp','BDown','MUp','MDown']:
         for cent in ['sf_btag','sf_sjbtag']:
             shiftedlabel = ''

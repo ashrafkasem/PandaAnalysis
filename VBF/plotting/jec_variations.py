@@ -35,6 +35,7 @@ plot = root.HistogramDrawer()
 plot.SetTDRStyle()
 plot.InitLegend()
 plot.SetLumi(35.8)
+plot.SetAutoRange(False)
 
 plotr = root.HistogramDrawer()
 plotr.SetRatioStyle()
@@ -46,6 +47,8 @@ repl = {}
 
 repl['up'] = {
     'pfmet' : 'pfmetUp',
+    'pfUWmag' : 'pfUWmagUp',
+    'pfUZmag' : 'pfUZmagUp',
     'jot1Pt' : 'jot1PtUp',
     'jot2Pt' : 'jot2PtUp',
     'jot1Eta' : 'jot1EtaUp',
@@ -56,6 +59,8 @@ repl['up'] = {
 }
 repl['down'] = {
     'pfmet' : 'pfmetDown',
+    'pfUWmag' : 'pfUWmagDown',
+    'pfUZmag' : 'pfUZmagDown',
     'jot1Pt' : 'jot1PtDown',
     'jot2Pt' : 'jot2PtDown',
     'jot1Eta' : 'jot1EtaDown',
@@ -76,9 +81,23 @@ t_in1 = f_in1.Get('events')
 f_in2 = root.TFile.Open(basedir+args.process2+'.root')
 t_in2 = f_in2.Get('events')
 
-hbase = root.TH1D('dummy','',1,0,2)
-hbase.GetXaxis().SetTitle('1')
-hbase.GetYaxis().SetTitle('Events')
+to_plot = [('1',0,2,'1'),
+           ('jot1Pt',80,1000,'leading jet p_{T} [GeV]'),
+           ('jot2Pt',40,1000,'subleading jet p_{T} [GeV]'),
+           ('jot1Eta',-4.5,4.5,'leading jet #eta'),
+           ('jot2Eta',-4.5,4.5,'subleading jet #eta'),
+           ('pfmet',200,1000,'E_{T}^{miss} [GeV]'),
+           ('jot12Mass',500,5000,'m_{jj} [GeV]'),
+           ('fabs(jot12DPhi)',0,3.14,'#Delta#phi_{jj}'),
+           ('fabs(jot12DEta)',0,10,'#Delta#eta_{jj}')]
+hbase = {}
+for d in to_plot:
+    nbins = 1 if d[0]=='1' else 10
+    hbase[d[0]] = root.TH1D(d[0],'',nbins,d[1],d[2])
+    hbase[d[0]].GetYaxis().SetTitle('Events/bin')
+    hbase[d[0]].GetXaxis().SetTitle(d[0])
+
+
 
 cut1 = {'nominal' : sel.cuts[args.region1]}
 cut2 = {'nominal' : sel.cuts[args.region2]}
@@ -94,29 +113,29 @@ for s in ['up','down']:
         d[s] = d[s].replace('dphipfmetUp','dphipfmet')
         d[s] = d[s].replace('dphipfmetDown','dphipfmet')
 
-def draw(s):
-    h1 = hbase.Clone(s+'_1')
-    h2 = hbase.Clone(s+'_2')
-    xarr1 = read_tree(t_in1,['1',weight1[s]],cut1[s])
-    xarr2 = read_tree(t_in2,['1',weight2[s]],cut2[s]) 
-    draw_hist(h1,xarr1,['1'],weight1[s])
-    draw_hist(h2,xarr2,['1'],weight2[s])
-    h1.SetMaximum(h1.GetMaximum()*2)
-    h2.SetMaximum(h2.GetMaximum()*2)
-    return {1:h1,2:h2}
+def draw(s,variables):
+    xarr1 = read_tree(t_in1,variables+[weight1[s]],cut1[s])
+    xarr2 = read_tree(t_in2,variables+[weight2[s]],cut2[s]) 
+    ret = {}
+    for var in variables:
+        h1 = hbase[var].Clone(s+'_1')
+        h2 = hbase[var].Clone(s+'_2')
+        draw_hist(h1,xarr1,[var],weight1[s])
+        draw_hist(h2,xarr2,[var],weight2[s])
+        # h1.SetMaximum(h1.GetMaximum()*2)
+        # h2.SetMaximum(h2.GetMaximum()*2)
+        ret[var] = {1:h1,2:h2}
+    return ret
 
 def build_ratio(hnum,hden):
     hratio = hnum.Clone()
     hratio.Divide(hden)
     return hratio
 
-nominal = draw('nominal')
-up = draw('up')
-down = draw('down')
-
-for h in [nominal,up,down]:
-    for i in [1,2]:
-        PInfo(sname,'%30s => %f'%(str(h[i]), h[i].Integral()))
+v_to_plot = [x[0] for x in to_plot]
+g_nominal = draw('nominal',v_to_plot)
+g_up = draw('up',v_to_plot)
+g_down = draw('down',v_to_plot)
 
 label1 = ''
 if args.process1 in labels:
@@ -158,7 +177,10 @@ elif 'muon' in args.region2:
         label2 += ')'
 
 # main plotting functions
-def plot_ratio():
+def plot_ratio(x):
+    nominal = g_nominal[x[0]]
+    up = g_up[x[0]]
+    down = g_down[x[0]]
    
     h_nominal = build_ratio(nominal[1],nominal[2]) 
     h_up = build_ratio(up[1],up[2]) 
@@ -174,33 +196,36 @@ def plot_ratio():
         if val==0: continue
         h_nominal.SetBinContent(ib,1)
         h_nominal.SetBinError(ib,h_nominal.GetBinError(ib)/val)
-    for h in [h_nominal,h_up,h_down]:
-        h.SetMaximum(1.5)
-        h.SetMinimum(0.8)
+    for h in [h_up,h_down,h_nominal]:
+        h.SetMaximum(1.25)
+        h.SetMinimum(0.75)
 
     h_nominal.GetYaxis().SetTitle('Uncertainty')
+    h_nominal.GetXaxis().SetTitle(x[3])
 
-    plotr.cd()
-    plotr.Reset()
+    plot.cd()
+    plot.Reset()
 
-    plotr.AddCMSLabel()
-    plotr.AddLumiLabel(True)
-    plotr.AddPlotLabel('%s / %s'%(label1,label2),.18,.77,False,42,.06)
-    plotr.AddHistogram(h_nominal,'Nominal (stat.)',root.kData)
-    plotr.AddHistogram(h_up,'JEC Up',root.kExtra2,root.kRed,'hist')
-    plotr.AddHistogram(h_down,'JEC Down',root.kExtra3,root.kBlue,'hist')
+    plot.AddCMSLabel()
+    plot.AddLumiLabel(True)
+    plot.AddPlotLabel('%s / %s'%(label1,label2),.18,.77,False,42,.06)
+    plot.AddHistogram(h_nominal,'Nominal (stat.)',root.kData)
+    plot.AddHistogram(h_up,'JEC Up',root.kExtra2,root.kRed,'hist')
+    plot.AddHistogram(h_down,'JEC Down',root.kExtra3,root.kBlue,'hist')
 
-    plotname = 'jec_ratio_%s_%s_%s'%(args.process1,args.region1,args.region2)
-    plotr.Draw(args.outdir+'/',plotname)
+    plotname = 'jec_ratio_%s_%s_%s_%s'%(args.process1,args.region1,args.region2,
+                                        x[0].replace('(','').replace(')',''))
+    plot.Draw(args.outdir+'/',plotname)
+
 
 def plot_yield(region):
     plot.cd()
     plot.Reset()
     plot.AddCMSLabel()
     plot.AddLumiLabel(True)
-    plot.AddHistogram(nominal[region],'Nominal (stat.)',root.kData)
-    plot.AddHistogram(up[region],'JEC Up',root.kExtra2,root.kRed,'hist')
-    plot.AddHistogram(down[region],'JEC Down',root.kExtra3,root.kBlue,'hist')
+    plot.AddHistogram(g_nominal['1'][region],'Nominal (stat.)',root.kData)
+    plot.AddHistogram(g_up['1'][region],'JEC Up',root.kExtra2,root.kRed,'hist')
+    plot.AddHistogram(g_down['1'][region],'JEC Down',root.kExtra3,root.kBlue,'hist')
 
     process = args.process1 if region==1 else args.process2
     label_ = label1 if region==1 else label2
@@ -208,6 +233,8 @@ def plot_yield(region):
     plotname = 'jec_yieldo_%s_%s'%(process,args.region1 if region==1 else args.region2)
     plot.Draw(args.outdir+'/',plotname)
 
-plot_ratio()
-plot_yield(1)
-plot_yield(2)
+
+for x in to_plot:
+    plot_ratio(x)
+#plot_yield(1)
+#plot_yield(2)
