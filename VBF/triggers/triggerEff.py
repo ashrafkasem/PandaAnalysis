@@ -4,124 +4,84 @@ from sys import argv,exit
 from os import getenv
 from array import array
 from math import sqrt
+import argparse
+parser = argparse.ArgumentParser(description='plot stuff')
+parser.add_argument('--outdir',metavar='outdir',type=str)
+parser.add_argument('--cut',metavar='cut',type=str,default=None)
+parser.add_argument('--label',metavar='label',type=str)
+args = parser.parse_args()
+basedir = getenv('PANDA_FLATDIR')+'/'
 
+sname = argv[0]
 argv=[]
 
 import ROOT as root
 from PandaCore.Tools.Load import *
+from PandaCore.Tools.root_interface import draw_hist, read_tree
 from PandaCore.Tools.Misc import *
-Load('Drawers','HistogramDrawer')
+import PandaAnalysis.VBF.PandaSelection as sel
 
-root.gROOT.LoadMacro('triggerFunc.C')
-fitFunc = root.TF1('fitFunc',root.ErfCB,60,900,5)
-initParams = [80,1,0.064,1.72,1]
-for iP in xrange(5):
-  fitFunc.SetParameter(iP,initParams[iP])
-  #fitFunc.SetParameter(iP,2)
+Load('PandaCoreTools')
+Load('PandaCoreDrawers')
 
 plot = root.HistogramDrawer()
-plot.SetLumi(12.9)
+plot.SetLumi(35.8)
+plot.Ratio(True)
+plot.FixRatio(0.1)
 plot.SetTDRStyle()
+plot.InitLegend(0.5,0.8,0.88,0.9,2)
+plot.SetRatioLabel('W/Z')
+plot.SetAutoRange(False)
+
+w_base_cut = 'metFilter==1 && egmFilter==1 && jot1Eta*jot2Eta<0 && jot1Pt>80 && jot2Pt>40 && fabs(jot1Eta)<4.7 && fabs(jot2Eta)<4.7 && (fabs(jot1Eta)<3||fabs(jot1Eta)>3.2) && nTau==0 && nLoosePhoton==0 && nLooseLep==1 && looseLep1IsTight==1 && abs(looseLep1PdgId)==13 && fabs(calomet-pfmet)/pfUWmag<0.5 && mT<160 && dphipfUW>0.5'
+z_base_cut = 'metFilter==1 && egmFilter==1 && jot1Eta*jot2Eta<0 && jot1Pt>80 && jot2Pt>40 && fabs(jot1Eta)<4.7 && fabs(jot2Eta)<4.7 && (fabs(jot1Eta)<3||fabs(jot1Eta)>3.2) && nTau==0 && nLooseElectron==0 && nLoosePhoton==0 && nLooseMuon==2 && nTightLep>0 && 60<diLepMass && diLepMass<120 && fabs(calomet-pfmet)/pfUZmag<0.5 && mT<160 && dphipfUZ>0.5'
+trigger = '(trigger&1)!=0'
+
+recoil_bins = array('f',[60,120,180,240,320,500,1000])
+#recoil_bins = array('f',[60,90,120,150,180,210,240,280,320,400,500,750,1000])
+hbase = root.TH1D('dummy','',len(recoil_bins)-1,recoil_bins)
+hbase.GetXaxis().SetTitle('MET no #mu [GeV]')
+hbase.GetYaxis().SetTitle('Efficiency')
+hbase.SetMaximum(1.2)
+hbase.SetMinimum(0.2)
 
 counter=0
 
-fIn = root.TFile('/home/snarayan/home000/panda/vbf_v0/SingleElectron.root')
+fIn = root.TFile(basedir+'/SingleMuon.root')
 events = fIn.Get('events')
-hOne = root.TH1F('hone','one',1,0.,2.)
 
-baseCut = 'metFilter==1 && ((trigger&2)!=0) && nLooseElectron==1 && looseLep1IsTight && nLooseMuon==0 && nJet>1 && jet1Pt>%f && jet2Pt>%f && jet12DEta>3'
-monobaseCut = 'metFilter==1 && ((trigger&2)!=0) && nLooseElectron==1 && looseLep1IsTight && nLooseMuon==0 && nJet>0 && jet1Pt>%f && fabs(jet1Eta)<2.5'
-#monobaseCut = '((trigger&2)!=0) && nLooseElectron>0'
-metCut  = '(trigger&1)!=0'
+def get_hist(cut):
+    h = hbase.Clone()
+    xarr = read_tree(events,['pfmetnomu'],cut)
+    draw_hist(h,xarr,['pfmetnomu'],None)
+    return h
 
-def getHist(tree,cut,bins):
-  global counter
-  N = len(bins)-1
-  h = root.TH1F('h%i'%counter,'h%i'%counter,N,bins)
-  tree.Draw('metnomu>>h%i'%counter,cut)
-  counter += 1
-  return h
+def run_eff(base_cut):
+    cut = tAND(base_cut,args.cut)
+    hden = get_hist(cut)
+    hnum = get_hist(tAND(cut,trigger))
+    hratio = hnum.Clone()
+    for ib in xrange(1,len(recoil_bins)):
+        vnum = hnum.GetBinContent(ib)
+        enum = hnum.GetBinError(ib)
+        vden = hden.GetBinContent(ib)
+        if vden==0:
+            vden = 1
+        hratio.SetBinContent(ib,vnum/vden)
+        hratio.SetBinError(ib,enum/vden)
+    
+    return hratio
+    
 
-def getMETHist(tree,cut,bins):
-  global counter
-  N = len(bins)-1
-  h = root.TH1F('h%i'%counter,'h%i'%counter,N,bins)
-  tree.Draw('pfmet>>h%i'%counter,cut)
-  counter += 1
-  return h
+h_w_eff = run_eff(w_base_cut)
+h_z_eff = run_eff(z_base_cut)
+h_one = hbase.Clone()
+for ib in xrange(1,len(recoil_bins)): h_one.SetBinContent(ib,1)
+h_one.SetLineColor(root.kGray)
+h_one.SetLineStyle(2)
 
-def runEff(label,fn=getHist,doFit=False,pt1=100,pt2=40):
-  bins = array('f',[60,80,100,120,140,160,180,200,220,240,270,300,400,900])
-  baseCut_ = baseCut%(pt1,pt2)
-  if pt2==0:
-    #baseCut_ = monobaseCut
-    baseCut_ = monobaseCut%(pt1)
-  hBase = fn(events,baseCut_,bins)
-  hMET = fn(events,tAND(baseCut_,metCut),bins)
-  x = []; central = []; up = []; down = []; zero = []
-  for iB in xrange(1,len(bins)):
-    passed=hMET.GetBinContent(iB)
-    total=hBase.GetBinContent(iB)
-    try:
-      eff = passed/total
-    except ZeroDivisionError:
-      eff = 0
-    try:
-#      err = eff*sqrt(1/total+1/passed)
-#      err = sqrt(pow(passed,2)/pow(total,3)+passed/pow(total,2))
-#      err = sqrt(passed*(1-passed/total))/total 
-       errUp = root.TEfficiency.ClopperPearson(int(total),int(passed),0.68,True)
-       errDown = root.TEfficiency.ClopperPearson(int(total),int(passed),0.68,False)
-    except ZeroDivisionError:
-       err = eff
-       errUp = eff
-       errDown = eff
-    hMET.SetBinContent(iB,eff)
-    hMET.SetBinError(iB,(errUp-errDown)/2)
-    x.append(hMET.GetBinCenter(iB))
-    central.append(eff)
-    up.append(errUp-eff)
-    down.append(eff-errDown)
-#    up.append(min(1-eff,err))
-#    down.append(min(eff,err))
-    zero.append(0)
-  N = len(x)
-  x = array('f',x); central = array('f',central); zero=array('f',zero)
-  up=array('f',up); down=array('f',down)
-  errs = root.TGraphAsymmErrors(N,x,central,zero,zero,down,up)
-  errs.SetLineWidth(2)
-  if fn==getHist:
-    hMET.GetXaxis().SetTitle('U')
-  else:
-    hMET.GetXaxis().SetTitle('MET')
-  hMET.GetYaxis().SetTitle('Efficiency')
-  hMET.SetMaximum(1)
-  plot.AddCMSLabel()
-  plot.AddLumiLabel(True)
-  if doFit:
-    hMET.Fit(fitFunc)
-    plot.AddPlotLabel('#mu=%.3f, #sigma=%.3f'%(fitFunc.GetParameter(0),fitFunc.GetParameter(1)),0.5,0.5,False,42,0.05,11)
-  if pt2:
-    plot.AddPlotLabel('p_{T}^{1}>%.0f, p_{T}^{2}>%.0f'%(pt1,pt2),0.5,0.4,False,42,0.05,11)
-  else:
-    plot.AddPlotLabel('p_{T}^{1}>%.0f'%(pt1),0.5,0.4,False,42,0.05,11)
-  for iB in xrange(1,len(bins)):
-    hMET.SetBinError(iB,0.00001)
-  fitFunc.SetLineColor(root.kBlue)
-  plot.AddHistogram(hMET,'Data',root.kData)
-  plot.AddAdditional(errs,'p')
-  if doFit:
-    plot.AddAdditional(fitFunc,'l')
-  plot.Draw('~/public_html/figs/vbf/trigger/',label)
-  plot.Reset()
+plot.AddHistogram(h_w_eff,'Single-#mu',root.kData,root.kBlue,'el')
+plot.AddHistogram(h_z_eff,'Di-#mu',root.kExtra1,root.kRed,'el')
+plot.AddAdditional(h_one,'hist')
 
-fit=False
-
-runEff('vbf_baseline',getMETHist,fit) 
-runEff('vbf_pt1_40_pt2_40',getMETHist,fit,40,40) 
-runEff('vbf_pt1_20_pt2_20',getMETHist,fit,20,20) 
-
-#runEff('mono_baseline',getMETHist,fit,100,0) 
-#runEff('mono_pt1_40',getMETHist,fit,40,0) 
-#runEff('mono_pt1_20',getMETHist,fit,20,0) 
-
+plot.Draw(args.outdir,args.label)
