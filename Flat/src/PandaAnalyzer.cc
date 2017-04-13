@@ -371,6 +371,10 @@ bool PandaAnalyzer::PassGoodLumis(int run, int lumi) {
 
 
 bool PandaAnalyzer::PassPreselection() {
+    // TODO: refactor this function
+    // was originally written this way to handle more complex conditions
+    // like triggers, but could probably clean it up with a Condition class
+    
     if (preselBits==0)
         return true;
     bool isGood=false;
@@ -379,33 +383,35 @@ bool PandaAnalyzer::PassPreselection() {
         if (gt->fj1Pt>250)
             isGood = true;
     }
+
+    float max_puppi = std::max({gt->puppimet, gt->puppiUZmag, gt->puppiUWmag, gt->puppiUAmag});
+    float max_pf = std::max({gt->pfmet, gt->pfUZmag, gt->pfUWmag, gt->pfUAmag});
+    float max_pfUp = std::max({gt->pfmetUp, gt->pfUZmagUp, gt->pfUWmagUp, gt->pfUAmagUp});
+    float max_pfDown = std::max({gt->pfmetDown, gt->pfUZmagDown, gt->pfUWmagDown, gt->pfUAmagDown});
+
     if (preselBits & kRecoil) {
-        if ( (gt->puppimet>200 || gt->puppiUZmag>200 || gt->puppiUWmag>200 || gt->puppiUAmag>200) ||
-                    (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
-                    isGood = true;
+        if ( max_pfDown>200 || max_pf>200 || max_pfUp>200 || max_puppi>200 ) {
+            isGood = true;
         }
     }
     if (preselBits & kMonotop) {
         if (gt->nFatjet>=1 && gt->fj1Pt>200) {
-            if ( (gt->puppimet>200 || gt->puppiUZmag>200 || gt->puppiUWmag>200 || gt->puppiUAmag>200) ||
-                        (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
-                        isGood = true;
+            if ( max_pf>200 || max_puppi>200) {
+                isGood = true;
             }
         }
     }
     if (preselBits & kMonojet) {
         if (true) {
-            if ( (gt->puppimet>200 || gt->puppiUZmag>200 || gt->puppiUWmag>200 || gt->puppiUAmag>200) ||
-                        (gt->pfmet>200 || gt->pfUZmag>200 || gt->pfUWmag>200 || gt->pfUAmag>200) ) {
-                        isGood = true;
+            if ( max_pfDown>200 || max_pf>200 || max_pfUp>200 || max_puppi>200 ) {
+                isGood = true;
             }
         }
     }
     if (preselBits & kMonohiggs) {
         if ((gt->nFatjet>=1 && gt->fj1Pt>200) || gt->hbbpt>150 ) {
-            if ( (gt->puppimet>175 || gt->puppiUZmag>175 || gt->puppiUWmag>175 || gt->puppiUAmag>175) ||
-                        (gt->pfmet>175 || gt->pfUZmag>175 || gt->pfUWmag>175 || gt->pfUAmag>175) ) {
-                        isGood = true;
+            if ( max_pf>175 || max_puppi>175) {
+                isGood = true;
             }
         }
     }
@@ -672,6 +678,8 @@ void PandaAnalyzer::Run() {
         pr.Report();
         ResetBranches();
         event.getEntry(*tIn,iE);
+
+
         tr.TriggerEvent(TString::Format("GetEntry %u",iE));
         if (DEBUG>2) {
             PDebug("PandaAnalyzer::Run::Dump","");
@@ -1067,6 +1075,8 @@ void PandaAnalyzer::Run() {
                         TString::Format("Offline mT corr: %.3f -> %.3f",old_mT,gt->mT));
             }
         }
+        TLorentzVector vpfUp; vpfUp.SetPtEtaPhiM(gt->pfmetUp,0,gt->pfmetphi,0);
+        TLorentzVector vpfDown; vpfDown.SetPtEtaPhiM(gt->pfmetDown,0,gt->pfmetphi,0);
         TLorentzVector vObj1, vObj2;
         TLorentzVector vpuppiUW, vpuppiUZ, vpuppiUA;
         TLorentzVector vpfUW, vpfUZ, vpfUA;
@@ -1079,6 +1089,9 @@ void PandaAnalyzer::Run() {
             // one lep => W
             vpuppiUW = vPuppiMET+vObj1; gt->puppiUWmag=vpuppiUW.Pt(); gt->puppiUWphi=vpuppiUW.Phi();
             vpfUW = vPFMET+vObj1; gt->pfUWmag=vpfUW.Pt(); gt->pfUWphi=vpfUW.Phi();
+            
+            TLorentzVector vpfUWUp = vpfUp+vObj1; gt->pfUWmagUp = vpfUWUp.Pt();
+            TLorentzVector vpfUWDown = vpfDown+vObj1; gt->pfUWmagDown = vpfUWDown.Pt();
 
             if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
                 // two OS lep => Z
@@ -1087,6 +1100,9 @@ void PandaAnalyzer::Run() {
 
                 vpuppiUZ=vpuppiUW+vObj2; gt->puppiUZmag=vpuppiUZ.Pt(); gt->puppiUZphi=vpuppiUZ.Phi();
                 vpfUZ=vpfUW+vObj2; gt->pfUZmag=vpfUZ.Pt(); gt->pfUZphi=vpfUZ.Phi();
+
+                TLorentzVector vpfUZUp = vpfUWUp+vObj2; gt->pfUZmagUp = vpfUZUp.Pt();
+                TLorentzVector vpfUZDown = vpfUWDown+vObj2; gt->pfUZmagDown = vpfUZDown.Pt();
 
                 vpuppiU = vpuppiUZ; vpfU = vpfUZ;
                 whichRecoil = 2;
@@ -1101,6 +1117,10 @@ void PandaAnalyzer::Run() {
 
             vpuppiUA=vPuppiMET+vObj1; gt->puppiUAmag=vpuppiUA.Pt(); gt->puppiUAphi=vpuppiUA.Phi();
             vpfUA=vPFMET+vObj1; gt->pfUAmag=vpfUA.Pt(); gt->pfUAphi=vpfUA.Phi();
+
+            TLorentzVector vpfUAUp = vpfUp+vObj1; gt->pfUAmagUp = vpfUAUp.Pt();
+            TLorentzVector vpfUADown = vpfDown+vObj1; gt->pfUAmagDown = vpfUADown.Pt();
+
             if (gt->nLooseLep==0) {
                 vpuppiU = vpuppiUA; vpfU = vpfUA;
                 whichRecoil = -1;
@@ -1303,12 +1323,15 @@ void PandaAnalyzer::Run() {
         float maxIsoEta = (doMonoH) ? 4.5 : 2.5;
 
         for (auto& jet : *jets) {
-          if (jet.pt()<30 || abs(jet.eta())>4.5)
+
+          // only do eta-phi checks here
+          if (abs(jet.eta())>4.5)
                 continue;
           if (IsMatched(&matchLeps,0.16,jet.eta(),jet.phi()) ||
               IsMatched(&matchPhos,0.16,jet.eta(),jet.phi()))
                 continue;
 
+          if (jet.pt()>30) { // nominal jets
             cleanedJets.push_back(&jet);
             if (cleanedJets.size()==1) {
                 jot1 = &jet;
@@ -1320,34 +1343,6 @@ void PandaAnalyzer::Run() {
                 gt->jot2Pt = jet.pt();
                 gt->jot2Eta = jet.eta();
                 gt->jot2Phi = jet.phi();
-            }
-            if (jet.ptCorrUp > gt->jot1PtUp) {
-                if (jotUp1) {
-                    jotUp2 = jotUp1;
-                    gt->jot2PtUp = gt->jot1PtUp;
-                    gt->jot2EtaUp = gt->jot1EtaUp;
-                }
-                jotUp1 = &jet;
-                gt->jot1PtUp = jet.ptCorrUp;
-                gt->jot1EtaUp = jet.eta();
-            } else if (jet.ptCorrUp > gt->jot2PtUp) {
-                jotUp2 = &jet;
-                gt->jot2PtUp = jet.ptCorrUp;
-                gt->jot2EtaUp = jet.eta();
-            }
-            if (jet.ptCorrDown > gt->jot1PtDown) {
-                if (jotDown1) {
-                    jotDown2 = jotDown1;
-                    gt->jot2PtDown = gt->jot1PtDown;
-                    gt->jot2EtaDown = gt->jot1EtaDown;
-                }
-                jotDown1 = &jet;
-                gt->jot1PtDown = jet.ptCorrDown;
-                gt->jot1EtaDown = jet.eta();
-            } else if (jet.ptCorrDown > gt->jot2PtDown) {
-                jotDown2 = &jet;
-                gt->jot2PtDown = jet.ptCorrDown;
-                gt->jot2EtaDown = jet.eta();
             }
 
             float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
@@ -1420,6 +1415,41 @@ void PandaAnalyzer::Run() {
                 if (doMonoH)
                     gt->jetIso[cleanedJets.size()-1]=0;
             }
+          }
+
+          // do jes variation OUTSIDE of pt>30 check
+          if (jet.ptCorrUp>30) {
+            if (jet.ptCorrUp > gt->jot1PtUp) {
+                if (jotUp1) {
+                    jotUp2 = jotUp1;
+                    gt->jot2PtUp = gt->jot1PtUp;
+                    gt->jot2EtaUp = gt->jot1EtaUp;
+                }
+                jotUp1 = &jet;
+                gt->jot1PtUp = jet.ptCorrUp;
+                gt->jot1EtaUp = jet.eta();
+            } else if (jet.ptCorrUp > gt->jot2PtUp) {
+                jotUp2 = &jet;
+                gt->jot2PtUp = jet.ptCorrUp;
+                gt->jot2EtaUp = jet.eta();
+            }
+          }
+          if (jet.ptCorrDown>30) {
+            if (jet.ptCorrDown > gt->jot1PtDown) {
+                if (jotDown1) {
+                    jotDown2 = jotDown1;
+                    gt->jot2PtDown = gt->jot1PtDown;
+                    gt->jot2EtaDown = gt->jot1EtaDown;
+                }
+                jotDown1 = &jet;
+                gt->jot1PtDown = jet.ptCorrDown;
+                gt->jot1EtaDown = jet.eta();
+            } else if (jet.ptCorrDown > gt->jot2PtDown) {
+                jotDown2 = &jet;
+                gt->jot2PtDown = jet.ptCorrDown;
+                gt->jot2EtaDown = jet.eta();
+            }
+          }
 
         } // VJet loop
 
@@ -1454,17 +1484,21 @@ void PandaAnalyzer::Run() {
           gt->jot12DPhi = vj1.DeltaPhi(vj2);
           gt->jot12DEta = fabs(jot1->eta()-jot2->eta());
 
-          vj1.SetPtEtaPhiM(jotUp1->ptCorrUp,jotUp1->eta(),jotUp1->phi(),jotUp1->m());
-          vj2.SetPtEtaPhiM(jotUp2->ptCorrUp,jotUp2->eta(),jotUp2->phi(),jotUp2->m());
-          gt->jot12MassUp = (vj1+vj2).M();
-          gt->jot12DPhiUp = vj1.DeltaPhi(vj2);
-          gt->jot12DEtaUp = fabs(jotUp1->eta()-jotUp2->eta());
+          if (jotUp1 && jotUp2) {
+              vj1.SetPtEtaPhiM(jotUp1->ptCorrUp,jotUp1->eta(),jotUp1->phi(),jotUp1->m());
+              vj2.SetPtEtaPhiM(jotUp2->ptCorrUp,jotUp2->eta(),jotUp2->phi(),jotUp2->m());
+              gt->jot12MassUp = (vj1+vj2).M();
+              gt->jot12DPhiUp = vj1.DeltaPhi(vj2);
+              gt->jot12DEtaUp = fabs(jotUp1->eta()-jotUp2->eta());
+          }
           
-          vj1.SetPtEtaPhiM(jotDown1->ptCorrDown,jotDown1->eta(),jotDown1->phi(),jotDown1->m());
-          vj2.SetPtEtaPhiM(jotDown2->ptCorrDown,jotDown2->eta(),jotDown2->phi(),jotDown2->m());
-          gt->jot12MassDown = (vj1+vj2).M();
-          gt->jot12DPhiDown = vj1.DeltaPhi(vj2);
-          gt->jot12DEtaDown = fabs(jotDown1->eta()-jotDown2->eta());
+          if (jotDown1 && jotDown2) {
+              vj1.SetPtEtaPhiM(jotDown1->ptCorrDown,jotDown1->eta(),jotDown1->phi(),jotDown1->m());
+              vj2.SetPtEtaPhiM(jotDown2->ptCorrDown,jotDown2->eta(),jotDown2->phi(),jotDown2->m());
+              gt->jot12MassDown = (vj1+vj2).M();
+              gt->jot12DPhiDown = vj1.DeltaPhi(vj2);
+              gt->jot12DEtaDown = fabs(jotDown1->eta()-jotDown2->eta());
+          }
         }
 
         tr.TriggerEvent("jets");
