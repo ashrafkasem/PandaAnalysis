@@ -68,7 +68,7 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
     event.setStatus(*t, {"!*"}); // turn everything off first
 
     TString jetname = (flags["puppi"]) ? "puppi" : "chs";
-    panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", 
+    panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", "rho", 
                                        "isData", "npv", "npvTrue", "weight", "chsAK4Jets", 
                                        "electrons", "muons", "taus", "photons", 
                                        "pfMet", "caloMet", "puppiMet", 
@@ -189,6 +189,14 @@ void PandaAnalyzer::Terminate() {
         delete iter.second;
 
     delete ak8JERReader;
+
+    for (auto& iter : ak4UncReader)
+        delete iter.second;
+
+    for (auto& iter : ak4ScaleReader)
+        delete iter.second;
+
+    delete ak4JERReader;
 
     delete activeArea;
     delete areaDef;
@@ -315,18 +323,60 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 
     if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded mSD correction");
 
+    TString jecV = "V4", jecReco = "23Sep2016"; 
+    TString jecVFull = jecReco+jecV;
     ak8UncReader["MC"] = new JetCorrectionUncertainty(
-          (dirPath+"/jec/23Sep2016V2/Spring16_23Sep2016V2_MC_Uncertainty_AK8PFPuppi.txt").Data()
+          (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_Uncertainty_AK8PFPuppi.txt").Data()
         );
     std::vector<TString> eraGroups = {"BCD","EF","G","H"};
     for (auto e : eraGroups) {
         ak8UncReader["data"+e] = new JetCorrectionUncertainty(
-              (dirPath+"/jec/23Sep2016V2/Spring16_23Sep2016"+e+"V2_DATA_Uncertainty_AK8PFPuppi.txt").Data()
+              (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_Uncertainty_AK8PFPuppi.txt").Data()
             );
     }
 
     ak8JERReader = new JERReader(dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_SF_AK8PFPuppi.txt",
                                  dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK8PFPuppi.txt");
+
+
+    ak4UncReader["MC"] = new JetCorrectionUncertainty(
+          (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_Uncertainty_AK4PFPuppi.txt").Data()
+        );
+    for (auto e : eraGroups) {
+        ak4UncReader["data"+e] = new JetCorrectionUncertainty(
+              (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_Uncertainty_AK4PFPuppi.txt").Data()
+            );
+    }
+
+    ak4JERReader = new JERReader(dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_SF_AK4PFPuppi.txt",
+                                 dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK4PFPuppi.txt");
+
+    std::vector<JetCorrectorParameters> params = {
+        JetCorrectorParameters(
+            (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_L1FastJet_AK4PFPuppi.txt").Data()),
+         JetCorrectorParameters(
+             (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_L2Relative_AK4PFPuppi.txt").Data()),
+         JetCorrectorParameters(
+             (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_L3Absolute_AK4PFPuppi.txt").Data()),
+         JetCorrectorParameters(
+             (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_L2L3Residual_AK4PFPuppi.txt").Data())
+    };
+    ak4ScaleReader["MC"] = new FactorizedJetCorrector(params);
+    if (DEBUG>1) PDebug("PandaAnalyzer::SetDataDir","Loaded JES for AK4 MC");
+    for (auto e : eraGroups) {
+        params = {
+            JetCorrectorParameters(
+                (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_L1FastJet_AK4PFPuppi.txt").Data()),
+            JetCorrectorParameters(
+                (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_L2Relative_AK4PFPuppi.txt").Data()),
+            JetCorrectorParameters(
+                (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_L3Absolute_AK4PFPuppi.txt").Data()),
+            JetCorrectorParameters(
+                (dirPath+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_L2L3Residual_AK4PFPuppi.txt").Data())
+        };
+        ak4ScaleReader["data"+e] = new FactorizedJetCorrector(params);
+        if (DEBUG>1) PDebug("PandaAnalyzer::SetDataDir","Loaded JES for AK4 "+e);
+    }
 
     if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded JES/R");
 
@@ -588,6 +638,8 @@ void PandaAnalyzer::Run() {
     Binner btageta(vbtageta);
 
     JetCorrectionUncertainty *uncReader=0;
+    JetCorrectionUncertainty *uncReaderAK4=0;
+    FactorizedJetCorrector *scaleReaderAK4=0;
 
     std::vector<unsigned int> metTriggers;
     std::vector<unsigned int> eleTriggers;
@@ -763,11 +815,15 @@ void PandaAnalyzer::Run() {
                         continue;
                     if (iter.first.Contains(thisEra)) {
                         uncReader = iter.second;
+                        uncReaderAK4 = ak4UncReader[iter.first];
+                        scaleReaderAK4 = ak4ScaleReader[iter.first];
                         break;
                     }
                 }
             } else {
                 uncReader = ak8UncReader["MC"];
+                uncReaderAK4 = ak4UncReader["MC"];
+                scaleReaderAK4 = ak4ScaleReader["MC"];
             }
         }
 
@@ -1177,6 +1233,7 @@ void PandaAnalyzer::Run() {
                     // do a bit of jet energy scaling
                     uncReader->setJetEta(eta); uncReader->setJetPt(pt);
                     double scaleUnc = uncReader->getUncertainty(true);
+//                    double scaleUnc = (fj.ptCorrUp - gt->fj1Pt) / gt->fj1Pt; 
                     gt->fj1PtScaleUp    = gt->fj1Pt  * (1 + 2*scaleUnc);
                     gt->fj1PtScaleDown  = gt->fj1Pt  * (1 - 2*scaleUnc);
                     gt->fj1MSDScaleUp   = gt->fj1MSD * (1 + 2*scaleUnc);
@@ -1192,7 +1249,7 @@ void PandaAnalyzer::Run() {
                         gt->fj1MSDSmearedDown = gt->fj1MSD;
                     } else {
                         double smear=1, smearUp=1, smearDown=1;
-                        ak8JERReader->getStochasticSmear(pt,eta,15,smear,smearUp,smearDown);
+                        ak8JERReader->getStochasticSmear(pt,eta,event.rho,smear,smearUp,smearDown);
 
                         gt->fj1PtSmeared = smear*gt->fj1Pt;
                         gt->fj1PtSmearedUp = smearUp*gt->fj1Pt;
@@ -1202,6 +1259,45 @@ void PandaAnalyzer::Run() {
                         gt->fj1MSDSmearedUp = smearUp*gt->fj1MSD;
                         gt->fj1MSDSmearedDown = smearDown*gt->fj1MSD;
                     }
+
+                    // now have to do this mess with the subjets...
+                    TLorentzVector sjSum, sjSumUp, sjSumDown, sjSumSmear;
+                    for (unsigned int iSJ=0; iSJ!=fj.subjets.size(); ++iSJ) {
+                        auto& subjet = fj.subjets.objAt(iSJ);
+                        // now correct...
+                        double factor=1;
+                        if (fabs(subjet.eta())<5.191) {
+                            scaleReaderAK4->setJetPt(subjet.pt());
+                            scaleReaderAK4->setJetEta(subjet.eta());
+                            scaleReaderAK4->setJetPhi(subjet.phi());
+                            scaleReaderAK4->setJetE(subjet.e());
+                            scaleReaderAK4->setRho(event.rho);
+                            scaleReaderAK4->setJetA(0);
+                            scaleReaderAK4->setJetEMF(-99.0);
+                            factor = scaleReaderAK4->getCorrection();
+                        }
+                        TLorentzVector vCorr = factor * subjet.p4();
+                        sjSum += vCorr;
+                        double corr_pt = vCorr.Pt();
+
+                        // now vary
+                        uncReaderAK4->setJetEta(subjet.eta()); uncReaderAK4->setJetPt(corr_pt);
+                        double scaleUnc = uncReaderAK4->getUncertainty(true);
+                        sjSumUp += (1 + 2*scaleUnc) * vCorr;
+                        sjSumDown += (1 - 2*scaleUnc) * vCorr;
+
+                        // now smear...
+                        double smear=1, smearUp=1, smearDown=1;
+                        ak4JERReader->getStochasticSmear(corr_pt,subjet.eta(),event.rho,smear,smearUp,smearDown);
+                        sjSumSmear += smear * vCorr;
+                    }
+                    gt->fj1PtScaleUp_sj = gt->fj1Pt * (sjSumUp.Pt()/sjSum.Pt());
+                    gt->fj1PtScaleDown_sj = gt->fj1Pt * (sjSumDown.Pt()/sjSum.Pt());
+                    gt->fj1PtSmeared_sj = gt->fj1Pt * (sjSumSmear.Pt()/sjSum.Pt());
+                    gt->fj1MSDScaleUp_sj = gt->fj1MSD * (sjSumUp.Pt()/sjSum.Pt());
+                    gt->fj1MSDScaleDown_sj = gt->fj1MSD * (sjSumDown.Pt()/sjSum.Pt());
+                    gt->fj1MSDSmeared_sj = gt->fj1MSD * (sjSumSmear.Pt()/sjSum.Pt());
+
 
                     // mSD correction
                     float corrweight=1.;

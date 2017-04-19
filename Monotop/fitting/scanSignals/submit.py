@@ -12,11 +12,14 @@ flatdir  = environ['PANDA_FLATDIR']
 
 sigfiles = []
 
+sigfiles += glob(flatdir+'/ST*root')
+coupling_scan = False
+
 #sigfiles += glob(flatdir+'/Scalar*root')
 #coupling_scan = False
 
-sigfiles += glob(flatdir+'/Vector*root')
-coupling_scan = True
+#sigfiles += glob(flatdir+'/Vector*root')
+#coupling_scan = True
 
 fweights = open('../signal_weights.dat')
 weights = [x.strip().replace('_nlo','') for x in fweights]
