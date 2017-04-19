@@ -31,7 +31,7 @@ cp -v ${WD}/local.cfg ${WD}/local_all.cfg
 cd $CMSSW_BASE/
 if [[ $doTar == 1 ]]; then
   PInfo -n "$0" "Tarring up CMSSW..."
-  tar -chzf cmssw.tgz src python biglib bin lib objs test external # h = --dereference symlinks
+  tar --exclude-vcs -chzf cmssw.tgz src python biglib bin lib objs test external # h = --dereference symlinks
   mv -v cmssw.tgz ${WD}
 fi
 
