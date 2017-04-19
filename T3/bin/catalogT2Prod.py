@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 
 from glob import glob
-from os import stat,getenv
+from os import stat,getenv,system
+from multiprocessing import Pool
 from PandaCore.Tools.process import *
 from PandaCore.Tools.Misc import *
 from re import sub
@@ -13,6 +14,7 @@ parser.add_argument('--catalog',type=str,default='/home/cmsprod/catalog/t2mit/pa
 parser.add_argument('--outfile',type=str)
 parser.add_argument('--include',nargs='+',type=str,default=None)
 parser.add_argument('--exclude',nargs='+',type=str,default=None)
+parser.add_argument('--smartcache',action='store_true')
 parser.add_argument('--force',action='store_true')
 args = parser.parse_args()
 
@@ -24,13 +26,20 @@ class CatalogSample:
         self.files = []
     def add_file(self,f):
         self.files.append(f)
-    def get_lines(self):
+    def get_lines(self,smartcache_args=None):
         lines = []
         nickname = self.name+'_%i'
         for f in self.files:
-            lines.append('{0:<25} {2:<10} {3:<15} {1:<180}\n'.format(nickname,f,self.dtype,self.xsec)) 
+            ds_ = f.split('/')[-2]
+            f_ = f.split('/')[-1]
+            book_ = '/'.join(args.catalog.split('/')[-2:])
+            lines.append('{0:<25} {2:<10} {3:<15} {1}\n'.format(nickname,f,self.dtype,self.xsec)) 
+            if smartcache_args is not None:
+                smartcache_args.append('--file %s --dataset %s --book %s'%(f_,ds_,book_))
         return lines
 
+def smartcache(arguments):
+    system('/usr/local/DynamicData/SmartCache/Client/addDownloadRequest.py %s >/dev/null'%arguments)
 
 def checkDS(nickname,include,exclude):
   included=False
@@ -89,12 +98,18 @@ if len(could_not_find)>0:
 
 cfg_file = open(args.outfile,'w')
 lines = []
+smartcache_args = [] if args.smartcache else None
 for k in sorted(samples):
     sample = samples[k]
-    lines += sample.get_lines()
+    lines += sample.get_lines(smartcache_args)
 for iL in xrange(len(lines)):
     cfg_file.write(lines[iL]%(iL))
 
 cfg_file.close()
 PInfo(argv[0],'Cataloged %i files for %i datasets'%(len(lines),len(samples)))
 PInfo(argv[0],'Output written to '+args.outfile)
+
+if args.smartcache:
+    PInfo(argv[0],'Making smartcache requests for files')
+    p = Pool(8)
+    p.map(smartcache,smartcache_args)
