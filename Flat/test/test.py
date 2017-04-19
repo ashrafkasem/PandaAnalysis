@@ -24,10 +24,10 @@ skimmer = root.PandaAnalyzer(debug_level)
 
 
 skimmer.firstEvent=0
-skimmer.lastEvent=400
+skimmer.lastEvent=100
 skimmer.isData=False
-skimmer.SetFlag('puppi',False)
-skimmer.SetFlag('fatjet',False)
+skimmer.SetFlag('puppi',True)
+skimmer.SetFlag('fatjet',True)
 skimmer.SetFlag('vbf',True)
 skimmer.SetFlag('firstGen',False)
 skimmer.SetFlag('applyEGCorr',True)
@@ -42,7 +42,7 @@ if skimmer.isData and False:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
 #skimmer.processType = root.PandaAnalyzer.kTT
 skimmer.processType = root.PandaAnalyzer.kNone
-skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+skimmer.SetPreselectionBit(root.PandaAnalyzer.kFatjet)
 #system("pxrdcp %s input.root '!pfCandidates'"%(torun))
 #fin = root.TFile.Open('input.root')
 fin = root.TFile.Open(torun)

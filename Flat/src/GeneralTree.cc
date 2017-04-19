@@ -98,6 +98,16 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    fj1MSDScaleUp_sj = -1;
+    fj1MSDScaleDown_sj = -1;
+    fj1MSDSmeared_sj = -1;
+    fj1MSDSmearedUp_sj = -1;
+    fj1MSDSmearedDown_sj = -1;
+    fj1PtScaleUp_sj = -1;
+    fj1PtScaleDown_sj = -1;
+    fj1PtSmeared_sj = -1;
+    fj1PtSmearedUp_sj = -1;
+    fj1PtSmearedDown_sj = -1;
     jot2EtaUp = -1;
     jot2EtaDown = -1;
     jot1EtaUp = -1;
@@ -412,6 +422,16 @@ void GeneralTree::WriteTree(TTree *t) {
     treePtr->Branch(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    treePtr->Branch("fj1MSDScaleUp_sj",&fj1MSDScaleUp_sj,"fj1MSDScaleUp_sj/F");
+    treePtr->Branch("fj1MSDScaleDown_sj",&fj1MSDScaleDown_sj,"fj1MSDScaleDown_sj/F");
+    treePtr->Branch("fj1MSDSmeared_sj",&fj1MSDSmeared_sj,"fj1MSDSmeared_sj/F");
+    treePtr->Branch("fj1MSDSmearedUp_sj",&fj1MSDSmearedUp_sj,"fj1MSDSmearedUp_sj/F");
+    treePtr->Branch("fj1MSDSmearedDown_sj",&fj1MSDSmearedDown_sj,"fj1MSDSmearedDown_sj/F");
+    treePtr->Branch("fj1PtScaleUp_sj",&fj1PtScaleUp_sj,"fj1PtScaleUp_sj/F");
+    treePtr->Branch("fj1PtScaleDown_sj",&fj1PtScaleDown_sj,"fj1PtScaleDown_sj/F");
+    treePtr->Branch("fj1PtSmeared_sj",&fj1PtSmeared_sj,"fj1PtSmeared_sj/F");
+    treePtr->Branch("fj1PtSmearedUp_sj",&fj1PtSmearedUp_sj,"fj1PtSmearedUp_sj/F");
+    treePtr->Branch("fj1PtSmearedDown_sj",&fj1PtSmearedDown_sj,"fj1PtSmearedDown_sj/F");
     treePtr->Branch("isGS",&isGS,"isGS/I");
     treePtr->Branch("fj1SubMaxCSV",&fj1SubMaxCSV,"fj1SubMaxCSV/F");
     treePtr->Branch("looseLep1IsHLTSafe",&looseLep1IsHLTSafe,"looseLep1IsHLTSafe/I");
