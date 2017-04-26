@@ -12,14 +12,14 @@ flatdir  = environ['PANDA_FLATDIR']
 
 sigfiles = []
 
-sigfiles += glob(flatdir+'/ST*root')
-coupling_scan = False
+# sigfiles += glob(flatdir+'/ST*root')
+# coupling_scan = False
 
 #sigfiles += glob(flatdir+'/Scalar*root')
 #coupling_scan = False
 
-#sigfiles += glob(flatdir+'/Vector*root')
-#coupling_scan = True
+sigfiles += glob(flatdir+'/Vector*root')
+coupling_scan = True
 
 fweights = open('../signal_weights.dat')
 weights = [x.strip().replace('_nlo','') for x in fweights]
@@ -68,9 +68,8 @@ for ff in sigfiles:
 if coupling_scan:
     for k in to_submit:
         to_submit[k] = '+'.join(to_submit[k])
-        print k
-
-exit(1)
+#        print k
+#exit(1)
 
 for coupling,mParams in to_submit.iteritems():
     if coupling_scan:
@@ -94,6 +93,6 @@ for coupling,mParams in to_submit.iteritems():
                              should_transfer_files = YES
                              when_to_transfer_output = ON_EXIT
                              GetEnv = True
-                             accounting_group = group_cmsuser.{6}
+                             accounting_group = group_t3mit.urgent.snarayan
                              Queue 1'''.format(logpath,fittingdir,scramdir,model,mP,coupling,user)
         system('echo "%s" | condor_submit'%(condorJDLString))

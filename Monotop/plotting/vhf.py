@@ -38,7 +38,7 @@ cut = tAND(sel.cuts[args.region],args.cut)
 plot = PlotUtility()
 plot.Stack(True)
 plot.Ratio(True)
-plot.FixRatio(0.4)
+plot.FixRatio(0.2)
 if 'qcd' in region:
     plot.FixRatio(1)
 plot.SetTDRStyle()
@@ -52,18 +52,30 @@ plot.AddLumiLabel(True)
 plot.do_overflow = True
 plot.do_underflow = True
 
+lf = 'jet1Flav==0 && jet2Flav==0 && isojet1Flav==0 && isojet2Flav==0'
+#lf = 'nHF==0'
+hf = tNOT(lf)
+
 weight = sel.weights[region]%lumi
+# weight = tTIMES(weight,'sf_sjbtag0MUp*(fj1MaxCSV<0.54)+sf_sjbtag1MUp*(fj1MaxCSV>0.54)')
 plot.mc_weight = weight
 
 #PInfo('cut',plot.cut)
 #PInfo('weight',plot.mc_weight)
 
-#plot.add_systematic('QCD scale','scaleUp','scaleDown',root.kRed+2)
+plot.add_systematic('HF uncertainty','0.964*(%s) + 1.2*(%s)'%(lf,hf),'1.036*(%s) + 0.8*(%s)'%(lf,hf),root.kRed+2)
+plot.add_systematic('b-tag SF unc',{'sf_sjbtag0':'sf_sjbtag0BUp','sf_sjbtag1':'sf_sjbtag1BUp'},
+                                   {'sf_sjbtag0':'sf_sjbtag0BDown','sf_sjbtag1':'sf_sjbtag1BDown'},root.kBlue+2)
+plot.add_systematic('mis-tag SF unc',{'sf_sjbtag0':'sf_sjbtag0MUp','sf_sjbtag1':'sf_sjbtag1MUp'},
+                                     {'sf_sjbtag0':'sf_sjbtag0MDown','sf_sjbtag1':'sf_sjbtag1MDown'},root.kGreen+2)
+
 #plot.add_systematic('PDF','pdfUp','pdfDown',root.kBlue+2)
 
 ### DEFINE PROCESSES ###
-zjets         = Process('Z+jets',root.kZjets)
-wjets         = Process('W+jets',root.kWjets)
+zlf          = Process('Z+LF',root.kZjets); zlf.additional_cut = lf
+zhf          = Process('Z+HF',root.kExtra1); zhf.additional_cut = hf
+wlf          = Process('W+LF',root.kWjets); wlf.additional_cut = lf
+whf          = Process('W+HF',root.kExtra2); whf.additional_cut = hf
 diboson       = Process('Diboson',root.kDiboson)
 ttbar         = Process('t#bar{t}',root.kTTbar)
 ttg           = Process('t#bar{t}#gamma',root.kTTbar)
@@ -74,18 +86,17 @@ gjets         = Process('#gamma+jets',root.kGjets)
 data          = Process("Data",root.kData)
 signal        = Process('m_{V}=1.75 TeV, m_{#chi}=1 GeV',root.kSignal)
 #processes = [qcd,diboson,singletop,ttbar,wewk,zewk,wjets,zjets]
-processes = [qcd,diboson,singletop,wjets,ttbar,zjets]
-if 'qcd' in region:
-    processes = [diboson,singletop,wjets,ttbar,zjets,qcd]
+processes = [qcd,diboson,singletop,wlf,whf,ttbar,zhf,zlf]
+#processes = [qcd,diboson,zhf]
 
 ### ASSIGN FILES TO PROCESSES ###
-if 'signal' in region or 'qcd' in region:
-    zjets.add_file(baseDir+'ZtoNuNu.root')
-    signal.add_file(baseDir+'Vector_MonoTop_NLO_Mphi-1750_Mchi-1_gSM-0p25_gDM-1p0_13TeV-madgraph.root')
-else:
-    zjets.add_file(baseDir+'ZJets.root')
-    #zjets.add_file(baseDir+'ZJets_nlo.root')
-wjets.add_file(baseDir+'WJets.root')
+for z in [zlf,zhf]:
+    if 'signal' in args.region:
+        z.add_file(baseDir+'ZtoNuNu.root')
+    else:
+        z.add_file(baseDir+'ZJets_hf.root')
+for w in [wlf,whf]:
+    w.add_file(baseDir+'WJets_hf.root')
 diboson.add_file(baseDir+'Diboson.root')
 ttbar.add_file(baseDir+'TTbar%s.root'%(args.tt));
 singletop.add_file(baseDir+'SingleTop.root')
@@ -102,10 +113,6 @@ if 'pho' in region:
 else:
     qcd.add_file(baseDir+'QCD.root')
 
-if any([x in region for x in ['singlemuonw','singleelectronw']]):
-    processes = [qcd,diboson,singletop,zjets,ttbar,wjets,]
-if any([x in region for x in ['singlemuontop','singleelectrontop']]):
-    processes = [qcd,diboson,singletop,zjets,wjets,ttbar]
 if any([x in region for x in ['signal','muon','qcd']]):
     data.additional_cut = sel.triggers['met']
     data.add_file(dataDir+'MET.root')
@@ -152,16 +159,18 @@ elif region=='photon':
 #recoil.calc_chi2 = True
 plot.add_distribution(recoil)
 
-plot.add_distribution(FDistribution('nJet',0.5,6.5,6,'N_{jet}','Events'))
-plot.add_distribution(FDistribution('npv',0,45,45,'N_{PV}','Events'))
-plot.add_distribution(FDistribution('fj1MSD',50,250,10,'fatjet m_{SD} [GeV]','Events'))
+btagbins = [0,0.54,1]
+
+plot.add_distribution(VDistribution('fj1MaxCSV',btagbins,'fatjet max CSV','Events'))
+plot.add_distribution(VDistribution('jet1CSV',btagbins,'jet 1 CSV','Events',filename='jet1CSV'))
+plot.add_distribution(VDistribution('isojet1CSV',btagbins,'isojet 1 CSV','Events',filename='isojet1CSV'))
+plot.add_distribution(FDistribution('jetNBtags',-0.5,1.5,2,'N_{b-tag} jets','Events'))
+plot.add_distribution(FDistribution('isojetNBtags',-0.5,1.5,2,'N_{b-tag} isojets','Events'))
+
 plot.add_distribution(FDistribution('fj1Pt',200,1000,20,'fatjet p_{T} [GeV]','Events'))
-#plot.add_distribution(FDistribution('top_ecf_bdt',-1,1,20,'Top BDT','Events'))
-plot.add_distribution(FDistribution('fj1MaxCSV',0,1,20,'fatjet max CSV','Events'))
-plot.add_distribution(FDistribution('fj1Tau32',0,1,20,'fatjet #tau_{32}','Events'))
-plot.add_distribution(FDistribution('fj1Tau32SD',0,1,20,'fatjet #tau_{32}^{SD}','Events'))
-plot.add_distribution(FDistribution('jet1CSV',0,1,20,'jet 1 CSV','Events',filename='jet1CSV'))
-plot.add_distribution(FDistribution('dphipfmet',0,3.14,20,'min#Delta#phi(jet,E_{T}^{miss})','Events'))
+# plot.add_distribution(FDistribution('fj1MaxCSV',0,1,20,'fatjet max CSV','Events'))
+# plot.add_distribution(FDistribution('jet1CSV',0,1,20,'jet 1 CSV','Events',filename='jet1CSV'))
+# plot.add_distribution(FDistribution('isojet1CSV',0,1,20,'isojet 1 CSV','Events',filename='isojet1CSV'))
 plot.add_distribution(FDistribution("1",0,2,1,"dummy","dummy"))
 
 ### DRAW AND CATALOGUE ###
