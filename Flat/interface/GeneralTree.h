@@ -158,6 +158,7 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    int nB = -1;
     float fj1MSDScaleUp_sj = -1;
     float fj1MSDScaleDown_sj = -1;
     float fj1MSDSmeared_sj = -1;
@@ -357,7 +358,7 @@ class GeneralTree : public genericTree {
     int fj1IsTight = -1;
     int fj1IsLoose = -1;
     float fj1RawPt = -1;
-    int fj1IsHF = -1;
+    int fj1NHF = -1;
     float fj1HTTMass = -1;
     float fj1HTTFRec = -1;
     int fj1IsClean = -1;
@@ -365,7 +366,7 @@ class GeneralTree : public genericTree {
     int fj1NSDConst = -1;
     float fj1EFrac100 = -1;
     float fj1SDEFrac100 = -1;
-    int isHF = -1;
+    int nHF = -1;
     int nLoosePhoton = -1;
     int nTightPhoton = -1;
     int loosePho1IsTight = -1;
