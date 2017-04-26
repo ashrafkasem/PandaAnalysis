@@ -235,33 +235,33 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 
   // electrons
   OpenCorrection(cEleVeto,dirPath+"moriond17/scaleFactor_electron_summer16.root",
-         "scaleFactor_electron_vetoid_RooCMSShape_pu_0_100",2);
+                 "scaleFactor_electron_vetoid_RooCMSShape_pu_0_100",2);
   OpenCorrection(cEleTight,dirPath+"moriond17/scaleFactor_electron_summer16.root",
-         "scaleFactor_electron_tightid_RooCMSShape_pu_0_100",2);
+                 "scaleFactor_electron_tightid_RooCMSShape_pu_0_100",2);
   OpenCorrection(cEleReco,dirPath+"moriond17/scaleFactor_electron_reco_summer16.root",
-         "scaleFactor_electron_reco_RooCMSShape_pu_0_100",2);
+                 "scaleFactor_electron_reco_RooCMSShape_pu_0_100",2);
 
   // muons
   OpenCorrection(cMuLooseID,dirPath+"moriond17/muon_scalefactors_37ifb.root",
-         "scalefactors_MuonLooseId_Muon",2);
+                 "scalefactors_MuonLooseId_Muon",2);
   OpenCorrection(cMuLooseIso,dirPath+"moriond17/muon_scalefactors_37ifb.root",
-         "scalefactors_Iso_MuonLooseId",2);
+                 "scalefactors_Iso_MuonLooseId",2);
   OpenCorrection(cMuTightID,dirPath+"moriond17/muon_scalefactors_37ifb.root",
-         "scalefactors_TightId_Muon",2);
+                 "scalefactors_TightId_Muon",2);
   OpenCorrection(cMuTightIso,dirPath+"moriond17/muon_scalefactors_37ifb.root",
-         "scalefactors_Iso_MuonTightId",2);
+                 "scalefactors_Iso_MuonTightId",2);
   OpenCorrection(cMuReco,dirPath+"moriond17/Tracking_12p9.root","htrack2",1);
 
   // photons
   OpenCorrection(cPho,dirPath+"moriond17/scalefactors_80x_medium_photon_37ifb.root",
-         "EGamma_SF2D",2);
+                 "EGamma_SF2D",2);
 
   // triggers
   OpenCorrection(cTrigMET,dirPath+"moriond17/metTriggerEfficiency_recoil_monojet_TH1F.root",
-         "hden_monojet_recoil_clone_passed",1);
+                 "hden_monojet_recoil_clone_passed",1);
   OpenCorrection(cTrigEle,dirPath+"moriond17/eleTrig.root","hEffEtaPt",2);
   OpenCorrection(cTrigPho,dirPath+"moriond17/photonTriggerEfficiency_photon_TH1F.root",
-         "hden_photonpt_clone_passed",1);
+                 "hden_photonpt_clone_passed",1);
 
   if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded scale factors");
 
@@ -334,7 +334,7 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   }
 
   ak8JERReader = new JERReader(dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_SF_AK8PFPuppi.txt",
-                dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK8PFPuppi.txt");
+                               dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK8PFPuppi.txt");
 
 
   ak4UncReader["MC"] = new JetCorrectionUncertainty(
@@ -347,7 +347,7 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   }
 
   ak4JERReader = new JERReader(dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_SF_AK4PFPuppi.txt",
-                dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK4PFPuppi.txt");
+                               dirPath+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK4PFPuppi.txt");
 
   std::vector<JetCorrectorParameters> params = {
     JetCorrectorParameters(
