@@ -58,7 +58,7 @@ class Branch:
         if '[' in self.dtype:
             return '' # now I'm just being lazy
         else:
-            return '    treePtr->Branch("{0}",&{0},"{0}{1}");\n'.format(self.name,self.suffix)
+            return '    Book("{0}",&{0},"{0}{1}");\n'.format(self.name,self.suffix)
 
 def get_template(path):
     with open(path) as ftmpl:
