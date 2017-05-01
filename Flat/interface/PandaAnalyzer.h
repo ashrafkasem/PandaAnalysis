@@ -174,6 +174,9 @@ private:
     
     std::map<TString,JetCorrectionUncertainty*> ak8UncReader; //!< calculate JES unc on the fly
     JERReader *ak8JERReader; //!< fatjet jet energy resolution reader
+    std::map<TString,JetCorrectionUncertainty*> ak4UncReader; //!< calculate JES unc on the fly
+    std::map<TString,FactorizedJetCorrector*> ak4ScaleReader; //!< calculate JES on the fly
+    JERReader *ak4JERReader; //!< fatjet jet energy resolution reader
     EraHandler eras = EraHandler(2016); //!< determining data-taking era, to be used for era-dependent JEC
 
     // files and histograms containing weights

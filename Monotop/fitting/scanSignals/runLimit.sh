@@ -28,18 +28,18 @@ cp -r $scramdir/src/MonoXFit_CSV .
 cd MonoXFit_CSV/datacards
 
 if [[ "${couplings}" == "" ]]; then 
-    python scanbatch.py correlated_tmpl.txt --mParams $mParams --infile $fittingdir/fittingForest.root $model
+    python scanbatch.py correlated_tmpl.txt --mParams $mParams --infile $fittingdir/fittingForest.root --model $model
 else
-    python scanbatch.py correlated_tmpl.txt --mParams $mParams --infile $fittingdir/signals/fittingForest_signal_vector_${couplings}_nlo.root $model
+    python scanbatch.py correlated_tmpl.txt --mParams $mParams --infile $fittingdir/signals/fittingForest_signal_vector_${couplings}_nlo.root --model $model
 fi
 
 #cp signalmodel.root $fittingdir/scans/signal_${mV}_${mChi}.root
 if [[ "${couplings}" == "" ]]; then 
-    mkdir -p $fittingdir/scans/nominal/
-    cp higgs*root $fittingdir/scans/nominal/
+    mkdir -p $fittingdir/scans/$model/nominal/
+    cp higgs*root $fittingdir/scans/$model/nominal/
 else
-    mkdir -p $fittingdir/scans/${couplings}/
-    cp higgs*root $fittingdir/scans/${couplings}/
+    mkdir -p $fittingdir/scans/$model/${couplings}/
+    cp higgs*root $fittingdir/scans/$model/${couplings}/
 fi
 #cp scan_*txt $fittingdir/scans
 
