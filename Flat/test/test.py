@@ -23,16 +23,16 @@ Load('PandaAnalyzer')
 skimmer = root.PandaAnalyzer(debug_level)
 
 
-skimmer.firstEvent=0
-skimmer.lastEvent=20
+#skimmer.firstEvent=0
+#skimmer.lastEvent=10
 skimmer.isData=False
-skimmer.SetFlag('puppi',False)
-skimmer.SetFlag('fatjet',False)
-skimmer.SetFlag('vbf',True)
+skimmer.SetFlag('puppi',True)
+skimmer.SetFlag('fatjet',True)
+skimmer.SetFlag('vbf',False)
 skimmer.SetFlag('firstGen',False)
 skimmer.SetFlag('applyEGCorr',True)
 #skimmer.SetFlag('applyJSON',False)
-#skimmer.SetFlag('pfCands',False)
+skimmer.SetFlag('pfCands',True)
 #skimmer.SetFlag('monohiggs',True)
 if skimmer.isData and False:
     with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt') as jsonFile:
@@ -40,8 +40,8 @@ if skimmer.isData and False:
         for run,lumis in payload.iteritems():
             for l in lumis:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
-#skimmer.processType = root.PandaAnalyzer.kTT
-skimmer.processType = root.PandaAnalyzer.kNone
+skimmer.processType = root.PandaAnalyzer.kTT
+#skimmer.processType = root.PandaAnalyzer.kNone
 #skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
 #system("pxrdcp %s input.root '!pfCandidates'"%(torun))
 #fin = root.TFile.Open('input.root')

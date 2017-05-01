@@ -21,17 +21,35 @@
 ////////////////////////////////////////////////////////////////////////////////////
 typedef std::vector<fastjet::PseudoJet> VPseudoJet;
 
-inline VPseudoJet ConvertPFCands(panda::PFCandCollection &incoll, bool puppi, double minPt=0.001) {
+inline VPseudoJet ConvertPFCands(std::vector<const panda::PFCand*> &incoll, bool puppi, double minPt=0.001) {
   VPseudoJet vpj;
   vpj.reserve(incoll.size());
-  for (auto &incand : incoll) {
-    double factor = puppi ? incand.puppiW() : 1;
-    if (factor*incand.pt()<minPt)
+  for (auto *incand : incoll) {
+    double factor = puppi ? incand->puppiW() : 1;
+    if (factor*incand->pt()<minPt)
       continue;
-    vpj.emplace_back(factor*incand.px(),factor*incand.py(),
-                     factor*incand.pz(),factor*incand.e());
+    vpj.emplace_back(factor*incand->px(),factor*incand->py(),
+                     factor*incand->pz(),factor*incand->e());
   }
   return vpj;
+}
+
+inline VPseudoJet ConvertPFCands(panda::RefVector<panda::PFCand> &incoll, bool puppi, double minPt=0.001) {
+  std::vector<const panda::PFCand*> outcoll;
+  outcoll.reserve(incoll.size());
+  for (auto incand : incoll)
+    outcoll.push_back(incand.get());
+
+  return ConvertPFCands(outcoll, puppi, minPt);
+}
+
+inline VPseudoJet ConvertPFCands(panda::PFCandCollection &incoll, bool puppi, double minPt=0.001) {
+  std::vector<const panda::PFCand*> outcoll;
+  outcoll.reserve(incoll.size());
+  for (auto &incand : incoll)
+    outcoll.push_back(&incand);
+
+  return ConvertPFCands(outcoll, puppi, minPt);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
