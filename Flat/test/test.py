@@ -23,8 +23,8 @@ Load('PandaAnalyzer')
 skimmer = root.PandaAnalyzer(debug_level)
 
 
-#skimmer.firstEvent=0
-#skimmer.lastEvent=10
+# skimmer.firstEvent=0
+# skimmer.lastEvent=100
 skimmer.isData=False
 skimmer.SetFlag('puppi',True)
 skimmer.SetFlag('fatjet',True)
@@ -50,6 +50,8 @@ fin = root.TFile.Open(torun)
 tree = fin.FindObjectAny("events")
 hweights = fin.FindObjectAny("hSumW")
 weights = fin.FindObjectAny('weights')
+if not weights:
+    weights = None
 
 skimmer.SetDataDir(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/')
 skimmer.SetOutputFile(output)

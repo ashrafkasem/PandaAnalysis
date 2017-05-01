@@ -7,7 +7,7 @@ NBINS=20
 
 parser = argparse.ArgumentParser(description='fit stuff')
 parser.add_argument('--indir',metavar='indir',type=str)
-parser.add_argument('--syst',metavar='syst',type=str,default=None)
+parser.add_argument('--syst',metavar='syst',type=str,default='cent')
 args = parser.parse_args()
 basedir = args.indir
 argv=[]
@@ -15,18 +15,49 @@ argv=[]
 from math import sqrt
 import ROOT as root
 from PandaCore.Tools.Load import *
-Load('Drawers','HistogramDrawer')
+Load('HistogramDrawer')
 
 def imp(w_):
   return getattr(w_,'import')
 
-if args.syst:
+plot_labels = {
+    'smeared' : 'JER smeared',
+    'scaleUp' : 'JES Up',
+    'scaleDown' : 'JES Down',
+    'smearedSJ' : 'SJ JER smeared',
+    'scaleSJUp' : 'SJ JES Up',
+    'scaleSJDown' : 'SJ JES Down',
+    'topPt' : 'No top p_{T} weight',
+    'btagUp' : 'b-tag Up',
+    'btagDown' : 'b-tag Down',
+    'mistagUp' : 'b-mistag Up',
+    'mistagDown' : 'b-mistag Down',
+    'mergeUp' : 'Merging radius Up',
+    'mergeDown' : 'Merging radius Down',
+    'cent' : 'Nominal'
+    }
+
+plot_postfix = ''
+plot_label = plot_labels[args.syst]
+if args.syst!='cent':
   if args.syst=='smeared':
     postfix = 'Smeared'
-  if args.syst=='scaleUp':
+  elif args.syst=='scaleUp':
     postfix = 'ScaleUp'
-  if args.syst=='scaleDown':
+  elif args.syst=='scaleDown':
     postfix = 'ScaleDown'
+  elif args.syst=='smearedSJ':
+    postfix = 'Smeared_sj'
+  elif args.syst=='scaleSJUp':
+    postfix = 'ScaleUp_sj'
+  elif args.syst=='scaleSJDown':
+    postfix = 'ScaleDown_sj'
+  else:
+    postfix = ''
+  if postfix!='':
+    plot_postfix = postfix
+  else:
+    plot_postfix = args.syst
   args.syst += '_'
 else:
   postfix = ''
@@ -36,7 +67,7 @@ plot = {}
 for iC in [0,1]:
   plot[iC] = root.HistogramDrawer()
   plot[iC].Ratio(1)
-  plot[iC].FixRatio(.5)
+  plot[iC].FixRatio(.4)
   plot[iC].DrawMCErrors(False)
   plot[iC].Stack(True)
   plot[iC].DrawEmpty(True)
@@ -235,23 +266,24 @@ for iC in [0,1]:
   plot[iC].AddAdditional(hmodel,'hist')
 
 
-  plot[iC].AddPlotLabel('#varepsilon_{tag}^{Data} = %.3g^{+%.2g}_{-%.2g}'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo())),
+  plot[iC].AddPlotLabel('#varepsilon_{tag}^{Data} = %.4g^{+%.2g}_{-%.2g}'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo())),
                         .6,.47,False,42,.04)
   #plot[iC].AddPlotLabel('#varepsilon_{tag}^{MC} = %.3g^{+%.2g}_{-%.2g}'%(eff_,err_,err_),
-  plot[iC].AddPlotLabel('#varepsilon_{tag}^{MC} = %.3g'%(eff_),
+  plot[iC].AddPlotLabel('#varepsilon_{tag}^{MC} = %.4g'%(eff_),
                         .6,.37,False,42,.04)
-  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{Data} = %.3g^{+%.2g}_{-%.2g}'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo())),
+  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{Data} = %.4g^{+%.2g}_{-%.2g}'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo())),
                         .6,.27,False,42,.04)
   #plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{MC} = %.3g^{+%.2g}_{-%.2g}'%(eff_*effMass_,err_*effMass_,err_*effMass_),
-  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{MC} = %.3g'%(eff_*effMass_),
+  plot[iC].AddPlotLabel('#varepsilon_{tag+mSD}^{MC} = %.4g'%(eff_*effMass_),
                         .6,.17,False,42,.04)
 
 plot[1].AddPlotLabel('Pass category',.18,.77,False,42,.05)
 plot[0].AddPlotLabel('Fail category',.18,.77,False,42,.05)
-if postfix:
-  postfix = '_'+postfix
-plot[1].Draw(basedir,'/fits/pass%s'%postfix)
-plot[0].Draw(basedir,'/fits/fail%s'%postfix)
+for _,p in plot.iteritems():
+  p.AddPlotLabel(plot_label,.18,.7,False,42,.05)
+plot_postfix = '_'+plot_postfix
+plot[1].Draw(basedir,'/fits/pass%s'%plot_postfix)
+plot[0].Draw(basedir,'/fits/fail%s'%plot_postfix)
 
 # save outpuat
 w = root.RooWorkspace('w','workspace')
@@ -270,13 +302,21 @@ for iC in [0,1]:
     w.imp(pdfprong[cat])
     w.imp(norm[cat])
 #    w.imp(smeared[cat])
-w.writeToFile(basedir+'/fits/wspace.root')
+w.writeToFile(basedir+'/fits/wspace%s.root'%plot_postfix)
 
-print 'Tagging cut:'
-print '\tPre-fit efficiency was %f'%(eff_)
-print '\tPost-fit efficiency is %f +%.5g -%.5g'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo()))
-print 'Tagging+mass cut:'
-print '\tPre-fit mass efficiency was %f'%(effMass_)
-print '\tPost-fit mass efficiency is %f +/-%.5g'%(effMass,effMassErr)
-print '\tPre-fit mass+tag efficiency was %f'%(effMass_*eff_)
-print '\tPost-fit mass+tag efficiency is %f +%.5g -%.5g'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo()))
+s = []
+s.append( 'Tagging cut:' )
+s.append( '\tPre-fit efficiency was %f'%(eff_) )
+s.append( '\tPost-fit efficiency is %f +%.5g -%.5g'%(eff.getVal(),abs(eff.getErrorHi()),abs(eff.getErrorLo())) )
+s.append( 'Tagging+mass cut:' )
+s.append( '\tPre-fit mass efficiency was %f'%(effMass_) )
+s.append( '\tPost-fit mass efficiency is %f +/-%.5g'%(effMass,effMassErr) )
+s.append( '\tPre-fit mass+tag efficiency was %f'%(effMass_*eff_) )
+s.append( '\tPost-fit mass+tag efficiency is %f +%.5g -%.5g'%(effMass*eff.getVal(),effMass*abs(eff.getErrorHi()),effMass*abs(eff.getErrorLo())) )
+s.append( '\tSF = %f +%f -%f'%(effMass*eff.getVal()/(eff_*effMass_), effMass*abs(eff.getErrorHi())/(eff_*effMass_), effMass*abs(eff.getErrorLo())/(eff_*effMass_)) )
+
+s = '\n'.join(s)
+
+with open(basedir+'/fits/summary%s.txt'%plot_postfix,'w') as fout:
+  fout.write(s)
+print s

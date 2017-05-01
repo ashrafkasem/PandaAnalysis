@@ -23,9 +23,11 @@ import ROOT as root
 root.gROOT.SetBatch()
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-import PandaAnalysis.Monotop.MonojetSelection as sel
+#import PandaAnalysis.Monotop.MonojetSelection as sel
 #import PandaAnalysis.Monotop.LooseSelection as sel
 #import PandaAnalysis.Monotop.TightSelection as sel
+import PandaAnalysis.Monotop.OneFatJetSelection as sel
+#import PandaAnalysis.Monotop.TestSelection as sel
 from PandaCore.Drawers.plot_utility import *
 
 ### DEFINE REGIONS ###
@@ -35,9 +37,8 @@ cut = tAND(sel.cuts[args.region],args.cut)
 ### LOAD PLOTTING UTILITY ###
 plot = PlotUtility()
 plot.Stack(True)
-if 'signal' not in region:
-    plot.Ratio(True)
-    plot.FixRatio(0.4)
+plot.Ratio(True)
+plot.FixRatio(0.4)
 if 'qcd' in region:
     plot.FixRatio(1)
 plot.SetTDRStyle()
@@ -46,18 +47,13 @@ plot.DrawMCErrors(True)
 plot.AddCMSLabel()
 plot.cut = cut
 plot.SetEvtNum("eventNumber")
-if ('signal' in region) and blind and False:
-  plot.SetEvtMod(5)
-  plot.SetLumi(lumi/5000)
-  plot.AddPlotLabel('Every 5th event',.18,.7,False,42,.04)
-else:
-  plot.SetLumi(lumi/1000)
+plot.SetLumi(lumi/1000)
 plot.AddLumiLabel(True)
 plot.do_overflow = True
 plot.do_underflow = True
 
 weight = sel.weights[region]%lumi
-plot.mc_weight = weight#.replace('sf_qcdV','1').replace('sf_ewkV','1')
+plot.mc_weight = weight
 
 #PInfo('cut',plot.cut)
 #PInfo('weight',plot.mc_weight)
@@ -96,7 +92,8 @@ singletop.add_file(baseDir+'SingleTop.root')
 ttg.add_file(baseDir+'TTbar_Photon.root');
 singletopg.add_file(baseDir+'SingleTop_tG.root')
 if 'pho' in region:
-    processes = [qcd,singletopg,ttg,gjets]
+    #processes = [qcd,singletopg,ttg,gjets]
+    processes = [qcd,gjets]
     gjets.add_file(baseDir+'GJets.root')
     qcd.add_file(baseDir+'SinglePhoton.root')
     qcd.additional_cut = sel.triggers['pho']
@@ -125,11 +122,7 @@ elif region=='photon':
     data.add_file(dataDir+'SinglePhoton.root')
 
 
-if 'signal' not in region:
-    processes.append(data)
-else:
-    pass
-    processes.append(signal)
+processes.append(data)
 
 for p in processes:
     plot.add_process(p)
@@ -159,10 +152,11 @@ elif region=='photon':
 #recoil.calc_chi2 = True
 plot.add_distribution(recoil)
 
+plot.add_distribution(FDistribution('nJet',0.5,6.5,6,'N_{jet}','Events'))
 plot.add_distribution(FDistribution('npv',0,45,45,'N_{PV}','Events'))
 plot.add_distribution(FDistribution('fj1MSD',50,250,10,'fatjet m_{SD} [GeV]','Events'))
 plot.add_distribution(FDistribution('fj1Pt',200,1000,20,'fatjet p_{T} [GeV]','Events'))
-plot.add_distribution(FDistribution('top_ecf_bdt',-1,1,20,'Top BDT','Events'))
+#plot.add_distribution(FDistribution('top_ecf_bdt',-1,1,20,'Top BDT','Events'))
 plot.add_distribution(FDistribution('fj1MaxCSV',0,1,20,'fatjet max CSV','Events'))
 plot.add_distribution(FDistribution('fj1Tau32',0,1,20,'fatjet #tau_{32}','Events'))
 plot.add_distribution(FDistribution('fj1Tau32SD',0,1,20,'fatjet #tau_{32}^{SD}','Events'))
