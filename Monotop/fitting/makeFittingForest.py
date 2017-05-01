@@ -23,7 +23,8 @@ argv=[]
 import PandaAnalysis.Flat.fitting_forest as forest 
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions # kinematics
-import PandaAnalysis.Monotop.CombinedSelection as sel
+import PandaAnalysis.Monotop.CombinedBVetoSelection as sel
+#import PandaAnalysis.Monotop.CombinedSelection as sel
 
 basedir = getenv('PANDA_FLATDIR')+'/'
 lumi = 35900
@@ -33,8 +34,8 @@ def f(x):
 
 def shift_btags(additional=None):
     shifted_weights = {}
-    if not any([x in region for x in ['signal','top','w']]):
-        return shifted_weights 
+    #if not any([x in region for x in ['signal','top','w']]):
+    #    return shifted_weights 
     for shift in ['BUp','BDown','MUp','MDown']:
         for cent in ['sf_btag','sf_sjbtag']:
             shiftedlabel = ''
@@ -89,7 +90,7 @@ elif region=='photon':
     factory.add_process(f('SinglePhoton'),'Data',is_data=True,extra_cut=sel.triggers['pho'])
     factory.add_process(f('SinglePhoton'),'QCD',is_data=True,
                         extra_weights='sf_phoPurity',extra_cut=sel.triggers['pho'])
-elif out_region not in ['signal_scalar','signal_vector','signal_thq']:
+elif out_region not in ['signal_scalar','signal_vector','signal_thq','signal_stdm']:
     factory.add_process(f('ZtoNuNu'),'Zvv')
     factory.add_process(f('ZJets'),'Zll')
     factory.add_process(f('WJets'),'Wlv')
@@ -133,6 +134,9 @@ elif out_region=='signal_scalar':
         factory.add_process(f,'scalar_'+signame)
 elif out_region=='signal_thq':
     factory.add_process(f('thq'),'thq')
+elif out_region=='signal_stdm':
+    for m in [300,500,1000]:
+        factory.add_process(f('ST_tch_DM-scalar_LO-%i_1-13_TeV'%m),'stdm_%i'%m)
 
 
 if is_test:
