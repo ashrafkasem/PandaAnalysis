@@ -82,8 +82,8 @@ def fn(input_name,isData,full_path):
     skimmer.isData=isData
     skimmer.SetFlag('firstGen',True)
 #    skimmer.SetFlag('applyEGCorr',False)
-    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
-    #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
+#    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
         if any([x in full_path for x in ['ST_','Vector_','Scalar_','ZprimeToTT']]):
@@ -113,6 +113,8 @@ def fn(input_name,isData,full_path):
     if not hweights:
         PError(sname+'.fn','Could not recover hweights in %s'%input_name)
         return False
+    if not weight_table:
+        weight_table = None
 
     output_name = input_name.replace('input','output')
     skimmer.SetDataDir(data_dir)

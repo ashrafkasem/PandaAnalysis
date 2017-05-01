@@ -14,11 +14,12 @@ parser.add_argument('--cat',metavar='cat',type=str)
 parser.add_argument('--wp',metavar='wp',type=str)
 parser.add_argument('--region',metavar='region',type=str,default=None)
 parser.add_argument('--syst',metavar='syst',type=str,default=None)
+parser.add_argument('--var',metavar='var',type=str,default='')
 args = parser.parse_args()
 
 ylabel = 'Events/bin'
 
-lumi = 36560.
+lumi = 35800.
 region = args.region
 sname = argv[0]
 if args.basedir:
@@ -39,24 +40,42 @@ op = '>' if args.cat=='pass' else '<'
 wp = 0.45 if args.wp=='tight' else 0.1
 cut = 'top_ecf_bdt%s%.2f'%(op,wp)
 cut = tAND(sel.cuts[args.region],cut)
+weight = sel.weights[region]%lumi
 label = 'BDT %s %.2f'%(op,wp)
 
 pt_name = 'fj1Pt'
 msd_name = 'fj1MSD'
+merge_rad = 1.44
 if args.syst:
-    prefix += args.syst + '_'
+    prefix += args.syst + args.var + '_'
     if args.syst == 'smeared':
         pt_name = 'fj1PtSmeared'
         msd_name = 'fj1MSDSmeared'
         label = '#splitline{%s}{Smeared p_{T} and m_{SD}}'%(label)
-    elif args.syst == 'scaleUp':
-        pt_name = 'fj1PtScaleUp'
-        msd_name = 'fj1MSDScaleUp'
-        label = '#splitline{%s}{JES Up}'%(label)
-    elif args.syst == 'scaleDown':
-        pt_name = 'fj1PtScaleDown'
-        msd_name = 'fj1MSDScaleDown'
-        label = '#splitline{%s}{JES Down}'%(label)
+    elif args.syst == 'scale':
+        pt_name += 'Scale' + args.var
+        msd_name += 'Scale' + args.var
+        label = '#splitline{%s}{JES %s}'%(label,args.var)
+    elif args.syst == 'smearedSJ':
+        pt_name = 'fj1PtSmeared_sj'
+        msd_name = 'fj1MSDSmeared_sj'
+        label = '#splitline{%s}{Smeared subjet p_{T} and m_{SD}}'%(label)
+    elif args.syst == 'scaleSJ':
+        pt_name += 'Scale' + args.var + '_sj'
+        msd_name += 'Scale' + args.var + '_sj'  
+        label = '#splitline{%s}{Subjet JES %s}'%(label,args.var)
+    elif args.syst == 'merge':
+        label = '#splitline{%s}{Merging Radius %s}'%(label,args.var)
+        if args.var=='Up':
+            merge_rad = 2.25
+        else:
+            merge_rad = 1
+    elif args.syst == 'topPt':
+        weight = weight.replace('sf_tt','1')
+        label = '#splitline{%s}{No top p_{T} weight}'%(label)
+    elif args.syst == 'btag':
+        weight = sub('sf_([sj]*)btag([01])','sf_\\1btag\\2B%s'%(args.var),weight)
+        label = '#splitline{%s}{b-tag %s}'%(label,args.var)
     cut = cut.replace('fj1Pt',pt_name)
     cut = cut.replace('fj1MSD',msd_name)
 
@@ -76,7 +95,6 @@ plot.do_overflow = False
 plot.do_underflow = False
 plot.AddPlotLabel(label,.18,.77,False,42,.04)
 
-weight = sel.weights[region]%lumi
 plot.mc_weight = weight
 
 ### DEFINE PROCESSES ###
@@ -93,13 +111,14 @@ diboson        = Process('Diboson',root.kDiboson)
 qcd             = Process("QCD",root.kQCD)
 
 top            = Process('Top [t-matched]',root.kTTbar)
-top.additional_cut = 'fj1IsMatched==1 && fj1GenSize<1.44'
+top.additional_cut   = 'fj1IsMatched==1 && fj1GenSize<{0}'.format(merge_rad)
 
 wtop           = Process('Top [W-matched]',root.kExtra1)
-wtop.additional_cut = 'fj1IsMatched==1 && fj1GenSize>1.44 && fj1IsWMatched==1 && fj1GenWSize<1.44'
+wtop.additional_cut  = '(fj1IsMatched==0 || fj1GenSize>{0}) && fj1IsWMatched==1 && fj1GenWSize<{0}'.format(merge_rad)
 
-untop           = Process('Top [unmatched]',root.kExtra4)
-untop.additional_cut = '!((fj1IsMatched==1&&fj1GenSize>1.44 && fj1IsWMatched && fj1GenWSize<1.44)||(fj1IsMatched==1&&fj1GenSize<1.44))'
+untop          = Process('Top [unmatched]',root.kExtra4)
+untop.additional_cut = tNOT(tOR(top.additional_cut, wtop.additional_cut))
+#'!((fj1IsMatched==1 && fj1GenSize>{0} && fj1IsWMatched && fj1GenWSize<{0})||(fj1IsMatched==1&&fj1GenSize<{0}))'.format(merge_rad)
 
 data            = Process("Data",root.kData)
 if region=='photon':
