@@ -11,16 +11,16 @@ args = parser.parse_args()
 
 
 suffixes = { 'float':'F', 
-                         'int':'I',
-                         'uint':'i',
-                         'uint64':'l',
-                     }
+             'int':'I',
+             'uint':'i',
+             'uint64':'l',
+           }
 ctypes = {    
-                        'uint':'unsigned int',
-                        'float':'float',
-                        'int':'int',
-                        'uint64':'ULong64_t'
-                 }
+            'uint':'unsigned int',
+            'float':'float',
+            'int':'int',
+            'uint64':'ULong64_t'
+         }
 
 class Branch:
     def __init__(self,name,dtype):

@@ -1,5 +1,4 @@
 #include "../interface/genericTree.h"
-#include "TRegexp.h"
 
 void
 genericTree::RemoveBranches(std::vector<TString> droppable, 

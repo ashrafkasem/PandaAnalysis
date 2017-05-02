@@ -68,8 +68,10 @@ for ff in sigfiles:
 if coupling_scan:
     for k in to_submit:
         to_submit[k] = '+'.join(to_submit[k])
-#        print k
-#exit(1)
+#         print k
+# else:
+#     print to_submit
+# exit(1)
 
 for coupling,mParams in to_submit.iteritems():
     if coupling_scan:
