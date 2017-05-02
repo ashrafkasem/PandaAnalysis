@@ -27,7 +27,7 @@ cd $WD
 cp -r $scramdir/src/MonoXFit_CSV .
 cd MonoXFit_CSV/datacards
 
-if [[ "${couplings}" == "" ]]; then 
+if [[ "${couplings}" == "" || "${couplings}" == "nominal" ]]; then 
     python scanbatch.py correlated_tmpl.txt --mParams $mParams --infile $fittingdir/fittingForest.root --model $model
 else
     python scanbatch.py correlated_tmpl.txt --mParams $mParams --infile $fittingdir/signals/fittingForest_signal_vector_${couplings}_nlo.root --model $model

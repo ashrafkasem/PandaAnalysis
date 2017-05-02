@@ -22,9 +22,9 @@ args = parser.parse_args()
 outdir = args.outdir
 
 if not args.infile:
-  args.infile = workdir+'/local_all.cfg'
+    args.infile = workdir+'/local_all.cfg'
 if not args.outfile:
-  args.outfile = workdir+'/local.cfg'
+    args.outfile = workdir+'/local.cfg'
 
 WIDTH=50
 header = '%-48s'%('Sample')
@@ -39,48 +39,48 @@ colors = {
     }
 
 class Output:
-  def __init__(self,name):
-    self.name = name
-    self.total = 0
-    self.done = 0
-    self.idle = 0
-    self.running = 0
-    self.missing = 0
-  def add(self,state):
-    self.total += 1
-    if state=='done':
-        self.done += 1
-    elif state=='running':
-        self.running += 1
-    elif state=='idle':
-        self.idle += 1
-    elif state=='missing':
-        self.missing += 1
-  def __str__(self):
-    if self.total==0:
-      return ''
-    s = '%-40s'%self.name[:40]
-    d_frac = 1.*WIDTH*self.done/self.total
-    r_frac = 1.*WIDTH*(self.done+self.running)/self.total
-    i_frac = 1.*WIDTH*(self.idle+self.done+self.running)/self.total
-    s += '\t[\033[0;%im'%colors['green']
-    state = 0
-    for i in xrange(WIDTH):
-        if i>=d_frac:
-            s += '\033[0;%im'%colors['blue']
-        if i>=r_frac:
-            s += '\033[0;%im'%colors['grey']
-        if i>=i_frac:
-            s += '\033[0;%im'%colors['red']
-        s += ' '
-    s += '\033[0m] '
-    s += '%10i '%self.total
-    s += '%10i '%self.running
-    s += '%10i '%self.idle
-    s += '%10i '%self.missing
-    s += '%10i '%self.done
-    s += '(done=%.2f%%)'%(d_frac*100./WIDTH)
-    return s
+    def __init__(self,name):
+        self.name = name
+        self.total = 0
+        self.done = 0
+        self.idle = 0
+        self.running = 0
+        self.missing = 0
+    def add(self,state):
+        self.total += 1
+        if state=='done':
+            self.done += 1
+        elif state=='running':
+            self.running += 1
+        elif state=='idle':
+            self.idle += 1
+        elif state=='missing':
+            self.missing += 1
+    def __str__(self):
+        if self.total==0:
+            return ''
+        s = '%-40s'%self.name[:40]
+        d_frac = 1.*WIDTH*self.done/self.total
+        r_frac = 1.*WIDTH*(self.done+self.running)/self.total
+        i_frac = 1.*WIDTH*(self.idle+self.done+self.running)/self.total
+        s += '\t[\033[0;%im'%colors['green']
+        state = 0
+        for i in xrange(WIDTH):
+            if i>=d_frac:
+                s += '\033[0;%im'%colors['blue']
+            if i>=r_frac:
+                s += '\033[0;%im'%colors['grey']
+            if i>=i_frac:
+                s += '\033[0;%im'%colors['red']
+            s += ' '
+        s += '\033[0m] '
+        s += '%10i '%self.total
+        s += '%10i '%self.running
+        s += '%10i '%self.idle
+        s += '%10i '%self.missing
+        s += '%10i '%self.done
+        s += '(done=%.2f%%)'%(d_frac*100./WIDTH)
+        return s
 
 
 # determine what files have been processed and logged as such
@@ -96,14 +96,14 @@ for lock in locks:
 running_samples = []
 idle_samples = []
 if path.isfile(workdir+'/submission.pkl'): 
-  with open(workdir+'/submission.pkl','rb') as fpkl:
-    submissions = pickle.load(fpkl)
+    with open(workdir+'/submission.pkl','rb') as fpkl:
+      submissions = pickle.load(fpkl)
 else:
-  submissions = []
+    submissions = []
 for s in submissions:
-  results = s.query_status()
-  running_samples += results['running']
-  idle_samples += results['idle']
+    results = s.query_status()
+    running_samples += results['running']
+    idle_samples += results['idle']
 
 running_files = list(chain.from_iterable([x.files for x in running_samples]))
 idle_files = list(chain.from_iterable([x.files for x in idle_samples]))
@@ -143,10 +143,6 @@ for name in sorted(all_samples):
             state = 'idle'
 
         if state=='missing' or (args.force and state!='done'):
-            if '06A8FEEE-78D0-E611-A23E-0CC47A78A426' in f:
-                print f,' is missing'
-            # if '750' in f:
-            #     print '|%s|'%f
             out_sample.add_file(f)
             merged_sample.add_file(f)
 
@@ -182,7 +178,7 @@ else:
 
 print header
 for n in sorted(outputs):
-  print str(outputs[n])
+    print str(outputs[n])
 print
 print str(data)
 print str(mc)

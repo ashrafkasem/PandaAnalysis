@@ -23,8 +23,8 @@ Load('PandaAnalyzer')
 skimmer = root.PandaAnalyzer(debug_level)
 
 
-# skimmer.firstEvent=0
-# skimmer.lastEvent=100
+skimmer.firstEvent=0
+skimmer.lastEvent=10
 skimmer.isData=False
 skimmer.SetFlag('puppi',False)
 skimmer.SetFlag('fatjet',False)
@@ -41,7 +41,7 @@ if skimmer.isData and False:
             for l in lumis:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
 #skimmer.processType = root.PandaAnalyzer.kTT
-skimmer.processType = root.PandaAnalyzer.kW
+skimmer.processType = root.PandaAnalyzer.kSignal
 #skimmer.SetPreselectionBit(root.PandaAnalyzer.kFatjet)
 #system("pxrdcp %s input.root '!pfCandidates'"%(torun))
 #fin = root.TFile.Open('input.root')
@@ -52,6 +52,7 @@ hweights = fin.FindObjectAny("hSumW")
 weights = fin.FindObjectAny('weights')
 if not weights:
     weights = None
+print tree, hweights, weights
 
 skimmer.SetDataDir(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/')
 skimmer.SetOutputFile(output)
