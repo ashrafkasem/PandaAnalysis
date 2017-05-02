@@ -863,13 +863,6 @@ void PandaAnalyzer::Run() {
         continue;
       looseLeps.push_back(&ele);
       gt->nLooseElectron++;
-      if (applyEGRegCorr) {
-        // apply the regression correction to everything
-        // i.e. reg - raw (==reg-pf in absence of gain switch)
-        float diffPt = ele.regPt - ele.rawPt;
-        TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,0,ele.phi(),0);
-        vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
-      } 
       if (isData && applyEGCorr) {
         // if data, further apply GS correction
         // i.e. raw - pf
@@ -883,7 +876,7 @@ void PandaAnalyzer::Run() {
           //     basePt = ele.originalPt; 
           gt->isGS = 1;
           // GS correction is raw (GS fixed but no regression) minus PF
-          float diffPt = ele.rawPt - basePt; 
+          float diffPt = ele.pt()- basePt; 
           TLorentzVector vCorr; vCorr.SetPtEtaPhiM(fabs(diffPt),0,ele.phi(),0);
           vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
         // }
@@ -1026,13 +1019,6 @@ void PandaAnalyzer::Run() {
         gt->loosePho1Eta = eta;
         gt->loosePho1Phi = phi;
       }
-      if (applyEGRegCorr) {
-        // apply the regression correction to everything
-        // i.e. reg - raw (==reg-pf in absence of gain switch)
-        float diffPt = pho.regPt - pho.rawPt;
-        TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
-        vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
-      } 
       if (isData && applyEGCorr) {
         // if data, further apply GS correction
         // i.e. raw - pf
@@ -1046,7 +1032,7 @@ void PandaAnalyzer::Run() {
           //     basePt = pho.originalPt; 
           gt->isGS = 1;
           // GS correction is raw (GS fixed but no regression) minus PF
-          float diffPt = pho.rawPt - basePt; 
+          float diffPt = pho.pt() - basePt; 
           TLorentzVector vCorr; vCorr.SetPtEtaPhiM(fabs(diffPt),0,pho.phi(),0);
           vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
         // }
@@ -1370,54 +1356,6 @@ void PandaAnalyzer::Run() {
             pj1 = &jet;
           }
         }
-<<<<<<< HEAD
-        gt->calomet = event.caloMet.pt;
-        gt->puppimet = event.puppiMet.pt;
-        gt->puppimetphi = event.puppiMet.phi;
-        TLorentzVector vPFMET, vPuppiMET;
-        vPFMET.SetPtEtaPhiM(gt->pfmet,0,gt->pfmetphi,0);
-        vPuppiMET.SetPtEtaPhiM(gt->puppimet,0,gt->puppimetphi,0);
-        TVector2 vMETNoMu; vMETNoMu.SetMagPhi(gt->pfmet,gt->pfmetphi); //       for trigger eff
-
-        tr.TriggerEvent("met");
-
-        TLorentzVector vType1EGCorr;
-        gt->isGS = 0;
-
-        //electrons
-        std::vector<panda::Lepton*> looseLeps, tightLeps;
-        for (auto& ele : event.electrons) {
-          float pt = ele.pt()*EGMSCALE; float eta = ele.eta(); float aeta = fabs(eta);
-            if (pt<10 || aeta>2.5 /* || (aeta>1.4442 && aeta<1.566) */)
-                continue;
-            if (!ele.veto)
-                continue;
-            looseLeps.push_back(&ele);
-            gt->nLooseElectron++;
-            if (isData && applyEGCorr) {
-                // if data, further apply GS correction
-                // i.e. raw - pf
-                // if we apply reg correction, then the final correction is
-                // (reg - raw) + (raw - pf) = (reg - pf)
-                // if (fabs(ele.rawPt-ele.originalPt)/ele.rawPt > 0.01) {
-                    // ignore cases where there is no correction/it was less than a percent
-                    float basePt = ele.originalPt;
-                    // if (basePt<1)
-                    //     // if we did not match to a PF, use the uncorrected supercluster
-                    //     basePt = ele.originalPt; 
-                    gt->isGS = 1;
-                    // GS correction is raw (GS fixed but no regression) minus PF
-                    float diffPt = ele.pt() - basePt; 
-                    TLorentzVector vCorr; vCorr.SetPtEtaPhiM(fabs(diffPt),0,ele.phi(),0);
-                    vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
-                // }
-                /*
-                float diffPt = ele.rawPt - ele.pfPt;
-                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
-                vType1EGCorr -= vCorr;
-                */
-            }
-=======
         if (pj1) {
           VPseudoJet constituents = fastjet::sorted_by_pt(pj1->constituents());
 
@@ -1444,7 +1382,6 @@ void PandaAnalyzer::Run() {
           }
           gt->fj1SDEFrac100 = eTrunc/eTot;
 
->>>>>>> remotes/origin/master
         }
         tr.TriggerSubEvent("fatjet reclustering");
       }
@@ -1618,62 +1555,6 @@ void PandaAnalyzer::Run() {
         break;
     }
 
-<<<<<<< HEAD
-        tr.TriggerEvent("leptons");
-
-        // photons
-        std::vector<panda::Photon*> loosePhos;
-        for (auto& pho : event.photons) {
-            if (!pho.loose || !pho.csafeVeto)
-                continue;
-            float pt = pho.pt() * EGMSCALE;
-            if (pt<1) continue;
-            float eta = pho.eta(), phi = pho.phi();
-            if (pt<15 || fabs(eta)>2.5)
-                continue;
-            /*
-            if (IsMatched(&matchEles,0.16,eta,phi))
-                continue;
-            */
-            loosePhos.push_back(&pho);
-            gt->nLoosePhoton++;
-            if (gt->nLoosePhoton==1) {
-                gt->loosePho1Pt = pt;
-                gt->loosePho1Eta = eta;
-                gt->loosePho1Phi = phi;
-            }
-            if (isData && applyEGCorr) {
-                // if data, further apply GS correction
-                // i.e. raw - pf
-                // if we apply reg correction, then the final correction is
-                // (reg - raw) + (raw - pf) = (reg - pf)
-                // if (fabs(pho.rawPt-pho.originalPt)/pho.rawPt > 0.01) {
-                    // ignore cases where there is no correction/it was less than a percent
-                    float basePt = pho.originalPt;
-                    // if (basePt<1)
-                    //     // if we did not match to a PF, use the uncorrected supercluster
-                    //     basePt = pho.originalPt; 
-                    gt->isGS = 1;
-                    // GS correction is raw (GS fixed but no regression) minus PF
-                    float diffPt = pho.pt() - basePt; 
-                    TLorentzVector vCorr; vCorr.SetPtEtaPhiM(fabs(diffPt),0,pho.phi(),0);
-                    vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
-                // }
-                /*
-                float diffPt = pho.rawPt - pho.pfPt;
-                TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
-                vType1EGCorr -= vCorr;
-                */
-            }
-            if ( pho.medium &&
-                 pt>175 /*&& fabs(eta)<1.4442*/ ) { // apply eta cut offline
-                if (gt->nLoosePhoton==1)
-                    gt->loosePho1IsTight=1;
-                gt->nTightPhoton++;
-                matchPhos.push_back(&pho);
-            }
-        }
-=======
     gt->nJet = centralJets.size();
     gt->nJot = cleanedJets.size();
     if (gt->nJot>1 && doVBF) {
@@ -1700,7 +1581,6 @@ void PandaAnalyzer::Run() {
        gt->jot12DEtaDown = fabs(jotDown1->eta()-jotDown2->eta());
      }
     }
->>>>>>> remotes/origin/master
 
     tr.TriggerEvent("jets");
 
@@ -1824,74 +1704,6 @@ void PandaAnalyzer::Run() {
                 lastW = &partW;
               }
             }
-<<<<<<< HEAD
-            tr.TriggerSubEvent("fatjet basics");
-
-            if (flags["pfCands"] && fj1) {
-                panda::RefVector<panda::PFCand> constituents = fj1->constituents;
-                VPseudoJet particles = ConvertPFCands(constituents,flags["puppi"],0);
-                fastjet::ClusterSequenceArea seq(particles,*jetDef,*areaDef);
-                VPseudoJet allJets = fastjet::sorted_by_pt(seq.inclusive_jets(0.));
-                fastjet::PseudoJet *pj1=0;
-                if (allJets.size()>0) 
-                    pj1 = &(allJets.at(0));
-                /*
-                double minDR2 = 999;
-                for (auto &jet : allJets) {
-                    double dr2 = DeltaR2(jet.eta(),jet.phi_std(),fj1->eta(),fj1->phi());
-                    if (dr2<minDR2) {
-                        minDR2 = dr2;
-                        pj1 = &jet;
-                    }
-                }
-                */
-                if (pj1) {
-                    VPseudoJet constituents = fastjet::sorted_by_pt(pj1->constituents());
-
-                    gt->fj1NConst = constituents.size();
-                    double eTot=0, eTrunc=0;
-                    for (unsigned iC=0; iC!=gt->fj1NConst; ++iC) {
-                        double e = constituents.at(iC).E();
-                        eTot += e;
-                        if (iC<100)
-                            eTrunc += e;
-                    }
-                    gt->fj1EFrac100 = eTrunc/eTot;
-
-
-                    fastjet::PseudoJet sdJet = (*softDrop)(*pj1);
-                    VPseudoJet sdConstituents = fastjet::sorted_by_pt(sdJet.constituents());
-                    gt->fj1NSDConst = sdConstituents.size();
-                    eTot=0; eTrunc=0;
-                    for (unsigned iC=0; iC!=gt->fj1NSDConst; ++iC) {
-                        double e = sdConstituents.at(iC).E();
-                        eTot += e;
-                        if (iC<100)
-                            eTrunc += e;
-                    }
-                    gt->fj1SDEFrac100 = eTrunc/eTot;
-
-                    if (DEBUG>1) {
-                        PDebug("PandaAnalyzer::Run::Recluster",
-                                TString::Format("%7s : %10s | %10s","","panda","recluster"));
-                        PDebug("PandaAnalyzer::Run::Recluster",
-                                "------------------------------------------------");
-                        PDebug("PandaAnalyzer::Run::Recluster",
-                                TString::Format("%7s : %10f | %10f","raw pT",fj1->rawPt,pj1->perp()));
-                        PDebug("PandaAnalyzer::Run::Recluster",
-                                TString::Format("%7s : %10f | %10f","eta",fj1->eta(),pj1->eta()));
-                        PDebug("PandaAnalyzer::Run::Recluster",
-                                TString::Format("%7s : %10f | %10f","mSD",fj1->mSD,sdJet.m()));
-                        PDebug("PandaAnalyzer::Run::Recluster",
-                                "------------------------------------------------");
-                    }
-
-                } else {
-                    PError("PandaAnalyzer::Run",
-                            TString::Format("Could not recluster a fatjet with pT=%.3f!",fj1->pt()));
-                }
-                tr.TriggerSubEvent("fatjet reclustering");
-=======
           } // looking for W
           if (!lastW) {// ???
             continue;
@@ -1925,7 +1737,6 @@ void PandaAnalyzer::Run() {
                 sizeW = TMath::Max(DeltaR2(partW.eta(),partW.phi(),partQ.eta(),partQ.phi()),
                          sizeW);
               }
->>>>>>> remotes/origin/master
             }
             if (iB>=0 && iQ1>=0 && iQ2>=0)
               break;
