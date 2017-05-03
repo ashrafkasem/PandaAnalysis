@@ -72,7 +72,7 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
                                      "isData", "npv", "npvTrue", "weight", "chsAK4Jets", 
                                      "electrons", "muons", "taus", "photons", 
                                      "pfMet", "caloMet", "puppiMet", 
-                                     "recoil","metFilters",});
+                                     "recoil","metFilters","genMet",});
   readlist.setVerbosity(1);
 
   if (flags["fatjet"])
@@ -1651,6 +1651,7 @@ void PandaAnalyzer::Run() {
       switch(processType) {
         case kTop:
         case kTT:
+        case kSignal:
           pdgidTarget=6;
           break;
         case kV:
@@ -2148,6 +2149,34 @@ void PandaAnalyzer::Run() {
     }
 
     tr.TriggerEvent("qcd/ewk SFs");
+
+    if (!isData && processType==kSignal) {
+      bool found=false, foundbar=false;
+      TLorentzVector vMediator(0,0,0,0);
+      for (auto& gen : event.genParticles) {
+        printf("%i \n",gen.pdgid);
+        if (found && foundbar)
+          break;
+        if (abs(gen.pdgid) != 18)
+          continue;
+        if (gen.parent.isValid() && gen.parent->pdgid == gen.pdgid)
+          continue;
+        if (gen.pdgid == 18 && !found) {
+          found = true;
+          vMediator += gen.p4();
+        } else if (gen.pdgid == -18 && !foundbar) {
+          foundbar = true;
+          vMediator += gen.p4();
+        }
+      }
+      if (found && foundbar) {
+        gt->trueGenBosonPt = vMediator.Pt();
+        gt->genBosonPt = bound(gt->trueGenBosonPt,175,1200);
+      }
+      // gt->trueGenBosonPt = event.genMet.pt;
+      // gt->genBosonPt = bound(gt->trueGenBosonPt,175,1200);
+      // tr.TriggerEvent("signal gen kinematics");
+    }
 
     //lepton SFs
     gt->sf_lepID=1; gt->sf_lepIso=1; gt->sf_lepTrack=1;

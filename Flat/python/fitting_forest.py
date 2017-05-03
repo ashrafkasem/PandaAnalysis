@@ -51,7 +51,7 @@ class Process:
                                      fcontext = f_out)
     def run(self,f_out):
         PInfo('fitting_forest.Process.run','Running '+self.name)
-        branches = self.all_branches.values()
+        branches = sorted(self.all_branches.values())
         try:
             xarr = root_interface.read_tree(tree = self.tree,
                                             branches = branches,

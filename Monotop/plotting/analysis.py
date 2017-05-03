@@ -12,6 +12,8 @@ parser.add_argument('--outdir',metavar='outdir',type=str,default=None)
 parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
 parser.add_argument('--region',metavar='region',type=str,default=None)
 parser.add_argument('--tt',metavar='tt',type=str,default='')
+parser.add_argument('--bdtcut',type=float,default=None)
+parser.add_argument('--masscut',type=float,default=None)
 args = parser.parse_args()
 lumi = 35800.
 blind=True
@@ -26,13 +28,18 @@ import PandaCore.Tools.Functions
 #import PandaAnalysis.Monotop.MonojetSelection as sel
 #import PandaAnalysis.Monotop.LooseSelection as sel
 #import PandaAnalysis.Monotop.TightSelection as sel
-import PandaAnalysis.Monotop.OneFatJetSelection as sel
+#import PandaAnalysis.Monotop.OneFatJetSelection as sel
+import PandaAnalysis.Monotop.CombinedBVetoSelection as sel
 #import PandaAnalysis.Monotop.TestSelection as sel
 from PandaCore.Drawers.plot_utility import *
 
 ### DEFINE REGIONS ###
 
 cut = tAND(sel.cuts[args.region],args.cut)
+if args.bdtcut:
+    cut = tAND(cut,'top_ecf_bdt>%f'%args.bdtcut)
+if args.masscut:
+    cut = tAND(cut,'fj1MSD>%f'%args.masscut)
 
 ### LOAD PLOTTING UTILITY ###
 plot = PlotUtility()
@@ -54,6 +61,11 @@ plot.do_underflow = True
 
 weight = sel.weights[region]%lumi
 plot.mc_weight = weight
+
+if args.bdtcut:
+    plot.AddPlotLabel('BDT > %.2f'%args.bdtcut,.18,.7,False,42,.04)
+if args.masscut:
+    plot.AddPlotLabel('%i < m_{SD} < 210 GeV'%(int(args.masscut)),.18,.7,False,42,.04)
 
 #PInfo('cut',plot.cut)
 #PInfo('weight',plot.mc_weight)
@@ -152,11 +164,11 @@ elif region=='photon':
 #recoil.calc_chi2 = True
 plot.add_distribution(recoil)
 
-plot.add_distribution(FDistribution('nJet',0.5,6.5,6,'N_{jet}','Events'))
+plot.add_distribution(FDistribution('nJet',0.5,8.5,8,'N_{jet}','Events'))
 plot.add_distribution(FDistribution('npv',0,45,45,'N_{PV}','Events'))
 plot.add_distribution(FDistribution('fj1MSD',50,250,10,'fatjet m_{SD} [GeV]','Events'))
 plot.add_distribution(FDistribution('fj1Pt',200,1000,20,'fatjet p_{T} [GeV]','Events'))
-#plot.add_distribution(FDistribution('top_ecf_bdt',-1,1,20,'Top BDT','Events'))
+plot.add_distribution(FDistribution('top_ecf_bdt',-1,1,20,'Top BDT','Events'))
 plot.add_distribution(FDistribution('fj1MaxCSV',0,1,20,'fatjet max CSV','Events'))
 plot.add_distribution(FDistribution('fj1Tau32',0,1,20,'fatjet #tau_{32}','Events'))
 plot.add_distribution(FDistribution('fj1Tau32SD',0,1,20,'fatjet #tau_{32}^{SD}','Events'))
@@ -165,4 +177,8 @@ plot.add_distribution(FDistribution('dphipfmet',0,3.14,20,'min#Delta#phi(jet,E_{
 plot.add_distribution(FDistribution("1",0,2,1,"dummy","dummy"))
 
 ### DRAW AND CATALOGUE ###
+if args.bdtcut:
+    region += ('_bdt%.2f'%(args.bdtcut)).replace('.','p').replace('-','m')
+if args.masscut:
+    region += ('_mass%i'%(int(args.masscut)))
 plot.draw_all(args.outdir+'/'+region+'_')
