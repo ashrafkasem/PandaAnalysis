@@ -56,7 +56,8 @@ public :
         kTT,
         kTop, // used for non-ttbar top
         kV, // used for non V+jets W or Z
-        kH
+        kH,
+        kSignal
     };
 
     enum TriggerBits {
