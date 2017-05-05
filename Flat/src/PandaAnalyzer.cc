@@ -24,8 +24,6 @@ PandaAnalyzer::PandaAnalyzer(int debug_/*=0*/) {
   flags["applyJSON"]      = true;
   flags["genOnly"]        = false;
   flags["pfCands"]        = false;
-  flags["applyEGCorr"]    = true;
-  flags["applyEGRegCorr"] = false;
   if (DEBUG) PDebug("PandaAnalyzer::PandaAnalyzer","Called constructor");
 }
 
@@ -49,19 +47,29 @@ void PandaAnalyzer::SetOutputFile(TString fOutName) {
   fOut = new TFile(fOutName,"RECREATE");
   tOut = new TTree("events","events");
 
+  fOut->WriteTObject(hDTotalMCWeight);    
+
   gt->monohiggs = flags["monohiggs"];
   gt->vbf       = flags["vbf"];
   gt->fatjet    = flags["fatjet"];
+
+  // fill the signal weights
+  for (auto& id : wIDs) 
+    gt->signal_weights[id] = 1;
+
+  // Build the input tree here 
+  gt->WriteTree(tOut);
+
   if (DEBUG) PDebug("PandaAnalyzer::SetOutputFile","Created output in "+fOutName);
 }
 
 
-void PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
+int PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
 {
   if (DEBUG) PDebug("PandaAnalyzer::Init","Starting initialization");
   if (!t || !hweights) {
     PError("PandaAnalyzer::Init","Malformed input!");
-    return;
+    return 0;
   }
   tIn = t;
 
@@ -71,9 +79,9 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
   panda::utils::BranchList readlist({"runNumber", "lumiNumber", "eventNumber", "rho", 
                                      "isData", "npv", "npvTrue", "weight", "chsAK4Jets", 
                                      "electrons", "muons", "taus", "photons", 
-                                     "pfMet", "caloMet", "puppiMet", 
+                                     "pfMet", "caloMet", "puppiMet", "rawMet", 
                                      "recoil","metFilters","genMet",});
-  readlist.setVerbosity(1);
+  readlist.setVerbosity(0);
 
   if (flags["fatjet"])
    readlist += {jetname+"CA15Jets", "subjets", jetname+"CA15Subjets","Subjets"};
@@ -83,29 +91,35 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
 
   if (isData) {
     readlist.push_back("triggers");
-    if (flags["applyEGCorr"])
-      readlist.push_back("metMuOnlyFix");
   } else {
    readlist.push_back("genParticles");
    readlist.push_back("genReweight");
   }
 
+
   event.setAddress(*t, readlist); // pass the readlist so only the relevant branches are turned on
   if (DEBUG) PDebug("PandaAnalyzer::Init","Set addresses");
 
-  TH1F hDTotalMCWeight("hDTotalMCWeight","hDTotalMCWeight",1,0,2);
-  hDTotalMCWeight.SetBinContent(1,hweights->GetBinContent(1));
-  fOut->WriteTObject(&hDTotalMCWeight);    
+  hDTotalMCWeight = new TH1F("hDTotalMCWeight","hDTotalMCWeight",1,0,2);
+  hDTotalMCWeight->SetBinContent(1,hweights->GetBinContent(1));
 
   if (weightNames) {
+    if (weightNames->GetEntries()!=377 && weightNames->GetEntries()!=22) {
+      PError("PandaAnalyzer::Init",
+          TString::Format("Reweighting failed because only found %u weights!",
+                          unsigned(weightNames->GetEntries())));
+      return 1;
+    }
     TString *id = new TString();
     weightNames->SetBranchAddress("id",&id);
     unsigned nW = weightNames->GetEntriesFast();
     for (unsigned iW=0; iW!=nW; ++iW) {
       weightNames->GetEntry(iW);
-      gt->signal_weights[*id] = 1;
       wIDs.push_back(*id);
     }
+  } else if (processType==kSignal) {
+    PError("PandaAnalyzer::Init","This is a signal file, but the weights are missing!");
+    return 2;
   }
 
 
@@ -140,10 +154,9 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
     gt->RemoveBranches(droppable);
   }
 
-  // Build the input tree here 
-  gt->WriteTree(tOut);
-
   if (DEBUG) PDebug("PandaAnalyzer::Init","Finished configuration");
+
+  return 0;
 }
 
 
@@ -201,6 +214,8 @@ void PandaAnalyzer::Terminate() {
   delete areaDef;
   delete jetDef;
   delete softDrop;
+
+  delete hDTotalMCWeight;
   if (DEBUG) PDebug("PandaAnalyzer::Terminate","Finished with output");
 }
 
@@ -717,8 +732,6 @@ void PandaAnalyzer::Run() {
   TimeReporter tr("PandaAnalyzer::Run",DEBUG);
 
   bool applyJSON = flags["applyJSON"];
-  bool applyEGCorr = flags["applyEGCorr"];
-  bool applyEGRegCorr = applyEGCorr && flags["applyEGRegCorr"];
   bool doMonoH = flags["monohiggs"];
   bool doVBF = flags["vbf"];
   bool doFatjet = flags["fatjet"];
@@ -829,17 +842,11 @@ void PandaAnalyzer::Run() {
     tr.TriggerEvent("initialize");
 
     // met
-    if (isData && applyEGCorr) {
-      gt->pfmet = event.metMuOnlyFix.pt;
-      gt->pfmetphi = event.metMuOnlyFix.phi;
-      gt->pfmetUp = event.metMuOnlyFix.ptCorrUp;
-      gt->pfmetDown = event.metMuOnlyFix.ptCorrDown;
-    } else {
-      gt->pfmet = event.pfMet.pt;
-      gt->pfmetphi = event.pfMet.phi;
-      gt->pfmetUp = event.pfMet.ptCorrUp;
-      gt->pfmetDown = event.pfMet.ptCorrDown;
-    }
+    gt->pfmetRaw = event.rawMet.pt;
+    gt->pfmet = event.pfMet.pt;
+    gt->pfmetphi = event.pfMet.phi;
+    gt->pfmetUp = event.pfMet.ptCorrUp;
+    gt->pfmetDown = event.pfMet.ptCorrDown;
     gt->calomet = event.caloMet.pt;
     gt->puppimet = event.puppiMet.pt;
     gt->puppimetphi = event.puppiMet.phi;
@@ -850,7 +857,6 @@ void PandaAnalyzer::Run() {
 
     tr.TriggerEvent("met");
 
-    TLorentzVector vType1EGCorr;
     gt->isGS = 0;
 
     //electrons
@@ -863,29 +869,6 @@ void PandaAnalyzer::Run() {
         continue;
       looseLeps.push_back(&ele);
       gt->nLooseElectron++;
-      if (isData && applyEGCorr) {
-        // if data, further apply GS correction
-        // i.e. raw - pf
-        // if we apply reg correction, then the final correction is
-        // (reg - raw) + (raw - pf) = (reg - pf)
-        // if (fabs(ele.rawPt-ele.originalPt)/ele.rawPt > 0.01) {
-          // ignore cases where there is no correction/it was less than a percent
-          float basePt = ele.pfPt;
-          // if (basePt<1)
-          //     // if we did not match to a PF, use the uncorrected supercluster
-          //     basePt = ele.originalPt; 
-          gt->isGS = 1;
-          // GS correction is raw (GS fixed but no regression) minus PF
-          float diffPt = ele.pt()- basePt; 
-          TLorentzVector vCorr; vCorr.SetPtEtaPhiM(fabs(diffPt),0,ele.phi(),0);
-          vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
-        // }
-        /*
-        float diffPt = ele.rawPt - ele.pfPt;
-        TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,ele.eta(),ele.phi(),ele.m());
-        vType1EGCorr -= vCorr;
-        */
-      }
     }
 
     // muons
@@ -1019,29 +1002,6 @@ void PandaAnalyzer::Run() {
         gt->loosePho1Eta = eta;
         gt->loosePho1Phi = phi;
       }
-      if (isData && applyEGCorr) {
-        // if data, further apply GS correction
-        // i.e. raw - pf
-        // if we apply reg correction, then the final correction is
-        // (reg - raw) + (raw - pf) = (reg - pf)
-        // if (fabs(pho.rawPt-pho.originalPt)/pho.rawPt > 0.01) {
-          // ignore cases where there is no correction/it was less than a percent
-          float basePt = pho.pfPt;
-          // if (basePt<1)
-          //     // if we did not match to a PF, use the uncorrected supercluster
-          //     basePt = pho.originalPt; 
-          gt->isGS = 1;
-          // GS correction is raw (GS fixed but no regression) minus PF
-          float diffPt = pho.pt() - basePt; 
-          TLorentzVector vCorr; vCorr.SetPtEtaPhiM(fabs(diffPt),0,pho.phi(),0);
-          vType1EGCorr -= sign(diffPt)*vCorr; // propagate the negative correction to MET
-        // }
-        /*
-        float diffPt = pho.rawPt - pho.pfPt;
-        TLorentzVector vCorr; vCorr.SetPtEtaPhiM(diffPt,pho.eta(),pho.phi(),pho.m());
-        vType1EGCorr -= vCorr;
-        */
-      }
       if ( pho.medium &&
         pt>175 /*&& fabs(eta)<1.4442*/ ) { // apply eta cut offline
         if (gt->nLoosePhoton==1)
@@ -1089,33 +1049,6 @@ void PandaAnalyzer::Run() {
     tr.TriggerEvent("triggers");
 
     // recoil!
-    if (applyEGRegCorr || (isData && applyEGCorr)) {
-      float old_mT = gt->mT;
-      float old_pfmet = gt->pfmet;
-      vPFMET += vType1EGCorr;
-      gt->pfmet = vPFMET.Pt();
-      gt->pfmetphi = vPFMET.Phi();
-      if (gt->nLooseLep>0)
-        gt->mT = MT(gt->looseLep1Pt,gt->looseLep1Phi,gt->pfmet,gt->pfmetphi);
-      
-      TLorentzVector vUp; vUp.SetPtEtaPhiM(gt->pfmetUp,0,gt->pfmetphi,0);
-      vUp += vType1EGCorr; 
-      gt->pfmetUp = vUp.Pt();
-      TLorentzVector vDown; vDown.SetPtEtaPhiM(gt->pfmetDown,0,gt->pfmetphi,0);
-      vDown += vType1EGCorr; 
-      gt->pfmetDown = vDown.Pt();
-
-      if (DEBUG>1) {
-        PDebug("PandaAnalyzer::Run::applyEGCorr)",
-            TString::Format("nLooseLep=%i, nLoosePhoton=%i",gt->nLooseLep,gt->nLoosePhoton));
-        PDebug("PandaAnalyzer::Run::applyEGCorr)",
-            TString::Format("Offline MET corr: %.3f -> %.3f",old_pfmet,gt->pfmet));
-        PDebug("PandaAnalyzer::Run::applyEGCorr)",
-            TString::Format("CMSSW MET corr: %.3f -> %.3f",old_pfmet,event.pfMet.pt));
-        PDebug("PandaAnalyzer::Run::applyEGCorr)",
-            TString::Format("Offline mT corr: %.3f -> %.3f",old_mT,gt->mT));
-      }
-    }
     TLorentzVector vpfUp; vpfUp.SetPtEtaPhiM(gt->pfmetUp,0,gt->pfmetphi,0);
     TLorentzVector vpfDown; vpfDown.SetPtEtaPhiM(gt->pfmetDown,0,gt->pfmetphi,0);
     TLorentzVector vObj1, vObj2;
@@ -2154,7 +2087,6 @@ void PandaAnalyzer::Run() {
       bool found=false, foundbar=false;
       TLorentzVector vMediator(0,0,0,0);
       for (auto& gen : event.genParticles) {
-        printf("%i \n",gen.pdgid);
         if (found && foundbar)
           break;
         if (abs(gen.pdgid) != 18)

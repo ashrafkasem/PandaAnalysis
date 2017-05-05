@@ -13,7 +13,6 @@ WD=$PWD
 #cd CMSSW_7_4_7/src/MonoX
 #scramv1 b ProjectRename
 cd $scramdir/src/
-eval `scramv1 runtime -sh`
 eval `/cvmfs/cms.cern.ch/common/scramv1 runtime -sh`
 echo $CMSSW_BASE
 echo -n "COMBINE "

@@ -24,7 +24,7 @@ for k,v in processes.iteritems():
     else:
         pds[v[0]] = (k,-1)
 
-VERBOSE=False
+VERBOSE=True
 
 user = environ['USER']
 system('mkdir -p /tmp/%s/split'%user) # tmp dir
@@ -33,8 +33,10 @@ system('mkdir -p /tmp/%s/merged'%user) # tmp dir
 inbase = environ['SUBMIT_OUTDIR']
 outbase = environ['PANDA_FLATDIR']
 
-suffix = ' > /dev/null '
-#suffix = ''
+if VERBOSE:
+    suffix = ''
+else:
+    suffix = ' > /dev/null '
 
 def hadd(inpath,outpath):
     if type(inpath)==type('str'):
