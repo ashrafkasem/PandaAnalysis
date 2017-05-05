@@ -98,6 +98,7 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    pfmetRaw = -1;
     nB = 0;
     fj1MSDScaleUp_sj = -1;
     fj1MSDScaleDown_sj = -1;
@@ -423,6 +424,7 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("pfmetRaw",&pfmetRaw,"pfmetRaw/F");
     Book("nB",&nB,"nB/I");
     Book("fj1MSDScaleUp_sj",&fj1MSDScaleUp_sj,"fj1MSDScaleUp_sj/F");
     Book("fj1MSDScaleDown_sj",&fj1MSDScaleDown_sj,"fj1MSDScaleDown_sj/F");
