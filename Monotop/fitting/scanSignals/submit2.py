@@ -16,7 +16,7 @@ import ROOT as root
 
 sigfiles = []
 nper = 5
-force = False
+force = True 
 #nper = 1
 
 # sigfiles += glob(flatdir+'/ST*root')
@@ -74,13 +74,11 @@ for ff in sigfiles:
                         mask[cfg] = False
             cfglines.append(cfg)
 
-exit(1)
-
 to_submit = []
 for i in xrange(len(cfglines)):
     cfg = cfglines[i]
     if mask[cfg]:
-        to_submit.append(i)
+        to_submit.append(cfg)
 
 
 fout = open('submit.cfg','w')
@@ -89,33 +87,13 @@ for l in cfglines:
     fout.write(l+'\n')
 fout.close()
 
-args_template = '%s --template correlated_tmpl.txt --cfg %s '%(scramdir,path.abspath('./submit.cfg'))
+args_template = '%s '%scramdir
+args_template += '--template correlated_tmpl.txt '
+args_template += '--indir %s '%fittingdir
+args_template += '--outdir %s '%scansdir
+args_template += '--cfg '
 
-coll = htcondor.Collector()
-schedd = htcondor.Schedd(coll.locate(htcondor.DaemonTypes.Schedd, 't3home000.mit.edu'))
-base_job_properties = {
-    "Cmd" : "runLimit2.sh",
-    "WhenToTransferOutput" : "ON_EXIT",
-    "ShouldTransferFiles" : "YES",
-    "Requirements" : classad.ExprTree('UidDomain == "mit.edu" && Arch == "X86_64" && OpSysAndVer == "SL6"'),
-    "AcctGroup" : "group_t3mit.urgent",
-    "AccountingGroup" : "group_t3mit.urgent.snarayan",
-    "OnExitHold" : classad.ExprTree("( ExitBySignal == true ) || ( ExitCode != 0 )"),
-}
-cluster_ad = classad.ClassAd()
-for k,v in base_job_properties.iteritems():
-    cluster_ad[k] = v
-procs = []
-for counter in xrange(len(to_submit)/nper+1):
-    proc_ad = classad.ClassAd()
-    proc_ad['UserLog'] = fittingdir + '/logs/%i.log'%counter
-    proc_ad['Out'] = fittingdir + '/logs/%i.out'%counter
-    proc_ad['Err'] = fittingdir + '/logs/%i.err'%counter
+for cfg in to_submit:
     args = args_template
-    for i in to_submit[nper*counter:min(nper*(counter+1),len(to_submit))]:
-        args += ' %i'%(i)
-    proc_ad['Arguments'] = args
-    procs.append((proc_ad,1))
-print 'Submitting %i jobs'%(len(procs))
-schedd.submitMany(cluster_ad,procs)
-
+    args += cfg
+    print args

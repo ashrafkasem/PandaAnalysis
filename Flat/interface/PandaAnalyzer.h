@@ -71,7 +71,7 @@ public :
 
     PandaAnalyzer(int debug_=0);
     ~PandaAnalyzer();
-    void Init(TTree *tree, TH1D *hweights, TTree *weightNames=0);
+    int Init(TTree *tree, TH1D *hweights, TTree *weightNames=0);
     void SetOutputFile(TString fOutName);
     void ResetBranches();
     void Run();
@@ -194,6 +194,7 @@ private:
     TFile *fOut;     // output file is owned by PandaAnalyzer
     TTree *tOut;
     GeneralTree *gt; // essentially a wrapper around tOut
+    TH1F *hDTotalMCWeight=0;
     TTree *tIn=0;    // input tree to read
     unsigned int preselBits=0;
 

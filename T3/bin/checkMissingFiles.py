@@ -85,12 +85,18 @@ class Output:
 
 # determine what files have been processed and logged as such
 processedfiles = []
+print 'Finding locks...                      \r',
 locks = glob(outdir+'/locks/*lock')
+nl = len(locks)
+il = 1
 for lock in locks:
+    print 'Reading lock %i/%i                   \r'%(il,nl),
+    il += 1
     flock = open(lock)
     for l in flock:
         processedfiles.append(l.strip())
 
+print 'Checking jobs...                 \r',
 
 # determine what samples from previous resubmissions are still running
 running_samples = []
@@ -114,6 +120,7 @@ outputs = {}
 data = Output('Data')
 mc = Output('MC')
 
+print 'Rebuilding configuration...            \r',
 
 all_samples = read_sample_config(args.infile)
 filtered_samples = {}
@@ -175,6 +182,9 @@ else:
         for c in configs:
             outfile.write(c%(counter,counter))
             counter += 1
+
+print '\r',
+print 'Summary:                     '
 
 print header
 for n in sorted(outputs):

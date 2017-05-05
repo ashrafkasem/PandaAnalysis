@@ -127,8 +127,11 @@ def fn(input_name,isData,full_path):
                 run = int(run_str)
                 for l in lumis:
                     skimmer.AddGoodLumiRange(run,l[0],l[1])
+    rinit = skimmer.Init(tree,hweights,weight_table)
+    if rinit:
+        PError(sname+'.fn','Failed to initialize %s!'%(input_name))
+        return False 
     skimmer.SetOutputFile(output_name)
-    skimmer.Init(tree,hweights,weight_table)
 
     # run and save output
     skimmer.Run()
