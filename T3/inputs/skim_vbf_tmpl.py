@@ -82,14 +82,14 @@ def fn(input_name,isData,full_path):
     skimmer.isData=isData
     skimmer.SetFlag('firstGen',True)
     skimmer.SetFlag('fatjet',False)
-    skimmer.SetFlag('puppi',False)
     skimmer.SetFlag('vbf',True)
-#    skimmer.SetFlag('applyEGCorr',False)
+    skimmer.SetFlag('puppi',False)
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
-    #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
-        if any([x in full_path for x in ['ST_','Vector_','Scalar_','ZprimeToTT']]):
+        if any([x in full_path for x in ['Vector_','Scalar_']]):
+            processType=root.PandaAnalyzer.kSignal
+        elif any([x in full_path for x in ['ST_','ZprimeToTT']]):
             processType=root.PandaAnalyzer.kTop
         elif 'ZJets' in full_path or 'DY' in full_path:
             processType=root.PandaAnalyzer.kZ
@@ -105,6 +105,7 @@ def fn(input_name,isData,full_path):
     try:
         fin = root.TFile.Open(input_name)
         tree = fin.FindObjectAny("events")
+        weight_table = fin.FindObjectAny('weights')
         hweights = fin.FindObjectAny("hSumW")
     except:
         PError(sname+'.fn','Could not read %s'%input_name)
@@ -115,6 +116,8 @@ def fn(input_name,isData,full_path):
     if not hweights:
         PError(sname+'.fn','Could not recover hweights in %s'%input_name)
         return False
+    if not weight_table:
+        weight_table = None
 
     output_name = input_name.replace('input','output')
     skimmer.SetDataDir(data_dir)
@@ -125,8 +128,11 @@ def fn(input_name,isData,full_path):
                 run = int(run_str)
                 for l in lumis:
                     skimmer.AddGoodLumiRange(run,l[0],l[1])
+    rinit = skimmer.Init(tree,hweights,weight_table)
+    if rinit:
+        PError(sname+'.fn','Failed to initialize %s!'%(input_name))
+        return False 
     skimmer.SetOutputFile(output_name)
-    skimmer.Init(tree,hweights)
 
     # run and save output
     skimmer.Run()
@@ -278,9 +284,6 @@ if __name__ == "__main__":
     hadd(list(processed))
     print_time('hadd')
 
-    if drop_branches(to_drop='fj1ECFN*'):
-        exit(2)
-    print_time('drop branches')
     ret = stageout(outdir,outfilename)
     print_time('stageout')
     if not ret:
