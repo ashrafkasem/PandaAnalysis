@@ -86,9 +86,9 @@ def fn(input_name,isData,full_path):
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
-        if any([x in full_path for x in ['ST_','Vector_','Scalar_']]):
+        if any([x in full_path for x in ['Vector_','Scalar_']]):
             processType=root.PandaAnalyzer.kSignal
-        elif 'ZprimeToTT' in full_path:
+        elif any([x in full_path for x in ['ST_','ZprimeToTT']]):
             processType=root.PandaAnalyzer.kTop
         elif 'ZJets' in full_path or 'DY' in full_path:
             processType=root.PandaAnalyzer.kZ
