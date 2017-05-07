@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from os import getenv,path
+from os import getenv,path,popen
 from PandaCore.Tools.job_management import *
 import subprocess
 import sys
@@ -18,6 +18,7 @@ parser.add_argument('--outfile',type=str,default=None)
 parser.add_argument('--outdir',type=str,default=outdir)
 parser.add_argument('--force',action='store_true')
 parser.add_argument('--nfiles',type=int,default=-1)
+parser.add_argument('--width',type=int,default=None)
 args = parser.parse_args()
 outdir = args.outdir
 
@@ -26,8 +27,12 @@ if not args.infile:
 if not args.outfile:
     args.outfile = workdir+'/local.cfg'
 
-WIDTH=50
-header = '%-48s'%('Sample')
+if not args.width:
+    columns = int(popen('stty size', 'r').read().split()[-1])
+    WIDTH = (columns-80)/2
+else:
+    WIDTH = args.width
+header = ('%%-%is'%(WIDTH))%('Sample')
 header += ('%%-%is'%(WIDTH+2))%('Progress')
 header += ' %10s %10s %10s %10s %10s'%('Total','Running','Idle','Missing','Done')
 
@@ -38,49 +43,52 @@ colors = {
     'red' : 41,
     }
 
+#if getenv('SUBMIT_CONFIG'):
+#  setup_schedd(getenv('SUBMIT_CONFIG'))
+
 class Output:
-    def __init__(self,name):
-        self.name = name
-        self.total = 0
-        self.done = 0
-        self.idle = 0
-        self.running = 0
-        self.missing = 0
-    def add(self,state):
-        self.total += 1
-        if state=='done':
-            self.done += 1
-        elif state=='running':
-            self.running += 1
-        elif state=='idle':
-            self.idle += 1
-        elif state=='missing':
-            self.missing += 1
-    def __str__(self):
-        if self.total==0:
-            return ''
-        s = '%-40s'%self.name[:40]
-        d_frac = 1.*WIDTH*self.done/self.total
-        r_frac = 1.*WIDTH*(self.done+self.running)/self.total
-        i_frac = 1.*WIDTH*(self.idle+self.done+self.running)/self.total
-        s += '\t[\033[0;%im'%colors['green']
-        state = 0
-        for i in xrange(WIDTH):
-            if i>=d_frac:
-                s += '\033[0;%im'%colors['blue']
-            if i>=r_frac:
-                s += '\033[0;%im'%colors['grey']
-            if i>=i_frac:
-                s += '\033[0;%im'%colors['red']
-            s += ' '
-        s += '\033[0m] '
-        s += '%10i '%self.total
-        s += '%10i '%self.running
-        s += '%10i '%self.idle
-        s += '%10i '%self.missing
-        s += '%10i '%self.done
-        s += '(done=%.2f%%)'%(d_frac*100./WIDTH)
-        return s
+  def __init__(self,name):
+    self.name = name
+    self.total = 0
+    self.done = 0
+    self.idle = 0
+    self.running = 0
+    self.missing = 0
+  def add(self,state):
+    self.total += 1
+    if state=='done':
+        self.done += 1
+    elif state=='running':
+        self.running += 1
+    elif state=='idle':
+        self.idle += 1
+    elif state=='missing':
+        self.missing += 1
+  def __str__(self):
+    if self.total==0:
+      return ''
+    s = ('%%-%is '%(WIDTH-1))%self.name[:(WIDTH-1)]
+    d_frac = 1.*WIDTH*self.done/self.total
+    r_frac = 1.*WIDTH*(self.done+self.running)/self.total
+    i_frac = 1.*WIDTH*(self.idle+self.done+self.running)/self.total
+    s += '[\033[0;%im'%colors['green']
+    state = 0
+    for i in xrange(WIDTH):
+        if i>=d_frac:
+            s += '\033[0;%im'%colors['blue']
+        if i>=r_frac:
+            s += '\033[0;%im'%colors['grey']
+        if i>=i_frac:
+            s += '\033[0;%im'%colors['red']
+        s += ' '
+    s += '\033[0m] '
+    s += '%10i '%self.total
+    s += '%10i '%self.running
+    s += '%10i '%self.idle
+    s += '%10i '%self.missing
+    s += '%10i '%self.done
+    s += '(done=%.2f%%)'%(d_frac*100./WIDTH)
+    return s
 
 
 # determine what files have been processed and logged as such
