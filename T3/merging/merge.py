@@ -158,6 +158,7 @@ d = {
     'WmH'                 : ['WmLNuHbb'],
     'ZpTT'                : ['ZpTT_med-%i'%m for m in [1000,1250,1500,2000,2500,3000,3500,4000,500,750]],
     'th'                  : ['thq','thw'],
+    'WJets_EWK'           : ['WJets_EWKWPlus', 'WJets_EWKWMinus'],
 }
 
 args = {}
