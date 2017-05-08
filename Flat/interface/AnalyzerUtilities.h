@@ -100,14 +100,20 @@ public:
     }
     ~THCorr() {} // does not own histogram!
     double Eval(double x) {
-        if (dim!=1)
-            return -1;
+        if (dim!=1) {
+          PError("THCorr1::Eval",
+              TString::Format("Trying to access a non-1D histogram (%s)!",h->GetName()));
+          return -1;
+        }
         return getVal(h,bound(x,lo1,hi1));
     }
 
     double Eval(double x, double y) {
-        if (dim!=2)
-            return -1;
+        if (dim!=2) {
+          PError("THCorr1::Eval",
+             TString::Format("Trying to access a non-2D histogram (%s)!",h->GetName()));
+          return -1;
+        }
         return getVal(h,bound(x,lo1,hi1),bound(y,lo2,hi2));
     }
 
