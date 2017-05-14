@@ -84,13 +84,17 @@ def fn(input_name,isData,full_path):
     skimmer.SetFlag('fatjet',False)
     skimmer.SetFlag('vbf',True)
     skimmer.SetFlag('puppi',False)
-    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+#    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
     processType=root.PandaAnalyzer.kNone
     if not isData:
         if any([x in full_path for x in ['Vector_','Scalar_']]):
             processType=root.PandaAnalyzer.kSignal
         elif any([x in full_path for x in ['ST_','ZprimeToTT']]):
             processType=root.PandaAnalyzer.kTop
+        elif 'EWKZ2Jets' in full_path:
+            processType=root.PandaAnalyzer.kZEWK
+        elif 'EWKW' in full_path:
+            processType=root.PandaAnalyzer.kWEWK
         elif 'ZJets' in full_path or 'DY' in full_path:
             processType=root.PandaAnalyzer.kZ
         elif 'WJets' in full_path:

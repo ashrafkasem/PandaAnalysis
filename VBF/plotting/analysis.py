@@ -38,7 +38,12 @@ BLIND=True
 
 plot = PlotUtility()
 plot.Stack(True)
-if not(BLIND and 'signa' in region):
+if not(BLIND and 'signal' in region):
+    plot.Ratio(True)
+    plot.FixRatio(0.4)
+else:
+    plot.SetLumi(lumi/15000)
+    plot.eventmod = 15
     plot.Ratio(True)
     plot.FixRatio(0.4)
 plot.SetTDRStyle()
@@ -56,10 +61,10 @@ weight = sel.weights[region]%lumi
 plot.mc_weight = weight
 
 ### DEFINE PROCESSES ###
-zjets         = Process('Z+jets [QCD]',root.kZjets); zjets.additional_weight = 'sf_qcdVVBF'
-wjets         = Process('W+jets [QCD]',root.kWjets); wjets.additional_weight = 'sf_qcdVVBF'
-zjets_ewk     = Process('Z+jets [EWK]',root.kExtra3); zjets_ewk.additional_weight = 'sf_qcdVVBF_v2'
-wjets_ewk     = Process('W+jets [EWK]',root.kExtra2); wjets_ewk.additional_weight = 'sf_qcdVVBF_v2'
+zjets         = Process('Z+jets [QCD]',root.kZjets)
+wjets         = Process('W+jets [QCD]',root.kWjets)
+zjets_ewk     = Process('Z+jets [EWK]',root.kExtra3)
+wjets_ewk     = Process('W+jets [EWK]',root.kExtra2)
 diboson       = Process('Diboson',root.kDiboson)
 top           = Process('Top',root.kTTbar)
 qcd           = Process("QCD",root.kQCD)
@@ -70,10 +75,11 @@ vbf           = Process('VBF H(inv)',root.kSignal1)
 if 'signal' in region:
     zjets.add_file(baseDir+'ZtoNuNu.root')
     zjets_ewk.add_file(baseDir+'ZtoNuNu_EWK.root')
+    data.add_file(baseDir+'MET.root')
+    data.additional_cut = sel.triggers['met']
 else:
     zjets.add_file(baseDir+'ZJets.root')
     zjets_ewk.add_file(baseDir+'ZJets_EWK.root')
-    zjets.additional_weight = tTIMES(zjets.additional_weight,'sf_metTrigZmm')
     if 'muon' in region:
         data.add_file(baseDir+'MET.root')
         data.additional_cut = sel.triggers['met']
@@ -94,7 +100,7 @@ elif 'di' in region:
     processes = [qcd,diboson,wjets,wjets_ewk,top,zjets_ewk,zjets,data]
 else:
     processes = [qcd,diboson,top,wjets_ewk,zjets_ewk,wjets,zjets,vbf]
-    if not BLIND:
+    if not BLIND or True:
         processes.append(data)
 
 for p in processes:
@@ -130,7 +136,7 @@ plot.add_distribution(recoil)
 
 plot.add_distribution(FDistribution('jot12Mass',0,4000,20,'m_{jj} [GeV]','Events/200 GeV'))
 plot.add_distribution(FDistribution('jot12DEta',0,10,20,'#Delta#eta(j_{1},j_{2})','Events'))
-plot.add_distribution(FDistribution("jot12DPhi",0,3.142,20,"#Delta #phi leading jets","Events"))
+plot.add_distribution(FDistribution("fabs(jot12DPhi)",0,3.142,20,"#Delta #phi leading jets","Events",filename='jot12DPhi'))
 plot.add_distribution(FDistribution("jot1Eta",-5,5,20,"Jet 1 #eta","Events"))
 plot.add_distribution(FDistribution("jot2Eta",-5,5,20,"Jet 2 #eta","Events"))
 plot.add_distribution(FDistribution("jot1Pt",80,500,20,"Jet 1 p_{T} [GeV]","Events"))
