@@ -316,8 +316,8 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_vbf"));
 
   TFile *fKFactor_VBFW = new TFile(dirPath+"vbf_kfactors/kfactor_VBF_wjets.root");
-  h1Corrs[cVBF_ZNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf"));
-  h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf"));
+  h1Corrs[cVBF_WNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf"));
+  h1Corrs[cVBF_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf"));
 
   OpenCorrection(cVBF_EWKZ,dirPath+"vbf_kfactors/kFactor_ZToNuNu_pT_Mjj_2D.root",
                  "TH2F_kFactor",2);
