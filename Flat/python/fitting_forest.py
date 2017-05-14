@@ -83,14 +83,17 @@ class RegionFactory:
         self.mc_weights = mc_weights
         self.__mc_procs = [] # procs that get mc_weights
         self.__data_procs = [] # procs that don't get mc_weights
-    def add_process(self,fpath,pname,is_data=False,extra_weights=None,extra_cut=None):
+    def add_process(self,input_info,pname,is_data=False,extra_weights=None,extra_cut=None):
         global _trees, _files, treename 
-        if fpath in _trees:
-            tree = _trees[fpath]
-        else:
-            _files[fpath] = root.TFile.Open(fpath)
-            tree = _files[fpath].FindObjectAny(treename)
-            _trees[fpath] = tree 
+        if type(input_info)==str: # assume it's a filepath
+            if input_info in _trees:
+                tree = _trees[input_info]
+            else:
+                _files[input_info] = root.TFile.Open(input_info)
+                tree = _files[input_info].FindObjectAny(treename)
+                _trees[input_info] = tree 
+        else: # assume it's a TTree
+            tree = input_info
         weights = None 
         if is_data:
             if extra_weights:

@@ -29,28 +29,33 @@ Load('Normalizer')
 '''
 
 ## first copy files locally
-list_dir = '/home/bmaier/cms/MonoTop/interpolation/'
+list_dir = '/home/snarayan/MonoTop/interpolation/'
 
 def stage_in_file(source,target):
-    source = source.replace('/mnt/hadoop/cms','root://xrootd.cmsaf.mit.edu/')
+    source = 'root://xrootd.cmsaf.mit.edu/' + source
     cmd = 'xrdcp %s %s'%(source,target)
+    print cmd
     system(cmd)
 
+# copy slowly to keep Max happy
+def stage_in_list():
+    system('mkdir -p unmerged')
+    flist = open(list_dir+'%i_%i.txt'%(m_V,m_DM))
+    for l in flist:
+        in_name = l.strip()
+        out_name = 'unmerged/'+in_name.split('/')[-1]
+        stage_in_file(in_name,out_name)
+
+# do a recursive copy and make Max angry
 def stage_in_files():
     system('mkdir -p unmerged')
     t2dir = open(list_dir+'%i_%i.txt'%(m_V,m_DM)).readlines()[0]
     t2dir = t2dir.split('/')[:-1]
     t2dir = '/'.join(t2dir)
     t2dir = t2dir.replace('/mnt/hadoop/cms','root://xrootd.cmsaf.mit.edu/')
+    PInfo(sname+'.stage_in_files','Reading files from %s'%t2dir)
     cmd = 'xrdcp -r --parallel 4 %s unmerged'%(t2dir)
     system(cmd)
-
-def stage_in_list():
-    flist = open(list_dir+'%i_%i.txt'%(m_V,m_DM))
-    for l in flist:
-        in_name = l.strip()
-        out_name = 'unmerged_'+in_name.split('/')[-1]
-        stage_in_file(in_name,out_name)
 
 ## now hadd and cleanup the files
 def hadd():
@@ -84,7 +89,7 @@ def normalize():
     f.Close()
 
 ## draw histograms
-fweights = open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights_all.dat')
+fweights = open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights.dat')
 weights = [x.strip() for x in fweights]
 fweights.close()
 bins = array('f', [175, 225, 275, 325, 375, 425, 475, 600, 800, 1200])
@@ -117,7 +122,7 @@ def stageout():
     cmd = 'mv hists.root %s/interpolate/hists/%i_%i.root'%(getenv('PANDA_FITTING'),m_V,m_DM)
     system(cmd)
 
-stage_in_files()
+stage_in_list()
 hadd()
 remove('unmerged')
 normalize()

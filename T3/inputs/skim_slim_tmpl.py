@@ -90,6 +90,10 @@ def fn(input_name,isData,full_path):
             processType=root.PandaAnalyzer.kSignal
         elif any([x in full_path for x in ['ST_','ZprimeToTT']]):
             processType=root.PandaAnalyzer.kTop
+        elif 'EWKZ2Jets' in full_path:
+            processType=root.PandaAnalyzer.kZEWK
+        elif 'EWKW' in full_path:
+            processType=root.PandaAnalyzer.kWEWK
         elif 'ZJets' in full_path or 'DY' in full_path:
             processType=root.PandaAnalyzer.kZ
         elif 'WJets' in full_path:
