@@ -24,7 +24,7 @@ skimmer = root.PandaAnalyzer(debug_level)
 
 
 skimmer.firstEvent=0
-skimmer.lastEvent=100
+skimmer.lastEvent=500
 skimmer.isData=False
 skimmer.SetFlag('puppi',False)
 skimmer.SetFlag('fatjet',False)
