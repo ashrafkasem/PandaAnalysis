@@ -802,8 +802,11 @@ void PandaAnalyzer::Run() {
     gt->npv = event.npv;
     gt->pu = event.npvTrue;
     gt->metFilter = (event.metFilters.pass()) ? 1 : 0;
-    gt->metFilter = (gt->metFilter==1 && !event.metFilters.badMuons) ? 1 : 0;
-    gt->metFilter = (gt->metFilter==1 && !event.metFilters.duplicateMuons) ? 1 : 0;
+    // these two are not need since we use muon-fixed MET
+    // gt->metFilter = (gt->metFilter==1 && !event.metFilters.badMuons) ? 1 : 0;
+    // gt->metFilter = (gt->metFilter==1 && !event.metFilters.duplicateMuons) ? 1 : 0;
+    gt->metFilter = (gt->metFilter==1 && !event.metFilters.badPFMuons) ? 1 : 0;
+    gt->metFilter = (gt->metFilter==1 && !event.metFilters.badChargedHadrons) ? 1 : 0;
     gt->egmFilter = (!event.metFilters.dupECALClusters) ? 1 : 0;
     gt->egmFilter = (gt->egmFilter==1 && !event.metFilters.unfixedECALHits) ? 1 : 0;
 
@@ -883,6 +886,8 @@ void PandaAnalyzer::Run() {
       if (pt<10 || aeta>2.5 /* || (aeta>1.4442 && aeta<1.566) */)
         continue;
       if (!ele.veto)
+        continue;
+      if (!ElectronIP(ele.eta(),ele.dxy,ele.dz))
         continue;
       looseLeps.push_back(&ele);
       gt->nLooseElectron++;
@@ -1576,10 +1581,17 @@ void PandaAnalyzer::Run() {
     }
 
     for (auto& tau : event.taus) {
-      if (!tau.decayMode || !tau.decayModeNew)
-        continue;
-      if (!tau.looseIsoMVA)
-        continue;
+      if (doVBF) {
+        if (!tau.decayMode || !tau.decayModeNew)
+          continue;
+        if (!tau.looseIsoMVAOld)
+          continue;
+      } else {
+        if (!tau.decayMode || !tau.decayModeNew)
+          continue;
+        if (!tau.looseIsoMVA)
+          continue;
+      }
       /*
       if (tau.isoDeltaBetaCorr>5)
         continue;
