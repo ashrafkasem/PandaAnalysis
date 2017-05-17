@@ -146,6 +146,15 @@ inline bool MuonIsolation(double pt, double eta, double iso, panda::IDWorkingPoi
     return (iso < pt*maxIso);
 }
 
+inline bool ElectronIP(double eta, double dxy, double dz) {
+  double aeta = fabs(eta);
+  if (aeta<1.4442) {
+    return (dxy < 0.05 && dz < 0.10) ;
+  } else {
+    return (dxy < 0.10 && dz < 0.20);
+  }
+}
+
 ////////////////////////////////////////////////////////////////////////////////////
 
 
