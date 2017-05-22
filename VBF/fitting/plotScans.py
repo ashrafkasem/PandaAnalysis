@@ -20,21 +20,10 @@ var1=args.var1; var2=args.var2; var3=args.var3
 basedir=args.indir
 argv=[]
 
-labels = {
-    'eta':'jjDEta',
-    'phi':'jjDPhi',
-    'mjj':'mjj',
-    'jet1':'jot1Pt',
-    'jet2':'jot2Pt',
-    'dphi':'fabsminJetMetDPhiwithendcap',
-    }
 titles = {
-    'eta':'min #Delta#eta(j_{1},j_{2})',
-    'phi':'max #Delta#phi(j_{1},j_{2})',
+    'deta':'min #Delta#eta(j_{1},j_{2})',
+    'fabsdphi':'max #Delta#phi(j_{1},j_{2})',
     'mjj':'min M(j_{1},j_{2}) [GeV]',
-    'jet1':'min p_{T}(j_{1}) [GeV]',
-    'jet2':'min p_{T}(j_{2}) [GeV]',
-    'dphi':'min #Delta#phi(j,MET)',
     }
 
 import ROOT as root
@@ -58,7 +47,7 @@ root.gStyle.SetPalette(root.kBird)
 root.gStyle.SetPaintTextFormat(".2g")
 
 
-Load('Drawers','CanvasDrawer')
+Load('CanvasDrawer')
 
 plot = root.CanvasDrawer()
 plot.SetTDRStyle()
@@ -68,9 +57,9 @@ c = root.TCanvas()
 
 cut1s = set([]); cut2s = set([])
 if var3:
-  listoffiles = glob(basedir+'/higgsCombine%s*%s*%s*.root'%(labels[var1],labels[var2],var3))
+  listoffiles = glob(basedir+'/higgsCombine%s*%s*%s*.root'%(var1,var2,var3))
 else:
-  listoffiles = glob(basedir+'/higgsCombine%s*%s*.root'%(labels[var1],labels[var2]))
+  listoffiles = glob(basedir+'/higgsCombine%s*%s*.root'%(var1,var2))
 for f in listoffiles:
   try:
     fname = f.split('/')[-1]
@@ -103,11 +92,11 @@ for e in cut1s:
     try:
       fname = basedir+'/higgsCombine'
       if var1=='mjj':
-        fname += '%s_%i__%s_%.2f'%(labels[var1],int(e),labels[var2],p)
+        fname += '%s_%i__%s_%.2f'%(var1,int(e),var2,p)
       elif var2=='mjj':
-        fname += '%s_%.2f__%s_%i'%(labels[var1],e,labels[var2],int(p))
+        fname += '%s_%.2f__%s_%i'%(var1,e,var2,int(p))
       else:
-        fname += '%s_%.2f__%s_%.2f'%(labels[var1],e,labels[var2],p)
+        fname += '%s_%.2f__%s_%.2f'%(var1,e,var2,p)
       if var3:
         fname += '__%s'%(var3)
       fname += '.Asymptotic.mH120.root'
