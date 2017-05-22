@@ -57,7 +57,7 @@ def interpolate():
         m_DM_recos = [x[1] for x in frescos if x[0]==m_V_reco]
         m_DM_recos = [x for x in m_DM_recos if ((2*x>=m_V)==offshell)]
         if len(m_DM_recos)==0:
-            m_DM_recos = [x for x in m_DM_recos]
+            m_DM_recos = [x[1] for x in frescos if x[0]==m_V_reco]
         m_DM_reco = min(m_DM_recos, key = lambda x : abs(m_DM-x))
 
         args.mass_reco = '%i_%i'%(m_V_reco,m_DM_reco)

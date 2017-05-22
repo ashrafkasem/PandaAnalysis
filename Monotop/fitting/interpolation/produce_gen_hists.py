@@ -34,13 +34,14 @@ list_dir = '/home/snarayan/MonoTop/interpolation/'
 def stage_in_file(source,target):
     source = 'root://xrootd.cmsaf.mit.edu/' + source
     cmd = 'xrdcp %s %s'%(source,target)
-    print cmd
+    PInfo(sname+'.stage_in_file', cmd)
     system(cmd)
 
 # copy slowly to keep Max happy
 def stage_in_list():
     system('mkdir -p unmerged')
     flist = open(list_dir+'%i_%i.txt'%(m_V,m_DM))
+    PInfo(sname+'.stage_in_list','Reading '+list_dir+'%i_%i.txt'%(m_V,m_DM))
     for l in flist:
         in_name = l.strip()
         out_name = 'unmerged/'+in_name.split('/')[-1]
