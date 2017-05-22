@@ -19,6 +19,7 @@ parser.add_argument('--outdir',type=str,default=outdir)
 parser.add_argument('--force',action='store_true')
 parser.add_argument('--nfiles',type=int,default=-1)
 parser.add_argument('--width',type=int,default=None)
+parser.add_argument('--silent',action='store_true')
 args = parser.parse_args()
 outdir = args.outdir
 
@@ -87,7 +88,7 @@ class Output:
     s += '%10i '%self.idle
     s += '%10i '%self.missing
     s += '%10i '%self.done
-    s += '(done=%.2f%%)'%(d_frac*100./WIDTH)
+    s += '(done=%.2f%%)\n'%(d_frac*100./WIDTH)
     return s
 
 
@@ -195,11 +196,12 @@ print '\r',
 print 'Summary:                     '
 
 print header
-for n in sorted(outputs):
-    print str(outputs[n])
-print
-print str(data)
-print str(mc)
+if not args.silent:
+  for n in sorted(outputs):
+      sys.stdout.write(str(outputs[n]))
+  print
+sys.stdout.write(str(data))
+sys.stdout.write(str(mc))
 print
 print 'Legend: Done=\033[0;%im    \033[0m, Running=\033[0;%im    \033[0m, Idle=\033[0;%im    \033[0m, Missing=\033[0;%im    \033[0m, '%(colors['green'],colors['blue'],colors['grey'],colors['red'])
 

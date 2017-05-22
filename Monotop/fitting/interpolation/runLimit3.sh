@@ -23,7 +23,10 @@ cp -r $scramdir/src/MonoXFit_CSV .
 cd MonoXFit_CSV/datacards
 
 python scanbatch3.py "${@:2}"
+ret=$?
 
 cd $WD
 #cp -r MonoXFit_CSV $fittingdir/scans/fit_${mV}_${mChi}_${model}
 rm -rf MonoXFit_CSV
+
+exit $ret
