@@ -890,6 +890,10 @@ void PandaAnalyzer::Run() {
       if (!ElectronIP(ele.eta(),ele.dxy,ele.dz))
         continue;
       looseLeps.push_back(&ele);
+      if (doVBF) {
+        matchLeps.push_back(&ele);
+        matchEles.push_back(&ele);
+      }
       gt->nLooseElectron++;
     }
 
@@ -903,6 +907,8 @@ void PandaAnalyzer::Run() {
       if (!MuonIsolation(pt,eta,mu.combIso(),panda::kLoose))
         continue;
       looseLeps.push_back(&mu);
+      if (doVBF)
+        matchLeps.push_back(&mu);
       gt->nLooseMuon++;
       TVector2 vMu; vMu.SetMagPhi(pt,mu.phi());
       vMETNoMu += vMu;
@@ -943,7 +949,8 @@ void PandaAnalyzer::Run() {
           if (isTight) {
             gt->nTightMuon++;
             gt->looseLep1IsTight = 1;
-            matchLeps.push_back(lep);
+            if (!doVBF)
+              matchLeps.push_back(lep);
           }
         } else if (lep_counter==2) {
           gt->looseLep2PdgId = mu->charge*-13;
@@ -952,7 +959,7 @@ void PandaAnalyzer::Run() {
             gt->nTightMuon++;
             gt->looseLep2IsTight = 1;
           }
-          if (isTight || gt->looseLep1IsTight)
+          if (!doVBF && (isTight || gt->looseLep1IsTight))
             matchLeps.push_back(lep);
         }
       } else {
@@ -967,8 +974,10 @@ void PandaAnalyzer::Run() {
           if (isTight) {
             gt->nTightElectron++;
             gt->looseLep1IsTight = 1;
-            matchLeps.push_back(lep);
-            matchEles.push_back(lep);
+            if (!doVBF) {
+              matchLeps.push_back(lep);
+              matchEles.push_back(lep);
+            }
           }
         } else if (lep_counter==2) {
           gt->looseLep2Pt *= EGMSCALE;
@@ -978,7 +987,7 @@ void PandaAnalyzer::Run() {
             gt->nTightElectron++;
             gt->looseLep2IsTight = 1;
           }
-          if (isTight || gt->looseLep1IsTight) {
+          if (!doVBF && (isTight || gt->looseLep1IsTight)) {
             matchLeps.push_back(lep);
             matchEles.push_back(lep);
           }
@@ -1357,16 +1366,29 @@ void PandaAnalyzer::Run() {
     gt->dphipuppiUW=999; gt->dphipfUW=999;
     gt->dphipuppiUZ=999; gt->dphipfUZ=999;
     gt->dphipuppiUA=999; gt->dphipfUA=999;
-    float maxIsoEta = (doMonoH) ? 4.5 : 2.5;
+    float maxJetEta = (doVBF) ? 4.7 : 4.5;
+    float maxIsoEta = (doMonoH) ? maxJetEta : 2.5;
+    unsigned nJetDPhi = (doVBF) ? 4 : 5;
 
     for (auto& jet : *jets) {
+     
 
      // only do eta-phi checks here
-     if (abs(jet.eta())>4.5)
+     if (abs(jet.eta()) > maxJetEta)
         continue;
+     // NOTE:
+     // For VBF we require nTightLep>0, but in monotop looseLep1IsTight
+     // No good reason to do that, should switch to former
+     // Should update jet cleaning accordingly (just check all loose objects)
      if (IsMatched(&matchLeps,0.16,jet.eta(),jet.phi()) ||
          IsMatched(&matchPhos,0.16,jet.eta(),jet.phi()))
         continue;
+     if (doVBF && !jet.loose)
+       continue;
+
+     if (doVBF && jet.pt()>20 && fabs(jet.eta())<2.4 && jet.csv>0.8484) {
+        ++(gt->jetNMBtags);
+     }
 
      if (jet.pt()>30) { // nominal jets
       cleanedJets.push_back(&jet);
@@ -1375,6 +1397,11 @@ void PandaAnalyzer::Run() {
         gt->jot1Pt = jet.pt();
         gt->jot1Eta = jet.eta();
         gt->jot1Phi = jet.phi();
+        if (doVBF && fabs(gt->jot1Eta)<2.4) { // if it's a central jet, must jot1 ID requirements
+          gt->jot1VBFID = jet.monojet;
+        } else { // if leading jet is not central, leave the event be
+          gt->jot1VBFID = 1;
+        }
       } else if (cleanedJets.size()==2) {
         jot2 = &jet;
         gt->jot2Pt = jet.pt();
@@ -1411,7 +1438,7 @@ void PandaAnalyzer::Run() {
       }
 
       // compute dphi wrt mets
-      if (cleanedJets.size()<5) {
+      if (cleanedJets.size() <= nJetDPhi) {
         vJet.SetPtEtaPhiM(jet.pt(),jet.eta(),jet.phi(),jet.m());
         gt->dphipuppimet = std::min(fabs(vJet.DeltaPhi(vPuppiMET)),(double)gt->dphipuppimet);
         gt->dphipfmet = std::min(fabs(vJet.DeltaPhi(vPFMET)),(double)gt->dphipfmet);
@@ -1429,7 +1456,7 @@ void PandaAnalyzer::Run() {
           btaggedJets.push_back(&jet);
           btagindices.push_back(cleanedJets.size()-1);
         }
-        if (csv>0.84) 
+        if (!doVBF && csv>0.8484) 
           ++(gt->jetNMBtags);
       }
 

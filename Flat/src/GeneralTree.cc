@@ -98,6 +98,7 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    jot1VBFID = 0;
     sf_metTrigZmm = 1;
     sf_qcdV_VBF = 1;
     jetNMBtags = 0;
@@ -414,6 +415,7 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("jot12DPhiDown",&jot12DPhiDown,"jot12DPhiDown/F");
     Book("jot2EtaUp",&jot2EtaUp,"jot2EtaUp/F");
     Book("jot2EtaDown",&jot2EtaDown,"jot2EtaDown/F");
+    Book("jot1VBFID",&jot1VBFID,"jot1VBFID/I");
   }
   Book("scale",scale,"scale[6]/F");
 
