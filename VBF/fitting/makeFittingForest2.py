@@ -26,7 +26,7 @@ import PandaAnalysis.VBF.PandaSelection as sel
 import ROOT as root
 
 basedir = getenv('PANDA_FLATDIR')+'/'
-lumi = 35900
+lumi = 35800
 
 def f(x):
     return basedir + x + '.root'
