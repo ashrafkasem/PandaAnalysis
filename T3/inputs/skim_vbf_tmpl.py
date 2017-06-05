@@ -170,22 +170,6 @@ def hadd(good_inputs):
         PError(sname+'.hadd','Merging exited with code %i'%ret)
 
 
-def add_bdt():
-    # now run the BDT
-    Load('TMVABranchAdder')
-    ba = root.TMVABranchAdder()
-    ba.treename = 'events'
-    ba.defaultValue = -1.2
-    ba.presel = 'fj1ECFN_2_4_20>0'
-    for v in tagcfg.variables:
-        ba.AddVariable(v[0],v[2])
-    for v in tagcfg.formulae:
-        ba.AddFormula(v[0],v[2])
-    for s in tagcfg.spectators:
-        ba.AddSpectator(s[0])
-    ba.BookMVA('top_ecf_bdt',data_dir+'/trainings/top_ecfbdt_v8_BDT.weights.xml')
-    ba.RunFile('output.root')
-
 
 def drop_branches(to_drop=None, to_keep=None):
     # remove any irrelevant branches from the final tree.
