@@ -1,15 +1,15 @@
 metFilter==1 && egmFilter==1 : MET filters
 nLooseMuon==1
 nTightMuon==1 : muon tag
-#nLooseElectron==0
+nLooseElectron==0
 nLoosePhoton==0
-#nTau==0
+nTau==0
 jetNMBtags==0
 mT<160
 jot1Pt>80 && jot2Pt>40 : 2 jets
 jot1VBFID==1
 pfUWmag>200
-#fabs(calomet-pfmet)/pfUWmag<0.5 : Calo-PF
+fabs(calomet-pfmet)/pfUWmag<0.5 : Calo-PF
 dphipfUW>0.5
 jot1Eta*jot2Eta<0 : opposite etas
 jot12DEta>1
