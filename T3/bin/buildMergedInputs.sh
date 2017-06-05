@@ -1,8 +1,8 @@
 #!/bin/bash
 
-: ${SUBMIT_WORKDIR?"Need to set SUBMIT_WORKDIR"}
-: ${SUBMIT_OUTDIR?"Need to set SUBMIT_OUTDIR"}
-: ${SUBMIT_LOGDIR?"Need to set SUBMIT_LOGDIR"}
+: ${SUBMIT_WORKDIR:?"Need to set SUBMIT_WORKDIR"}
+: ${SUBMIT_OUTDIR:?"Need to set SUBMIT_OUTDIR"}
+: ${SUBMIT_LOGDIR:?"Need to set SUBMIT_LOGDIR"}
 
 PInfo -n "$0" "Cleaning up staging areas..."
 WD=$SUBMIT_WORKDIR
