@@ -28,11 +28,31 @@ Load('Normalizer')
         - Delete the merged file and stageout the file with histograms
 '''
 
+#CONFIG = 'couplings' # or finer or normal
+CONFIG = 'normal'
+
 ## first copy files locally
-list_dir = '/home/snarayan/MonoTop/interpolation/'
+list_dir = '/home/bmaier/cms/MonoTop/interpolation/'
+if CONFIG == 'couplings':
+    list_dir += 'coupling_'
+elif CONFING == 'fine':
+    list_dir += 'fine_'
+
+xsec_path = 'non-resonant'
+if CONFIG == 'couplings':
+    xsec_path = 'non-resonant-couplings'
+elif CONFIG == 'fine':
+    xsec_path = 'non-resonant-fine'
+
+outdir = 'hists'
+if CONFIG == 'couplings':
+    outdir = 'hists_couplings'
+elif CONFIG == 'fine':
+    outdir = 'hists_fine'
 
 def stage_in_file(source,target):
     source = 'root://xrootd.cmsaf.mit.edu/' + source
+    source = source.replace('/mnt/hadoop/cms','')
     cmd = 'xrdcp %s %s'%(source,target)
     PInfo(sname+'.stage_in_file', cmd)
     system(cmd)
@@ -69,7 +89,7 @@ def remove(pattern):
 
 ## normalize the merged file
 def get_xsec():
-    params = read_nr_model(m_V,m_DM)
+    params = read_nr_model(m_V,m_DM, path=xsec_path)
     if params:
         xsec = params.sigma
     else:
@@ -92,7 +112,10 @@ def normalize(xsec):
     f.Close()
 
 ## draw histograms
-fweights = open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights.dat')
+fweights = open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights_all.dat')
+if CONFIG == 'couplings':
+    fweights = open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights_couplings_all.dat')
+
 weights = [x.strip() for x in fweights]
 fweights.close()
 bins = array('f', [175, 225, 275, 325, 375, 425, 475, 600, 800, 1200])
@@ -122,7 +145,9 @@ def draw_all():
 
 ## stage out
 def stageout():
-    cmd = 'mv hists.root %s/interpolate/hists/%i_%i.root'%(getenv('PANDA_FITTING'),m_V,m_DM)
+    cmd = 'mkdir -p %s/interpolate/%s'%(getenv('PANDA_FITTING'),outdir)
+    system(cmd)
+    cmd = 'mv hists.root %s/interpolate/%s/%i_%i.root'%(getenv('PANDA_FITTING'),outdir,m_V,m_DM)
     system(cmd)
 
 xsec = get_xsec() # do this first in case it's missing

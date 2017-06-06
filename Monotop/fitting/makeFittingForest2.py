@@ -77,7 +77,7 @@ weights = {'nominal' : sel.weights[region]%lumi}
 
 if masses:
     if out_region=='signal_vector':
-        with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights.dat') as fweights:
+        with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights_all.dat') as fweights:
             for line in fweights:
                 l = line.strip()
                 if l!='nominal':
@@ -164,5 +164,7 @@ if is_test:
     out_region = 'test'
 if masses:
     out_region += '_'+masses
-factory.run(basedir+'/fitting/fittingForest_%s.root'%out_region)
+    factory.run(basedir+'/fitting/signals_3/fittingForest_%s.root'%out_region)
+else:
+    factory.run(basedir+'/fitting/fittingForest_%s.root'%out_region)
 
