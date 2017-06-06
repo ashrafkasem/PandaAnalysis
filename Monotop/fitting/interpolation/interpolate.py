@@ -34,7 +34,7 @@ systs = ['btagUp','btagDown','mistagUp','mistagDown',
 basedir = getenv('PANDA_FITTING')
 
 couplings = map(lambda x : x.strip(), 
-                open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights.dat').readlines())
+                open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights_all.dat').readlines())
 
 # todo: pass more complicated metrics to interpolate, including things
 # that can take N nearby points and weight them
