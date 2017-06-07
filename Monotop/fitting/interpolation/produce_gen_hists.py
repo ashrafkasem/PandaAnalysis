@@ -28,14 +28,14 @@ Load('Normalizer')
         - Delete the merged file and stageout the file with histograms
 '''
 
-#CONFIG = 'couplings' # or finer or normal
-CONFIG = 'normal'
+CONFIG = 'couplings' # or finer or normal
+#CONFIG = 'normal'
 
 ## first copy files locally
 list_dir = '/home/bmaier/cms/MonoTop/interpolation/'
 if CONFIG == 'couplings':
     list_dir += 'coupling_'
-elif CONFING == 'fine':
+elif CONFIG == 'fine':
     list_dir += 'fine_'
 
 xsec_path = 'non-resonant'
@@ -129,7 +129,7 @@ def draw_all():
         if idx==0:
             weight_str = 'normalizedWeight'
         else:
-            weight_str = 'normalizedWeight*weights[%i]'%(idx-1)
+            weight_str = 'normalizedWeight*fabs(weights[%i])'%(idx-1)
         weight_strs.append(weight_str)
     xarr = read_tree(t_in, ['genBosonPt']+weight_strs)
     
@@ -148,6 +148,7 @@ def stageout():
     cmd = 'mkdir -p %s/interpolate/%s'%(getenv('PANDA_FITTING'),outdir)
     system(cmd)
     cmd = 'mv hists.root %s/interpolate/%s/%i_%i.root'%(getenv('PANDA_FITTING'),outdir,m_V,m_DM)
+    PInfo(sname+'.stageout',cmd)
     system(cmd)
 
 xsec = get_xsec() # do this first in case it's missing
