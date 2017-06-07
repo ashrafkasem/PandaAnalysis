@@ -28,28 +28,23 @@ Load('Normalizer')
         - Delete the merged file and stageout the file with histograms
 '''
 
-CONFIG = 'couplings' # or finer or normal
-#CONFIG = 'normal'
+#CONFIG = 'couplings' # or finer or normal
+CONFIG = 'normal'
 
-## first copy files locally
 list_dir = '/home/bmaier/cms/MonoTop/interpolation/'
-if CONFIG == 'couplings':
-    list_dir += 'coupling_'
-elif CONFIG == 'fine':
-    list_dir += 'fine_'
-
 xsec_path = 'non-resonant'
-if CONFIG == 'couplings':
-    xsec_path = 'non-resonant-couplings'
-elif CONFIG == 'fine':
-    xsec_path = 'non-resonant-fine'
-
 outdir = 'hists'
 if CONFIG == 'couplings':
+    list_dir += 'coupling_'
+    xsec_path = 'non-resonant-couplings'
     outdir = 'hists_couplings'
 elif CONFIG == 'fine':
+    list_dir += 'fine_'
+    xsec_path = 'non-resonant-fine'
     outdir = 'hists_fine'
 
+
+## first copy files locally
 def stage_in_file(source,target):
     source = 'root://xrootd.cmsaf.mit.edu/' + source
     source = source.replace('/mnt/hadoop/cms','')
