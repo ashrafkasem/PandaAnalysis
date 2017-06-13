@@ -868,6 +868,7 @@ void PandaAnalyzer::Run() {
     gt->pfmetUp = event.pfMet.ptCorrUp;
     gt->pfmetDown = event.pfMet.ptCorrDown;
     gt->calomet = event.caloMet.pt;
+    gt->sumETRaw = event.pfMet.sumETRaw;
     gt->puppimet = event.puppiMet.pt;
     gt->puppimetphi = event.puppiMet.phi;
     TLorentzVector vPFMET, vPuppiMET;
