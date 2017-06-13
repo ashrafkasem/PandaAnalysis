@@ -39,7 +39,6 @@ couplings_interp = map(lambda x : x.strip(),
 # couplings_reco = map(lambda x : x.strip(), 
 #                      open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights_all.dat').readlines())
 
-
 def parse_coupling_name(x):
     if x=='nominal':
         return (1, 0, 0.25, 0)
@@ -93,7 +92,7 @@ def interpolate():
     f_reco_gen_path = basedir+'/interpolate/hists/%s.root'%(args.mass_reco)
     f_reco_gen = root.TFile.Open(f_reco_gen_path)
 
-    system('mkdir -p %s/interpolate/interpolated_couplings2/'%basedir)
+    system('mkdir -p %s/interpolate/interpolated_couplings2test/'%basedir)
     t_out = t_reco.Clone()
     metname = 'min(met,999.9999)'
     branches = [metname]
@@ -120,8 +119,8 @@ def interpolate():
     xarr['tight'] = read_tree(t_reco,branches,'top_ecf_bdt>0.45 && met>250')
     xarr['loose'] = read_tree(t_reco,branches,'top_ecf_bdt>0.1 && top_ecf_bdt<0.45 && met>250')
 
-    f_out = root.TFile('%s/interpolate/interpolated_couplings2/interp_%s.root'%(basedir,args.mass),'RECREATE')
-    PInfo(sname,'Creating %s/interpolate/interpolated_couplings2/interp_%s.root'%(basedir,args.mass))
+    f_out = root.TFile('%s/interpolate/interpolated_couplings2test/interp_%s.root'%(basedir,args.mass),'RECREATE')
+    PInfo(sname,'Creating %s/interpolate/interpolated_couplings2test/interp_%s.root'%(basedir,args.mass))
     for g in couplings_interp:
         f_out.cd()
         folder = f_out.mkdir(g)
