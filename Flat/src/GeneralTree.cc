@@ -98,6 +98,7 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    sumETRaw = -1;
     jot1VBFID = 0;
     sf_metTrigZmm = 1;
     sf_qcdV_VBF = 1;
@@ -429,6 +430,7 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("sumETRaw",&sumETRaw,"sumETRaw/F");
     Book("sf_metTrigZmm",&sf_metTrigZmm,"sf_metTrigZmm/F");
     Book("sf_qcdV_VBF",&sf_qcdV_VBF,"sf_qcdV_VBF/F");
     Book("jetNMBtags",&jetNMBtags,"jetNMBtags/I");

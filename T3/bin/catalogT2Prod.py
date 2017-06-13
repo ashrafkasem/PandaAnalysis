@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from glob import glob
-from os import stat,getenv,system
+from os import stat,getenv,system,path
 from multiprocessing import Pool
 from PandaCore.Tools.process import *
 from PandaCore.Tools.Misc import *
@@ -35,7 +35,8 @@ class CatalogSample:
             book_ = '/'.join(args.catalog.split('/')[-2:])
             lines.append('{0:<25} {2:<10} {3:<15} {1}\n'.format(nickname,f,self.dtype,self.xsec)) 
             if smartcache_args is not None:
-                smartcache_args.append('--file %s --dataset %s --book %s'%(f_,ds_,book_))
+                if not path.isfile(f.replace('root://xrootd.cmsaf.mit.edu','/mnt/hadoop/cms')):
+                    smartcache_args.append('--file %s --dataset %s --book %s'%(f_,ds_,book_))
         return lines
 
 def smartcache(arguments):
