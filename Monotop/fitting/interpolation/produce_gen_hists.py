@@ -6,7 +6,7 @@ from sys import argv,exit
 from os import environ,system,path
 from array import array
 
-sname = argv[0]
+sname = argv[0].split('/')[-1]
 m_V = int(argv[1])
 m_DM = int(argv[2])
 argv=[]
@@ -53,14 +53,21 @@ def stage_in_file(source,target):
     system(cmd)
 
 # copy slowly to keep Max happy
+event_cutoff = 5e5
 def stage_in_list():
     system('mkdir -p unmerged')
     flist = open(list_dir+'%i_%i.txt'%(m_V,m_DM))
     PInfo(sname+'.stage_in_list','Reading '+list_dir+'%i_%i.txt'%(m_V,m_DM))
+    total_events = 0 
     for l in flist:
         in_name = l.strip()
         out_name = 'unmerged/'+in_name.split('/')[-1]
         stage_in_file(in_name,out_name)
+        f_out = root.TFile(out_name)
+        t_out = f_out.Get('events')
+        total_events += t_out.GetEntries()
+        if total_events >= event_cutoff:
+            break
 
 # do a recursive copy and make Max angry
 def stage_in_files():
@@ -126,14 +133,23 @@ def draw_all():
         else:
             weight_str = 'normalizedWeight*fabs(weights[%i])'%(idx-1)
         weight_strs.append(weight_str)
-    xarr = read_tree(t_in, ['genBosonPt']+weight_strs)
-    
-    for idx in xrange(len(weights)):
-        h = hbase.Clone()
-        weight_str = weight_strs[idx]
-        weight_name = weights[idx]
-        draw_hist(h, xarr, ['genBosonPt'], weight_str)
-        f_out.WriteTObject(h,'h_'+weight_name)
+
+    n_weights = len(weight_strs)
+    n_per = 50
+    nominal_arr = None
+    for iw in xrange(0, n_weights, n_per): 
+        PInfo(sname,'Extracting %i -> %i'%(iw,iw+n_per))
+
+        xarr = read_tree(t_in, ['genBosonPt'] + weight_strs[iw:iw + n_per])
+
+        for idx in xrange(iw, iw + n_per):
+            if idx == n_weights:
+                break
+            h = hbase.Clone()
+            weight_str = weight_strs[idx]
+            weight_name = weights[idx]
+            draw_hist(h, xarr, ['genBosonPt'], weight_str)
+            f_out.WriteTObject(h,'h_'+weight_name)
 
     f_out.Close()
     f_in.Close()
