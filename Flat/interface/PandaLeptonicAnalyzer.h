@@ -185,7 +185,8 @@ private:
     TTree *tOut;
     GeneralLeptonicTree *gt; // essentially a wrapper around tOut
     TH1F *hDTotalMCWeight=0;
-    TH1D *hDDilPt;
+    TH1D *hDDilPtMM;
+    TH1D *hDDilPtEE;
     TTree *tIn=0;    // input tree to read
     unsigned int preselBits=0;
 
