@@ -138,7 +138,7 @@ d = {
     'WWdps'               : ['WWTo2L2Nu_DoubleScattering_13TeV-pythia8'],
     'VVV'                 : ['WWW_4F_TuneCUETP8M1_13TeV-amcatnlo-pythia8','WWZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8','WZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8','ZZZ_TuneCUETP8M1_13TeV-amcatnlo-pythia8','WWG_TuneCUETP8M1_13TeV-amcatnlo-pythia8'],
     'TTV'                 : ['TTGJets_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8','TTZToLLNuNu_M-10_TuneCUETP8M1_13TeV-amcatnlo-pythia8','TTZToQQ_TuneCUETP8M1_13TeV-amcatnlo-pythia8','TTWJetsToLNu_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8','TTWJetsToQQ_TuneCUETP8M1_13TeV-amcatnloFXFX-madspin-pythia8','tZq_ll_4f_13TeV-amcatnlo-pythia8','tZq_nunu_4f_13TeV-amcatnlo-pythia8_TuneCUETP8M1'],
-    'TT2l'                : ['TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8'],
+    'TT2L'                : ['TTTo2L2Nu_TuneCUETP8M2_ttHtranche3_13TeV-powheg-pythia8'],
     'TW'                  : ['ST_tW_antitop_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1','ST_tW_top_5f_inclusiveDecays_13TeV-powheg-pythia8_TuneCUETP8M1'],
     'WGstar'              : ['WGstarToLNuEE_012Jets_13TeV-madgraph','WGstarToLNuMuMu_012Jets_13TeV-madgraph'],
     'VG'                  : ['WGToLNuG_TuneCUETP8M1_13TeV-madgraphMLM-pythia8','ZGTo2LG_TuneCUETP8M1_13TeV-amcatnloFXFX-pythia8'],
