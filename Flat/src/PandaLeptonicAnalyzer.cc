@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "TSystem.h"
+#include "TRandom2.h"
 
 #include "PandaAnalysis/Flat/interface/LeptonicFactors.h"
 
@@ -90,10 +91,15 @@ int PandaLeptonicAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
   hDTotalMCWeight = new TH1F("hDTotalMCWeight","hDTotalMCWeight",1,0,2);
   hDTotalMCWeight->SetBinContent(1,hweights->GetBinContent(1));
 
-  const int nBinPt = 25; Float_t xbinsPt[nBinPt+1] = {  0,  2,  4,  6,  8, 10, 12, 14, 16, 18,
-                                                       20, 25, 30, 40, 50, 60, 70, 80, 90,100,
-						       150,200,300,400,500,1000};
-  hDDilPt = new TH1D("hDDilPt", "hDDilPt", nBinPt, xbinsPt);
+  const int nBinPt = 64; Float_t xbinsPt[nBinPt+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                                       10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                       20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                                                       30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+                                                       40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 
+						       90, 95,100,120,140,160,180,200,250,300,
+						      350,400,450,500,1000};
+  hDDilPtMM = new TH1D("hDDilPtMM", "hDDilPtMM", nBinPt, xbinsPt);
+  hDDilPtEE = new TH1D("hDDilPtEE", "hDDilPtEE", nBinPt, xbinsPt);
 
   if (weightNames) {
     if (weightNames->GetEntries()!=377 && weightNames->GetEntries()!=22) {
@@ -159,7 +165,8 @@ panda::GenParticle const *PandaLeptonicAnalyzer::MatchToGen(double eta, double p
 
 void PandaLeptonicAnalyzer::Terminate() {
   fOut->WriteTObject(tOut);
-  fOut->WriteTObject(hDDilPt);    
+  fOut->WriteTObject(hDDilPtMM);    
+  fOut->WriteTObject(hDDilPtEE);    
   fOut->Close();
 
   //for (auto *f : fCorrs)
@@ -188,7 +195,8 @@ void PandaLeptonicAnalyzer::Terminate() {
   delete ak4JERReader;
   
   delete hDTotalMCWeight;
-  delete hDDilPt;
+  delete hDDilPtMM;
+  delete hDDilPtEE;
 
   if (DEBUG) PDebug("PandaLeptonicAnalyzer::Terminate","Finished with output");
 }
@@ -466,7 +474,6 @@ void PandaLeptonicAnalyzer::RegisterTrigger(TString path, std::vector<unsigned> 
 void PandaLeptonicAnalyzer::Run() {
 
   // INITIALIZE --------------------------------------------------------------------------
-
   unsigned int nEvents = tIn->GetEntries();
   unsigned int nZero = 0;
   if (lastEvent>=0 && lastEvent<(int)nEvents)
@@ -1315,7 +1322,8 @@ void PandaLeptonicAnalyzer::Run() {
         genlep2.SetPtEtaPhiM(gt->genLep2Pt,gt->genLep2Eta,gt->genLep2Phi,0.0);
 	TLorentzVector dilep = genlep1 + genlep2;
 	if(TMath::Abs(dilep.M()-91.1876) < 15.0) {
-	  hDDilPt->Fill(TMath::Min(dilep.Pt(),999.999),event.weight);
+	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtMM->Fill(TMath::Min(dilep.Pt(),999.999),event.weight);
+	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtEE->Fill(TMath::Min(dilep.Pt(),999.999),event.weight);
 	}
       }
 
