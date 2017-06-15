@@ -948,11 +948,6 @@ void PandaLeptonicAnalyzer::Run() {
 
     tr.TriggerEvent("leptons");
 
-    if (!PassPreselection())
-      continue;
-
-    tr.TriggerEvent("presel");
-
     // photons
     gt->nLoosePhoton = 0;
     for (auto& pho : event.photons) {
@@ -1433,6 +1428,11 @@ void PandaLeptonicAnalyzer::Run() {
       }
 
     } // end gen study
+
+    if (!PassPreselection())
+      continue;
+
+    tr.TriggerEvent("presel");
 
     if (!isData) {
       // now get the jet btag SFs
