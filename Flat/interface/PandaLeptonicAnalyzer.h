@@ -187,6 +187,10 @@ private:
     TH1F *hDTotalMCWeight=0;
     TH1D *hDDilPtMM;
     TH1D *hDDilPtEE;
+    TH1D *hDDilLowPtMM;
+    TH1D *hDDilLowPtEE;
+    TH1D *hDDilPt2MM;
+    TH1D *hDDilPt2EE;
     TTree *tIn=0;    // input tree to read
     unsigned int preselBits=0;
 
