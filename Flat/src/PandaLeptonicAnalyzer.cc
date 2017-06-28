@@ -100,6 +100,12 @@ int PandaLeptonicAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
   hDDilPtMM = new TH1D("hDDilPtMM", "hDDilPtMM", nBinPt, xbinsPt);
   hDDilPtEE = new TH1D("hDDilPtEE", "hDDilPtEE", nBinPt, xbinsPt);
 
+  hDDilLowPtMM = new TH1D("hDDilLowPtMM", "hDDilLowPtMM", 500, 0, 50);
+  hDDilLowPtEE = new TH1D("hDDilLowPtEE", "hDDilLowPtEE", 500, 0, 50);
+
+  hDDilPt2MM = new TH1D("hDDilPt2MM", "hDDilPt2MM", 50, 0, 50);
+  hDDilPt2EE = new TH1D("hDDilPt2EE", "hDDilPt2EE", 50, 0, 50);
+
   if (weightNames) {
     if (weightNames->GetEntries()!=377 && weightNames->GetEntries()!=22) {
       PError("PandaLeptonicAnalyzer::Init",
@@ -166,6 +172,10 @@ void PandaLeptonicAnalyzer::Terminate() {
   fOut->WriteTObject(tOut);
   fOut->WriteTObject(hDDilPtMM);    
   fOut->WriteTObject(hDDilPtEE);    
+  fOut->WriteTObject(hDDilLowPtMM);    
+  fOut->WriteTObject(hDDilLowPtEE);    
+  fOut->WriteTObject(hDDilPt2MM);    
+  fOut->WriteTObject(hDDilPt2EE);    
   fOut->Close();
 
   //for (auto *f : fCorrs)
@@ -196,6 +206,10 @@ void PandaLeptonicAnalyzer::Terminate() {
   delete hDTotalMCWeight;
   delete hDDilPtMM;
   delete hDDilPtEE;
+  delete hDDilLowPtMM;
+  delete hDDilLowPtEE;
+  delete hDDilPt2MM;
+  delete hDDilPt2EE;
 
   if (DEBUG) PDebug("PandaLeptonicAnalyzer::Terminate","Finished with output");
 }
@@ -1316,8 +1330,12 @@ void PandaLeptonicAnalyzer::Run() {
         genlep2.SetPtEtaPhiM(gt->genLep2Pt,gt->genLep2Eta,gt->genLep2Phi,0.0);
 	TLorentzVector dilep = genlep1 + genlep2;
 	if(TMath::Abs(dilep.M()-91.1876) < 15.0) {
-	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtMM->Fill(TMath::Min(dilep.Pt(),999.999),event.weight);
-	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtEE->Fill(TMath::Min(dilep.Pt(),999.999),event.weight);
+	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtMM->Fill(dilep.Pt(),event.weight);
+	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtEE->Fill(dilep.Pt(),event.weight);
+	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13 && dilep.Pt() < 50.0) hDDilLowPtMM->Fill(dilep.Pt(),event.weight);
+	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11 && dilep.Pt() < 50.0) hDDilLowPtEE->Fill(dilep.Pt(),event.weight);
+	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPt2MM->Fill(dilep.Pt()*dilep.Pt(),event.weight);
+	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPt2EE->Fill(dilep.Pt()*dilep.Pt(),event.weight);
 	}
       }
 
