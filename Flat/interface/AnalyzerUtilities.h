@@ -117,6 +117,24 @@ public:
         return getVal(h,bound(x,lo1,hi1),bound(y,lo2,hi2));
     }
 
+    double Error(double x) {
+        if (dim!=1) {
+          PError("THCorr1::Eval",
+              TString::Format("Trying to access a non-1D histogram (%s)!",h->GetName()));
+          return -1;
+        }
+        return getError(h,bound(x,lo1,hi1));
+    }
+
+    double Error(double x, double y) {
+        if (dim!=2) {
+          PError("THCorr1::Eval",
+             TString::Format("Trying to access a non-2D histogram (%s)!",h->GetName()));
+          return -1;
+        }
+        return getError(h,bound(x,lo1,hi1),bound(y,lo2,hi2));
+    }
+
     T *GetHist() { return h; }
 
 private:

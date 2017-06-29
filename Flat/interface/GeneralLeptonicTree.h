@@ -254,6 +254,11 @@ class GeneralLeptonicTree : public genericTree {
     float sf_tight3 = 1.0;
     float sf_tight4 = 1.0;
 
+    float sf_unc1 = 1.0;
+    float sf_unc2 = 1.0;
+    float sf_unc3 = 1.0;
+    float sf_unc4 = 1.0;
+
 };
 
 #endif

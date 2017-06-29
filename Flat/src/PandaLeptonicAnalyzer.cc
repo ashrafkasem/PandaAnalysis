@@ -234,6 +234,18 @@ double PandaLeptonicAnalyzer::GetCorr(CorrectionType ct, double x, double y) {
   }
 }
 
+double PandaLeptonicAnalyzer::GetError(CorrectionType ct, double x, double y) {
+  if (h1Corrs[ct]!=0) {
+    return h1Corrs[ct]->Error(x); 
+  } else if (h2Corrs[ct]!=0) {
+    return h2Corrs[ct]->Error(x,y);
+  } else {
+    PError("PandaLeptonicAnalyzer::GetCorr",
+       TString::Format("No correction is defined for CorrectionType=%u",ct));
+    return 1;
+  }
+}
+
 void PandaLeptonicAnalyzer::SetDataDir(const char *s2) {
   TString dirPath1 = TString(gSystem->Getenv("CMSSW_BASE")) + "/src/";
   TString dirPath2(s2);
@@ -868,6 +880,10 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose1  = GetCorr(cLooseMuonId,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cLooseMuonIso,TMath::Abs(mu->eta()),mu->pt());
 	  gt->sf_medium1 = GetCorr(cMediumMuonId,TMath::Abs(mu->eta()),mu->pt()) * GetCorr(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt());
 	  gt->sf_tight1  = GetCorr(cTightMuonId,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cTightMuonIso,TMath::Abs(mu->eta()),mu->pt());
+	  gt->sf_unc1 = sqrt(GetError(cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())      *GetError(cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())+
+	               0.010*GetCorr (cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())*0.010*GetCorr (cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())+
+			     GetError(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())      *GetError(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())+
+		       0.005*GetCorr (cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())*0.005*GetCorr (cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt()));
         }
 	else if (lep_counter==2) {
           gt->looseLep2PdgId = mu->charge*-13;
@@ -879,6 +895,10 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose2  = GetCorr(cLooseMuonId,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cLooseMuonIso,TMath::Abs(mu->eta()),mu->pt());
 	  gt->sf_medium2 = GetCorr(cMediumMuonId,TMath::Abs(mu->eta()),mu->pt()) * GetCorr(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt());
 	  gt->sf_tight2  = GetCorr(cTightMuonId,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cTightMuonIso,TMath::Abs(mu->eta()),mu->pt());
+	  gt->sf_unc2 = sqrt(GetError(cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())      *GetError(cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())+
+	               0.010*GetCorr (cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())*0.010*GetCorr (cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())+
+			     GetError(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())      *GetError(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())+
+		       0.005*GetCorr (cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())*0.005*GetCorr (cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt()));
         }
 	else if (lep_counter==3) {
           gt->looseLep3PdgId = mu->charge*-13;
@@ -890,6 +910,10 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose3  = GetCorr(cLooseMuonId,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cLooseMuonIso,TMath::Abs(mu->eta()),mu->pt());
 	  gt->sf_medium3 = GetCorr(cMediumMuonId,TMath::Abs(mu->eta()),mu->pt()) * GetCorr(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt());
 	  gt->sf_tight3  = GetCorr(cTightMuonId,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cTightMuonIso,TMath::Abs(mu->eta()),mu->pt());
+	  gt->sf_unc3 = sqrt(GetError(cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())      *GetError(cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())+
+	               0.010*GetCorr (cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())*0.010*GetCorr (cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())+
+			     GetError(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())      *GetError(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())+
+		       0.005*GetCorr (cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())*0.005*GetCorr (cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt()));
         }
 	else if (lep_counter==4) {
           gt->looseLep4PdgId = mu->charge*-13;
@@ -901,6 +925,10 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose4  = GetCorr(cLooseMuonId,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cLooseMuonIso,TMath::Abs(mu->eta()),mu->pt());
 	  gt->sf_medium4 = GetCorr(cMediumMuonId,TMath::Abs(mu->eta()),mu->pt()) * GetCorr(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt());
 	  gt->sf_tight4  = GetCorr(cTightMuonId,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cTightMuonIso,TMath::Abs(mu->eta()),mu->pt());
+	  gt->sf_unc4 = sqrt(GetError(cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())      *GetError(cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())+
+	               0.010*GetCorr (cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())*0.010*GetCorr (cMediumMuonId ,TMath::Abs(mu->eta()),mu->pt())+
+			     GetError(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())      *GetError(cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())+
+		       0.005*GetCorr (cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt())*0.005*GetCorr (cMediumMuonIso,TMath::Abs(mu->eta()),mu->pt()));
         }
       } else {
         panda::Electron *ele = dynamic_cast<panda::Electron*>(lep);
@@ -918,6 +946,7 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose1  = GetCorr(cLooseElectronId,ele->eta(),ele->pt());
 	  gt->sf_medium1 = GetCorr(cMediumElectronId,ele->eta(),ele->pt());
 	  gt->sf_tight1  = GetCorr(cTightElectronId,ele->eta(),ele->pt());
+	  gt->sf_unc1 = GetError(cMediumElectronId,ele->eta(),ele->pt());
         } 
 	else if (lep_counter==2) {
           gt->looseLep2Pt *= EGMSCALE;
@@ -930,6 +959,7 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose2  = GetCorr(cLooseElectronId,ele->eta(),ele->pt());
 	  gt->sf_medium2 = GetCorr(cMediumElectronId,ele->eta(),ele->pt());
 	  gt->sf_tight2  = GetCorr(cTightElectronId,ele->eta(),ele->pt());
+	  gt->sf_unc2 = GetError(cMediumElectronId,ele->eta(),ele->pt());
         }
 	else if (lep_counter==3) {
           gt->looseLep3Pt *= EGMSCALE;
@@ -942,6 +972,7 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose3  = GetCorr(cLooseElectronId,ele->eta(),ele->pt());
 	  gt->sf_medium3 = GetCorr(cMediumElectronId,ele->eta(),ele->pt());
 	  gt->sf_tight3  = GetCorr(cTightElectronId,ele->eta(),ele->pt());
+	  gt->sf_unc3 = GetError(cMediumElectronId,ele->eta(),ele->pt());
         }
 	else if (lep_counter==4) {
           gt->looseLep4Pt *= EGMSCALE;
@@ -954,6 +985,7 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose4  = GetCorr(cLooseElectronId,ele->eta(),ele->pt());
 	  gt->sf_medium4 = GetCorr(cMediumElectronId,ele->eta(),ele->pt());
 	  gt->sf_tight4  = GetCorr(cTightElectronId,ele->eta(),ele->pt());
+	  gt->sf_unc4 = GetError(cMediumElectronId,ele->eta(),ele->pt());
         }
       }
       ++lep_counter;
