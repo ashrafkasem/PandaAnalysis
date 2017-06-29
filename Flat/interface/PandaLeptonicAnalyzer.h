@@ -152,6 +152,7 @@ private:
                     GeneralLeptonicTree::BTagShift shift,GeneralLeptonicTree::BTagJet jettype, bool do2=false);
     void OpenCorrection(CorrectionType,TString,TString,int);
     double GetCorr(CorrectionType ct,double x, double y=0);
+    double GetError(CorrectionType ct,double x, double y=0);
     void RegisterTrigger(TString path, std::vector<unsigned> &idxs); 
 
     int DEBUG = 0; //!< debug verbosity level

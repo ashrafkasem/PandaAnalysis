@@ -187,6 +187,11 @@ void GeneralLeptonicTree::Reset() {
     sf_tight3 = 1.0;
     sf_tight4 = 1.0;
 
+    sf_unc1 = 1.0;
+    sf_unc2 = 1.0;
+    sf_unc3 = 1.0;
+    sf_unc4 = 1.0;
+
 }
 
 void GeneralLeptonicTree::WriteTree(TTree *t) {
@@ -350,5 +355,9 @@ void GeneralLeptonicTree::WriteTree(TTree *t) {
   Book("sf_tight2",&sf_tight2,"sf_tight2/F");
   Book("sf_tight3",&sf_tight3,"sf_tight3/F");
   Book("sf_tight4",&sf_tight4,"sf_tight4/F");
+  Book("sf_unc1",&sf_unc1,"sf_unc1/F");
+  Book("sf_unc2",&sf_unc2,"sf_unc2/F");
+  Book("sf_unc3",&sf_unc3,"sf_unc3/F");
+  Book("sf_unc4",&sf_unc4,"sf_unc4/F");
 
 }
