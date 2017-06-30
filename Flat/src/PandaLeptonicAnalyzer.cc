@@ -90,13 +90,21 @@ int PandaLeptonicAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
 
   hDTotalMCWeight = new TH1F("hDTotalMCWeight","hDTotalMCWeight",1,0,2);
   hDTotalMCWeight->SetBinContent(1,hweights->GetBinContent(1));
-
   const int nBinPt = 57; Float_t xbinsPt[nBinPt+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
                                                        10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
                                                        20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
                                                        30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
                                                        40, 50, 60, 70, 80, 90,100,125,150,175, 
 						      200,250,300,350,400,450,500,1000};
+/*
+  const int nBinPt = 65; Float_t xbinsPt[nBinPt+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                                       10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                       20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                                                       30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+                                                       40, 50, 60, 70, 80, 90,100,125,150,175, 
+						      200,225,250,275,300,325,350,375,400,425,
+						      450,475,500,750,1000,2000};
+*/
   hDDilPtMM = new TH1D("hDDilPtMM", "hDDilPtMM", nBinPt, xbinsPt);
   hDDilPtEE = new TH1D("hDDilPtEE", "hDDilPtEE", nBinPt, xbinsPt);
 
