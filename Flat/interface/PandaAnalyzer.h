@@ -122,6 +122,8 @@ private:
         cVBF_WNLO,
         cVBF_EWKZ,    //!< k-factors for EWK Z,W in VBF phase space
         cVBF_EWKW,
+        cVBF_TrigMET, //!< MET trigger eff as a f'n of mjj/met 
+        cVBF_TrigMETZmm,
         cN
     };
 
