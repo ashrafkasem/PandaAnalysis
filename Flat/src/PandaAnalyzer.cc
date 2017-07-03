@@ -311,18 +311,23 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 
   if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded k factors");
 
-  TFile *fKFactor_VBFZ = new TFile(dirPath+"vbf_kfactors/kfactor_VBF_zjets.root");
-  h1Corrs[cVBF_ZNLO] = new THCorr1((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_vbf"));
-  h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_vbf"));
+  TFile *fKFactor_VBFZ = new TFile(dirPath+"vbf16/kqcd/kfactor_VBF_zjets_v2.root");
+  h1Corrs[cVBF_ZNLO] = new THCorr1((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_vbf_relaxed"));
+  h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_vbf_relaxed"));
 
-  TFile *fKFactor_VBFW = new TFile(dirPath+"vbf_kfactors/kfactor_VBF_wjets.root");
-  h1Corrs[cVBF_WNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf"));
-  h1Corrs[cVBF_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf"));
+  TFile *fKFactor_VBFW = new TFile(dirPath+"vbf16/kqcd/kfactor_VBF_wjets_v2.root");
+  h1Corrs[cVBF_WNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf_relaxed"));
+  h1Corrs[cVBF_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf_relaxed"));
 
-  OpenCorrection(cVBF_EWKZ,dirPath+"vbf_kfactors/kFactor_ZToNuNu_pT_Mjj_2D.root",
+  OpenCorrection(cVBF_EWKZ,dirPath+"vbf16/kewk/kFactor_ZToNuNu_pT_Mjj.root",
                  "TH2F_kFactor",2);
-  OpenCorrection(cVBF_EWKW,dirPath+"vbf_kfactors/kFactor_WToLNu_pT_Mjj_2D.root",
+  OpenCorrection(cVBF_EWKW,dirPath+"vbf16/kewk/kFactor_WToLNu_pT_Mjj.root",
                  "TH2F_kFactor",2);
+
+  OpenCorrection(cVBF_TrigMET,dirPath+"vbf16/trig/metTriggerEfficiency_mjj_vbf.root",
+                 "h_eff",2);
+  OpenCorrection(cVBF_TrigMETZmm,dirPath+"vbf16/trig/metTriggerEfficiency_mjj_vbf_zmm.root",
+                 "h_eff",2);
 
   if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded VBF k factors");
 
@@ -1060,7 +1065,8 @@ void PandaAnalyzer::Run() {
     tr.TriggerEvent("photons");
 
     // trigger efficiencies
-    gt->sf_eleTrig=1; gt->sf_metTrig=1; gt->sf_phoTrig=1;
+    gt->sf_eleTrig=1; gt->sf_metTrig=1; gt->sf_phoTrig=1; gt->sf_metTrigZmm=1;
+    gt->sf_metTrigVBF=1; gt->sf_metTrigZmmVBF=1;
     if (!isData) {
       gt->sf_metTrig = GetCorr(cTrigMET,gt->pfmetnomu);
       gt->sf_metTrigZmm = GetCorr(cTrigMETZmm,gt->pfmetnomu);
@@ -2154,6 +2160,12 @@ void PandaAnalyzer::Run() {
     }
 
     tr.TriggerEvent("qcd/ewk SFs");
+
+    gt->sf_metTrigVBF=1; gt->sf_metTrigZmmVBF=1;
+    if (!isData) {
+      gt->sf_metTrigVBF = GetCorr(cVBF_TrigMET,gt->pfmetnomu,gt->jot12Mass);
+      gt->sf_metTrigZmmVBF = GetCorr(cVBF_TrigMETZmm,gt->pfmetnomu,gt->jot12Mass);
+    }
 
     if (!isData && processType==kSignal) {
       bool found=false, foundbar=false;
