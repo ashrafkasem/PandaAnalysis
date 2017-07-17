@@ -120,10 +120,13 @@ private:
         cAEWK,
         cVBF_ZNLO,    //!< NLO weights for QCD Z,W in VBF phase space
         cVBF_WNLO,
+        cVBFTight_ZNLO,    //!< NLO weights for QCD Z,W in tight VBF phase space
+        cVBFTight_WNLO,
         cVBF_EWKZ,    //!< k-factors for EWK Z,W in VBF phase space
         cVBF_EWKW,
         cVBF_TrigMET, //!< MET trigger eff as a f'n of mjj/met 
         cVBF_TrigMETZmm,
+        cBadECALJets,  //!< bad ECAL clusters to filter jets
         cN
     };
 

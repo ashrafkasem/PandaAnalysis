@@ -314,10 +314,22 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   TFile *fKFactor_VBFZ = new TFile(dirPath+"vbf16/kqcd/kfactor_VBF_zjets_v2.root");
   h1Corrs[cVBF_ZNLO] = new THCorr1((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_vbf_relaxed"));
   h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_vbf_relaxed"));
+  h1Corrs[cVBF_ZNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_monojet"));
+  h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_monojet"));
+  h1Corrs[cVBFTight_ZNLO] = new THCorr1((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_vbf"));
+  h1Corrs[cVBFTight_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_vbf"));
+  h1Corrs[cVBFTight_ZNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_monojet"));
+  h1Corrs[cVBFTight_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_monojet"));
 
   TFile *fKFactor_VBFW = new TFile(dirPath+"vbf16/kqcd/kfactor_VBF_wjets_v2.root");
   h1Corrs[cVBF_WNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf_relaxed"));
   h1Corrs[cVBF_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf_relaxed"));
+  h1Corrs[cVBF_WNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_monojet"));
+  h1Corrs[cVBF_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_monojet"));
+  h1Corrs[cVBFTight_WNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf"));
+  h1Corrs[cVBFTight_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf"));
+  h1Corrs[cVBFTight_WNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_monojet"));
+  h1Corrs[cVBFTight_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_monojet"));
 
   OpenCorrection(cVBF_EWKZ,dirPath+"vbf16/kewk/kFactor_ZToNuNu_pT_Mjj.root",
                  "TH2F_kFactor",2);
@@ -328,6 +340,9 @@ void PandaAnalyzer::SetDataDir(const char *s) {
                  "h_eff",2);
   OpenCorrection(cVBF_TrigMETZmm,dirPath+"vbf16/trig/metTriggerEfficiency_mjj_vbf_zmm.root",
                  "h_eff",2);
+
+  OpenCorrection(cBadECALJets,dirPath+"vbf16/hotjets-runBCDEFGH.root",
+                 "h2jet",2);
 
   if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded VBF k factors");
 
@@ -1377,9 +1392,9 @@ void PandaAnalyzer::Run() {
     float maxIsoEta = (doMonoH) ? maxJetEta : 2.5;
     unsigned nJetDPhi = (doVBF) ? 4 : 5;
 
+    gt->badECALFilter = 1;
     for (auto& jet : *jets) {
      
-
      // only do eta-phi checks here
      if (abs(jet.eta()) > maxJetEta)
         continue;
@@ -1396,6 +1411,7 @@ void PandaAnalyzer::Run() {
      if (doVBF && jet.pt()>20 && fabs(jet.eta())<2.4 && jet.csv>0.8484) {
         ++(gt->jetNMBtags);
      }
+
 
      if (jet.pt()>30) { // nominal jets
       cleanedJets.push_back(&jet);
@@ -1414,6 +1430,12 @@ void PandaAnalyzer::Run() {
         gt->jot2Pt = jet.pt();
         gt->jot2Eta = jet.eta();
         gt->jot2Phi = jet.phi();
+      }
+
+      if (cleanedJets.size()<3) {
+        bool isBad = GetCorr(cBadECALJets,jet.eta(),jet.phi()) > 0;
+        if (isBad)
+          gt->badECALFilter = 0;
       }
 
       float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
@@ -2128,23 +2150,27 @@ void PandaAnalyzer::Run() {
             gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
             gt->sf_qcdV = GetCorr(cZNLO,gt->genBosonPt);
             gt->sf_ewkV = GetCorr(cZEWK,gt->genBosonPt);
-            gt->sf_qcdV_VBF = GetCorr(cVBF_ZNLO,gt->genBosonPt);
+            gt->sf_qcdV_VBF = GetCorr(cVBF_ZNLO,gt->genBosonPt) * gt->sf_qcdV;
+            gt->sf_qcdV_VBFTight = GetCorr(cVBFTight_ZNLO,gt->genBosonPt) * gt->sf_qcdV;
             found=true;
           } else if (processType==kW) {
             gt->trueGenBosonPt = gen.pt();
             gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
             gt->sf_qcdV = GetCorr(cWNLO,gt->genBosonPt);
             gt->sf_ewkV = GetCorr(cWEWK,gt->genBosonPt);
-            gt->sf_qcdV_VBF = GetCorr(cVBF_WNLO,gt->genBosonPt);
+            gt->sf_qcdV_VBF = GetCorr(cVBF_WNLO,gt->genBosonPt) * gt->sf_qcdV;
+            gt->sf_qcdV_VBFTight = GetCorr(cVBFTight_WNLO,gt->genBosonPt) * gt->sf_qcdV;
             found=true;
           } else if (processType==kZEWK) {
             gt->trueGenBosonPt = gen.pt();
             gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
             gt->sf_qcdV_VBF = GetCorr(cVBF_EWKZ,gt->genBosonPt,gt->jot12Mass);
+            gt->sf_qcdV_VBFTight = gt->sf_qcdV_VBF; // for consistency
           } else if (processType==kWEWK) {
             gt->trueGenBosonPt = gen.pt();
             gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
             gt->sf_qcdV_VBF = GetCorr(cVBF_EWKW,gt->genBosonPt,gt->jot12Mass);
+            gt->sf_qcdV_VBFTight = gt->sf_qcdV_VBF; // for consistency
           } else if (processType==kA) {
             // take the highest pT
             if (gen.pt() > gt->trueGenBosonPt) {
@@ -2205,10 +2231,10 @@ void PandaAnalyzer::Run() {
         if (mu!=NULL) {
           if (isTight) {
             gt->sf_lepID *= GetCorr(cMuTightID,aeta,pt);
-            gt->sf_lepIso *= GetCorr(cMuTightIso,eta,pt);
+            gt->sf_lepIso *= GetCorr(cMuTightIso,aeta,pt);
           } else {
             gt->sf_lepID *= GetCorr(cMuLooseID,aeta,pt);
-            gt->sf_lepIso *= GetCorr(cMuLooseIso,eta,pt);
+            gt->sf_lepIso *= GetCorr(cMuLooseIso,aeta,pt);
           }
           gt->sf_lepTrack *= GetCorr(cMuReco,gt->npv);
         } else {
