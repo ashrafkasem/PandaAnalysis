@@ -40,7 +40,7 @@ if skimmer.isData and False:
         for run,lumis in payload.iteritems():
             for l in lumis:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
-skimmer.processType = root.PandaAnalyzer.kTT
+skimmer.processType = root.PandaAnalyzer.kZ
 #skimmer.processType = root.PandaAnalyzer.kWEWK
 #skimmer.SetPreselectionBit(root.PandaAnalyzer.kFatjet)
 #system("pxrdcp %s input.root '!pfCandidates'"%(torun))

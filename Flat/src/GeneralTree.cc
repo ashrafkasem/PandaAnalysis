@@ -98,6 +98,8 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    badECALFilter = 0;
+    sf_qcdV_VBFTight = 1;
     sf_metTrigVBF = 1;
     sf_metTrigZmmVBF = 1;
     sumETRaw = -1;
@@ -432,6 +434,8 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("badECALFilter",&badECALFilter,"badECALFilter/I");
+    Book("sf_qcdV_VBFTight",&sf_qcdV_VBFTight,"sf_qcdV_VBFTight/F");
     Book("sf_metTrigVBF",&sf_metTrigVBF,"sf_metTrigVBF/F");
     Book("sf_metTrigZmmVBF",&sf_metTrigZmmVBF,"sf_metTrigZmmVBF/F");
     Book("sumETRaw",&sumETRaw,"sumETRaw/F");
