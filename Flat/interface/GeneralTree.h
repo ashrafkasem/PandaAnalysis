@@ -158,6 +158,8 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    int badECALFilter = -1;
+    float sf_qcdV_VBFTight = -1;
     float sf_metTrigVBF = -1;
     float sf_metTrigZmmVBF = -1;
     float sumETRaw = -1;
