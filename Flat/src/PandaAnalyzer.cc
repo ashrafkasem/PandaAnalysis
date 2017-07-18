@@ -2143,7 +2143,16 @@ void PandaAnalyzer::Run() {
         if (found) break;
         int apdgid = abs(gen.pdgid);
         if (apdgid==target)     {
-          if (gen.parent.isValid() && gen.parent->pdgid==gen.pdgid)
+          bool foundChild = false;
+          for (auto& child : event.genParticles) {
+            if (abs(child.pdgid) != target)
+              continue;
+            if (child.parent.isValid() && child.parent.get() == &(gen)) {
+              foundChild = true; 
+              break;
+            }
+          }
+          if (foundChild)
             continue;
           if (processType==kZ) {
             gt->trueGenBosonPt = gen.pt();
