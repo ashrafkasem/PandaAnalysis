@@ -14,7 +14,7 @@ parser.add_argument('--cut',metavar='cut',type=str,default='1==1')
 parser.add_argument('--region',metavar='region',type=str,default=None)
 parser.add_argument('--cat',type=str,default='loose')
 args = parser.parse_args()
-lumi = 35900.
+lumi = 36000.
 blind=True
 region = args.region
 sname = argv[0]
@@ -41,7 +41,7 @@ plot.Stack(True)
 if not(BLIND and 'signal' in region):
     plot.Ratio(True)
     plot.FixRatio(1)
-plot.SetTDRStyle()
+plot.SetTDRStyle("vbf")
 plot.InitLegend()
 plot.DrawMCErrors(True)
 plot.AddCMSLabel()
@@ -56,7 +56,10 @@ weight = sel.weights[region]%lumi
 plot.mc_weight = weight
 
 ### DEFINE PROCESSES ###
-zjets         = Process('Z+jets [QCD]',root.kZjets)
+if 'signal' in args.region:
+    zjets         = Process('Z+jets [QCD]',root.kZjets)
+else:
+    zjets         = Process('Z+jets [QCD]',root.kExtra1)
 wjets         = Process('W+jets [QCD]',root.kWjets)
 zjets_ewk     = Process('Z+jets [EWK]',root.kExtra3)
 wjets_ewk     = Process('W+jets [EWK]',root.kExtra2)
