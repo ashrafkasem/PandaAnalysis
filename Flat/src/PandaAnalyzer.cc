@@ -17,6 +17,7 @@ PandaAnalyzer::PandaAnalyzer(int debug_/*=0*/) {
   Ns = gt->get_Ns();
   orders = gt->get_orders();
   flags["fatjet"]         = true;
+  flags["fatjetAK8"]      = false;
   flags["puppi"]          = true;
   flags["monohiggs"]      = false;
   flags["vbf"]            = false;
@@ -73,9 +74,10 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
                                      "electrons", "muons", "taus", "photons", 
                                      "pfMet", "caloMet", "puppiMet", 
                                      "recoil","metFilters","genMet",});
-
-  if (flags["fatjet"])
-   readlist += {jetname+"CA15Jets", "subjets", jetname+"CA15Subjets","Subjets"};
+  if (flags["fatjetAK8"])
+    readlist += {jetname+"AK8Jets", "subjets", jetname+"AK8Subjets","Subjets"};
+  else if (flags["fatjet"]) 
+    readlist += {jetname+"CA15Jets", "subjets", jetname+"CA15Subjets","Subjets"};
   
   if (flags["pfCands"])
     readlist.push_back("pfCandidates");
@@ -121,7 +123,9 @@ void PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
     gt->RemoveBranches({".*"},keepable);
   }
 
-  if (!flags["fatjet"]) {
+  gt->RemoveBranches({"ak81.*"}); // unused
+
+  if (!flags["fatjet"] && !flags["fatjetAK8"]) {
     gt->RemoveBranches({"fj1.*"});
   } else if (flags["pfCands"]) {
     int activeAreaRepeats = 1;
@@ -608,11 +612,16 @@ void PandaAnalyzer::Run() {
   }
 
   panda::FatJetCollection* fatjets(0);
-  if (flags["fatjet"]) {
-   if (flags["puppi"])
-    fatjets = &event.puppiCA15Jets;
-   else
-    fatjets = &event.chsCA15Jets;
+  if (flags["fatjetAK8"]) {
+    if (flags["puppi"])
+      fatjets = &event.puppiAK8Jets;
+    else
+      fatjets = &event.chsAK8Jets;
+  } else if (flags["fatjet"]) {
+    if (flags["puppi"])
+      fatjets = &event.puppiCA15Jets;
+    else
+      fatjets = &event.chsCA15Jets;
   }
 
   panda::JetCollection* jets(0);
@@ -721,6 +730,9 @@ void PandaAnalyzer::Run() {
   bool doMonoH = flags["monohiggs"];
   bool doVBF = flags["vbf"];
   bool doFatjet = flags["fatjet"];
+  bool doAK8 = flags["fatjetAK8"];
+
+  float fatjetMatchDR2 = doAK8 ? 0.64 : fatjetMatchDR2;
 
   // EVENTLOOP --------------------------------------------------------------------------
   for (iE=nZero; iE!=nEvents; ++iE) {
@@ -1210,7 +1222,7 @@ void PandaAnalyzer::Run() {
           continue;
 
         float phi = fj.phi();
-        if (IsMatched(&matchLeps,2.25,eta,phi) || IsMatched(&matchPhos,2.25,eta,phi)) {
+        if (IsMatched(&matchLeps,fatjetMatchDR2,eta,phi) || IsMatched(&matchPhos,fatjetMatchDR2,eta,phi)) {
           continue;
         }
 
@@ -1356,6 +1368,8 @@ void PandaAnalyzer::Run() {
       }
       tr.TriggerSubEvent("fatjet basics");
 
+
+
       if (flags["pfCands"] && fj1) {
         VPseudoJet particles = ConvertPFCands(event.pfCandidates,flags["puppi"],0);
         fastjet::ClusterSequenceArea seq(particles,*jetDef,*areaDef);
@@ -1490,7 +1504,7 @@ void PandaAnalyzer::Run() {
 
       bool isIsoJet = ( (gt->nFatjet==0) || 
                (fabs(jet.eta())<maxIsoEta 
-               && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet.eta(),jet.phi())>2.25) ); 
+               && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet.eta(),jet.phi())>fatjetMatchDR2) ); 
 
       if (isIsoJet) {
         isoJets.push_back(&jet);
@@ -1832,7 +1846,7 @@ void PandaAnalyzer::Run() {
         float pt = gen.pt();
         int pdgid = gen.pdgid;
         if (pt>(gt->fj1HighestPtGenPt)
-          && DeltaR2(gen.eta(),gen.phi(),fj1->eta(),fj1->phi())<2.25) {
+          && DeltaR2(gen.eta(),gen.phi(),fj1->eta(),fj1->phi())<fatjetMatchDR2) {
           gt->fj1HighestPtGenPt = pt;
           gt->fj1HighestPtGen = pdgid;
         }
@@ -1851,7 +1865,7 @@ void PandaAnalyzer::Run() {
             gt->nB++;
         }
 
-        if (DeltaR2(gen.eta(),gen.phi(),fj1->eta(),fj1->phi())<2.25) {
+        if (DeltaR2(gen.eta(),gen.phi(),fj1->eta(),fj1->phi())<fatjetMatchDR2) {
           gt->fj1NHF++;
           if (apdgid==5) {
             if (gen.parent.isValid() && gen.parent->pdgid==21 && gen.parent->pt()>20) {
@@ -2167,7 +2181,6 @@ void PandaAnalyzer::Run() {
       bool found=false, foundbar=false;
       TLorentzVector vMediator(0,0,0,0);
       for (auto& gen : event.genParticles) {
-        printf("%i \n",gen.pdgid);
         if (found && foundbar)
           break;
         if (abs(gen.pdgid) != 18)
