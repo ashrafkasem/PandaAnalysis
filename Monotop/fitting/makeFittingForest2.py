@@ -101,7 +101,8 @@ elif region=='photon':
     factory.add_process(f('SinglePhoton'),'Data',is_data=True,extra_cut=sel.triggers['pho'])
     factory.add_process(f('SinglePhoton'),'QCD',is_data=True,
                         extra_weights='sf_phoPurity',extra_cut=sel.triggers['pho'])
-elif out_region not in ['signal_scalar','signal_vector','signal_thq','signal_stdm']:
+#elif out_region not in ['signal_scalar','signal_vector','signal_thq','signal_stdm']:
+elif not any([x in out_region for x in ['scalar','vector','thq','stdm']]):
     factory.add_process(f('ZtoNuNu'),'Zvv')
     factory.add_process(f('ZJets'),'Zll')
     factory.add_process(f('WJets'),'Wlv')
@@ -113,7 +114,7 @@ elif out_region not in ['signal_scalar','signal_vector','signal_thq','signal_std
         factory.add_process(f('SingleElectron'),'Data',is_data=True,extra_cut=sel.triggers['ele'])
     else:
         factory.add_process(f('MET'),'Data',is_data=True,extra_cut=sel.triggers['met'])
-elif out_region=='signal_vector':
+elif 'vector' in out_region:
     signal_files = glob(basedir+'/Vector*root')
     for f in signal_files:
         fname = f.split('/')[-1].replace('.root','')
@@ -130,7 +131,7 @@ elif out_region=='signal_vector':
                 continue
             masses = signame
         factory.add_process(f,signame)
-elif out_region=='signal_scalar':
+elif 'scalar' in out_region:
     signal_files = glob(basedir+'/Scalar*root')
     if couplings:
         out_region += '_'+couplings
@@ -145,11 +146,12 @@ elif out_region=='signal_scalar':
         for k,v in replacements.iteritems():
             signame = signame.replace(k,v)
         factory.add_process(f,'scalar_'+signame)
-elif out_region=='signal_thq':
+elif 'thq' in out_region:
     factory.add_process(f('thq'),'thq')
-elif out_region=='signal_stdm':
+elif 'stdm' in out_region:
     for m in [300,500,1000]:
         factory.add_process(f('ST_tch_DM-scalar_LO-%i_1-13_TeV'%m),'stdm_%i'%m)
+        factory.add_process(f('TT_DM-scalar_LO-%i_1-13_TeV'%m),'ttdm_%i'%m)
 
 
 if is_test:

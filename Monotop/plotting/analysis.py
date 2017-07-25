@@ -15,7 +15,7 @@ parser.add_argument('--tt',metavar='tt',type=str,default='')
 parser.add_argument('--bdtcut',type=float,default=None)
 parser.add_argument('--masscut',type=float,default=None)
 args = parser.parse_args()
-lumi = 35800.
+lumi = 36000.
 blind=True
 region = args.region
 sname = argv[0]
@@ -28,8 +28,8 @@ import PandaCore.Tools.Functions
 #import PandaAnalysis.Monotop.MonojetSelection as sel
 #import PandaAnalysis.Monotop.LooseSelection as sel
 #import PandaAnalysis.Monotop.TightSelection as sel
-#import PandaAnalysis.Monotop.OneFatJetSelection as sel
-import PandaAnalysis.Monotop.CombinedBVetoSelection as sel
+import PandaAnalysis.Monotop.OneFatJetSelection as sel
+#import PandaAnalysis.Monotop.CombinedBVetoSelection as sel
 #import PandaAnalysis.Monotop.TestSelection as sel
 from PandaCore.Drawers.plot_utility import *
 
@@ -51,7 +51,8 @@ if 'qcd' in region:
 plot.SetTDRStyle()
 plot.InitLegend()
 plot.DrawMCErrors(True)
-plot.AddCMSLabel()
+#plot.AddCMSLabel(0.15,0.94,'Preliminary')
+plot.AddCMSLabel(0.15,0.94,'')
 plot.cut = cut
 plot.SetEvtNum("eventNumber")
 plot.SetLumi(lumi/1000)
@@ -81,7 +82,7 @@ ttbar         = Process('t#bar{t}',root.kTTbar)
 ttg           = Process('t#bar{t}#gamma',root.kTTbar)
 singletop     = Process('Single t',root.kST)
 singletopg    = Process('t#gamma',root.kST)
-qcd           = Process("QCD",root.kQCD)
+qcd           = Process("QCD multijet",root.kQCD)
 gjets         = Process('#gamma+jets',root.kGjets)
 data          = Process("Data",root.kData)
 signal        = Process('m_{V}=1.75 TeV, m_{#chi}=1 GeV',root.kSignal)
@@ -89,6 +90,8 @@ signal        = Process('m_{V}=1.75 TeV, m_{#chi}=1 GeV',root.kSignal)
 processes = [qcd,diboson,singletop,wjets,ttbar,zjets]
 if 'qcd' in region:
     processes = [diboson,singletop,wjets,ttbar,zjets,qcd]
+if 'dimuon' in region:
+    processes = [diboson,singletop,ttbar,zjets]
 
 ### ASSIGN FILES TO PROCESSES ###
 if 'signal' in region or 'qcd' in region:
@@ -168,7 +171,7 @@ plot.add_distribution(FDistribution('nJet',0.5,8.5,8,'N_{jet}','Events'))
 plot.add_distribution(FDistribution('npv',0,45,45,'N_{PV}','Events'))
 plot.add_distribution(FDistribution('fj1MSD',50,250,10,'fatjet m_{SD} [GeV]','Events'))
 plot.add_distribution(FDistribution('fj1Pt',200,1000,20,'fatjet p_{T} [GeV]','Events'))
-plot.add_distribution(FDistribution('top_ecf_bdt',-1,1,20,'Top BDT','Events'))
+plot.add_distribution(FDistribution('top_ecf_bdt',-1,1,20,'Top BDT','Events/0.1 Units'))
 plot.add_distribution(FDistribution('fj1MaxCSV',0,1,20,'fatjet max CSV','Events'))
 plot.add_distribution(FDistribution('fj1Tau32',0,1,20,'fatjet #tau_{32}','Events'))
 plot.add_distribution(FDistribution('fj1Tau32SD',0,1,20,'fatjet #tau_{32}^{SD}','Events'))
