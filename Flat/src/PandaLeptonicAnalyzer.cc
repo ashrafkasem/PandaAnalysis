@@ -90,21 +90,45 @@ int PandaLeptonicAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
 
   hDTotalMCWeight = new TH1F("hDTotalMCWeight","hDTotalMCWeight",1,0,2);
   hDTotalMCWeight->SetBinContent(1,hweights->GetBinContent(1));
+
+  const int nBinRap = 24; Float_t xbinsRap[nBinRap+1]; for(int i=0; i<=nBinRap;i++) xbinsRap[i] = i * 0.1;
+/*
   const int nBinPt = 57; Float_t xbinsPt[nBinPt+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
                                                        10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
                                                        20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
                                                        30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
                                                        40, 50, 60, 70, 80, 90,100,125,150,175, 
 						      200,250,300,350,400,450,500,1000};
-/*
-  const int nBinPt = 65; Float_t xbinsPt[nBinPt+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
-                                                       10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
-                                                       20, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-                                                       30, 31, 32, 33, 34, 35, 36, 37, 38, 39,
-                                                       40, 50, 60, 70, 80, 90,100,125,150,175, 
-						      200,225,250,275,300,325,350,375,400,425,
-						      450,475,500,750,1000,2000};
+
+  const int nBinPtRap0 = 36; Float_t xbinsPtRap0[nBinPtRap0+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                                		   10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                		   20, 25, 30, 35, 40, 50, 60, 70, 80, 90,
+                                                		  100,150,200,300,400,500,1000};
+  const int nBinPtRap1 = 36; Float_t xbinsPtRap1[nBinPtRap1+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                                		   10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                		   20, 25, 30, 35, 40, 50, 60, 70, 80, 90,
+                                                		  100,150,200,300,400,500,1000};
+  const int nBinPtRap2 = 36; Float_t xbinsPtRap2[nBinPtRap2+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                                		   10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                		   20, 25, 30, 35, 40, 50, 60, 70, 80, 90,
+                                                		  100,150,200,300,400,500,1000};
+  const int nBinPtRap3 = 36; Float_t xbinsPtRap3[nBinPtRap3+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                                		   10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                		   20, 25, 30, 35, 40, 50, 60, 70, 80, 90,
+                                                		  100,150,200,300,400,500,1000};
+  const int nBinPtRap4 = 36; Float_t xbinsPtRap4[nBinPtRap4+1] = {  0,  1,  2,  3,  4,  5,  6,  7,  8,  9,
+                                                                  10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+                                                                  20, 25, 30, 35, 40, 50, 60, 70, 80, 90,
+                                                                 100,150,200,300,400,500,1000};
 */
+  const int nBinPt     = 37; Float_t xbinsPt[nBinPt+1]         = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,22,25,28,32,37,43,52,65,85,120,160,190,220,250,300,350,400,450,500,1000};
+
+  const int nBinPtRap0 = 37; Float_t xbinsPtRap0[nBinPtRap0+1] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,22,25,28,32,37,43,52,65,85,120,160,190,220,250,300,350,400,450,500,1000};
+  const int nBinPtRap1 = 37; Float_t xbinsPtRap1[nBinPtRap1+1] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,22,25,28,32,37,43,52,65,85,120,160,190,220,250,300,350,400,450,500,1000};
+  const int nBinPtRap2 = 37; Float_t xbinsPtRap2[nBinPtRap2+1] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,22,25,28,32,37,43,52,65,85,120,160,190,220,250,300,350,400,450,500,1000};
+  const int nBinPtRap3 = 37; Float_t xbinsPtRap3[nBinPtRap3+1] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,22,25,28,32,37,43,52,65,85,120,160,190,220,250,300,350,400,450,500,1000};
+  const int nBinPtRap4 = 37; Float_t xbinsPtRap4[nBinPtRap4+1] = {0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,16,18,20,22,25,28,32,37,43,52,65,85,120,160,190,220,250,300,350,400,450,500,1000};
+
   hDDilPtMM = new TH1D("hDDilPtMM", "hDDilPtMM", nBinPt, xbinsPt);
   hDDilPtEE = new TH1D("hDDilPtEE", "hDDilPtEE", nBinPt, xbinsPt);
 
@@ -113,6 +137,33 @@ int PandaLeptonicAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
 
   hDDilPt2MM = new TH1D("hDDilPt2MM", "hDDilPt2MM", 50, 0, 50);
   hDDilPt2EE = new TH1D("hDDilPt2EE", "hDDilPt2EE", 50, 0, 50);
+
+  hDDilDRMM = new TH1D("hDDilDRMM", "hDDilDRMM", 100, 0, 5);
+  hDDilDREE = new TH1D("hDDilDREE", "hDDilDREE", 100, 0, 5);
+
+  hDDilRapMM = new TH1D("hDDilRapMM", "hDDilRapMM", nBinRap, xbinsRap);
+  hDDilRapEE = new TH1D("hDDilRapEE", "hDDilRapEE", nBinRap, xbinsRap);
+
+  hDDilRapPMM = new TH1D("hDDilRapPMM", "hDDilRapPMM", nBinRap, xbinsRap);
+  hDDilRapPEE = new TH1D("hDDilRapPEE", "hDDilRapPEE", nBinRap, xbinsRap);
+
+  hDDilRapMMM = new TH1D("hDDilRapMMM", "hDDilRapMMM", nBinRap, xbinsRap);
+  hDDilRapMEE = new TH1D("hDDilRapMEE", "hDDilRapMEE", nBinRap, xbinsRap);
+
+  hDDilPtRap0MM = new TH1D("hDDilPtRap0MM", "hDDilPtRap0MM", nBinPtRap0, xbinsPtRap0);
+  hDDilPtRap0EE = new TH1D("hDDilPtRap0EE", "hDDilPtRap0EE", nBinPtRap0, xbinsPtRap0);
+
+  hDDilPtRap1MM = new TH1D("hDDilPtRap1MM", "hDDilPtRap1MM", nBinPtRap1, xbinsPtRap1);
+  hDDilPtRap1EE = new TH1D("hDDilPtRap1EE", "hDDilPtRap1EE", nBinPtRap1, xbinsPtRap1);
+
+  hDDilPtRap2MM = new TH1D("hDDilPtRap2MM", "hDDilPtRap2MM", nBinPtRap2, xbinsPtRap2);
+  hDDilPtRap2EE = new TH1D("hDDilPtRap2EE", "hDDilPtRap2EE", nBinPtRap2, xbinsPtRap2);
+
+  hDDilPtRap3MM = new TH1D("hDDilPtRap3MM", "hDDilPtRap3MM", nBinPtRap3, xbinsPtRap3);
+  hDDilPtRap3EE = new TH1D("hDDilPtRap3EE", "hDDilPtRap3EE", nBinPtRap3, xbinsPtRap3);
+
+  hDDilPtRap4MM = new TH1D("hDDilPtRap4MM", "hDDilPtRap4MM", nBinPtRap4, xbinsPtRap4);
+  hDDilPtRap4EE = new TH1D("hDDilPtRap4EE", "hDDilPtRap4EE", nBinPtRap4, xbinsPtRap4);
 
   if (weightNames) {
     if (weightNames->GetEntries()!=377 && weightNames->GetEntries()!=22) {
@@ -184,6 +235,24 @@ void PandaLeptonicAnalyzer::Terminate() {
   fOut->WriteTObject(hDDilLowPtEE);    
   fOut->WriteTObject(hDDilPt2MM);    
   fOut->WriteTObject(hDDilPt2EE);    
+  fOut->WriteTObject(hDDilDRMM);    
+  fOut->WriteTObject(hDDilDREE);    
+  fOut->WriteTObject(hDDilRapMM);    
+  fOut->WriteTObject(hDDilRapEE);    
+  fOut->WriteTObject(hDDilRapPMM);    
+  fOut->WriteTObject(hDDilRapPEE);    
+  fOut->WriteTObject(hDDilRapMMM);    
+  fOut->WriteTObject(hDDilRapMEE);    
+  fOut->WriteTObject(hDDilPtRap0MM);    
+  fOut->WriteTObject(hDDilPtRap0EE);    
+  fOut->WriteTObject(hDDilPtRap1MM);    
+  fOut->WriteTObject(hDDilPtRap1EE);    
+  fOut->WriteTObject(hDDilPtRap2MM);    
+  fOut->WriteTObject(hDDilPtRap2EE);    
+  fOut->WriteTObject(hDDilPtRap3MM);    
+  fOut->WriteTObject(hDDilPtRap3EE);    
+  fOut->WriteTObject(hDDilPtRap4MM);    
+  fOut->WriteTObject(hDDilPtRap4EE);    
   fOut->Close();
 
   //for (auto *f : fCorrs)
@@ -218,6 +287,24 @@ void PandaLeptonicAnalyzer::Terminate() {
   delete hDDilLowPtEE;
   delete hDDilPt2MM;
   delete hDDilPt2EE;
+  delete hDDilDRMM;
+  delete hDDilDREE;
+  delete hDDilRapMM;    
+  delete hDDilRapEE;    
+  delete hDDilRapPMM;    
+  delete hDDilRapPEE;    
+  delete hDDilRapMMM;    
+  delete hDDilRapMEE;    
+  delete hDDilPtRap0MM;    
+  delete hDDilPtRap0EE;    
+  delete hDDilPtRap1MM;    
+  delete hDDilPtRap1EE;    
+  delete hDDilPtRap2MM;    
+  delete hDDilPtRap2EE;    
+  delete hDDilPtRap3MM;    
+  delete hDDilPtRap3EE;    
+  delete hDDilPtRap4MM;    
+  delete hDDilPtRap4EE;    
 
   if (DEBUG) PDebug("PandaLeptonicAnalyzer::Terminate","Finished with output");
 }
@@ -711,8 +798,6 @@ void PandaLeptonicAnalyzer::Run() {
     // gt->metFilter = (gt->metFilter==1 && !event.metFilters.duplicateMuons) ? 1 : 0;
     gt->metFilter = (gt->metFilter==1 && !event.metFilters.badPFMuons) ? 1 : 0;
     gt->metFilter = (gt->metFilter==1 && !event.metFilters.badChargedHadrons) ? 1 : 0;
-    gt->egmFilter = (!event.metFilters.dupECALClusters) ? 1 : 0;
-    gt->egmFilter = (gt->egmFilter==1 && !event.metFilters.unfixedECALHits) ? 1 : 0;
 
     // save triggers
     for (auto iT : metTriggers) {
@@ -954,7 +1039,7 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose1  = GetCorr(cLooseElectronId,ele->eta(),ele->pt());
 	  gt->sf_medium1 = GetCorr(cMediumElectronId,ele->eta(),ele->pt());
 	  gt->sf_tight1  = GetCorr(cTightElectronId,ele->eta(),ele->pt());
-	  gt->sf_unc1 = GetError(cMediumElectronId,ele->eta(),ele->pt());
+	  gt->sf_unc1 = GetError(cMediumElectronId,ele->eta(),ele->pt())+0.01;
         } 
 	else if (lep_counter==2) {
           gt->looseLep2Pt *= EGMSCALE;
@@ -967,7 +1052,7 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose2  = GetCorr(cLooseElectronId,ele->eta(),ele->pt());
 	  gt->sf_medium2 = GetCorr(cMediumElectronId,ele->eta(),ele->pt());
 	  gt->sf_tight2  = GetCorr(cTightElectronId,ele->eta(),ele->pt());
-	  gt->sf_unc2 = GetError(cMediumElectronId,ele->eta(),ele->pt());
+	  gt->sf_unc2 = GetError(cMediumElectronId,ele->eta(),ele->pt())+0.01;
         }
 	else if (lep_counter==3) {
           gt->looseLep3Pt *= EGMSCALE;
@@ -980,7 +1065,7 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose3  = GetCorr(cLooseElectronId,ele->eta(),ele->pt());
 	  gt->sf_medium3 = GetCorr(cMediumElectronId,ele->eta(),ele->pt());
 	  gt->sf_tight3  = GetCorr(cTightElectronId,ele->eta(),ele->pt());
-	  gt->sf_unc3 = GetError(cMediumElectronId,ele->eta(),ele->pt());
+	  gt->sf_unc3 = GetError(cMediumElectronId,ele->eta(),ele->pt())+0.01;
         }
 	else if (lep_counter==4) {
           gt->looseLep4Pt *= EGMSCALE;
@@ -993,7 +1078,7 @@ void PandaLeptonicAnalyzer::Run() {
 	  gt->sf_loose4  = GetCorr(cLooseElectronId,ele->eta(),ele->pt());
 	  gt->sf_medium4 = GetCorr(cMediumElectronId,ele->eta(),ele->pt());
 	  gt->sf_tight4  = GetCorr(cTightElectronId,ele->eta(),ele->pt());
-	  gt->sf_unc4 = GetError(cMediumElectronId,ele->eta(),ele->pt());
+	  gt->sf_unc4 = GetError(cMediumElectronId,ele->eta(),ele->pt())+0.01;
         }
       }
       ++lep_counter;
@@ -1250,6 +1335,7 @@ void PandaLeptonicAnalyzer::Run() {
       std::vector<int> targetsN;
 
       int nGen = event.genParticles.size();
+
       for (int iG=0; iG!=nGen; ++iG) {
         auto& part(event.genParticles.at(iG));
         int pdgid = part.pdgid;
@@ -1284,7 +1370,7 @@ void PandaLeptonicAnalyzer::Run() {
         // check there is no further copy:
         bool isLastCopy=true;
         for (int kG : targetsLepton) {
-          if (event.genParticles.at(kG).parent.get() == &part) {
+          if (event.genParticles.at(kG).parent.isValid() && event.genParticles.at(kG).parent.get() == &part) {
             isLastCopy=false;
             break;
           }
@@ -1300,7 +1386,7 @@ void PandaLeptonicAnalyzer::Run() {
           // check there is no further copy:
           bool isLastCopy=true;
           for (int kG : targetsPhoton) {
-            if (event.genParticles.at(kG).parent.get() == &part) {
+            if (event.genParticles.at(kG).parent.isValid() && event.genParticles.at(kG).parent.get() == &part) {
               isLastCopy=false;
               break;
             }
@@ -1370,12 +1456,54 @@ void PandaLeptonicAnalyzer::Run() {
         genlep2.SetPtEtaPhiM(gt->genLep2Pt,gt->genLep2Eta,gt->genLep2Phi,0.0);
 	TLorentzVector dilep = genlep1 + genlep2;
 	if(TMath::Abs(dilep.M()-91.1876) < 15.0) {
-	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtMM->Fill(dilep.Pt(),event.weight);
-	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtEE->Fill(dilep.Pt(),event.weight);
-	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13 && dilep.Pt() < 50.0) hDDilLowPtMM->Fill(dilep.Pt(),event.weight);
-	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11 && dilep.Pt() < 50.0) hDDilLowPtEE->Fill(dilep.Pt(),event.weight);
-	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPt2MM->Fill(dilep.Pt()*dilep.Pt(),event.weight);
-	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPt2EE->Fill(dilep.Pt()*dilep.Pt(),event.weight);
+          double ZGenPt  = dilep.Pt();
+          double ZGenRap = TMath::Abs(dilep.Rapidity());
+	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtMM->Fill(ZGenPt,event.weight);
+	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtEE->Fill(ZGenPt,event.weight);
+	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13 && dilep.Pt() < 50.0) hDDilLowPtMM->Fill(ZGenPt,event.weight);
+	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11 && dilep.Pt() < 50.0) hDDilLowPtEE->Fill(ZGenPt,event.weight);
+	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPt2MM->Fill(ZGenPt*ZGenPt,event.weight);
+	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPt2EE->Fill(ZGenPt*ZGenPt,event.weight);
+	  if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13 && dilep.Pt() > 500.0) hDDilDRMM->Fill(sqrt(DeltaR2(gt->genLep1Eta,gt->genLep1Phi,gt->genLep2Eta,gt->genLep2Phi)),event.weight);
+	  else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11 && dilep.Pt() > 500.0) hDDilDREE->Fill(sqrt(DeltaR2(gt->genLep1Eta,gt->genLep1Phi,gt->genLep2Eta,gt->genLep2Phi)),event.weight);
+	  if(ZGenRap < 2.4) {
+	    if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) {
+	      hDDilRapMM->Fill(ZGenRap,event.weight);
+	      if(gt->genLep1PdgId < 0) {
+	        hDDilRapPMM->Fill(ZGenRap,event.weight);
+	      } else {
+	        hDDilRapMMM->Fill(ZGenRap,event.weight);
+	      }
+	    }
+	    else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) {
+	      hDDilRapEE->Fill(ZGenRap,event.weight);
+	      if(gt->genLep1PdgId < 0) {
+	        hDDilRapPEE->Fill(ZGenRap,event.weight);
+	      } else {
+	        hDDilRapMEE->Fill(ZGenRap,event.weight);
+	      }
+	    }
+	  }
+	  if     (ZGenRap < 0.5) {
+	    if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtRap0MM->Fill(ZGenPt,event.weight);
+	    else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtRap0EE->Fill(ZGenPt,event.weight);
+	  }
+	  else if(ZGenRap < 1.0) {
+	    if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtRap1MM->Fill(ZGenPt,event.weight);
+	    else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtRap1EE->Fill(ZGenPt,event.weight);
+	  }
+	  else if(ZGenRap < 1.5) {
+	    if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtRap2MM->Fill(ZGenPt,event.weight);
+	    else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtRap2EE->Fill(ZGenPt,event.weight);
+	  }
+	  else if(ZGenRap < 2.0) {
+	    if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtRap3MM->Fill(ZGenPt,event.weight);
+	    else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtRap3EE->Fill(ZGenPt,event.weight);
+	  }
+	  else if(ZGenRap < 2.4) {
+	    if     (TMath::Abs(gt->genLep1PdgId) == 13 && TMath::Abs(gt->genLep2PdgId) == 13) hDDilPtRap4MM->Fill(ZGenPt,event.weight);
+	    else if(TMath::Abs(gt->genLep1PdgId) == 11 && TMath::Abs(gt->genLep2PdgId) == 11) hDDilPtRap4EE->Fill(ZGenPt,event.weight);
+	  }
 	}
       }
 
@@ -1387,7 +1515,7 @@ void PandaLeptonicAnalyzer::Run() {
         // check there is no further copy:
         bool isLastCopy=true;
         for (int kG : targetsN) {
-          if (event.genParticles.at(kG).parent.get() == &part) {
+          if (event.genParticles.at(kG).parent.isValid() && event.genParticles.at(kG).parent.get() == &part) {
             isLastCopy=false;
             break;
           }
@@ -1409,7 +1537,7 @@ void PandaLeptonicAnalyzer::Run() {
         // check there is no further copy:
         bool isLastCopy=true;
         for (int kG : targetsV) {
-          if (event.genParticles.at(kG).parent.get() == &part) {
+          if (event.genParticles.at(kG).parent.isValid() && event.genParticles.at(kG).parent.get() == &part) {
             isLastCopy=false;
             break;
           }
@@ -1465,7 +1593,7 @@ void PandaLeptonicAnalyzer::Run() {
         // check there is no further copy:
         bool isLastCopy=true;
         for (int kG : targetsTop) {
-          if (event.genParticles.at(kG).parent.get() == &part) {
+          if (event.genParticles.at(kG).parent.isValid() && event.genParticles.at(kG).parent.get() == &part) {
             isLastCopy=false;
             break;
           }
@@ -1478,7 +1606,7 @@ void PandaLeptonicAnalyzer::Run() {
         } else {
          pt_tbar = part.pt();
         }
-      }
+     }
       if (pt_t>0 && pt_tbar>0) {
         gt->sf_tt = TMath::Sqrt(TMath::Exp(0.0615-0.0005*TMath::Min((float)400.,pt_t)) *
                   		TMath::Exp(0.0615-0.0005*TMath::Min((float)400.,pt_tbar)));

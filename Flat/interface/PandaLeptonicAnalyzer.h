@@ -192,6 +192,24 @@ private:
     TH1D *hDDilLowPtEE;
     TH1D *hDDilPt2MM;
     TH1D *hDDilPt2EE;
+    TH1D *hDDilDRMM;
+    TH1D *hDDilDREE;
+    TH1D *hDDilRapMM;
+    TH1D *hDDilRapEE;
+    TH1D *hDDilRapPMM;
+    TH1D *hDDilRapPEE;
+    TH1D *hDDilRapMMM;
+    TH1D *hDDilRapMEE;
+    TH1D *hDDilPtRap0MM;
+    TH1D *hDDilPtRap0EE;
+    TH1D *hDDilPtRap1MM;
+    TH1D *hDDilPtRap1EE;
+    TH1D *hDDilPtRap2MM;
+    TH1D *hDDilPtRap2EE;
+    TH1D *hDDilPtRap3MM;
+    TH1D *hDDilPtRap3EE;
+    TH1D *hDDilPtRap4MM;
+    TH1D *hDDilPtRap4EE;
     TTree *tIn=0;    // input tree to read
     unsigned int preselBits=0;
 
