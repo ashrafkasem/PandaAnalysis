@@ -827,8 +827,6 @@ void PandaAnalyzer::Run() {
     // gt->metFilter = (gt->metFilter==1 && !event.metFilters.duplicateMuons) ? 1 : 0;
     gt->metFilter = (gt->metFilter==1 && !event.metFilters.badPFMuons) ? 1 : 0;
     gt->metFilter = (gt->metFilter==1 && !event.metFilters.badChargedHadrons) ? 1 : 0;
-    gt->egmFilter = (!event.metFilters.dupECALClusters) ? 1 : 0;
-    gt->egmFilter = (gt->egmFilter==1 && !event.metFilters.unfixedECALHits) ? 1 : 0;
 
     if (isData) {
       // check the json
