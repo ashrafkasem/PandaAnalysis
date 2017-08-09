@@ -284,7 +284,11 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded scale factors");
 
   // kfactors
-  TFile *fKFactor = new TFile(dirPath+"kfactors.root"); 
+  TFile *fKFactor = 0;
+  if (flags["vbf"])
+    fKFactor = new TFile(dirPath+"vbf16/kqcd/kfactor_24bins.root"); 
+  else
+    fKFactor = new TFile(dirPath+"kfactors.root"); 
   fCorrs[cZNLO] = fKFactor; // just for garbage collection
 
   TH1D *hZLO    = (TH1D*)fKFactor->Get("ZJets_LO/inv_pt");
