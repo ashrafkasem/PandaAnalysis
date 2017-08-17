@@ -106,20 +106,22 @@ private:
         cPU=0,         //!< true pu weight
         cPUUp,         //!< true pu weight Up
         cPUDown,       //!< true pu weight Down
-	ZHEwkCorr,     //!< ZH Ewk Corr weight  
-	ZHEwkCorrUp,   //!< ZH Ewk Corr weight Up  
-	ZHEwkCorrDown, //!< ZH Ewk Corr weight Down  
-	cLooseMuonId,
-	cMediumMuonId,
-	cTightMuonId,
-	cLooseMuonIso, 
-	cMediumMuonIso,
-	cTightMuonIso,
-	cTrackingMuon,
-	cLooseElectronId, 
-	cMediumElectronId,
-	cTightElectronId,
-	cTrackingElectron,
+	    cZHEwkCorr,     //!< ZH Ewk Corr weight  
+	    cZHEwkCorrUp,   //!< ZH Ewk Corr weight Up  
+	    cZHEwkCorrDown, //!< ZH Ewk Corr weight Down  
+        cWZEwkCorr,
+        cqqZZQcdCorr,
+	    cLooseMuonId,
+	    cMediumMuonId,
+	    cTightMuonId,
+	    cLooseMuonIso, 
+	    cMediumMuonIso,
+	    cTightMuonIso,
+	    cTrackingMuon,
+	    cLooseElectronId, 
+	    cMediumElectronId,
+	    cTightElectronId,
+	    cTrackingElectron,
         cN
     };
 
