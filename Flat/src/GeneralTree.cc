@@ -98,6 +98,17 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    genMuonPt = -1;
+    genMuonEta = -1;
+    genElectronPt = -1;
+    genElectronEta = -1;
+    genTauPt = -1;
+    genTauEta = -1;
+    badECALFilter = 0;
+    sf_qcdV_VBFTight = 1;
+    sf_metTrigVBF = 1;
+    sf_metTrigZmmVBF = 1;
+    sumETRaw = -1;
     jot1VBFID = 0;
     sf_metTrigZmm = 1;
     sf_qcdV_VBF = 1;
@@ -429,6 +440,17 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("genMuonPt",&genMuonPt,"genMuonPt/F");
+    Book("genMuonEta",&genMuonEta,"genMuonEta/F");
+    Book("genElectronPt",&genElectronPt,"genElectronPt/F");
+    Book("genElectronEta",&genElectronEta,"genElectronEta/F");
+    Book("genTauPt",&genTauPt,"genTauPt/F");
+    Book("genTauEta",&genTauEta,"genTauEta/F");
+    Book("badECALFilter",&badECALFilter,"badECALFilter/I");
+    Book("sf_qcdV_VBFTight",&sf_qcdV_VBFTight,"sf_qcdV_VBFTight/F");
+    Book("sf_metTrigVBF",&sf_metTrigVBF,"sf_metTrigVBF/F");
+    Book("sf_metTrigZmmVBF",&sf_metTrigZmmVBF,"sf_metTrigZmmVBF/F");
+    Book("sumETRaw",&sumETRaw,"sumETRaw/F");
     Book("sf_metTrigZmm",&sf_metTrigZmm,"sf_metTrigZmm/F");
     Book("sf_qcdV_VBF",&sf_qcdV_VBF,"sf_qcdV_VBF/F");
     Book("jetNMBtags",&jetNMBtags,"jetNMBtags/I");
