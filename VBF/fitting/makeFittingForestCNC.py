@@ -46,7 +46,7 @@ vmap['met'] = u
 vmap['mjj'] = 'jot12Mass'
 vmap['deta'] = 'jot12DEta'
 vmap['dphi'] = 'jot12DPhi'
-weights = {'nominal' : sel.weights[region]%lumi}
+weights = {'nominal' : (sel.weights[region]%lumi).replace('sf_qcdV_VBF','sf_qcdV_VBFTight')}
 
 
 # build the factory
@@ -96,4 +96,4 @@ else:
         factory.add_process(f('ggFHinv_m125'),'GGF_H125')
         factory.add_process(f('vbfHinv_m125'),'VBF_H125')
 
-factory.run(basedir+'/fitting/fittingForest_%s.root'%out_region)
+factory.run(basedir+'/fitting/cncFittingForest_%s.root'%out_region)

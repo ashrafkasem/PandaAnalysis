@@ -158,6 +158,17 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    float genMuonPt = -1;
+    float genMuonEta = -1;
+    float genElectronPt = -1;
+    float genElectronEta = -1;
+    float genTauPt = -1;
+    float genTauEta = -1;
+    int badECALFilter = -1;
+    float sf_qcdV_VBFTight = -1;
+    float sf_metTrigVBF = -1;
+    float sf_metTrigZmmVBF = -1;
+    float sumETRaw = -1;
     int jot1VBFID = -1;
     float sf_metTrigZmm = -1;
     float sf_qcdV_VBF = -1;
