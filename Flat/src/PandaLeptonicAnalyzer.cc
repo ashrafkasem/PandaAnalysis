@@ -496,7 +496,7 @@ bool PandaLeptonicAnalyzer::PassPreselection() {
     		       (gt->trigger & kMuTrig)   == kMuTrig   || (gt->trigger & kEGEGTrig) == kEGEGTrig ||
     		       (gt->trigger & kEGTrig)   == kEGTrig;
     if     (gt->nLooseLep>1 && gt->looseLep1Pt > 20 && gt->looseLep2Pt > 20) isGood = true;
-    else if(gt->nLooseLep>0 && gt->looseLep1Pt > 20 && passTrigger == true) isGood = true;
+    //else if(gt->nLooseLep>0 && gt->looseLep1Pt > 20 && passTrigger == true) isGood = true;
   }
 
   return isGood;
