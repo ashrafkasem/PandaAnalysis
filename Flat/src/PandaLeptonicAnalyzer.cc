@@ -352,31 +352,46 @@ void PandaLeptonicAnalyzer::SetDataDir(const char *s2) {
   OpenCorrection(cPUUp  ,dirPath1+"MitAnalysisRunII/data/80x/puWeights_80x_37ifb.root","puWeightsUp",1);
   OpenCorrection(cPUDown,dirPath1+"MitAnalysisRunII/data/80x/puWeights_80x_37ifb.root","puWeightsDown",1);
 
-  OpenCorrection(ZHEwkCorr    ,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root","SignalWeight_nloEWK_rebin",1);
-  OpenCorrection(ZHEwkCorrUp  ,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root","SignalWeight_nloEWK_up_rebin",1);
-  OpenCorrection(ZHEwkCorrDown,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root","SignalWeight_nloEWK_down_rebin",1);
+  OpenCorrection(cZHEwkCorr,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root",
+    "SignalWeight_nloEWK_rebin",1);
+  OpenCorrection(cZHEwkCorrUp  ,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root",
+    "SignalWeight_nloEWK_up_rebin",1);
+  OpenCorrection(cZHEwkCorrDown,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root",
+    "SignalWeight_nloEWK_down_rebin",1);
 
-  OpenCorrection(cLooseMuonId  ,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_MuonLooseId_Muon",2);
+  OpenCorrection(cLooseMuonId  ,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root",
+    "scalefactors_MuonLooseId_Muon",2);
 
   //OpenCorrection(cMediumMuonId ,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_MuonMediumId_Muon",2);
-  OpenCorrection(cMediumMuonId ,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_dylan_37ifb.root","scalefactors_Medium_Muon",2);
+  OpenCorrection(cMediumMuonId ,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_dylan_37ifb.root",
+    "scalefactors_Medium_Muon",2);
 
-  OpenCorrection(cTightMuonId  ,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_TightId_Muon",2);
-  OpenCorrection(cLooseMuonIso ,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonLooseId",2);
-  OpenCorrection(cMediumMuonIso,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonMediumId",2);
-  OpenCorrection(cTightMuonIso ,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonTightId",2);
-  OpenCorrection(cTrackingMuon ,dirPath1+"MitAnalysisRunII/data/80x/Tracking_EfficienciesAndSF_BCDEFGH.root","ratio_eff_eta3_dr030e030_corr",1);
+  OpenCorrection(cTightMuonId  ,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root",
+    "scalefactors_TightId_Muon",2);
+  OpenCorrection(cLooseMuonIso ,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root",
+    "scalefactors_Iso_MuonLooseId",2);
+  OpenCorrection(cMediumMuonIso,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root",
+    "scalefactors_Iso_MuonMediumId",2);
+  OpenCorrection(cTightMuonIso ,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root",
+    "scalefactors_Iso_MuonTightId",2);
+  OpenCorrection(cTrackingMuon ,dirPath1+"MitAnalysisRunII/data/80x/Tracking_EfficienciesAndSF_BCDEFGH.root",
+    "ratio_eff_eta3_dr030e030_corr",1);
 
-  OpenCorrection(cLooseElectronId ,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Loose_Electron",2);
+  OpenCorrection(cLooseElectronId ,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root",
+    "scalefactors_Loose_Electron",2);
 
   //OpenCorrection(cMediumElectronId,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Medium_Electron",2);
-  OpenCorrection(cMediumElectronId,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_dylan_37ifb.root","scalefactors_Medium_Electron",2);
+  OpenCorrection(cMediumElectronId,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_dylan_37ifb.root",
+    "scalefactors_Medium_Electron",2);
 
-  OpenCorrection(cTightElectronId ,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Tight_Electron",2);
-  OpenCorrection(cTrackingElectron,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Reco_Electron",2);
+  OpenCorrection(cTightElectronId ,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root",
+    "scalefactors_Tight_Electron",2);
+  OpenCorrection(cTrackingElectron,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root",
+    "scalefactors_Reco_Electron",2);
 
   // btag SFs
-  btagCalib = new BTagCalibration("csvv2",(dirPath1+"MitAnalysisRunII/data/80x/CSVv2_Moriond17_B_H.csv").Data());
+  btagCalib = new BTagCalibration("csvv2",
+                                  (dirPath1+"MitAnalysisRunII/data/80x/CSVv2_Moriond17_B_H.csv").Data());
   btagReaders[bJetL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
   btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
   btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
@@ -389,62 +404,9 @@ void PandaLeptonicAnalyzer::SetDataDir(const char *s2) {
 
   if (DEBUG) PDebug("PandaLeptonicAnalyzer::SetDataDir","Loaded btag SFs");
 
-  TString jecV = "V4", jecReco = "23Sep2016"; 
-  TString jecVFull = jecReco+jecV;
-  ak8UncReader["MC"] = new JetCorrectionUncertainty(
-     (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_Uncertainty_AK8PFPuppi.txt").Data()
-    );
-  std::vector<TString> eraGroups = {"BCD","EF","G","H"};
-  for (auto e : eraGroups) {
-    ak8UncReader["data"+e] = new JetCorrectionUncertainty(
-       (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_Uncertainty_AK8PFPuppi.txt").Data()
-      );
-  }
-
-  ak8JERReader = new JERReader(dirPath2+"/jec/25nsV10/Spring16_25nsV10_MC_SF_AK8PFPuppi.txt",
-                               dirPath2+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK8PFPuppi.txt");
-
-
-  ak4UncReader["MC"] = new JetCorrectionUncertainty(
-     (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_Uncertainty_AK4PFPuppi.txt").Data()
-    );
-  for (auto e : eraGroups) {
-    ak4UncReader["data"+e] = new JetCorrectionUncertainty(
-       (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_Uncertainty_AK4PFPuppi.txt").Data()
-      );
-  }
-
-  ak4JERReader = new JERReader(dirPath2+"/jec/25nsV10/Spring16_25nsV10_MC_SF_AK4PFPuppi.txt",
-                               dirPath2+"/jec/25nsV10/Spring16_25nsV10_MC_PtResolution_AK4PFPuppi.txt");
-
-  std::vector<JetCorrectorParameters> params = {
-    JetCorrectorParameters(
-      (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_L1FastJet_AK4PFPuppi.txt").Data()),
-    JetCorrectorParameters(
-      (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_L2Relative_AK4PFPuppi.txt").Data()),
-    JetCorrectorParameters(
-      (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_L3Absolute_AK4PFPuppi.txt").Data()),
-    JetCorrectorParameters(
-      (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecVFull+"_MC_L2L3Residual_AK4PFPuppi.txt").Data())
-  };
-  ak4ScaleReader["MC"] = new FactorizedJetCorrector(params);
-  if (DEBUG>1) PDebug("PandaLeptonicAnalyzer::SetDataDir","Loaded JES for AK4 MC");
-  for (auto e : eraGroups) {
-    params = {
-      JetCorrectorParameters(
-        (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_L1FastJet_AK4PFPuppi.txt").Data()),
-      JetCorrectorParameters(
-        (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_L2Relative_AK4PFPuppi.txt").Data()),
-      JetCorrectorParameters(
-        (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_L3Absolute_AK4PFPuppi.txt").Data()),
-      JetCorrectorParameters(
-        (dirPath2+"/jec/"+jecVFull+"/Summer16_"+jecReco+e+jecV+"_DATA_L2L3Residual_AK4PFPuppi.txt").Data())
-    };
-    ak4ScaleReader["data"+e] = new FactorizedJetCorrector(params);
-    if (DEBUG>1) PDebug("PandaLeptonicAnalyzer::SetDataDir","Loaded JES for AK4 "+e);
-  }
-
-  if (DEBUG) PDebug("PandaLeptonicAnalyzer::SetDataDir","Loaded JES/R");
+  // EWK corrections 
+  OpenCorrection(cWZEwkCorr,dirPath2+"data/leptonic/data.root","hEWKWZCorr",1);
+  OpenCorrection(cqqZZQcdCorr,dirPath2+"data/leptonic/data.root","hqqZZKfactor",2);
 
 }
 
@@ -1573,7 +1535,8 @@ void PandaLeptonicAnalyzer::Run() {
         // check there is no further copy:
         bool isLastCopy=true;
         for (int kG : targetsV) {
-          if (event.genParticles.at(kG).parent.isValid() && event.genParticles.at(kG).parent.get() == &part) {
+          if (event.genParticles.at(kG).parent.isValid() 
+              && event.genParticles.at(kG).parent.get() == &part) {
             isLastCopy=false;
             break;
           }
@@ -1593,7 +1556,7 @@ void PandaLeptonicAnalyzer::Run() {
         double theZZCorr[2] {1,1};
         theZZCorr[0] = weightEWKCorr(bosonPtMin,1);
         float GENmZZ = theZBosons.M();
-        theZZCorr[1] = kfactor_qqZZ_qcd_M(GENmZZ);
+        theZZCorr[1] = GetCorr(cqqZZQcdCorr,2,GENmZZ); // final state = 2 is fixed
         gt->sf_zz = theZZCorr[0]*theZZCorr[1];
         if(the_rho <= 0.3) gt->sf_zzUnc = (1.0+TMath::Abs((theZZCorr[0]-1)*(15.99/9.89-1)));
 	else               gt->sf_zzUnc = (1.0+TMath::Abs((theZZCorr[0]-1)               ));
@@ -1604,15 +1567,15 @@ void PandaLeptonicAnalyzer::Run() {
 
       if(nWBosons == 1 && nZBosons == 1) {
         TLorentzVector theWZBoson = theWBosons + theZBosons;
-        gt->sf_wz = weightEWKWZCorr(theWZBoson.M());
+        gt->sf_wz = GetCorr(cWZEwkCorr,theWZBoson.M());
       } else {
         gt->sf_wz = 1.0;
       }
       
       if(nZBosons == 1) {
-        gt->sf_zh     = weightZHEWKCorr(h1Corrs[ZHEwkCorr],     theZBosons.Pt());
-        gt->sf_zhUp   = weightZHEWKCorr(h1Corrs[ZHEwkCorrUp],   theZBosons.Pt());
-        gt->sf_zhDown = weightZHEWKCorr(h1Corrs[ZHEwkCorrDown], theZBosons.Pt());
+        gt->sf_zh     = weightZHEWKCorr(GetCorr(cZHEwkCorr,bound(theZBosons.Pt(),0,499.999)));
+        gt->sf_zhUp   = weightZHEWKCorr(GetCorr(cZHEwkCorrUp,bound(theZBosons.Pt(),0,499.999)));
+        gt->sf_zhDown = weightZHEWKCorr(GetCorr(cZHEwkCorrDown,bound(theZBosons.Pt(),0,499.999)));
       }
       else {
         gt->sf_zh     = 1.0;
@@ -1629,7 +1592,8 @@ void PandaLeptonicAnalyzer::Run() {
         // check there is no further copy:
         bool isLastCopy=true;
         for (int kG : targetsTop) {
-          if (event.genParticles.at(kG).parent.isValid() && event.genParticles.at(kG).parent.get() == &part) {
+          if (event.genParticles.at(kG).parent.isValid() 
+              && event.genParticles.at(kG).parent.get() == &part) {
             isLastCopy=false;
             break;
           }
