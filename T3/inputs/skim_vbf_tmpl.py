@@ -84,7 +84,7 @@ def fn(input_name,isData,full_path):
     skimmer.SetFlag('fatjet',False)
     skimmer.SetFlag('vbf',True)
     skimmer.SetFlag('puppi',False)
-#    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
     processType=root.PandaAnalyzer.kNone
     if not isData:
         if any([x in full_path for x in ['Vector_','Scalar_']]):
