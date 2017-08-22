@@ -45,7 +45,7 @@ public :
      kTriggers   =(1<<4),
      kVBF        =(1<<5),
      kRecoil     =(1<<6),
-     kFatjet     =(1<<7)
+     kFatjet     =(1<<7),
     };
 
     enum ProcessType { 
@@ -66,7 +66,8 @@ public :
         kMETTrig       =(1<<0),
         kSingleEleTrig =(1<<1),
         kSinglePhoTrig =(1<<2),
-        kSingleMuTrig     =(1<<3)
+        kSingleMuTrig  =(1<<3),
+        kJetHTTrig     =(1<<4),
     };
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -167,8 +168,8 @@ private:
     int DEBUG = 0; //!< debug verbosity level
     std::map<TString,bool> flags;
 
-    std::map<panda::GenParticle const*,float> genObjects;                 //!< particles we want to match the jets to, and the 'size' of the daughters
-    panda::GenParticle const* MatchToGen(double eta, double phi, double r2, int pdgid=0);        //!< private function to match a jet; returns NULL if not found
+    std::map<panda::GenParticle const*,float> genObjects; //!< particles we want to match the jets to, and the 'size' of the daughters
+    panda::GenParticle const* MatchToGen(double eta, double phi, double r2, int pdgid=0);   //!< private function to match a jet; returns NULL if not found
     std::map<int,std::vector<LumiRange>> goodLumis;
     std::vector<panda::Particle*> matchPhos, matchEles, matchLeps;
     
