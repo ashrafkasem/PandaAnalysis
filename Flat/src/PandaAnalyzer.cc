@@ -681,14 +681,14 @@ void PandaAnalyzer::Run() {
   std::vector<double> vbtagpt {20.0,50.0,80.0,120.0,200.0,300.0,400.0,500.0,700.0,1000.0};
   std::vector<double> vbtageta {0.0,0.5,1.5,2.5};
   std::vector<std::vector<double>> lfeff  = {{0.081,0.065,0.060,0.063,0.072,0.085,0.104,0.127,0.162},
-                       {0.116,0.097,0.092,0.099,0.112,0.138,0.166,0.185,0.222},
-                       {0.173,0.145,0.149,0.175,0.195,0.225,0.229,0.233,0.250}};
+                                             {0.116,0.097,0.092,0.099,0.112,0.138,0.166,0.185,0.222},
+                                             {0.173,0.145,0.149,0.175,0.195,0.225,0.229,0.233,0.250}};
   std::vector<std::vector<double>> ceff = {{0.377,0.389,0.391,0.390,0.391,0.375,0.372,0.392,0.435},
-                      {0.398,0.407,0.416,0.424,0.424,0.428,0.448,0.466,0.500},
-                      {0.375,0.389,0.400,0.425,0.437,0.459,0.481,0.534,0.488}};
+                                           {0.398,0.407,0.416,0.424,0.424,0.428,0.448,0.466,0.500},
+                                           {0.375,0.389,0.400,0.425,0.437,0.459,0.481,0.534,0.488}};
   std::vector<std::vector<double>> beff = {{0.791,0.815,0.825,0.835,0.821,0.799,0.784,0.767,0.760},
-                      {0.794,0.816,0.829,0.836,0.823,0.804,0.798,0.792,0.789},
-                      {0.739,0.767,0.780,0.789,0.776,0.771,0.779,0.787,0.806}};
+                                           {0.794,0.816,0.829,0.836,0.823,0.804,0.798,0.792,0.789},
+                                           {0.739,0.767,0.780,0.789,0.776,0.771,0.779,0.787,0.806}};
   Binner btagpt(vbtagpt);
   Binner btageta(vbtageta);
 
@@ -700,6 +700,7 @@ void PandaAnalyzer::Run() {
   std::vector<unsigned int> eleTriggers;
   std::vector<unsigned int> phoTriggers;
   std::vector<unsigned int> muTriggers;
+  std::vector<unsigned int> jetTriggers;
 
   if (isData) {
     std::vector<TString> metTriggerPaths = {
@@ -717,12 +718,6 @@ void PandaAnalyzer::Run() {
           "HLT_PFMETNoMu120_PFMHTNoMu120_IDTight"
     };
     std::vector<TString> eleTriggerPaths = {
-//                    "HLT_Ele25_eta2p1_WPTight_Gsf",
-//                     "HLT_Ele27_eta2p1_WPLoose_Gsf",
-
-//                    "HLT_Ele23_CaloIdL_TrackIdL_IsoVL",
-//                    "HLT_Ele22_eta2p1_WP75_Gsf",
-//                    "HLT_Ele23_WPLoose_Gsf",
           "HLT_Ele27_WP85_Gsf",
           "HLT_Ele27_WPLoose_Gsf",
           "HLT_Ele105_CaloIdVT_GsfTrkIdT",
@@ -731,8 +726,6 @@ void PandaAnalyzer::Run() {
           "HLT_Ele27_eta2p1_WPTight_Gsf",
           "HLT_Ele32_eta2p1_WPTight_Gsf",
           "HLT_Ele35_WPLoose_Gsf",
-//                    "HLT_Ele23_Ele12_CaloIdL_TrackIdL_IsoVL_DZ",
-
           "HLT_ECALHT800"
     };
 
@@ -746,22 +739,32 @@ void PandaAnalyzer::Run() {
           "HLT_Photon120_R9Id90_HE10_IsoM",
           "HLT_Photon165_R9Id90_HE10_IsoM",
           "HLT_Photon300_NoHE",
-
           "HLT_ECALHT800"
     };
 
+    std::vector<TString> jetTriggerPaths = {
+          "HLT_PFHT650",
+          "HLT_PFHT900",
+          "HLT_PFJet500",
+          "HLT_PFJet450",
+          "HLT_PFJet320",
+    };
+
     if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading MET triggers");
-    for (auto path : metTriggerPaths) {
+    for (auto path : metTriggerPaths) 
       RegisterTrigger(path,metTriggers);
-    }
+    
     if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading SingleElectron triggers");
-    for (auto path : eleTriggerPaths) {
+    for (auto path : eleTriggerPaths) 
       RegisterTrigger(path,eleTriggers);
-    }
+    
     if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading SinglePhoton triggers");
-    for (auto path : phoTriggerPaths) {
+    for (auto path : phoTriggerPaths) 
       RegisterTrigger(path,phoTriggers);
-    }
+
+    if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading JetHT triggers");
+    for (auto path : jetTriggerPaths) 
+      RegisterTrigger(path,jetTriggers);
 
   }
 
@@ -826,9 +829,6 @@ void PandaAnalyzer::Run() {
     gt->npv = event.npv;
     gt->pu = event.npvTrue;
     gt->metFilter = (event.metFilters.pass()) ? 1 : 0;
-    // these two are not need since we use muon-fixed MET
-    // gt->metFilter = (gt->metFilter==1 && !event.metFilters.badMuons) ? 1 : 0;
-    // gt->metFilter = (gt->metFilter==1 && !event.metFilters.duplicateMuons) ? 1 : 0;
     gt->metFilter = (gt->metFilter==1 && !event.metFilters.badPFMuons) ? 1 : 0;
     gt->metFilter = (gt->metFilter==1 && !event.metFilters.badChargedHadrons) ? 1 : 0;
 
@@ -839,22 +839,28 @@ void PandaAnalyzer::Run() {
 
       // save triggers
       for (auto iT : metTriggers) {
-       if (event.triggerFired(iT)) {
-        gt->trigger |= kMETTrig;
-        break;
-       }
+        if (event.triggerFired(iT)) {
+          gt->trigger |= kMETTrig;
+          break;
+        }
       }
       for (auto iT : eleTriggers) {
-       if (event.triggerFired(iT)) {
-        gt->trigger |= kSingleEleTrig;
-        break;
-       }
+        if (event.triggerFired(iT)) {
+          gt->trigger |= kSingleEleTrig;
+          break;
+        }
       }
       for (auto iT : phoTriggers) {
-       if (event.triggerFired(iT)) {
-        gt->trigger |= kSinglePhoTrig;
-        break;
-       }
+        if (event.triggerFired(iT)) {
+          gt->trigger |= kSinglePhoTrig;
+          break;
+        }
+      }
+      for (auto iT : jetTriggers) {
+        if (event.triggerFired(iT)) {
+          gt->trigger |= kJetHTTrig;
+          break;
+        }
       }
     } else {
       gt->sf_npv = GetCorr(cNPV,gt->npv);
@@ -988,7 +994,6 @@ void PandaAnalyzer::Run() {
       } else {
         panda::Electron *ele = dynamic_cast<panda::Electron*>(lep);
         bool isTight = ( ele->tight &&
-                /*ElectronIsolation(ele->pt,ele->eta,ele->iso,PElectron::kTight) &&*/
                 ele->pt()>40 && fabs(ele->eta())<2.5 );
         if (lep_counter==1) {
           gt->looseLep1Pt *= EGMSCALE;
@@ -1205,8 +1210,6 @@ void PandaAnalyzer::Run() {
           gt->fj1RawPt = rawpt;
 
           // do a bit of jet energy scaling
-          // uncReader->setJetEta(eta); uncReader->setJetPt(pt);
-          // double scaleUnc = uncReader->getUncertainty(true);
           double scaleUnc = (fj.ptCorrUp - gt->fj1Pt) / gt->fj1Pt; 
           gt->fj1PtScaleUp    = gt->fj1Pt  * (1 + 2*scaleUnc);
           gt->fj1PtScaleDown  = gt->fj1Pt  * (1 - 2*scaleUnc);
@@ -2012,22 +2015,6 @@ void PandaAnalyzer::Run() {
 
         }
 
-        /* // I'm killing this temporarily as we don't use it -SN
-        if (doMonoH){
-          // alternate stuff for inclusive jet collection (also different b tagging WP)
-          double sf_alt(1),sfUp_alt(1),sfDown_alt(1);
-          CalcBJetSFs("jet_M",flavor,eta,pt,eff,btagUncFactor,sf_alt,sfUp_alt,sfDown_alt);
-          btagcands_alt.push_back(btagcand(iJ,flavor,eff,sf_alt,sfUp_alt,sfDown_alt));
-          sf_cent_alt.push_back(sf_alt);
-          if (flavor>0) {
-            sf_bUp_alt.push_back(sfUp_alt); sf_bDown_alt.push_back(sfDown_alt);
-            sf_mUp_alt.push_back(sf_alt); sf_mDown_alt.push_back(sf_alt);
-          } else {
-            sf_bUp_alt.push_back(sf_alt); sf_bDown_alt.push_back(sf_alt);
-            sf_mUp_alt.push_back(sfUp_alt); sf_mDown_alt.push_back(sfDown_alt);
-          }
-        }
-        */
       } // loop over jets
 
       EvalBTagSF(btagcands,sf_cent,GeneralTree::bCent,GeneralTree::bJet);
@@ -2036,20 +2023,6 @@ void PandaAnalyzer::Run() {
       EvalBTagSF(btagcands,sf_mUp,GeneralTree::bMUp,GeneralTree::bJet);
       EvalBTagSF(btagcands,sf_mDown,GeneralTree::bMDown,GeneralTree::bJet);
 
-      /* // see above, also needs to use the new functions -SN
-      if (flags["monohiggs"]) {
-        EvalBTagSF(btagcands_alt,sf_cent_alt,
-              gt->sf_btag0_alt,gt->sf_btag1_alt,gt->sf_btag2_alt,gt->sf_btagGT0_alt);
-        EvalBTagSF(btagcands_alt,sf_bUp_alt,
-              gt->sf_btag0BUp_alt,gt->sf_btag1BUp_alt,gt->sf_btag2BUp_alt,gt->sf_btagGT0BUp_alt);
-        EvalBTagSF(btagcands_alt,sf_bDown_alt,
-              gt->sf_btag0BDown_alt,gt->sf_btag1BDown_alt,gt->sf_btag2BDown_alt,gt->sf_btagGT0BDown_alt);
-        EvalBTagSF(btagcands_alt,sf_mUp_alt,
-              gt->sf_btag0MUp_alt,gt->sf_btag1MUp_alt,gt->sf_btag2MUp_alt,gt->sf_btagGT0MUp_alt);
-        EvalBTagSF(btagcands_alt,sf_mDown_alt,
-              gt->sf_btag0MDown_alt,gt->sf_btag1MDown_alt,gt->sf_btag2MDown_alt,gt->sf_btagGT0MDown_alt);
-      }
-      */
     }
 
     tr.TriggerEvent("ak4 gen-matching");
