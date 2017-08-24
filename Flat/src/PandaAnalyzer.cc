@@ -499,6 +499,11 @@ bool PandaAnalyzer::PassPreselection() {
       isGood = true;
     }
   }
+  if (preselBits & kRecoil50) {
+    if ( max_pf>50 || max_puppi>50 ) {
+      isGood = true;
+    }
+  }
   if (preselBits & kMonotop) {
     if (gt->nFatjet>=1 && gt->fj1Pt>200) {
       if ( max_pf>200 || max_puppi>200) {
@@ -831,7 +836,9 @@ void PandaAnalyzer::Run() {
     gt->metFilter = (event.metFilters.pass()) ? 1 : 0;
     gt->metFilter = (gt->metFilter==1 && !event.metFilters.badPFMuons) ? 1 : 0;
     gt->metFilter = (gt->metFilter==1 && !event.metFilters.badChargedHadrons) ? 1 : 0;
-
+    gt->egmFilter = (!event.metFilters.dupECALClusters) ? 1 : 0;
+    gt->egmFilter = (gt->egmFilter==1 && !event.metFilters.unfixedECALHits) ? 1 : 0;
+ 
     if (isData) {
       // check the json
       if (applyJSON && !PassGoodLumis(gt->runNumber,gt->lumiNumber))
