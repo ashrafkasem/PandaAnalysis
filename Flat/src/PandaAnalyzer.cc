@@ -248,6 +248,8 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   // pileup
   OpenCorrection(cNPV,dirPath+"moriond17/normalized_npv.root","data_npv_Wmn",1);
   OpenCorrection(cPU,dirPath+"moriond17/puWeights_80x_37ifb.root","puWeights",1);
+  OpenCorrection(cPUUp,dirPath+"moriond17/puWeights_80x_37ifb.root","puWeightsUp",1);
+  OpenCorrection(cPUDown,dirPath+"moriond17/puWeights_80x_37ifb.root","puWeightsDown",1);
 
   // electrons
   OpenCorrection(cEleVeto,dirPath+"moriond17/scaleFactor_electron_summer16.root",
@@ -865,6 +867,8 @@ void PandaAnalyzer::Run() {
     } else {
       gt->sf_npv = GetCorr(cNPV,gt->npv);
       gt->sf_pu = GetCorr(cPU,gt->pu);
+      gt->sf_puUp = GetCorr(cPUUp,gt->pu);
+      gt->sf_puDown = GetCorr(cPUDown,gt->pu);
     }
 
     if (uncReader==0) {
