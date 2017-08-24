@@ -98,6 +98,8 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    sf_puUp = 1;
+    sf_puDown = 1;
     genMuonPt = -1;
     genMuonEta = -1;
     genElectronPt = -1;
@@ -440,6 +442,8 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("sf_puUp",&sf_puUp,"sf_puUp/F");
+    Book("sf_puDown",&sf_puDown,"sf_puDown/F");
     Book("genMuonPt",&genMuonPt,"genMuonPt/F");
     Book("genMuonEta",&genMuonEta,"genMuonEta/F");
     Book("genElectronPt",&genElectronPt,"genElectronPt/F");
