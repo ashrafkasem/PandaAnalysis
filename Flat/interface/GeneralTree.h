@@ -158,6 +158,8 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    float sf_puUp = -1;
+    float sf_puDown = -1;
     float genMuonPt = -1;
     float genMuonEta = -1;
     float genElectronPt = -1;
@@ -247,8 +249,6 @@ class GeneralTree : public genericTree {
     float sf_phoTrig = -1;
     float sf_metTrig = -1;
     float sf_pu = -1;
-    float sf_puUp = -1;
-    float sf_puDown = -1;
     float sf_npv = -1;
     float sf_tt = -1;
     float sf_tt_ext = -1;
