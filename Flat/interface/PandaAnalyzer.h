@@ -46,6 +46,7 @@ public :
      kVBF        =(1<<5),
      kRecoil     =(1<<6),
      kFatjet     =(1<<7),
+     kRecoil50   =(1<<8),
     };
 
     enum ProcessType { 
