@@ -99,6 +99,8 @@ private:
     enum CorrectionType { //!< enum listing relevant corrections applied to MC
         cNPV=0,       //!< npv weight
         cPU,          //!< true pu weight
+        cPUUp,        //!< true pu weight
+        cPUDown,      //!< true pu weight
         cEleVeto,     //!< monojet SF, Veto ID for e
         cEleTight,    //!< monojet SF, Tight ID for e
         cEleReco,     //!< monojet SF, tracking for e
