@@ -7,6 +7,7 @@ base = argv[1]
 output = argv[2]
 
 import ROOT as root
+from numpy import arange 
 from array import array 
 
 bins = [0, 800, 1200, 1700, 3000]
@@ -21,7 +22,9 @@ for ib in xrange(len(bins) - 1):
     eff_fn = f.Get('efficiency_func')
     nbx = eff.GetPassedHistogram().GetNbinsX()
     if not h_merged:
-        x_arr = array('f', [eff.GetPassedHistogram().GetXaxis().GetXbins().At(i) for i in xrange(nbx)])
+        hdummy= eff.GetPassedHistogram()
+        x_arr = array('f', arange(hdummy.GetBinLowEdge(1), hdummy.GetBinLowEdge(nbx+1), 1))
+        # x_arr = array('f', [.GetXaxis().GetXbins().At(i) for i in xrange(nbx)])
         y_arr = array('f', bins)
         x_n = len(x_arr) - 1
         y_n = len(y_arr) - 1
@@ -30,7 +33,7 @@ for ib in xrange(len(bins) - 1):
                              y_n, y_arr)
         h_merged.SetDirectory(0)
     xaxis = h_merged.GetXaxis()        
-    for ibx in xrange(1, nbx + 1):
+    for ibx in xrange(1, x_n + 1):
         x_val = xaxis.GetBinCenter(ibx)
         # h_merged.SetBinContent(ibx, ib + 1, eff.GetEfficiency(ibx))
         h_merged.SetBinContent(ibx, ib + 1, eff_fn.Eval(x_val))
