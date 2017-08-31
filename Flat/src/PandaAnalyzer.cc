@@ -821,7 +821,7 @@ void PandaAnalyzer::Run() {
     }
 
     if ( (preselBits&kMonotop) || (preselBits&kMonohiggs) || 
-      (preselBits&kMonojet) || (preselBits&kRecoil) ) 
+         (preselBits&kMonojet) || (preselBits&kRecoil) ) 
     {
      if (event.recoil.max<175)
        continue;
@@ -2184,10 +2184,7 @@ void PandaAnalyzer::Run() {
 
         TLorentzVector vpt(0,0,0,0);
 
-        int nGen = event.genParticles.size();
-
-        for (int iG=0; iG!=nGen; ++iG) {
-          auto& part(event.genParticles.at(iG));
+        for (auto& part : event.genParticles) {
           int pdgid = part.pdgid;
           unsigned int abspdgid = abs(pdgid);
 
@@ -2232,6 +2229,55 @@ void PandaAnalyzer::Run() {
     }
 
     tr.TriggerEvent("qcd/ewk SFs");
+
+    gt->genTauPt = -1;
+    gt->genElectronPt = -1;
+    gt->genMuonPt = -1;
+    panda::GenParticle *tau = NULL;
+    bool foundTauLeptonic = false; 
+    for (auto& gen : event.genParticles) {
+      unsigned apdgid = abs(gen.pdgid);
+      float pt = gen.pt();
+      bool isEmu = false; 
+
+      if (apdgid == 11 && pt > gt->genElectronPt) {
+        gt->genElectronPt = pt; 
+        gt->genElectronEta = gen.eta(); 
+        isEmu = true; 
+      }
+      
+      if (apdgid == 13 && pt > gt->genMuonPt) {
+        gt->genMuonPt = pt; 
+        gt->genMuonEta = gen.eta(); 
+        isEmu = true; 
+      }
+
+      if (isEmu && !foundTauLeptonic && tau) {
+        const panda::GenParticle *parent = &gen;
+        while (parent->parent.isValid()) {
+          parent = parent->parent.get();
+          if (parent == tau) {
+            foundTauLeptonic = true; 
+            gt->genTauPt = -1; 
+            gt->genTauEta = -1;
+            break;
+          }
+        }
+      }
+
+      if (!foundTauLeptonic && apdgid == 15 && pt > gt->genTauPt
+          && ((gen.statusFlags & (1 << panda::GenParticle::kIsHardProcess)) != 0 
+              || (gen.statusFlags & (1 << panda::GenParticle::kFromHardProcessBeforeFSR)) != 0 
+              || ((gen.statusFlags & (1 << panda::GenParticle::kIsDecayedLeptonHadron)) != 0 
+                  && (gen.statusFlags & (1 << panda::GenParticle::kFromHardProcess)) != 0
+                  )
+              )
+          ) 
+      {
+        gt->genTauPt = pt; 
+        gt->genTauEta = gen.eta();
+      }
+    }
 
     gt->sf_metTrigVBF=1; gt->sf_metTrigZmmVBF=1;
     if (!isData) {
