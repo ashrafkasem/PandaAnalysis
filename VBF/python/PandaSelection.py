@@ -43,3 +43,5 @@ for x in ['dimuon','dielectron','singlemuon','singleelectron']:
     #      weights[x] = weights['z']
       else:
           weights[x] = tTIMES(weights['z'],'sf_metTrigVBF')
+
+weights_cnc = {k:v.replace('sf_qcdV_VBF','sf_qcdV_VBFTight') for k,v in weights.iteritems()}

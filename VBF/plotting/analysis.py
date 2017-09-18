@@ -52,7 +52,10 @@ plot.AddLumiLabel(True)
 plot.do_overflow = True
 plot.do_underflow = True
 
-weight = sel.weights[region]%lumi
+if args.cat == 'cnc':
+    weight = sel.weights_cnc[region]%lumi
+else:
+    weight = sel.weights[region]%lumi
 plot.mc_weight = weight
 
 ### DEFINE PROCESSES ###
