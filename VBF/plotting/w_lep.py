@@ -64,14 +64,14 @@ t_out_mask = t_mask & (~accp)
 
 e_mask = ((s['genTauPt'] < 1) &
           (s['genElectronPt'] > 1))
-accp = ((s['genElectronPt'] > 40) & (s['fabs(genElectronEta)'] < 2.6))
+accp = ((s['genElectronPt'] > 10) & (s['fabs(genElectronEta)'] < 2.6))
 e_in_mask = e_mask & accp
 e_out_mask = e_mask & (~accp) 
 
 m_mask = ((s['genTauPt'] < 1) &
           (s['genElectronPt'] < 1) &
           (s['genMuonPt'] > 1))
-accp = ((s['genMuonPt'] > 20) & (s['fabs(genMuonEta)'] < 2.4))
+accp = ((s['genMuonPt'] > 10) & (s['fabs(genMuonEta)'] < 2.4))
 m_in_mask = m_mask & accp
 m_out_mask = m_mask & (~accp) 
 

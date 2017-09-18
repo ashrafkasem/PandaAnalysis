@@ -757,6 +757,12 @@ void PandaAnalyzer::Run() {
           "HLT_PFJet320",
     };
 
+    std::vector<TString> muTriggerPaths = {
+          "HLT_IsoMu20",
+          "HLT_IsoMu22",
+          "HLT_IsoMu24",
+    };
+
     if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading MET triggers");
     for (auto path : metTriggerPaths) 
       RegisterTrigger(path,metTriggers);
@@ -768,6 +774,11 @@ void PandaAnalyzer::Run() {
     if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading SinglePhoton triggers");
     for (auto path : phoTriggerPaths) 
       RegisterTrigger(path,phoTriggers);
+
+    if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading SingleMuon triggers");
+    for (auto path : muTriggerPaths) 
+      RegisterTrigger(path,muTriggers);
+
 
     if (DEBUG>1) PDebug("PandaAnalyzer::Run","Loading JetHT triggers");
     for (auto path : jetTriggerPaths) 
@@ -868,6 +879,12 @@ void PandaAnalyzer::Run() {
       for (auto iT : jetTriggers) {
         if (event.triggerFired(iT)) {
           gt->trigger |= kJetHTTrig;
+          break;
+        }
+      }
+      for (auto iT : muTriggers) {
+        if (event.triggerFired(iT)) {
+          gt->trigger |= kSingleMuTrig;
           break;
         }
       }
@@ -2118,6 +2135,7 @@ void PandaAnalyzer::Run() {
     // derive ewk/qcd weights
     gt->sf_qcdV=1; gt->sf_ewkV=1;
     gt->sf_qcdV_VBF=1;
+    gt->sf_qcdV_VBFTight=1;
     if (!isData) {
       bool found = processType!=kA && processType!=kZ && processType!=kW
                      && processType!=kZEWK && processType!=kWEWK;
