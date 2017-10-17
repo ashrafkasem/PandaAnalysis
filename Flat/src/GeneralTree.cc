@@ -98,6 +98,11 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    barrelHTMiss = -1;
+    barrelJet12Pt = -1;
+    barrelJet1Pt = -1;
+    barrelJet1Eta = -1;
+    barrelHT = -1;
     sf_puUp = 1;
     sf_puDown = 1;
     genMuonPt = -1;
@@ -442,6 +447,11 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("barrelHTMiss",&barrelHTMiss,"barrelHTMiss/F");
+    Book("barrelJet12Pt",&barrelJet12Pt,"barrelJet12Pt/F");
+    Book("barrelJet1Pt",&barrelJet1Pt,"barrelJet1Pt/F");
+    Book("barrelJet1Eta",&barrelJet1Eta,"barrelJet1Eta/F");
+    Book("barrelHT",&barrelHT,"barrelHT/F");
     Book("sf_puUp",&sf_puUp,"sf_puUp/F");
     Book("sf_puDown",&sf_puDown,"sf_puDown/F");
     Book("genMuonPt",&genMuonPt,"genMuonPt/F");
