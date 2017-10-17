@@ -342,10 +342,14 @@ void PandaAnalyzer::SetDataDir(const char *s) {
   OpenCorrection(cVBF_EWKW,dirPath+"vbf16/kewk/kFactor_WToLNu_pT_Mjj.root",
                  "TH2F_kFactor",2);
 
-  OpenCorrection(cVBF_TrigMET,dirPath+"vbf16/trig/metTriggerEfficiency_mjj_vbf.root",
-                 "h_eff",2);
-  OpenCorrection(cVBF_TrigMETZmm,dirPath+"vbf16/trig/metTriggerEfficiency_mjj_vbf_zmm.root",
-                 "h_eff",2);
+  // OpenCorrection(cVBF_TrigMET,dirPath+"vbf16/trig/metTriggerEfficiency_mjj_vbf.root",
+  //                "h_eff",2);
+  // OpenCorrection(cVBF_TrigMETZmm,dirPath+"vbf16/trig/metTriggerEfficiency_mjj_vbf_zmm.root",
+  //                "h_eff",2);
+  OpenCorrection(cVBF_TrigMET,dirPath+"vbf16/trig/param_nmu1.root",
+                 "h_barrelHT",1);
+  OpenCorrection(cVBF_TrigMETZmm,dirPath+"vbf16/trig/param_nmu2.root",
+                 "h_barrelHT",1);
 
   OpenCorrection(cBadECALJets,dirPath+"vbf16/hotjets-runBCDEFGH.root",
                  "h2jet",2);
@@ -1413,6 +1417,10 @@ void PandaAnalyzer::Run() {
     vector<panda::Jet*> cleanedJets, isoJets, btaggedJets, centralJets;
     vector<int> btagindices;
     TLorentzVector vJet;
+    TLorentzVector vBarrelJets;
+    gt->barrelJet12Pt = 0;
+    gt->barrelHT = 0;
+    unsigned nBarrelJets = 0;
     panda::Jet *jet1=0, *jet2=0;
     panda::Jet *jot1=0, *jot2=0;
     panda::Jet *jotUp1=0, *jotUp2=0;
@@ -1447,102 +1455,115 @@ void PandaAnalyzer::Run() {
 
 
      if (jet.pt()>30) { // nominal jets
-      cleanedJets.push_back(&jet);
-      if (cleanedJets.size()==1) {
-        jot1 = &jet;
-        gt->jot1Pt = jet.pt();
-        gt->jot1Eta = jet.eta();
-        gt->jot1Phi = jet.phi();
-        if (doVBF && fabs(gt->jot1Eta)<2.4) { // if it's a central jet, must jot1 ID requirements
-          gt->jot1VBFID = jet.monojet;
-        } else { // if leading jet is not central, leave the event be
-          gt->jot1VBFID = 1;
-        }
-      } else if (cleanedJets.size()==2) {
-        jot2 = &jet;
-        gt->jot2Pt = jet.pt();
-        gt->jot2Eta = jet.eta();
-        gt->jot2Phi = jet.phi();
-      }
+       cleanedJets.push_back(&jet);
+       if (cleanedJets.size()==1) {
+         jot1 = &jet;
+         gt->jot1Pt = jet.pt();
+         gt->jot1Eta = jet.eta();
+         gt->jot1Phi = jet.phi();
+         if (doVBF && fabs(gt->jot1Eta)<2.4) { // if it's a central jet, must pass ID requirements
+           gt->jot1VBFID = jet.monojet ? 1 : 0;
+         } else { // if leading jet is not central, leave the event be
+           gt->jot1VBFID = 1;
+         }
+       } else if (cleanedJets.size()==2) {
+         jot2 = &jet;
+         gt->jot2Pt = jet.pt();
+         gt->jot2Eta = jet.eta();
+         gt->jot2Phi = jet.phi();
+       }
+ 
+       if (cleanedJets.size()<3) {
+         bool isBad = GetCorr(cBadECALJets,jet.eta(),jet.phi()) > 0;
+         if (isBad)
+           gt->badECALFilter = 0;
+       }
+ 
+       float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
+       if (fabs(jet.eta())<2.4) {
+         centralJets.push_back(&jet);
+         if (centralJets.size()==1) {
+           jet1 = &jet;
+           gt->jet1Pt = jet.pt();
+           gt->jet1Eta = jet.eta();
+           gt->jet1Phi = jet.phi();
+           gt->jet1CSV = csv;
+           gt->jet1IsTight = jet.monojet ? 1 : 0;
+         } else if (centralJets.size()==2) {
+           jet2 = &jet;
+           gt->jet2Pt = jet.pt();
+           gt->jet2Eta = jet.eta();
+           gt->jet2Phi = jet.phi();
+           gt->jet2CSV = csv;
+         }
+       }
 
-      if (cleanedJets.size()<3) {
-        bool isBad = GetCorr(cBadECALJets,jet.eta(),jet.phi()) > 0;
-        if (isBad)
-          gt->badECALFilter = 0;
-      }
-
-      float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
-      if (fabs(jet.eta())<2.4) {
-        centralJets.push_back(&jet);
-        if (centralJets.size()==1) {
-          jet1 = &jet;
-          gt->jet1Pt = jet.pt();
-          gt->jet1Eta = jet.eta();
-          gt->jet1Phi = jet.phi();
-          gt->jet1CSV = csv;
-          gt->jet1IsTight = jet.monojet ? 1 : 0;
-        } else if (centralJets.size()==2) {
-          jet2 = &jet;
-          gt->jet2Pt = jet.pt();
-          gt->jet2Eta = jet.eta();
-          gt->jet2Phi = jet.phi();
-          gt->jet2CSV = csv;
-        }
-      }
-
-      if (doMonoH) {
-        gt->jetPt[cleanedJets.size()-1]=jet.pt();
-        gt->jetEta[cleanedJets.size()-1]=jet.eta();
-        gt->jetPhi[cleanedJets.size()-1]=jet.phi();
-        gt->jetE[cleanedJets.size()-1]=jet.m();
-        gt->jetCSV[cleanedJets.size()-1]=csv;
-        gt->jetQGL[cleanedJets.size()-1]=jet.qgl;
-      }
-
-      // compute dphi wrt mets
-      if (cleanedJets.size() <= nJetDPhi) {
-        vJet.SetPtEtaPhiM(jet.pt(),jet.eta(),jet.phi(),jet.m());
-        gt->dphipuppimet = std::min(fabs(vJet.DeltaPhi(vPuppiMET)),(double)gt->dphipuppimet);
-        gt->dphipfmet = std::min(fabs(vJet.DeltaPhi(vPFMET)),(double)gt->dphipfmet);
-        gt->dphipuppiUA = std::min(fabs(vJet.DeltaPhi(vpuppiUA)),(double)gt->dphipuppiUA);
-        gt->dphipuppiUW = std::min(fabs(vJet.DeltaPhi(vpuppiUW)),(double)gt->dphipuppiUW);
-        gt->dphipuppiUZ = std::min(fabs(vJet.DeltaPhi(vpuppiUZ)),(double)gt->dphipuppiUZ);
-        gt->dphipfUA = std::min(fabs(vJet.DeltaPhi(vpfUA)),(double)gt->dphipfUA);
-        gt->dphipfUW = std::min(fabs(vJet.DeltaPhi(vpfUW)),(double)gt->dphipfUW);
-        gt->dphipfUZ = std::min(fabs(vJet.DeltaPhi(vpfUZ)),(double)gt->dphipfUZ);
-      }
-      // btags
-      if (csv>0.5426) {
-        ++(gt->jetNBtags);
-        if (doMonoH) {
-          btaggedJets.push_back(&jet);
-          btagindices.push_back(cleanedJets.size()-1);
-        }
-        if (!doVBF && csv>0.8484) 
-          ++(gt->jetNMBtags);
-      }
-
-      bool isIsoJet = ( (gt->nFatjet==0) || 
-               (fabs(jet.eta())<maxIsoEta 
-               && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet.eta(),jet.phi())>2.25) ); 
-
-      if (isIsoJet) {
-        isoJets.push_back(&jet);
-        if (csv>0.5426)
-          ++gt->isojetNBtags;
-        if (isoJets.size()==1) {
-         gt->isojet1Pt = jet.pt();
-         gt->isojet1CSV = jet.csv;
-        } else if (isoJets.size()==2) {
-         gt->isojet2Pt = jet.pt();
-         gt->isojet2CSV = jet.csv;
-        }
-        if (doMonoH)
-          gt->jetIso[cleanedJets.size()-1]=1;
-      } else {
-        if (doMonoH)
-          gt->jetIso[cleanedJets.size()-1]=0;
-      }
+       vJet.SetPtEtaPhiM(jet.pt(),jet.eta(),jet.phi(),jet.m());
+       if (fabs(jet.eta())<3.0) {
+         gt->barrelHT += jet.pt();
+         vBarrelJets += vJet;
+         if (nBarrelJets == 0) {
+           gt->barrelJet1Pt = jet.pt();
+           gt->barrelJet1Eta = jet.eta();
+         }
+         if (nBarrelJets < 2) {
+           gt->barrelJet12Pt += jet.pt();
+         }
+         nBarrelJets++;
+       }
+ 
+       if (doMonoH) {
+         gt->jetPt[cleanedJets.size()-1]=jet.pt();
+         gt->jetEta[cleanedJets.size()-1]=jet.eta();
+         gt->jetPhi[cleanedJets.size()-1]=jet.phi();
+         gt->jetE[cleanedJets.size()-1]=jet.m();
+         gt->jetCSV[cleanedJets.size()-1]=csv;
+         gt->jetQGL[cleanedJets.size()-1]=jet.qgl;
+       }
+ 
+       // compute dphi wrt mets
+       if (cleanedJets.size() <= nJetDPhi) {
+         gt->dphipuppimet = std::min(fabs(vJet.DeltaPhi(vPuppiMET)),(double)gt->dphipuppimet);
+         gt->dphipfmet = std::min(fabs(vJet.DeltaPhi(vPFMET)),(double)gt->dphipfmet);
+         gt->dphipuppiUA = std::min(fabs(vJet.DeltaPhi(vpuppiUA)),(double)gt->dphipuppiUA);
+         gt->dphipuppiUW = std::min(fabs(vJet.DeltaPhi(vpuppiUW)),(double)gt->dphipuppiUW);
+         gt->dphipuppiUZ = std::min(fabs(vJet.DeltaPhi(vpuppiUZ)),(double)gt->dphipuppiUZ);
+         gt->dphipfUA = std::min(fabs(vJet.DeltaPhi(vpfUA)),(double)gt->dphipfUA);
+         gt->dphipfUW = std::min(fabs(vJet.DeltaPhi(vpfUW)),(double)gt->dphipfUW);
+         gt->dphipfUZ = std::min(fabs(vJet.DeltaPhi(vpfUZ)),(double)gt->dphipfUZ);
+       }
+       // btags
+       if (csv>0.5426) {
+         ++(gt->jetNBtags);
+         if (doMonoH) {
+           btaggedJets.push_back(&jet);
+           btagindices.push_back(cleanedJets.size()-1);
+         }
+         if (!doVBF && csv>0.8484) 
+           ++(gt->jetNMBtags);
+       }
+ 
+       bool isIsoJet = ( (gt->nFatjet==0) || 
+                (fabs(jet.eta())<maxIsoEta 
+                && DeltaR2(gt->fj1Eta,gt->fj1Phi,jet.eta(),jet.phi())>2.25) ); 
+ 
+       if (isIsoJet) {
+         isoJets.push_back(&jet);
+         if (csv>0.5426)
+           ++gt->isojetNBtags;
+         if (isoJets.size()==1) {
+          gt->isojet1Pt = jet.pt();
+          gt->isojet1CSV = jet.csv;
+         } else if (isoJets.size()==2) {
+          gt->isojet2Pt = jet.pt();
+          gt->isojet2CSV = jet.csv;
+         }
+         if (doMonoH)
+           gt->jetIso[cleanedJets.size()-1]=1;
+       } else {
+         if (doMonoH)
+           gt->jetIso[cleanedJets.size()-1]=0;
+       }
      }
 
      // do jes variation OUTSIDE of pt>30 check
@@ -1580,6 +1601,7 @@ void PandaAnalyzer::Run() {
      }
 
     } // VJet loop
+    gt->barrelHTMiss = vBarrelJets.Pt();
 
     switch (whichRecoil) {
       case -1: // photon
@@ -2299,8 +2321,10 @@ void PandaAnalyzer::Run() {
 
     gt->sf_metTrigVBF=1; gt->sf_metTrigZmmVBF=1;
     if (!isData) {
-      gt->sf_metTrigVBF = GetCorr(cVBF_TrigMET,gt->pfmetnomu,gt->jot12Mass);
-      gt->sf_metTrigZmmVBF = GetCorr(cVBF_TrigMETZmm,gt->pfmetnomu,gt->jot12Mass);
+      // gt->sf_metTrigVBF = GetCorr(cVBF_TrigMET,gt->pfmetnomu,gt->jot12Mass);
+      // gt->sf_metTrigZmmVBF = GetCorr(cVBF_TrigMETZmm,gt->pfmetnomu,gt->jot12Mass);
+      gt->sf_metTrigVBF = GetCorr(cVBF_TrigMET,gt->barrelHT);
+      gt->sf_metTrigZmmVBF = GetCorr(cVBF_TrigMETZmm,gt->barrelHT);
     }
 
     if (!isData && processType==kSignal) {
