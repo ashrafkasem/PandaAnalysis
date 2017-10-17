@@ -32,7 +32,9 @@
 #pragma link C++ enum GeneralTree::BTagTags;
 
 #pragma link C++ class LumiRange;
+#pragma link C++ class TCorr;
 #pragma link C++ class THCorr;
+#pragma link C++ class TF1Corr;
 #pragma link C++ class btagcand;
 #pragma link C++ class JetCorrector;
 #pragma link C++ class PandaAnalyzer;
