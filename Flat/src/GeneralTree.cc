@@ -98,6 +98,8 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    sf_qcdV_VBF2lTight = 1;
+    sf_qcdV_VBF2l = 1;
     barrelHTMiss = -1;
     barrelJet12Pt = -1;
     barrelJet1Pt = -1;
@@ -447,6 +449,8 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("sf_qcdV_VBF2lTight",&sf_qcdV_VBF2lTight,"sf_qcdV_VBF2lTight/F");
+    Book("sf_qcdV_VBF2l",&sf_qcdV_VBF2l,"sf_qcdV_VBF2l/F");
     Book("barrelHTMiss",&barrelHTMiss,"barrelHTMiss/F");
     Book("barrelJet12Pt",&barrelJet12Pt,"barrelJet12Pt/F");
     Book("barrelJet1Pt",&barrelJet1Pt,"barrelJet1Pt/F");
