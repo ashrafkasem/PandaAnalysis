@@ -123,8 +123,10 @@ private:
         cWEWK,
         cAEWK,
         cVBF_ZNLO,    //!< NLO weights for QCD Z,W in VBF phase space
+        cVBF_ZllNLO,  
         cVBF_WNLO,
         cVBFTight_ZNLO,    //!< NLO weights for QCD Z,W in tight VBF phase space
+        cVBFTight_ZllNLO,  
         cVBFTight_WNLO,
         cVBF_EWKZ,    //!< k-factors for EWK Z,W in VBF phase space
         cVBF_EWKW,
@@ -200,6 +202,7 @@ private:
     std::vector<TFile*> fCorrs = std::vector<TFile*>(cN,0); //!< files containing corrections
     std::vector<THCorr1*> h1Corrs = std::vector<THCorr1*>(cN,0); //!< histograms for binned corrections
     std::vector<THCorr2*> h2Corrs = std::vector<THCorr2*>(cN,0); //!< histograms for binned corrections
+    std::vector<TF1Corr*> f1Corrs = std::vector<TF1Corr*>(cN,0); //!< TF1s for continuous corrections
 
     TFile *MSDcorr;
     TF1* puppisd_corrGEN;
