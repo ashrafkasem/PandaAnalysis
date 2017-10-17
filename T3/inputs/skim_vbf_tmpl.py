@@ -20,12 +20,12 @@ import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 Load('PandaAnalyzer')
 data_dir = getenv('CMSSW_BASE') + '/src/PandaAnalysis/data/'
 
-stopwatch = clock() 
+stopwatch = time() 
 def print_time(label):
     global stopwatch
-    now_ = clock()
+    now_ = time()
     PDebug(sname+'.print_time:'+str(time()),
-           '%.3f s elapsed performing "%s"'%((now_-stopwatch)/1000.,label))
+           '%.3f s elapsed performing "%s"'%((now_-stopwatch),label))
     stopwatch = now_
 
 def copy_local(long_name):
