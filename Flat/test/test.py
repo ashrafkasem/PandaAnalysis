@@ -23,8 +23,8 @@ Load('PandaAnalyzer')
 skimmer = root.PandaAnalyzer(debug_level)
 
 
-#skimmer.firstEvent=0
-#skimmer.lastEvent=50
+skimmer.firstEvent=0
+skimmer.lastEvent=50
 skimmer.isData=False
 skimmer.SetFlag('puppi',False)
 skimmer.SetFlag('fatjet',False)
@@ -40,7 +40,7 @@ if skimmer.isData:
         for run,lumis in payload.iteritems():
             for l in lumis:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
-skimmer.processType = root.PandaAnalyzer.kW
+skimmer.processType = root.PandaAnalyzer.kZ
 #skimmer.processType = root.PandaAnalyzer.kWEWK
 #skimmer.SetPreselectionBit(root.PandaAnalyzer.kFatjet)
 #system("pxrdcp %s input.root '!pfCandidates'"%(torun))
