@@ -20,12 +20,12 @@ import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 Load('PandaAnalyzer')
 data_dir = getenv('CMSSW_BASE') + '/src/PandaAnalysis/data/'
 
-stopwatch = clock() 
+stopwatch = time() 
 def print_time(label):
     global stopwatch
-    now_ = clock()
+    now_ = time()
     PDebug(sname+'.print_time:'+str(time()),
-           '%.3f s elapsed performing "%s"'%((now_-stopwatch)/1000.,label))
+           '%.3f s elapsed performing "%s"'%((now_-stopwatch),label))
     stopwatch = now_
 
 def copy_local(long_name):
@@ -84,7 +84,7 @@ def fn(input_name,isData,full_path):
     skimmer.SetFlag('fatjet',False)
     skimmer.SetFlag('vbf',True)
     skimmer.SetFlag('puppi',False)
-#    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
+    skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
     processType=root.PandaAnalyzer.kNone
     if not isData:
         if any([x in full_path for x in ['Vector_','Scalar_']]):
@@ -169,22 +169,6 @@ def hadd(good_inputs):
     else:
         PError(sname+'.hadd','Merging exited with code %i'%ret)
 
-
-def add_bdt():
-    # now run the BDT
-    Load('TMVABranchAdder')
-    ba = root.TMVABranchAdder()
-    ba.treename = 'events'
-    ba.defaultValue = -1.2
-    ba.presel = 'fj1ECFN_2_4_20>0'
-    for v in tagcfg.variables:
-        ba.AddVariable(v[0],v[2])
-    for v in tagcfg.formulae:
-        ba.AddFormula(v[0],v[2])
-    for s in tagcfg.spectators:
-        ba.AddSpectator(s[0])
-    ba.BookMVA('top_ecf_bdt',data_dir+'/trainings/top_ecfbdt_v8_BDT.weights.xml')
-    ba.RunFile('output.root')
 
 
 def drop_branches(to_drop=None, to_keep=None):
