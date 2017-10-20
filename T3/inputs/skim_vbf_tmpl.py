@@ -20,12 +20,12 @@ import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 Load('PandaAnalyzer')
 data_dir = getenv('CMSSW_BASE') + '/src/PandaAnalysis/data/'
 
-stopwatch = clock() 
+stopwatch = time() 
 def print_time(label):
     global stopwatch
-    now_ = clock()
+    now_ = time()
     PDebug(sname+'.print_time:'+str(time()),
-           '%.3f s elapsed performing "%s"'%((now_-stopwatch)/1000.,label))
+           '%.3f s elapsed performing "%s"'%((now_-stopwatch),label))
     stopwatch = now_
 
 def copy_local(long_name):
@@ -82,15 +82,19 @@ def fn(input_name,isData,full_path):
     skimmer.isData=isData
     skimmer.SetFlag('firstGen',True)
     skimmer.SetFlag('fatjet',False)
-    skimmer.SetFlag('puppi',False)
     skimmer.SetFlag('vbf',True)
-#    skimmer.SetFlag('applyEGCorr',False)
+    skimmer.SetFlag('puppi',False)
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil)
-    #skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
-        if any([x in full_path for x in ['ST_','Vector_','Scalar_','ZprimeToTT']]):
+        if any([x in full_path for x in ['Vector_','Scalar_']]):
+            processType=root.PandaAnalyzer.kSignal
+        elif any([x in full_path for x in ['ST_','ZprimeToTT']]):
             processType=root.PandaAnalyzer.kTop
+        elif 'EWKZ2Jets' in full_path:
+            processType=root.PandaAnalyzer.kZEWK
+        elif 'EWKW' in full_path:
+            processType=root.PandaAnalyzer.kWEWK
         elif 'ZJets' in full_path or 'DY' in full_path:
             processType=root.PandaAnalyzer.kZ
         elif 'WJets' in full_path:
@@ -105,6 +109,7 @@ def fn(input_name,isData,full_path):
     try:
         fin = root.TFile.Open(input_name)
         tree = fin.FindObjectAny("events")
+        weight_table = fin.FindObjectAny('weights')
         hweights = fin.FindObjectAny("hSumW")
     except:
         PError(sname+'.fn','Could not read %s'%input_name)
@@ -115,6 +120,8 @@ def fn(input_name,isData,full_path):
     if not hweights:
         PError(sname+'.fn','Could not recover hweights in %s'%input_name)
         return False
+    if not weight_table:
+        weight_table = None
 
     output_name = input_name.replace('input','output')
     skimmer.SetDataDir(data_dir)
@@ -125,8 +132,11 @@ def fn(input_name,isData,full_path):
                 run = int(run_str)
                 for l in lumis:
                     skimmer.AddGoodLumiRange(run,l[0],l[1])
+    rinit = skimmer.Init(tree,hweights,weight_table)
+    if rinit:
+        PError(sname+'.fn','Failed to initialize %s!'%(input_name))
+        return False 
     skimmer.SetOutputFile(output_name)
-    skimmer.Init(tree,hweights)
 
     # run and save output
     skimmer.Run()
@@ -159,22 +169,6 @@ def hadd(good_inputs):
     else:
         PError(sname+'.hadd','Merging exited with code %i'%ret)
 
-
-def add_bdt():
-    # now run the BDT
-    Load('TMVABranchAdder')
-    ba = root.TMVABranchAdder()
-    ba.treename = 'events'
-    ba.defaultValue = -1.2
-    ba.presel = 'fj1ECFN_2_4_20>0'
-    for v in tagcfg.variables:
-        ba.AddVariable(v[0],v[2])
-    for v in tagcfg.formulae:
-        ba.AddFormula(v[0],v[2])
-    for s in tagcfg.spectators:
-        ba.AddSpectator(s[0])
-    ba.BookMVA('top_ecf_bdt',data_dir+'/trainings/top_ecfbdt_v8_BDT.weights.xml')
-    ba.RunFile('output.root')
 
 
 def drop_branches(to_drop=None, to_keep=None):
@@ -278,9 +272,6 @@ if __name__ == "__main__":
     hadd(list(processed))
     print_time('hadd')
 
-    if drop_branches(to_drop='fj1ECFN*'):
-        exit(2)
-    print_time('drop branches')
     ret = stageout(outdir,outfilename)
     print_time('stageout')
     if not ret:

@@ -45,7 +45,8 @@ public :
      kTriggers   =(1<<4),
      kVBF        =(1<<5),
      kRecoil     =(1<<6),
-     kFatjet     =(1<<7)
+     kFatjet     =(1<<7),
+     kRecoil50   =(1<<8),
     };
 
     enum ProcessType { 
@@ -53,25 +54,28 @@ public :
         kZ,
         kW,
         kA,
+        kZEWK,
+        kWEWK,
         kTT,
         kTop, // used for non-ttbar top
         kV, // used for non V+jets W or Z
         kH,
-        kSignal
+        kSignal,
     };
 
     enum TriggerBits {
         kMETTrig       =(1<<0),
         kSingleEleTrig =(1<<1),
         kSinglePhoTrig =(1<<2),
-        kSingleMuTrig     =(1<<3)
+        kSingleMuTrig  =(1<<3),
+        kJetHTTrig     =(1<<4),
     };
 
     //////////////////////////////////////////////////////////////////////////////////////
 
     PandaAnalyzer(int debug_=0);
     ~PandaAnalyzer();
-    void Init(TTree *tree, TH1D *hweights, TTree *weightNames=0);
+    int Init(TTree *tree, TH1D *hweights, TTree *weightNames=0);
     void SetOutputFile(TString fOutName);
     void ResetBranches();
     void Run();
@@ -96,6 +100,8 @@ private:
     enum CorrectionType { //!< enum listing relevant corrections applied to MC
         cNPV=0,       //!< npv weight
         cPU,          //!< true pu weight
+        cPUUp,        //!< true pu weight
+        cPUDown,      //!< true pu weight
         cEleVeto,     //!< monojet SF, Veto ID for e
         cEleTight,    //!< monojet SF, Tight ID for e
         cEleReco,     //!< monojet SF, tracking for e
@@ -106,15 +112,27 @@ private:
         cMuReco,      //!< MUO POG SF, tracking for mu
         cPho,         //!< EGM POG SF, contains ID for gamma
         cTrigMET,     //!< MET trigger eff        
+        cTrigMETZmm,  //!< Zmumu MET trigger eff
         cTrigEle,     //!< Ele trigger eff        
         cTrigPho,     //!< Pho trigger eff        
-        cZNLO,        //!< NLO weights for Z,W,A,A+2j
+        cZNLO,        //!< NLO weights for QCD Z,W,A,A+2j
         cWNLO,
         cANLO,
         cANLO2j,
-        cZEWK,        //!< EWK weights for Z,W,A,A+2j
+        cZEWK,        //!< EWK weights for QCD Z,W,A,A+2j
         cWEWK,
         cAEWK,
+        cVBF_ZNLO,    //!< NLO weights for QCD Z,W in VBF phase space
+        cVBF_ZllNLO,  
+        cVBF_WNLO,
+        cVBFTight_ZNLO,    //!< NLO weights for QCD Z,W in tight VBF phase space
+        cVBFTight_ZllNLO,  
+        cVBFTight_WNLO,
+        cVBF_EWKZ,    //!< k-factors for EWK Z,W in VBF phase space
+        cVBF_EWKW,
+        cVBF_TrigMET, //!< MET trigger eff as a f'n of mjj/met 
+        cVBF_TrigMETZmm,
+        cBadECALJets,  //!< bad ECAL clusters to filter jets
         cN
     };
 
@@ -155,8 +173,8 @@ private:
     int DEBUG = 0; //!< debug verbosity level
     std::map<TString,bool> flags;
 
-    std::map<panda::GenParticle const*,float> genObjects;                 //!< particles we want to match the jets to, and the 'size' of the daughters
-    panda::GenParticle const* MatchToGen(double eta, double phi, double r2, int pdgid=0);        //!< private function to match a jet; returns NULL if not found
+    std::map<panda::GenParticle const*,float> genObjects; //!< particles we want to match the jets to, and the 'size' of the daughters
+    panda::GenParticle const* MatchToGen(double eta, double phi, double r2, int pdgid=0);   //!< private function to match a jet; returns NULL if not found
     std::map<int,std::vector<LumiRange>> goodLumis;
     std::vector<panda::Particle*> matchPhos, matchEles, matchLeps;
     
@@ -184,6 +202,7 @@ private:
     std::vector<TFile*> fCorrs = std::vector<TFile*>(cN,0); //!< files containing corrections
     std::vector<THCorr1*> h1Corrs = std::vector<THCorr1*>(cN,0); //!< histograms for binned corrections
     std::vector<THCorr2*> h2Corrs = std::vector<THCorr2*>(cN,0); //!< histograms for binned corrections
+    std::vector<TF1Corr*> f1Corrs = std::vector<TF1Corr*>(cN,0); //!< TF1s for continuous corrections
 
     TFile *MSDcorr;
     TF1* puppisd_corrGEN;
@@ -194,6 +213,7 @@ private:
     TFile *fOut;     // output file is owned by PandaAnalyzer
     TTree *tOut;
     GeneralTree *gt; // essentially a wrapper around tOut
+    TH1F *hDTotalMCWeight=0;
     TTree *tIn=0;    // input tree to read
     unsigned int preselBits=0;
 
