@@ -189,9 +189,6 @@ void PandaAnalyzer::Terminate() {
   fOut->WriteTObject(tOut);
   fOut->Close();
 
-  for (auto *f : fCorrs)
-    if (f)
-      f->Close();
   for (auto *h : h1Corrs)
     delete h;
   for (auto *h : h2Corrs)
@@ -232,6 +229,9 @@ void PandaAnalyzer::OpenCorrection(CorrectionType ct, TString fpath, TString hna
     h2Corrs[ct] = new THCorr2((TH2D*)fCorrs[ct]->Get(hname));
   else 
     f1Corrs[ct] = new TF1Corr((TF1*)fCorrs[ct]->Get(hname));
+  fCorrs[ct]->Close();
+  delete fCorrs[ct];
+  fCorrs[ct] = 0;
 }
 
 double PandaAnalyzer::GetCorr(CorrectionType ct, double x, double y) {
