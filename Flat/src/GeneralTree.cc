@@ -441,19 +441,6 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("jot2EtaUp",&jot2EtaUp,"jot2EtaUp/F");
     Book("jot2EtaDown",&jot2EtaDown,"jot2EtaDown/F");
     Book("jot1VBFID",&jot1VBFID,"jot1VBFID/I");
-  }
-  Book("scale",scale,"scale[6]/F");
-
-  for (auto p : ecfParams) { 
-    TString ecfn(makeECFString(p));
-    Book("fj1"+ecfn,&(fj1ECFNs[p]),"fj1"+ecfn+"/F");
-  }
-
-  for (auto p : btagParams) {
-    TString btagn(makeBTagSFString(p));
-    Book(btagn,&(sf_btags[p]),btagn+"/F");
-  }
-//ENDCUSTOMWRITE
     Book("sf_qcdV_VBF2lTight",&sf_qcdV_VBF2lTight,"sf_qcdV_VBF2lTight/F");
     Book("sf_qcdV_VBF2l",&sf_qcdV_VBF2l,"sf_qcdV_VBF2l/F");
     Book("barrelHTMiss",&barrelHTMiss,"barrelHTMiss/F");
@@ -469,13 +456,26 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("genElectronEta",&genElectronEta,"genElectronEta/F");
     Book("genTauPt",&genTauPt,"genTauPt/F");
     Book("genTauEta",&genTauEta,"genTauEta/F");
-    Book("badECALFilter",&badECALFilter,"badECALFilter/I");
     Book("sf_qcdV_VBFTight",&sf_qcdV_VBFTight,"sf_qcdV_VBFTight/F");
     Book("sf_metTrigVBF",&sf_metTrigVBF,"sf_metTrigVBF/F");
     Book("sf_metTrigZmmVBF",&sf_metTrigZmmVBF,"sf_metTrigZmmVBF/F");
     Book("sumETRaw",&sumETRaw,"sumETRaw/F");
     Book("sf_metTrigZmm",&sf_metTrigZmm,"sf_metTrigZmm/F");
     Book("sf_qcdV_VBF",&sf_qcdV_VBF,"sf_qcdV_VBF/F");
+  }
+  Book("scale",scale,"scale[6]/F");
+
+  for (auto p : ecfParams) { 
+    TString ecfn(makeECFString(p));
+    Book("fj1"+ecfn,&(fj1ECFNs[p]),"fj1"+ecfn+"/F");
+  }
+
+  for (auto p : btagParams) {
+    TString btagn(makeBTagSFString(p));
+    Book(btagn,&(sf_btags[p]),btagn+"/F");
+  }
+//ENDCUSTOMWRITE
+    Book("badECALFilter",&badECALFilter,"badECALFilter/I");
     Book("jetNMBtags",&jetNMBtags,"jetNMBtags/I");
     Book("pfmetRaw",&pfmetRaw,"pfmetRaw/F");
     Book("nAK8jet",&nAK8jet,"nAK8jet/I");
