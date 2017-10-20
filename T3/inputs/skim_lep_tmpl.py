@@ -17,7 +17,7 @@ from PandaCore.Tools.Load import *
 import PandaCore.Tools.job_management as cb
 import PandaAnalysis.Tagging.cfg_v8 as tagcfg
 
-Load('PandaAnalyzer')
+Load('PandaLeptonicAnalyzer')
 data_dir = getenv('CMSSW_BASE') + '/src/PandaAnalysis/data/'
 
 stopwatch = clock() 
@@ -78,29 +78,35 @@ def fn(input_name,isData,full_path):
     
     PInfo(sname+'.fn','Starting to process '+input_name)
     # now we instantiate and configure the analyzer
-    skimmer = root.PandaAnalyzer()
+    skimmer = root.PandaLeptonicAnalyzer()
     skimmer.isData=isData
-    skimmer.SetFlag('firstGen',True)
-    skimmer.SetFlag('monohiggs',True)
-    skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonohiggs)
-    processType=root.PandaAnalyzer.kNone
+    skimmer.SetFlag('lepton',True)
+    skimmer.SetPreselectionBit(root.PandaLeptonicAnalyzer.kLepton)
+    processType=root.PandaLeptonicAnalyzer.kNone
     if not isData:
-        if any([x in full_path for x in ['ST_','Vector_','Scalar_','ZprimeToTT']]):
-            processType=root.PandaAnalyzer.kTop
+        if any([x in full_path for x in ['Vector_','Scalar_']]):
+            processType=root.PandaLeptonicAnalyzer.kSignal
+        elif any([x in full_path for x in ['ST_','ZprimeToTT']]):
+            processType=root.PandaLeptonicAnalyzer.kTop
+        elif 'EWKZ2Jets' in full_path:
+            processType=root.PandaLeptonicAnalyzer.kZEWK
+        elif 'EWKW' in full_path:
+            processType=root.PandaLeptonicAnalyzer.kWEWK
         elif 'ZJets' in full_path or 'DY' in full_path:
-            processType=root.PandaAnalyzer.kZ
+            processType=root.PandaLeptonicAnalyzer.kZ
         elif 'WJets' in full_path:
-            processType=root.PandaAnalyzer.kW
+            processType=root.PandaLeptonicAnalyzer.kW
         elif 'GJets' in full_path:
-            processType=root.PandaAnalyzer.kA
+            processType=root.PandaLeptonicAnalyzer.kA
         elif 'TTJets' in full_path or 'TT_' in full_path:
-            processType=root.PandaAnalyzer.kTT
+            processType=root.PandaLeptonicAnalyzer.kTT
     skimmer.processType=processType 
 
     # read the inputs
     try:
         fin = root.TFile.Open(input_name)
         tree = fin.FindObjectAny("events")
+        weight_table = fin.FindObjectAny('weights')
         hweights = fin.FindObjectAny("hSumW")
     except:
         PError(sname+'.fn','Could not read %s'%input_name)
@@ -111,6 +117,8 @@ def fn(input_name,isData,full_path):
     if not hweights:
         PError(sname+'.fn','Could not recover hweights in %s'%input_name)
         return False
+    if not weight_table:
+        weight_table = None
 
     output_name = input_name.replace('input','output')
     skimmer.SetDataDir(data_dir)
@@ -121,8 +129,11 @@ def fn(input_name,isData,full_path):
                 run = int(run_str)
                 for l in lumis:
                     skimmer.AddGoodLumiRange(run,l[0],l[1])
+    rinit = skimmer.Init(tree,hweights,weight_table)
+    if rinit:
+        PError(sname+'.fn','Failed to initialize %s!'%(input_name))
+        return False 
     skimmer.SetOutputFile(output_name)
-    skimmer.Init(tree,hweights)
 
     # run and save output
     skimmer.Run()
@@ -154,23 +165,6 @@ def hadd(good_inputs):
         PInfo(sname+'.hadd','Merging exited with code %i'%ret)
     else:
         PError(sname+'.hadd','Merging exited with code %i'%ret)
-
-
-def add_bdt():
-    # now run the BDT
-    Load('TMVABranchAdder')
-    ba = root.TMVABranchAdder()
-    ba.treename = 'events'
-    ba.defaultValue = -1.2
-    ba.presel = 'fj1ECFN_2_4_20>0'
-    for v in tagcfg.variables:
-        ba.AddVariable(v[0],v[2])
-    for v in tagcfg.formulae:
-        ba.AddFormula(v[0],v[2])
-    for s in tagcfg.spectators:
-        ba.AddSpectator(s[0])
-    ba.BookMVA('top_ecf_bdt',data_dir+'/trainings/top_ecfbdt_v8_BDT.weights.xml')
-    ba.RunFile('output.root')
 
 
 def drop_branches(to_drop=None, to_keep=None):

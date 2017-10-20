@@ -98,11 +98,36 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    sf_qcdV_VBF2lTight = 1;
+    sf_qcdV_VBF2l = 1;
+    barrelHTMiss = -1;
+    barrelJet12Pt = -1;
+    barrelJet1Pt = -1;
+    barrelJet1Eta = -1;
+    barrelHT = -1;
+    sf_puUp = 1;
+    sf_puDown = 1;
+    genMuonPt = -1;
+    genMuonEta = -1;
+    genElectronPt = -1;
+    genElectronEta = -1;
+    genTauPt = -1;
+    genTauEta = -1;
+    badECALFilter = 0;
+    sf_qcdV_VBFTight = 1;
+    sf_metTrigVBF = 1;
+    sf_metTrigZmmVBF = 1;
+    sumETRaw = -1;
     jot1VBFID = 0;
     sf_metTrigZmm = 1;
     sf_qcdV_VBF = 1;
     jetNMBtags = 0;
     pfmetRaw = -1;
+    nAK8jet = 0;
+    ak81Pt = -1;
+    ak81Eta = -1;
+    ak81Phi = -1;
+    ak81MaxCSV = -1;
     nB = 0;
     fj1MSDScaleUp_sj = -1;
     fj1MSDScaleDown_sj = -1;
@@ -429,10 +454,35 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("sf_qcdV_VBF2lTight",&sf_qcdV_VBF2lTight,"sf_qcdV_VBF2lTight/F");
+    Book("sf_qcdV_VBF2l",&sf_qcdV_VBF2l,"sf_qcdV_VBF2l/F");
+    Book("barrelHTMiss",&barrelHTMiss,"barrelHTMiss/F");
+    Book("barrelJet12Pt",&barrelJet12Pt,"barrelJet12Pt/F");
+    Book("barrelJet1Pt",&barrelJet1Pt,"barrelJet1Pt/F");
+    Book("barrelJet1Eta",&barrelJet1Eta,"barrelJet1Eta/F");
+    Book("barrelHT",&barrelHT,"barrelHT/F");
+    Book("sf_puUp",&sf_puUp,"sf_puUp/F");
+    Book("sf_puDown",&sf_puDown,"sf_puDown/F");
+    Book("genMuonPt",&genMuonPt,"genMuonPt/F");
+    Book("genMuonEta",&genMuonEta,"genMuonEta/F");
+    Book("genElectronPt",&genElectronPt,"genElectronPt/F");
+    Book("genElectronEta",&genElectronEta,"genElectronEta/F");
+    Book("genTauPt",&genTauPt,"genTauPt/F");
+    Book("genTauEta",&genTauEta,"genTauEta/F");
+    Book("badECALFilter",&badECALFilter,"badECALFilter/I");
+    Book("sf_qcdV_VBFTight",&sf_qcdV_VBFTight,"sf_qcdV_VBFTight/F");
+    Book("sf_metTrigVBF",&sf_metTrigVBF,"sf_metTrigVBF/F");
+    Book("sf_metTrigZmmVBF",&sf_metTrigZmmVBF,"sf_metTrigZmmVBF/F");
+    Book("sumETRaw",&sumETRaw,"sumETRaw/F");
     Book("sf_metTrigZmm",&sf_metTrigZmm,"sf_metTrigZmm/F");
     Book("sf_qcdV_VBF",&sf_qcdV_VBF,"sf_qcdV_VBF/F");
     Book("jetNMBtags",&jetNMBtags,"jetNMBtags/I");
     Book("pfmetRaw",&pfmetRaw,"pfmetRaw/F");
+    Book("nAK8jet",&nAK8jet,"nAK8jet/I");
+    Book("ak81Pt",&ak81Pt,"ak81Pt/F");
+    Book("ak81Eta",&ak81Eta,"ak81Eta/F");
+    Book("ak81Phi",&ak81Phi,"ak81Phi/F");
+    Book("ak81MaxCSV",&ak81MaxCSV,"ak81MaxCSV/F");
     Book("nB",&nB,"nB/I");
     Book("fj1MSDScaleUp_sj",&fj1MSDScaleUp_sj,"fj1MSDScaleUp_sj/F");
     Book("fj1MSDScaleDown_sj",&fj1MSDScaleDown_sj,"fj1MSDScaleDown_sj/F");
