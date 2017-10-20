@@ -3,6 +3,7 @@
 thiscut=$(echo $1 | sed "s?'??g")
 scramdir=$2
 outdir=$3
+datacard=$4
 label=$(echo $thiscut | sed "s?[\(\)_]??g" | sed "s?[><&]?_?g" )
 thiscut=$(echo $thiscut | sed "s?&?\\\&?g")
 
@@ -19,8 +20,8 @@ WD=$PWD
 # cd CMSSW_7_4_7/src/MonoX
 # scramv1 b ProjectRename
 cd $scramdir/src/
-eval `scramv1 runtime -sh`
-# eval `/cvmfs/cms.cern.ch/common/scramv1 runtime -sh`
+# eval `scramv1 runtime -sh`
+eval `/cvmfs/cms.cern.ch/common/scramv1 runtime -sh`
 echo $CMSSW_BASE
 which combine
 
@@ -35,9 +36,14 @@ python runModelNoPhoton.py
 cp combined_model.root datacardsHiggs/ 
 cd datacardsHiggs
 #combine -M Asymptotic vbf_combined_fewbins.txt -n $label --run=blind --noFitAsimov 
-combine -M Asymptotic vbf_combined_binned.txt -n $label --run=blind --noFitAsimov 
+#combine -M Asymptotic vbf_combined_binned.txt -n $label --run=blind --noFitAsimov 
 #combine -M Asymptotic vbf_combined.txt -n $label --run=blind --noFitAsimov 
-cp higgs*root $outdir 
+combine -M Asymptotic $datacard -n $label --run=blind --noFitAsimov 
+ls higgs*root
+mkdir -p $outdir
+ret=$(cp higgs*root $outdir )
 
 cd $WD
 rm -rf CMSSW_7_4_7
+
+exit $ret

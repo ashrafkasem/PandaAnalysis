@@ -29,27 +29,32 @@ Load('Normalizer')
 '''
 
 ## first copy files locally
-list_dir = '/home/bmaier/cms/MonoTop/interpolation/'
+list_dir = '/home/snarayan/MonoTop/interpolation/'
 
 def stage_in_file(source,target):
-    source = source.replace('/mnt/hadoop/cms','root://xrootd.cmsaf.mit.edu/')
+    source = 'root://xrootd.cmsaf.mit.edu/' + source
     cmd = 'xrdcp %s %s'%(source,target)
+    PInfo(sname+'.stage_in_file', cmd)
     system(cmd)
 
+# copy slowly to keep Max happy
 def stage_in_list():
-    flist = open(list_dir+'%i_%i.txt'%(m_V,m_DM))
     system('mkdir -p unmerged')
+    flist = open(list_dir+'%i_%i.txt'%(m_V,m_DM))
+    PInfo(sname+'.stage_in_list','Reading '+list_dir+'%i_%i.txt'%(m_V,m_DM))
     for l in flist:
         in_name = l.strip()
         out_name = 'unmerged/'+in_name.split('/')[-1]
         stage_in_file(in_name,out_name)
 
+# do a recursive copy and make Max angry
 def stage_in_files():
     system('mkdir -p unmerged')
     t2dir = open(list_dir+'%i_%i.txt'%(m_V,m_DM)).readlines()[0]
     t2dir = t2dir.split('/')[:-1]
     t2dir = '/'.join(t2dir)
     t2dir = t2dir.replace('/mnt/hadoop/cms','root://xrootd.cmsaf.mit.edu/')
+    PInfo(sname+'.stage_in_files','Reading files from %s'%t2dir)
     cmd = 'xrdcp -r --parallel 4 %s unmerged'%(t2dir)
     system(cmd)
 
@@ -63,13 +68,15 @@ def remove(pattern):
     system(cmd)
 
 ## normalize the merged file
-def normalize():
+def get_xsec():
     params = read_nr_model(m_V,m_DM)
     if params:
         xsec = params.sigma
     else:
         exit(1)
-    
+    return xsec    
+
+def normalize(xsec):
     f = root.TFile.Open('merged.root','UPDATE')
     t = f.Get('events')
     h = root.TH1D('h','',1,-1,2)
@@ -119,11 +126,12 @@ def stageout():
     cmd = 'mv hists.root %s/interpolate/hists/%i_%i.root'%(getenv('PANDA_FITTING'),m_V,m_DM)
     system(cmd)
 
+xsec = get_xsec() # do this first in case it's missing
 #stage_in_files()
 stage_in_list()
 hadd()
 remove('unmerged')
-normalize()
+normalize(xsec)
 draw_all()
 remove('merged.root')
 stageout()
