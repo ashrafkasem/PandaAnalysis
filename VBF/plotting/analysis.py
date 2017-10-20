@@ -25,8 +25,8 @@ import ROOT as root
 root.gROOT.SetBatch()
 from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions
-#import PandaAnalysis.VBF.PandaSelection as sel
-import PandaAnalysis.VBF.TriggerSelection as sel
+import PandaAnalysis.VBF.PandaSelection as sel
+#import PandaAnalysis.VBF.TriggerSelection as sel
 from PandaCore.Drawers.plot_utility import *
 
 ### DEFINE REGIONS ###
