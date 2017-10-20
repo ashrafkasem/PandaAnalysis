@@ -86,10 +86,14 @@ def fn(input_name,isData,full_path):
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kMonotop)
     processType=root.PandaAnalyzer.kNone
     if not isData:
-        if any([x in full_path for x in ['ST_','Vector_','Scalar_']]):
+        if any([x in full_path for x in ['Vector_','Scalar_']]):
             processType=root.PandaAnalyzer.kSignal
-        elif 'ZprimeToTT' in full_path:
+        elif any([x in full_path for x in ['ST_','ZprimeToTT']]):
             processType=root.PandaAnalyzer.kTop
+        elif 'EWKZ2Jets' in full_path:
+            processType=root.PandaAnalyzer.kZEWK
+        elif 'EWKW' in full_path:
+            processType=root.PandaAnalyzer.kWEWK
         elif 'ZJets' in full_path or 'DY' in full_path:
             processType=root.PandaAnalyzer.kZ
         elif 'WJets' in full_path:
@@ -127,8 +131,11 @@ def fn(input_name,isData,full_path):
                 run = int(run_str)
                 for l in lumis:
                     skimmer.AddGoodLumiRange(run,l[0],l[1])
+    rinit = skimmer.Init(tree,hweights,weight_table)
+    if rinit:
+        PError(sname+'.fn','Failed to initialize %s!'%(input_name))
+        return False 
     skimmer.SetOutputFile(output_name)
-    skimmer.Init(tree,hweights,weight_table)
 
     # run and save output
     skimmer.Run()

@@ -17,9 +17,10 @@ if region=='test':
     region = 'signal'
 else:
     is_test = False
-masses = args.masses
-if out_region!='signal_vector':
+masses = args.masses.strip()
+if out_region!='signal_vector' and out_region!='signal_scalar':
     masses = None
+sname = argv[0]
 
 argv=[]
 import PandaAnalysis.Flat.fitting_forest as forest 
@@ -27,6 +28,9 @@ from PandaCore.Tools.Misc import *
 import PandaCore.Tools.Functions # kinematics
 import PandaAnalysis.Monotop.CombinedBVetoSelection as sel
 #import PandaAnalysis.Monotop.CombinedSelection as sel
+
+if masses:
+    PDebug(sname,'Looking for point="%s"'%(masses))
 
 basedir = getenv('PANDA_FLATDIR')+'/'
 lumi = 35900
@@ -72,11 +76,12 @@ vmap['met'] = 'min(%s,999.9999)'%u
 weights = {'nominal' : sel.weights[region]%lumi}
 
 if masses:
-    with open('signal_weights.dat') as fweights:
-        for line in fweights:
-            l = line.strip()
-            if l!='nominal':
-                vmap[l.replace('rw_','').replace('_nlo','')] = l
+    if out_region=='signal_vector':
+        with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights.dat') as fweights:
+            for line in fweights:
+                l = line.strip()
+                if l!='nominal':
+                    vmap[l.replace('rw_','').replace('_nlo','')] = l
     vmap.update(shift_btags())
 else:
     weights.update(shift_btags())
@@ -130,11 +135,10 @@ elif 'vector' in out_region:
             if fname!=masses:
                 continue
             masses = signame
+        PDebug(sname,"Opening "+f)
         factory.add_process(f,signame)
 elif 'scalar' in out_region:
     signal_files = glob(basedir+'/Scalar*root')
-    if couplings:
-        out_region += '_'+couplings
     for f in signal_files:
         fname = f.split('/')[-1].replace('.root','')
         signame = fname
@@ -145,6 +149,10 @@ elif 'scalar' in out_region:
         }
         for k,v in replacements.iteritems():
             signame = signame.replace(k,v)
+        if masses:
+            if fname!=masses:
+                continue
+            masses = signame
         factory.add_process(f,'scalar_'+signame)
 elif 'thq' in out_region:
     factory.add_process(f('thq'),'thq')
