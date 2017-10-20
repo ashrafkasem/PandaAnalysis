@@ -2,3 +2,6 @@
 *.swp
 *.pcm
 *.bkp
+test*root
+*.txt
+*.jdl
