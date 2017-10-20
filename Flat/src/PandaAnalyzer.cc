@@ -81,7 +81,7 @@ int PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
                                      "isData", "npv", "npvTrue", "weight", "chsAK4Jets", 
                                      "electrons", "muons", "taus", "photons", 
                                      "pfMet", "caloMet", "puppiMet", "rawMet", 
-                                     "recoil","metFilters","genMet","ak4GenJets"});
+                                     "recoil","metFilters"});
   readlist.setVerbosity(0);
 
   if (flags["fatjetAK8"])
@@ -97,6 +97,8 @@ int PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
   } else {
    readlist.push_back("genParticles");
    readlist.push_back("genReweight");
+   readlist.push_back("ak4GenJets");
+   readlist.push_back("genMet");
   }
 
 
@@ -129,13 +131,15 @@ int PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
   // manipulate the output tree
   if (isData) {
     std::vector<TString> droppable = {"mcWeight","scale","scaleUp",
+                                      "trueGenBosonPt",
                                       "scaleDown","pdf.*","gen.*","sf_.*"};
     gt->RemoveBranches(droppable,{"sf_phoPurity"});
   }
   if (flags["genOnly"]) {
     std::vector<TString> keepable = {"mcWeight","scale","scaleUp",
-                                     "scaleDown","pdf*","gen*","fj1*",
-                                     "nFatjet","sf_tt*","sf_qcdTT*"};
+                                     "scaleDown","pdf.*","gen.*","fj1.*",
+                                     "nFatjet","sf_tt.*","sf_qcdTT.*",
+                                     "trueGenBosonPt","sf_qcd.*","sf_ewk.*"};
     gt->RemoveBranches({".*"},keepable);
   }
 
@@ -827,8 +831,9 @@ void PandaAnalyzer::Run() {
   bool doVBF = flags["vbf"];
   bool doFatjet = flags["fatjet"];
   bool doAK8 = flags["fatjetAK8"];
+  bool doGenOnly = flags["genOnly"];
 
-  float fatjetMatchDR2 = doAK8 ? 0.64 : fatjetMatchDR2;
+  float fatjetMatchDR2 = doAK8 ? 0.64 : 2.25;
 
   // EVENTLOOP --------------------------------------------------------------------------
   for (iE=nZero; iE!=nEvents; ++iE) {
