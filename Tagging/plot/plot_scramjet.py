@@ -37,7 +37,7 @@ plot.SetTDRStyle()
 plot.InitLegend()
 #plot.InitLegend(0.7,0.7,0.88,0.9)
 plot.DrawMCErrors(True)
-plot.AddCMSLabel(0.15,0.94,'Simulation Preliminary')
+plot.AddCMSLabel(0.15,0.94,' Simulation')
 plot.cut = 'mSD>110 && mSD<210 && pt<1000'
 plot.SetNormFactor(True)
 plot.AddSqrtSLabel()
@@ -46,7 +46,7 @@ plot.AddPlotLabel("110 < m_{SD} < 210 GeV",.2,.82,False,42,.04)
 plot.mc_weight = 'normalizedWeight'
 
 ### DEFINE PROCESSES ###
-matched = Process('Top jets',root.kExtra1)
+matched = Process('Top quark jets',root.kExtra1)
 matched.additional_cut = 'matched==1 && gensize<1.2'
 matched.additional_weight = 'ptweight'
 
@@ -63,8 +63,8 @@ qcd.add_file(basedir+'/QCD.root')
 for p in processes:
     plot.add_process(p)
 
-plot.add_distribution(FDistribution('top_ecfv8_bdt',-1,1,50,'Top BDT','Jets'))
-plot.add_distribution(FDistribution('tau32SD',0,1,50,'#tau_{32}^{SD}','Jets'))
+plot.add_distribution(FDistribution('top_ecfv8_bdt',-1,1,50,'BDT Output','Normalized distribution'))
+plot.add_distribution(FDistribution('tau32SD',0,1,50,'#tau_{32}^{SD}','Normalized distribution'))
 
 
 ### DRAW AND CATALOGUE ###

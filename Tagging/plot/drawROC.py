@@ -26,7 +26,7 @@ fin = root.TFile(figsdir+'/'+'hists.root')
 
 roc.Logy()
 roc.SetPlotRange(0.005,1)
-roc.InitCanvas(.65,.15,.94,.6, True)
+roc.InitCanvas(.7,.2,.85,.45, False)
 roc.SetFile(fin)
 roc.c.AddPlotLabel(plotlabel,.2,.82,False,42,.04)
 
@@ -34,11 +34,11 @@ variables = [
 #  ('top_ecfv14_bdt','ECF+#tau_{32}^{SD}+f_{rec} BDT v2',1,3),
 #  ('top_ecfv12_bdt','ECF BDT v2',2,3),
 #  ('top_ecfv8_bdt','ECF+#tau_{32}^{SD}+f_{rec} BDT',1,1),
-  ('top_ecfv8_bdt','Top BDT',1,1),
+  ('top_ecfv8_bdt','BDT',1,1),
 #  ('top_ecfv6_bdt','ECF BDT',2,1),
 #  ('top_taufrec_bdt','#tau_{32}^{SD}+f_{rec} BDT',4,1),
 #  ('htt_frec','f_{rec}',1,2),
-  ('tau32SD','Groomed #tau_{32}',3,2),
+  ('tau32SD','#tau_{3}/#tau_{2}',3,2),
 #  ('tau32','#tau_{32}',4,2),
 #  ('input0','e(1,2,2)/e(1,2,1)^{2}',3,3),
 #  ('input1','e(1,3,4)/e(2,3,2)',4,3),
@@ -63,7 +63,7 @@ for iV in xrange(len(variables)):
     vstyle = 1 if 'bdt' in v else 2
   else:
     v,vlabel,vcolor,vstyle = variables[iV]
-  roc.CalcROC('h_%s_Top jets'%v,'h_%s_qOverg jets'%v,vlabel,vcolor,vstyle,1)
+  roc.CalcROC('h_%s_Top quark jets'%v,'h_%s_qOverg jets'%v,vlabel,vcolor,vstyle,1)
 
 base = getenv('SCRAMJETFLAT')+'/'
 fsig = root.TFile(base+'ZpTT.root'); tsig = fsig.Get('puppiCA15')
