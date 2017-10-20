@@ -46,7 +46,7 @@ vmap['met'] = u
 vmap['mjj'] = 'jot12Mass'
 vmap['deta'] = 'jot12DEta'
 vmap['dphi'] = 'jot12DPhi'
-weights = {'nominal' : (sel.weights[region]%lumi).replace('sf_qcdV_VBF','sf_qcdV_VBFTight')}
+weights = {'nominal' : (sel.weights_cnc[region]%lumi)}
 
 
 # build the factory
