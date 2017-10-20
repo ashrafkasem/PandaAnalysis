@@ -123,6 +123,11 @@ void GeneralTree::Reset() {
     sf_qcdV_VBF = 1;
     jetNMBtags = 0;
     pfmetRaw = -1;
+    nAK8jet = 0;
+    ak81Pt = -1;
+    ak81Eta = -1;
+    ak81Phi = -1;
+    ak81MaxCSV = -1;
     nB = 0;
     fj1MSDScaleUp_sj = -1;
     fj1MSDScaleDown_sj = -1;
@@ -473,6 +478,11 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("sf_qcdV_VBF",&sf_qcdV_VBF,"sf_qcdV_VBF/F");
     Book("jetNMBtags",&jetNMBtags,"jetNMBtags/I");
     Book("pfmetRaw",&pfmetRaw,"pfmetRaw/F");
+    Book("nAK8jet",&nAK8jet,"nAK8jet/I");
+    Book("ak81Pt",&ak81Pt,"ak81Pt/F");
+    Book("ak81Eta",&ak81Eta,"ak81Eta/F");
+    Book("ak81Phi",&ak81Phi,"ak81Phi/F");
+    Book("ak81MaxCSV",&ak81MaxCSV,"ak81MaxCSV/F");
     Book("nB",&nB,"nB/I");
     Book("fj1MSDScaleUp_sj",&fj1MSDScaleUp_sj,"fj1MSDScaleUp_sj/F");
     Book("fj1MSDScaleDown_sj",&fj1MSDScaleDown_sj,"fj1MSDScaleDown_sj/F");

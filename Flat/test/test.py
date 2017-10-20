@@ -27,7 +27,8 @@ skimmer.firstEvent=0
 skimmer.lastEvent=50
 skimmer.isData=False
 skimmer.SetFlag('puppi',False)
-skimmer.SetFlag('fatjet',False)
+skimmer.SetFlag('fatjet',True)
+skimmer.SetFlag('fatjetAK8',False)
 skimmer.SetFlag('vbf',True)
 skimmer.SetFlag('firstGen',False)
 skimmer.SetFlag('applyEGCorr',False)
