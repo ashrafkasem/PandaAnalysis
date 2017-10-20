@@ -3,10 +3,12 @@
 #include "PandaAnalysis/Flat/interface/BTagTreeBuilder.h"
 #include "PandaAnalysis/Flat/interface/GenAnalyzer.h"
 #include "PandaAnalysis/Flat/interface/GeneralTree.h"
+#include "PandaAnalysis/Flat/interface/GeneralLeptonicTree.h"
 #include "PandaAnalysis/Flat/interface/JetCorrector.h"
 #include "PandaAnalysis/Flat/interface/KFactorTree.h"
 #include "PandaAnalysis/Flat/interface/LimitTreeBuilder.h"
 #include "PandaAnalysis/Flat/interface/PandaAnalyzer.h"
+#include "PandaAnalysis/Flat/interface/PandaLeptonicAnalyzer.h"
 #include "PandaAnalysis/Flat/interface/SFTreeBuilder.h"
 #include "PandaAnalysis/Flat/interface/genericTree.h"
 
@@ -30,10 +32,13 @@
 #pragma link C++ enum GeneralTree::BTagTags;
 
 #pragma link C++ class LumiRange;
+#pragma link C++ class TCorr;
 #pragma link C++ class THCorr;
+#pragma link C++ class TF1Corr;
 #pragma link C++ class btagcand;
 #pragma link C++ class JetCorrector;
 #pragma link C++ class PandaAnalyzer;
+#pragma link C++ class PandaLeptonicAnalyzer;
 #pragma link C++ class GenAnalyzer;
 #pragma link C++ class BTagTreeBuilder;
 #pragma link C++ class SFTreeBuilder;
@@ -41,6 +46,7 @@
 #pragma link C++ class GeneralTree;
 #pragma link C++ class GeneralTree::ECFParams;
 #pragma link C++ class GeneralTree::BTagParams;
+#pragma link C++ class GeneralLeptonicTree;
 #pragma link C++ class KFactorTree;
 #pragma link C++ class genericTree;
 #pragma link C++ class LimitTreeBuilder;
@@ -49,4 +55,4 @@
 #pragma link C++ class Process;
 #pragma link C++ class Region;
 
-#endif 
+#endif

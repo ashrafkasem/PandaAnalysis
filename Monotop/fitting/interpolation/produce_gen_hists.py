@@ -163,6 +163,7 @@ def stageout():
     system(cmd)
 
 xsec = get_xsec() # do this first in case it's missing
+#stage_in_files()
 stage_in_list()
 hadd()
 remove('unmerged')

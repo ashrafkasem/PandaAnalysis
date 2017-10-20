@@ -6,7 +6,7 @@ export PANDA="${CMSSW_BASE}/src/PandaAnalysis"
 #export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170205.cfg"
 #export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170419_qcd.cfg"
 #export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170419_all.cfg" 
-export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170502_signals.cfg" 
+export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170522_004.cfg" 
 #export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20170406_thiggs.cfg"
 export PANDA_FLATDIR="${HOME}/home000/store/panda/v_003_0/"
 mkdir -p $PANDA_FLATDIR
