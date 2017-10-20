@@ -92,6 +92,7 @@ def normalize(xsec):
     f.Close()
 
 ## draw histograms
+#fweights = open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights_all.dat')
 fweights = open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/Monotop/fitting/signal_weights.dat')
 weights = [x.strip() for x in fweights]
 fweights.close()
@@ -126,6 +127,7 @@ def stageout():
     system(cmd)
 
 xsec = get_xsec() # do this first in case it's missing
+#stage_in_files()
 stage_in_list()
 hadd()
 remove('unmerged')
