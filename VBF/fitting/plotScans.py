@@ -51,7 +51,7 @@ Load('CanvasDrawer')
 
 plot = root.CanvasDrawer()
 plot.SetTDRStyle()
-root.gStyle.SetPadRightMargin(0.15)
+root.gStyle.SetPadRightMargin(0.2)
 
 c = root.TCanvas()
 
@@ -68,7 +68,7 @@ for f in listoffiles:
     cut2 = float(fname.split('_')[4])
     cut1s.add(cut1)
     cut2s.add(cut2)
-  except IndexError:
+  except IndexError as e:
     pass
 
 def xformSet(s):
@@ -86,6 +86,7 @@ h2x.SetTitle(titles[var1])
 h2y.SetTitle(titles[var2])
 h2.GetZaxis().SetTitle('Toy limit')
 #h2.SetMaximum(0.5); h2.SetMinimum(0.15)
+h2.SetMarkerColor(0)
 
 for e in cut1s:
   for p in cut2s:
