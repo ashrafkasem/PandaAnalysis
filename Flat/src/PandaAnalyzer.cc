@@ -193,6 +193,9 @@ void PandaAnalyzer::Terminate() {
   fOut->WriteTObject(tOut);
   fOut->Close();
 
+  for (auto *f : fCorrs)
+    if (f)
+      f->Close();
   for (auto *h : h1Corrs)
     delete h;
   for (auto *h : h2Corrs)
@@ -233,9 +236,6 @@ void PandaAnalyzer::OpenCorrection(CorrectionType ct, TString fpath, TString hna
     h2Corrs[ct] = new THCorr2((TH2D*)fCorrs[ct]->Get(hname));
   else 
     f1Corrs[ct] = new TF1Corr((TF1*)fCorrs[ct]->Get(hname));
-  fCorrs[ct]->Close();
-  delete fCorrs[ct];
-  fCorrs[ct] = 0;
 }
 
 double PandaAnalyzer::GetCorr(CorrectionType ct, double x, double y) {
@@ -514,6 +514,11 @@ bool PandaAnalyzer::PassPreselection() {
     return true;
   bool isGood=false;
 
+  if (preselBits & kGenBosonPt) {
+    if (gt->trueGenBosonPt > 100)
+      isGood = true; 
+  }
+
   if (preselBits & kFatjet) {
     if (gt->fj1Pt>250)
       isGood = true;
@@ -530,7 +535,7 @@ bool PandaAnalyzer::PassPreselection() {
     }
   }
   if (preselBits & kRecoil50) {
-    if ( max_pf>50 || max_puppi>50 ) {
+    if ( gt->pfmet>50 ) {
       isGood = true;
     }
   }
@@ -554,6 +559,11 @@ bool PandaAnalyzer::PassPreselection() {
         isGood = true;
       }
     }
+  }
+
+  // anded with the rest
+  if (preselBits & kPassTrig) {
+    isGood = (gt->trigger != 0);
   }
 
   return isGood;
@@ -1751,7 +1761,7 @@ void PandaAnalyzer::Run() {
 
     tr.TriggerEvent("taus");
 
-    if (!PassPreselection())
+    if (!doGenOnly && !PassPreselection()) // only check reco presel here
       continue;
 
     tr.TriggerEvent("presel");
@@ -2198,16 +2208,20 @@ void PandaAnalyzer::Run() {
     if (!isData) {
       // calculate the mjj 
       TLorentzVector vGenJet;
-      if (event.ak4GenJets.size() > 1) {
+      if (event.ak4GenJets.size() > 0) {
         auto &gj = event.ak4GenJets.at(0);
         TLorentzVector v;
         v.SetPtEtaPhiM(gj.pt(), gj.eta(), gj.phi(), gj.m());
+        gt->genJet1Pt = gj.pt(); gt->genJet1Eta = gj.eta();
         vGenJet += v;
-        gj = event.ak4GenJets.at(1);
-        v.SetPtEtaPhiM(gj.pt(), gj.eta(), gj.phi(), gj.m());
-        vGenJet += v;
+        if (event.ak4GenJets.size() > 1) {
+          gj = event.ak4GenJets.at(1);
+          v.SetPtEtaPhiM(gj.pt(), gj.eta(), gj.phi(), gj.m());
+          gt->genJet2Pt = gj.pt(); gt->genJet2Eta = gj.eta();
+          vGenJet += v;
+        }
       }
-      double genMjj = vGenJet.M();
+      gt->genMjj = vGenJet.M();
 
       bool found = processType!=kA 
                    && processType!=kZ 
@@ -2235,29 +2249,37 @@ void PandaAnalyzer::Run() {
             continue;
           if (processType==kZ) {
             gt->trueGenBosonPt = gen.pt();
+            gt->genBosonMass = gen.m();
+            gt->genBosonEta = gen.eta();
             gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
             gt->sf_qcdV = GetCorr(cZNLO,gt->genBosonPt);
             gt->sf_ewkV = GetCorr(cZEWK,gt->genBosonPt);
-            gt->sf_qcdV_VBF = GetCorr(cVBF_ZNLO,gt->genBosonPt,genMjj);
-            gt->sf_qcdV_VBF2l = GetCorr(cVBF_ZllNLO,gt->genBosonPt,genMjj);
+            gt->sf_qcdV_VBF = GetCorr(cVBF_ZNLO,gt->genBosonPt,gt->genMjj);
+            gt->sf_qcdV_VBF2l = GetCorr(cVBF_ZllNLO,gt->genBosonPt,gt->genMjj);
             gt->sf_qcdV_VBFTight = GetCorr(cVBFTight_ZNLO,gt->genBosonPt);
             gt->sf_qcdV_VBF2lTight = GetCorr(cVBFTight_ZllNLO,gt->genBosonPt);
             found=true;
           } else if (processType==kW) {
             gt->trueGenBosonPt = gen.pt();
+            gt->genBosonMass = gen.m();
+            gt->genBosonEta = gen.eta();
             gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
             gt->sf_qcdV = GetCorr(cWNLO,gt->genBosonPt);
             gt->sf_ewkV = GetCorr(cWEWK,gt->genBosonPt);
-            gt->sf_qcdV_VBF = GetCorr(cVBF_WNLO,gt->genBosonPt,genMjj);
+            gt->sf_qcdV_VBF = GetCorr(cVBF_WNLO,gt->genBosonPt,gt->genMjj);
             gt->sf_qcdV_VBFTight = GetCorr(cVBFTight_WNLO,gt->genBosonPt);
             found=true;
           } else if (processType==kZEWK) {
             gt->trueGenBosonPt = gen.pt();
+            gt->genBosonMass = gen.m();
+            gt->genBosonEta = gen.eta();
             gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
             gt->sf_qcdV_VBF = GetCorr(cVBF_EWKZ,gt->genBosonPt,gt->jot12Mass);
             gt->sf_qcdV_VBFTight = gt->sf_qcdV_VBF; // for consistency
           } else if (processType==kWEWK) {
             gt->trueGenBosonPt = gen.pt();
+            gt->genBosonMass = gen.m();
+            gt->genBosonEta = gen.eta();
             gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
             gt->sf_qcdV_VBF = GetCorr(cVBF_EWKW,gt->genBosonPt,gt->jot12Mass);
             gt->sf_qcdV_VBFTight = gt->sf_qcdV_VBF; // for consistency
@@ -2265,6 +2287,8 @@ void PandaAnalyzer::Run() {
             // take the highest pT
             if (gen.pt() > gt->trueGenBosonPt) {
               gt->trueGenBosonPt = gen.pt();
+              gt->genBosonMass = gen.m();
+              gt->genBosonEta = gen.eta();
               gt->genBosonPt = bound(gen.pt(),genBosonPtMin,genBosonPtMax);
               gt->sf_qcdV = GetCorr(cANLO,gt->genBosonPt);
               gt->sf_ewkV = GetCorr(cAEWK,gt->genBosonPt);
@@ -2299,6 +2323,9 @@ void PandaAnalyzer::Run() {
         }
         
         gt->genBosonPt = bound(vpt.Pt(),genBosonPtMin,genBosonPtMax);
+        gt->trueGenBosonPt = vpt.Pt();
+        gt->genBosonMass = vpt.M();
+        gt->genBosonEta = vpt.Eta();
 
         if (processType==kZ) {
           gt->sf_qcdV = GetCorr(cZNLO,gt->genBosonPt);
@@ -2484,6 +2511,9 @@ void PandaAnalyzer::Run() {
         }
       }
     }
+    
+    if (doGenOnly && !PassPreselection()) // only check gen presel here
+      continue;
 
     gt->Fill();
 
