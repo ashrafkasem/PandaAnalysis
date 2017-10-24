@@ -98,7 +98,7 @@ public:
   TF1Corr(TF1 *f_):
     TCorr(f_) 
   {
-    f_->SetDirectory(0);
+//    f_->SetDirectory(0);
     h = f_;
   }
   ~TF1Corr() {} 
@@ -117,7 +117,7 @@ public:
   THCorr(T *h_):
     TCorr<T>(h_)
   {
-    h_->SetDirectory(0);
+//    h_->SetDirectory(0);
     this->h = h_;
     dim = this->h->GetDimension();
     TAxis *thurn = this->h->GetXaxis(); 

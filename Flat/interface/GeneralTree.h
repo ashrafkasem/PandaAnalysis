@@ -158,6 +158,11 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    float genJet1Pt = -1;
+    float genJet2Pt = -1;
+    float genJet1Eta = -1;
+    float genJet2Eta = -1;
+    float genMjj = -1;
     float sf_qcdV_VBF2lTight = -1;
     float sf_qcdV_VBF2l = -1;
     float barrelHTMiss = -1;
