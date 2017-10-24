@@ -46,14 +46,6 @@ def copy_local(long_name):
             PInfo(sname+'.copy_local','Opting to read locally')
             return local_path
 
-    '''
-    # xrdcp if remote, copy if local - DEPRECATED
-    if 'root://' in full_path:
-        system('xrdcp %s %s'%(full_path,input_name))
-    else:
-        system('cp %s %s'%(full_path,input_name))
-    '''
-
     # rely on pxrdcp for local and remote copies
     # default behavior: drop PF candidates
     cmd = "pxrdcp %s %s '!pfCandidates'"%(full_path,input_name)
