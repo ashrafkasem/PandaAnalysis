@@ -98,6 +98,11 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    genJet1Pt = -1;
+    genJet2Pt = -1;
+    genJet1Eta = -1;
+    genJet2Eta = -1;
+    genMjj = -1;
     sf_qcdV_VBF2lTight = 1;
     sf_qcdV_VBF2l = 1;
     barrelHTMiss = -1;
@@ -475,6 +480,11 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("genJet1Pt",&genJet1Pt,"genJet1Pt/F");
+    Book("genJet2Pt",&genJet2Pt,"genJet2Pt/F");
+    Book("genJet1Eta",&genJet1Eta,"genJet1Eta/F");
+    Book("genJet2Eta",&genJet2Eta,"genJet2Eta/F");
+    Book("genMjj",&genMjj,"genMjj/F");
     Book("badECALFilter",&badECALFilter,"badECALFilter/I");
     Book("jetNMBtags",&jetNMBtags,"jetNMBtags/I");
     Book("pfmetRaw",&pfmetRaw,"pfmetRaw/F");

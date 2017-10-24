@@ -44,7 +44,7 @@ root.TColor.CreateGradientColorTable(len(stops), stopsArray, redArray, greenArra
 '''
 root.gStyle.SetNumberContours(999);
 root.gStyle.SetPalette(root.kBird)
-root.gStyle.SetPaintTextFormat(".2g")
+root.gStyle.SetPaintTextFormat(".3g")
 
 
 Load('CanvasDrawer')
