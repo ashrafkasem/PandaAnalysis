@@ -152,6 +152,7 @@ d = {
     'SinglePhoton'        : ['SinglePhoton'],
     'WJets_nlo'           : ['WJets_pt%sto%s'%(str(x[0]),str(x[1])) for x in [(100,250),(250,400),(400,600),(600,'inf')] ],
     'ZJets_nlo'           : ['ZJets_pt%sto%s'%(str(x[0]),str(x[1])) for x in [(50,100),(100,250),(250,400),(400,650),(650,'inf')] ],
+    'ZtoNuNu_nlo'         : ['ZtoNuNu_pt%sto%s'%(str(x[0]),str(x[1])) for x in [(100,250),(250,400),(400,650),(650,'inf')] ],
     'ZHbb'                : ['ZHbb_mH125'],
     'ggZHbb'              : ['ggZHbb_mH125'],
     'WpH'                 : ['WpLNuHbb'],

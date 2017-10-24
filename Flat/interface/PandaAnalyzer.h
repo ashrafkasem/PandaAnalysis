@@ -42,11 +42,12 @@ public :
      kMonotop    =(1<<0),
      kMonohiggs  =(1<<2),
      kMonojet    =(1<<3),
-     kTriggers   =(1<<4),
+     kPassTrig   =(1<<4),
      kVBF        =(1<<5),
      kRecoil     =(1<<6),
      kFatjet     =(1<<7),
      kRecoil50   =(1<<8),
+     kGenBosonPt =(1<<9),
     };
 
     enum ProcessType { 
