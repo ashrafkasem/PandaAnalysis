@@ -13,6 +13,7 @@ import PandaCore.Tools.job_management as cb
 
 sname = 'T3.job_utilities'
 data_dir = getenv('CMSSW_BASE') + '/src/PandaAnalysis/data/'
+local_copy = bool(getenv('SUBMIT_LOCALACCESS'))
 
 _stopwatch = time() 
 def print_time(label):
@@ -39,7 +40,7 @@ def copy_local(long_name):
 
     # if the file is cached locally, why not use it?
     local_path = full_path.replace('root://xrootd.cmsaf.mit.edu/','/mnt/hadoop/cms')
-    if path.isfile(local_path) and False: # causing slowdown
+    if local_copy and path.isfile(local_path): 
         # apparently SmartCached files can be corrupted...
         ftest = root.TFile(local_path)
         if ftest and not(ftest.IsZombie()):
