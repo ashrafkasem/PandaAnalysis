@@ -39,7 +39,7 @@ def copy_local(long_name):
 
     # if the file is cached locally, why not use it?
     local_path = full_path.replace('root://xrootd.cmsaf.mit.edu/','/mnt/hadoop/cms')
-    if path.isfile(local_path):
+    if path.isfile(local_path) and False: # causing slowdown
         # apparently SmartCached files can be corrupted...
         ftest = root.TFile(local_path)
         if ftest and not(ftest.IsZombie()):
