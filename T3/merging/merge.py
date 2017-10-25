@@ -51,7 +51,7 @@ def hadd(inpath,outpath):
         PWarning(sname,'nothing hadded into',outpath)
         return
     elif len(infiles)==1:
-        cmd = 'cp %s %s'%(infiles[0],outpath)
+        cmd = 'mv %s %s'%(infiles[0],outpath)
     else:
         cmd = 'hadd -k -ff -n 100 -f %s '%outpath
         for f in infiles:
