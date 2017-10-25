@@ -29,8 +29,10 @@ def fn(input_name, isData, full_path):
     # now we instantiate and configure the analyzer
     skimmer = root.PandaAnalyzer()
     skimmer.isData=isData
+    skimmer.SetFlag('firstGen',True)
     skimmer.SetFlag('fatjet',False)
-    skimmer.SetFlag('genOnly',True)
+    skimmer.SetFlag('vbf',True)
+    skimmer.SetFlag('puppi',False)
     skimmer.SetPreselectionBit(root.PandaAnalyzer.kRecoil50)
     processType = utils.classify_sample(full_path, isData)
     skimmer.processType=processType 
@@ -72,13 +74,15 @@ if __name__ == "__main__":
     
     utils.main(to_run, processed, fn)
 
-    utils.hadd(list(processed))
+    utils.hadd(processed.keys())
     utils.print_time('hadd')
 
     ret = utils.stageout(outdir,outfilename)
-    utils.print_time('stageout')
+    utils.cleanup('*.root')
+    utils.print_time('stageout and cleanup')
     if not ret:
         utils.write_lock(outdir,outfilename,processed)
+        utils.cleanup('*.lock')
         utils.print_time('create lock')
     else:
         exit(-1*ret)

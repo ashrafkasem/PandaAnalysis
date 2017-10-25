@@ -19,7 +19,7 @@ def print_time(label):
     global _stopwatch
     now_ = time()
     PDebug(sname+'.print_time:'+str(time()),
-           '%.3f s elapsed performing "%s"'%((now_-_stopwatch),label))
+           '%.1f s elapsed performing "%s"'%((now_-_stopwatch),label))
     _stopwatch = now_
 
 def copy_local(long_name):
@@ -48,9 +48,10 @@ def copy_local(long_name):
 
     # rely on pxrdcp for local and remote copies
     # default behavior: drop PF candidates
-    cmd = "pxrdcp %s %s '!pfCandidates'"%(full_path,input_name)
+    # cmd = "pxrdcp %s %s '!pfCandidates'"%(full_path,input_name)
+    # now use direct xrdcp; seems to be faster
+    cmd = "xrdcp %s %s"%(full_path,input_name)
     PInfo(sname+'.copy_local',cmd)
-
     system(cmd)
             
     if path.isfile(input_name):
@@ -115,21 +116,20 @@ def drop_branches(to_drop=None, to_keep=None):
     # check that the write went okay
     f = root.TFile('output.root')
     if f.IsZombie():
-        PError(sname+'.drop_branches','Corrupted file trying to drop '+to_drop)
+        PError(sname+'.drop_branches','Corrupted file trying to drop '+str(to_drop))
         return 1 
     t_clone = f.FindObjectAny('events')
     if (n_entries==t_clone.GetEntriesFast()):
         return 0
     else:
-        PError(sname+'.drop_branches','Corrupted tree trying to drop '+to_drop)
+        PError(sname+'.drop_branches','Corrupted tree trying to drop '+str(to_drop))
         return 2
 
 
-def stageout(outdir,outfilename):
-    mvargs = 'mv $PWD/output.root %s/%s'%(outdir,outfilename)
+def stageout(outdir,outfilename,infilename='output.root'):
+    mvargs = 'mv $PWD/%s %s/%s'%(infilename,outdir,outfilename)
     PInfo(sname,mvargs)
     ret = system(mvargs)
-    system('rm *.root')
     if not ret:
         PInfo(sname+'.stageout','Move exited with code %i'%ret)
     else:
@@ -142,10 +142,12 @@ def stageout(outdir,outfilename):
 
 
 def write_lock(outdir,outfilename,processed):
-    flock = open(outdir+'/locks/'+outfilename.replace('.root','.lock'),'w')
+    outfilename = outfilename.replace('.root','.lock')
+    flock = open(outfilename,'w')
     for k,v in processed.iteritems():
         flock.write(v+'\n')
     flock.close()
+    stageout(outdir+'/locks/',outfilename,outfilename)
 
 
 def classify_sample(full_path, isData):
