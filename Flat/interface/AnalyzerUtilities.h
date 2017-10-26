@@ -66,6 +66,29 @@ inline double TTNLOToNNLO(double pt) {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+class Analysis {
+public:
+  Analysis(TString name_) { name = name_; }
+  ~Analysis() {}
+  TString name;
+  bool computeRecoil = false;
+  bool rerunJES = false;
+  bool varyJES = false;
+  bool complicatedLeptons = false;
+  bool vbf = false;
+  bool recoil = true;
+  bool fatjet = true;
+  bool monoh = false;
+  bool recluster = false;
+  bool genOnly = false;
+  bool btagSFs = true;
+  bool firstGen = true;
+  bool puppi_jets = true;
+  bool ak8 = false;
+};
+
+////////////////////////////////////////////////////////////////////////////////////
+
 class LumiRange {
 public:
     LumiRange(int l0_,int l1_):
@@ -78,6 +101,22 @@ public:
     }
 private:
     int l0, l1;
+};
+
+////////////////////////////////////////////////////////////////////////////////////
+class TriggerHandler {  
+public:
+  TriggerHandler() {};
+  ~TriggerHandler() {};
+  void addTriggers(std::vector<TString> paths) { 
+    for (auto &path : paths) {
+      paths.push_back(path); 
+      indices.push_back(-1); 
+    }
+  }
+  void registerTrigger(unsigned my_idx, int panda_idx) { indices[my_idx] = panda_idx; }
+  std::vector<int> indices;
+  std::vector<TString> paths;
 };
 
 

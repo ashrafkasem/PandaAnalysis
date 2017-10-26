@@ -98,6 +98,7 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    whichRecoil = 0;
     genJet1Pt = -1;
     genJet2Pt = -1;
     genJet1Eta = -1;
@@ -480,6 +481,7 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
 //ENDCUSTOMWRITE
+    Book("whichRecoil",&whichRecoil,"whichRecoil/I");
     Book("genJet1Pt",&genJet1Pt,"genJet1Pt/F");
     Book("genJet2Pt",&genJet2Pt,"genJet2Pt/F");
     Book("genJet1Eta",&genJet1Eta,"genJet1Eta/F");
