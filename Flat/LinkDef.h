@@ -34,6 +34,7 @@
 #pragma link C++ enum GeneralTree::BTagJet;
 #pragma link C++ enum GeneralTree::BTagTags;
 
+#pragma link C++ class Analysis;
 #pragma link C++ class LumiRange;
 #pragma link C++ class TCorr;
 #pragma link C++ class THCorr;
