@@ -46,7 +46,7 @@ vmap['met'] = u
 vmap['mjj'] = 'jot12Mass'
 vmap['deta'] = 'jot12DEta'
 vmap['dphi'] = 'jot12DPhi'
-weights = {'nominal' : (sel.weights[region]%lumi).replace('sf_qcdV_VBF','sf_qcdV_VBFTight')}
+weights = {'nominal' : (sel.weights_cnc[region]%lumi)}
 
 
 # build the factory
@@ -94,6 +94,7 @@ else:
     # signals
     if 'signal' in region:
         factory.add_process(f('ggFHinv_m125'),'GGF_H125')
-        factory.add_process(f('vbfHinv_m125'),'VBF_H125')
+        for m in [1000, 110, 125, 150, 200, 300, 500, 600, 800 ]:
+            factory.add_process(f('vbfHinv_m%i'%m),'VBF_H%i'%m)
 
 factory.run(basedir+'/fitting/cncFittingForest_%s.root'%out_region)
