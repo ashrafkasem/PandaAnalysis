@@ -42,10 +42,12 @@ public :
      kMonotop    =(1<<0),
      kMonohiggs  =(1<<2),
      kMonojet    =(1<<3),
-     kTriggers   =(1<<4),
+     kPassTrig   =(1<<4),
      kVBF        =(1<<5),
      kRecoil     =(1<<6),
-     kFatjet     =(1<<7)
+     kFatjet     =(1<<7),
+     kRecoil50   =(1<<8),
+     kGenBosonPt =(1<<9),
     };
 
     enum ProcessType { 
@@ -66,7 +68,8 @@ public :
         kMETTrig       =(1<<0),
         kSingleEleTrig =(1<<1),
         kSinglePhoTrig =(1<<2),
-        kSingleMuTrig     =(1<<3)
+        kSingleMuTrig  =(1<<3),
+        kJetHTTrig     =(1<<4),
     };
 
     //////////////////////////////////////////////////////////////////////////////////////
@@ -98,6 +101,8 @@ private:
     enum CorrectionType { //!< enum listing relevant corrections applied to MC
         cNPV=0,       //!< npv weight
         cPU,          //!< true pu weight
+        cPUUp,        //!< true pu weight
+        cPUDown,      //!< true pu weight
         cEleVeto,     //!< monojet SF, Veto ID for e
         cEleTight,    //!< monojet SF, Tight ID for e
         cEleReco,     //!< monojet SF, tracking for e
@@ -119,8 +124,10 @@ private:
         cWEWK,
         cAEWK,
         cVBF_ZNLO,    //!< NLO weights for QCD Z,W in VBF phase space
+        cVBF_ZllNLO,  
         cVBF_WNLO,
         cVBFTight_ZNLO,    //!< NLO weights for QCD Z,W in tight VBF phase space
+        cVBFTight_ZllNLO,  
         cVBFTight_WNLO,
         cVBF_EWKZ,    //!< k-factors for EWK Z,W in VBF phase space
         cVBF_EWKW,
@@ -167,8 +174,8 @@ private:
     int DEBUG = 0; //!< debug verbosity level
     std::map<TString,bool> flags;
 
-    std::map<panda::GenParticle const*,float> genObjects;                 //!< particles we want to match the jets to, and the 'size' of the daughters
-    panda::GenParticle const* MatchToGen(double eta, double phi, double r2, int pdgid=0);        //!< private function to match a jet; returns NULL if not found
+    std::map<panda::GenParticle const*,float> genObjects; //!< particles we want to match the jets to, and the 'size' of the daughters
+    panda::GenParticle const* MatchToGen(double eta, double phi, double r2, int pdgid=0);   //!< private function to match a jet; returns NULL if not found
     std::map<int,std::vector<LumiRange>> goodLumis;
     std::vector<panda::Particle*> matchPhos, matchEles, matchLeps;
     
@@ -196,6 +203,7 @@ private:
     std::vector<TFile*> fCorrs = std::vector<TFile*>(cN,0); //!< files containing corrections
     std::vector<THCorr1*> h1Corrs = std::vector<THCorr1*>(cN,0); //!< histograms for binned corrections
     std::vector<THCorr2*> h2Corrs = std::vector<THCorr2*>(cN,0); //!< histograms for binned corrections
+    std::vector<TF1Corr*> f1Corrs = std::vector<TF1Corr*>(cN,0); //!< TF1s for continuous corrections
 
     TFile *MSDcorr;
     TF1* puppisd_corrGEN;
