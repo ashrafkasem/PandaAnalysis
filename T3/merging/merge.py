@@ -51,7 +51,7 @@ def hadd(inpath,outpath):
         PWarning(sname,'nothing hadded into',outpath)
         return
     elif len(infiles)==1:
-        cmd = 'cp %s %s'%(infiles[0],outpath)
+        cmd = 'mv %s %s'%(infiles[0],outpath)
     else:
         cmd = 'hadd -k -ff -n 100 -f %s '%outpath
         for f in infiles:
@@ -152,11 +152,13 @@ d = {
     'SinglePhoton'        : ['SinglePhoton'],
     'WJets_nlo'           : ['WJets_pt%sto%s'%(str(x[0]),str(x[1])) for x in [(100,250),(250,400),(400,600),(600,'inf')] ],
     'ZJets_nlo'           : ['ZJets_pt%sto%s'%(str(x[0]),str(x[1])) for x in [(50,100),(100,250),(250,400),(400,650),(650,'inf')] ],
+    'ZtoNuNu_nlo'         : ['ZtoNuNu_pt%sto%s'%(str(x[0]),str(x[1])) for x in [(100,250),(250,400),(400,650),(650,'inf')] ],
     'ZHbb'                : ['ZHbb_mH125'],
     'ggZHbb'              : ['ggZHbb_mH125'],
     'WpH'                 : ['WpLNuHbb'],
     'WmH'                 : ['WmLNuHbb'],
     'ZpTT'                : ['ZpTT_med-%i'%m for m in [1000,1250,1500,2000,2500,3000,3500,4000,500,750]],
+    'ZpWW'                : ['ZpWW_med-%i'%m for m in [1000,1200,1400,1600,1800,2000,2500,800]],
     'th'                  : ['thq','thw'],
     'WJets_EWK'           : ['WJets_EWKWPlus', 'WJets_EWKWMinus'],
     'ggFHinv_m125'        : ['ggFHinv'],
