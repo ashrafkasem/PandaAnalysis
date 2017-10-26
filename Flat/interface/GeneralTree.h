@@ -158,6 +158,26 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    float genJet1Pt = -1;
+    float genJet2Pt = -1;
+    float genJet1Eta = -1;
+    float genJet2Eta = -1;
+    float genMjj = -1;
+    float sf_qcdV_VBF2lTight = -1;
+    float sf_qcdV_VBF2l = -1;
+    float barrelHTMiss = -1;
+    float barrelJet12Pt = -1;
+    float barrelJet1Pt = -1;
+    float barrelJet1Eta = -1;
+    float barrelHT = -1;
+    float sf_puUp = -1;
+    float sf_puDown = -1;
+    float genMuonPt = -1;
+    float genMuonEta = -1;
+    float genElectronPt = -1;
+    float genElectronEta = -1;
+    float genTauPt = -1;
+    float genTauEta = -1;
     int badECALFilter = -1;
     float sf_qcdV_VBFTight = -1;
     float sf_metTrigVBF = -1;
@@ -168,6 +188,11 @@ class GeneralTree : public genericTree {
     float sf_qcdV_VBF = -1;
     int jetNMBtags = -1;
     float pfmetRaw = -1;
+    int nAK8jet = -1;
+    float ak81Pt = -1;
+    float ak81Eta = -1;
+    float ak81Phi = -1;
+    float ak81MaxCSV = -1;
     int nB = -1;
     float fj1MSDScaleUp_sj = -1;
     float fj1MSDScaleDown_sj = -1;

@@ -95,17 +95,20 @@ class Output:
 # determine what files have been processed and logged as such
 processedfiles = []
 print 'Finding locks...                      \r',
+sys.stdout.flush()
 locks = glob(outdir+'/locks/*lock')
 nl = len(locks)
 il = 1
 for lock in locks:
     print 'Reading lock %i/%i                   \r'%(il,nl),
+    sys.stdout.flush()
     il += 1
     flock = open(lock)
     for l in flock:
         processedfiles.append(l.strip())
 
 print 'Checking jobs...                 \r',
+sys.stdout.flush()
 
 # determine what samples from previous resubmissions are still running
 running_samples = []
@@ -193,6 +196,7 @@ else:
             counter += 1
 
 print '\r',
+sys.stdout.flush()
 print 'Summary:                     '
 
 print header
