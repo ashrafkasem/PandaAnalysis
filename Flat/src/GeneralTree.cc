@@ -386,14 +386,15 @@ void GeneralTree::WriteTree(TTree *t) {
   }
 
   Book("nJet",&nJet,"nJet/I");
+  Book("nJot",&nJot,"nJot/I");
   if (monohiggs) {
-    Book("jetPt",jetPt,"jetPt[nJet]/F");
-    Book("jetEta",jetEta,"jetEta[nJet]/F");
-    Book("jetPhi",jetPhi,"jetPhi[nJet]/F");
-    Book("jetE",jetE,"jetE[nJet]/F");
-    Book("jetCSV",jetCSV,"jetCSV[nJet]/F");
-    Book("jetIso",jetIso,"jetIso[nJet]/F");
-    Book("jetQGL",jetQGL,"jetQGL[nJet]/F");
+    Book("jetPt",jetPt,"jetPt[nJot]/F");
+    Book("jetEta",jetEta,"jetEta[nJot]/F");
+    Book("jetPhi",jetPhi,"jetPhi[nJot]/F");
+    Book("jetE",jetE,"jetE[nJot]/F");
+    Book("jetCSV",jetCSV,"jetCSV[nJot]/F");
+    Book("jetIso",jetIso,"jetIso[nJot]/F");
+    Book("jetQGL",jetQGL,"jetQGL[nJot]/F");
     Book("fj1sjPt",fj1sjPt,"fj1sjPt[2]/F");
     Book("fj1sjPhi",fj1sjPhi,"fj1sjPhi[2]/F");
     Book("fj1sjEta",fj1sjEta,"fj1sjEta[2]/F");
@@ -410,7 +411,6 @@ void GeneralTree::WriteTree(TTree *t) {
   }
 
   if (vbf) { 
-    Book("nJot",&nJot,"nJot/I");
     Book("jot1Phi",&jot1Phi,"jot1Phi/F");
     Book("jot1Pt",&jot1Pt,"jot1Pt/F");
     Book("jot1GenPt",&jot1GenPt,"jot1GenPt/F");

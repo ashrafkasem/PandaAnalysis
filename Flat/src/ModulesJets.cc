@@ -158,9 +158,9 @@ void PandaAnalyzer::JetBasics()
   }
 
   gt->nJet = centralJets.size();
+  gt->nJot = cleanedJets.size();
 
   if (analysis->vbf) {
-    gt->nJot = cleanedJets.size();
     JetVBFSystem();
   }
 
