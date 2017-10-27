@@ -43,6 +43,7 @@ void PandaAnalyzer::ResetBranches()
   btaggedJets.clear();
   centralJets.clear();
   btagindices.clear();
+  genJetsNu.clear();
   fj1 = 0;
   for (TLorentzVector v_ : {vPFMET, vPuppiMET, vpfUW, vpfUZ, vpfUA, vpfU,
                             vpuppiUW, vpuppiUZ, vpuppiUA, vpuppiU,
@@ -157,24 +158,33 @@ int PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
   }
 
   gt->RemoveBranches({"ak81.*"}); // unused
+  
+  if (analysis->recluster || analysis->reclusterGen) {
+    int activeAreaRepeats = 1;
+    double ghostArea = 0.01;
+    double ghostEtaMax = 7.0;
+    activeArea = new fastjet::GhostedAreaSpec(ghostEtaMax,activeAreaRepeats,ghostArea);
+    areaDef = new fastjet::AreaDefinition(fastjet::active_area_explicit_ghosts,*activeArea);
+  }
 
   if (!analysis->fatjet && !analysis->ak8) {
     gt->RemoveBranches({"fj1.*"});
   } else if (analysis->recluster) {
-    int activeAreaRepeats = 1;
-    double ghostArea = 0.01;
-    double ghostEtaMax = 7.0;
     double radius = 1.5;
     double sdZcut = 0.15;
     double sdBeta = 1.;
-    activeArea = new fastjet::GhostedAreaSpec(ghostEtaMax,activeAreaRepeats,ghostArea);
-    areaDef = new fastjet::AreaDefinition(fastjet::active_area_explicit_ghosts,*activeArea);
     jetDef = new fastjet::JetDefinition(fastjet::cambridge_algorithm,radius);
     softDrop = new fastjet::contrib::SoftDrop(sdBeta,sdZcut,radius);
   } else { 
     std::vector<TString> droppable = {"fj1NConst","fj1NSDConst","fj1EFrac100","fj1SDEFrac100"};
     gt->RemoveBranches(droppable);
   }
+
+  if (analysis->reclusterGen) {
+    double radius = 0.4;
+    jetDefGen = new fastjet::JetDefinition(fastjet::antikt_algorithm,radius);
+  }
+
 
   if (DEBUG) PDebug("PandaAnalyzer::Init","Finished configuration");
 
