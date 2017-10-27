@@ -203,6 +203,7 @@ private:
     void PhotonSFs();
     void QCDUncs();
     void SignalReweights();
+    void GenJetsNu();
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -226,6 +227,7 @@ private:
     fastjet::contrib::SoftDrop *softDrop=0;
     fastjet::AreaDefinition *areaDef=0;
     fastjet::GhostedAreaSpec *activeArea=0;
+    fastjet::JetDefinition *jetDefGen=0;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -298,6 +300,7 @@ private:
     panda::Jet *jot1 = 0, *jot2 = 0;
     panda::Jet *jotUp1 = 0, *jotUp2 = 0;
     panda::Jet *jotDown1 = 0, *jotDown2 = 0;
+    std::vector<panda::GenJet> genJetsNu;
     float genBosonPtMin, genBosonPtMax;
     std::vector<TString> wIDs;
 
