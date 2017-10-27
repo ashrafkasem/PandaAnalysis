@@ -237,10 +237,10 @@ private:
     std::vector<BTagCalibrationReader*> btagReaders = std::vector<BTagCalibrationReader*>(bN,0); 
         //!< maps BTagType to a reader 
     std::map<TString,JetCorrectionUncertainty*> ak8UncReader; //!< calculate JES unc on the fly
-    JERReader *ak8JERReader; //!< fatjet jet energy resolution reader
+    JERReader *ak8JERReader{0}; //!< fatjet jet energy resolution reader
     std::map<TString,JetCorrectionUncertainty*> ak4UncReader; //!< calculate JES unc on the fly
     std::map<TString,FactorizedJetCorrector*> ak4ScaleReader; //!< calculate JES on the fly
-    JERReader *ak4JERReader; //!< fatjet jet energy resolution reader
+    JERReader *ak4JERReader{0}; //!< fatjet jet energy resolution reader
     EraHandler eras = EraHandler(2016); //!< determining data-taking era, to be used for era-dependent JEC
     JetCorrectionUncertainty *uncReader=0;           
     JetCorrectionUncertainty *uncReaderAK4=0;        
@@ -257,17 +257,17 @@ private:
     std::vector<THCorr1*> h1Corrs = std::vector<THCorr1*>(cN,0); //!< histograms for binned corrections
     std::vector<THCorr2*> h2Corrs = std::vector<THCorr2*>(cN,0); //!< histograms for binned corrections
     std::vector<TF1Corr*> f1Corrs = std::vector<TF1Corr*>(cN,0); //!< TF1s for continuous corrections
-    TFile *MSDcorr;
-    TF1* puppisd_corrGEN;
-    TF1* puppisd_corrRECO_cen;
-    TF1* puppisd_corrRECO_for;
+    TFile *MSDcorr=0;
+    TF1* puppisd_corrGEN=0;
+    TF1* puppisd_corrRECO_cen=0;
+    TF1* puppisd_corrRECO_for=0;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
     // IO for the analyzer
-    TFile *fOut;     // output file is owned by PandaAnalyzer
-    TTree *tOut;
-    GeneralTree *gt; // essentially a wrapper around tOut
+    TFile *fOut=0;     // output file is owned by PandaAnalyzer
+    TTree *tOut=0;
+    GeneralTree *gt=0; // essentially a wrapper around tOut
     TH1F *hDTotalMCWeight=0;
     TTree *tIn=0;    // input tree to read
     unsigned int preselBits=0;

@@ -221,6 +221,14 @@ void PandaAnalyzer::Terminate()
   for (auto *f : fCorrs)
     if (f)
       f->Close();
+//   for (unsigned i = 0; i != cN; ++i) {
+//     delete h1Corrs[i];
+//     printf("1 %i \n", i);
+//   }
+//   for (unsigned i = 0; i != cN; ++i) {
+//     delete h2Corrs[i];
+//     printf("2 %i \n", i);
+//   }
   for (auto *h : h1Corrs)
     delete h;
   for (auto *h : h2Corrs)
@@ -239,14 +247,17 @@ void PandaAnalyzer::Terminate()
   for (auto& iter : ak4UncReader)
     delete iter.second;
 
-  for (auto& iter : ak4ScaleReader)
+  for (auto& iter : ak4ScaleReader) {
+    printf("trying to delete: |%s| at %p\n",iter.first.Data(),iter.second);
     delete iter.second;
+  }
 
   delete ak4JERReader;
 
   delete activeArea;
   delete areaDef;
   delete jetDef;
+  delete jetDefGen;
   delete softDrop;
 
   delete hDTotalMCWeight;
@@ -401,11 +412,12 @@ void PandaAnalyzer::SetDataDir(const char *s)
     OpenCorrection(cVBF_TrigMETZmm,dirPath+"vbf16/trig/fit_nmu2.root",
                    "f_eff",3);
 
-    OpenCorrection(cBadECALJets,dirPath+"vbf16/hotjets-runBCDEFGH.root",
-                   "h2jet",2);
-
     if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded VBF k factors");
   }
+
+  OpenCorrection(cBadECALJets,dirPath+"vbf16/hotjets-runBCDEFGH.root",
+                 "h2jet",2);
+
 
   if (analysis->btagSFs) {
     // btag SFs
