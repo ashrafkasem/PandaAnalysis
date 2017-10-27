@@ -315,24 +315,30 @@ void PandaAnalyzer::JetHbbReco()
       float tmp_hbbm=-99;
       int tmp_hbbjtidx1=-1;
       int tmp_hbbjtidx2=-1;
-      for (unsigned int i = 0;i<btaggedJets.size();i++){
-        panda::Jet *jet_1 = btaggedJets.at(i);
-        TLorentzVector hbbdaughter1;
-        hbbdaughter1.SetPtEtaPhiM(jet_1->pt(),jet_1->eta(),jet_1->phi(),jet_1->m());
-        for (unsigned int j = i+1;j<btaggedJets.size();j++){
-          panda::Jet *jet_2 = btaggedJets.at(j);
-          TLorentzVector hbbdaughter2;
-          hbbdaughter2.SetPtEtaPhiM(jet_2->pt(),jet_2->eta(),jet_2->phi(),jet_2->m());
-          TLorentzVector hbbsystem = hbbdaughter1 + hbbdaughter2;
-          if (hbbsystem.Pt()>tmp_hbbpt){
-            tmp_hbbpt = hbbsystem.Pt();
-            tmp_hbbeta = hbbsystem.Eta();
-            tmp_hbbphi = hbbsystem.Phi();
-            tmp_hbbm = hbbsystem.M();
-            tmp_hbbjtidx1 = btagindices.at(i);
-            tmp_hbbjtidx2 = btagindices.at(j);
-          }
-        }
+      if (centralJets.size() > 1) {
+         vector<Jet*> csvSortedJets = centralJets;
+         sort(csvSortedJets.begin(), csvSortedJets.end(),
+               [](panda::Jet *x, panda::Jet *y) -> bool { return x->csv > y->csv; });
+         map<Jet*, unsigned> order;
+         for (unsigned i = 0; i != cleanedJets.size(); ++i) 
+            order[cleanedJets[i]] = i;
+
+         panda::Jet *jet_1 = csvSortedJets.at(0);
+         TLorentzVector hbbdaughter1;
+         hbbdaughter1.SetPtEtaPhiM(jet_1->pt(),jet_1->eta(),jet_1->phi(),jet_1->m());
+ 
+         panda::Jet *jet_2 = csvSortedJets.at(1);
+         TLorentzVector hbbdaughter2;
+         hbbdaughter2.SetPtEtaPhiM(jet_2->pt(),jet_2->eta(),jet_2->phi(),jet_2->m());
+ 
+         TLorentzVector hbbsystem = hbbdaughter1 + hbbdaughter2;
+
+         tmp_hbbpt = hbbsystem.Pt();
+         tmp_hbbeta = hbbsystem.Eta();
+         tmp_hbbphi = hbbsystem.Phi();
+         tmp_hbbm = hbbsystem.M();
+         tmp_hbbjtidx1 = order[jet_1];
+         tmp_hbbjtidx2 = order[jet_2];
       }
       gt->hbbpt = tmp_hbbpt;
       gt->hbbeta = tmp_hbbeta;
