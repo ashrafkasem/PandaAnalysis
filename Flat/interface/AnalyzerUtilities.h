@@ -68,10 +68,9 @@ inline double TTNLOToNNLO(double pt) {
 
 class Analysis {
 public:
-  Analysis(TString name_) { name = name_; }
+  Analysis(TString name_ = "") { name = name_; }
   ~Analysis() {}
   TString name;
-  bool computeRecoil = false;
   bool rerunJES = false;
   bool varyJES = false;
   bool complicatedLeptons = false;
