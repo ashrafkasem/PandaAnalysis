@@ -5,12 +5,12 @@
 #include <vector>
 
 #define EGMSCALE 1
-#define FATJETMATCHDR2 2.25
 
 using namespace panda;
 using namespace std;
 
-PandaAnalyzer::PandaAnalyzer(int debug_/*=0*/) {
+PandaAnalyzer::PandaAnalyzer(int debug_/*=0*/) 
+{
   DEBUG = debug_;
 
   if (DEBUG) PDebug("PandaAnalyzer::PandaAnalyzer","Calling constructor");
@@ -23,12 +23,14 @@ PandaAnalyzer::PandaAnalyzer(int debug_/*=0*/) {
 }
 
 
-PandaAnalyzer::~PandaAnalyzer() {
+PandaAnalyzer::~PandaAnalyzer() 
+{
   if (DEBUG) PDebug("PandaAnalyzer::~PandaAnalyzer","Calling destructor");
 }
 
 
-void PandaAnalyzer::ResetBranches() {
+void PandaAnalyzer::ResetBranches() 
+{
   genObjects.clear();
   matchPhos.clear();
   matchEles.clear();
@@ -45,14 +47,17 @@ void PandaAnalyzer::ResetBranches() {
   for (TLorentzVector v_ : {vPFMET, vPuppiMET, vpfUW, vpfUZ, vpfUA, vpfU,
                             vpuppiUW, vpuppiUZ, vpuppiUA, vpuppiU,
                             vJet, vBarrelJets})
+  {
     v_.SetPtEtaPhiM(0,0,0,0);
+  }
   vMETNoMu.SetMagPhi(0,0);
   gt->Reset();
   if (DEBUG) PDebug("PandaAnalyzer::ResetBranches","Reset");
 }
 
 
-void PandaAnalyzer::SetOutputFile(TString fOutName) {
+void PandaAnalyzer::SetOutputFile(TString fOutName) 
+{
   fOut = new TFile(fOutName,"RECREATE");
   tOut = new TTree("events","events");
 
@@ -103,10 +108,10 @@ int PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
   if (isData) {
     readlist.push_back("triggers");
   } else {
-   readlist.push_back("genParticles");
-   readlist.push_back("genReweight");
-   readlist.push_back("ak4GenJets");
-   readlist.push_back("genMet");
+    readlist.push_back("genParticles");
+    readlist.push_back("genReweight");
+    readlist.push_back("ak4GenJets");
+    readlist.push_back("genMet");
   }
 
 
@@ -177,7 +182,8 @@ int PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
 }
 
 
-panda::GenParticle const *PandaAnalyzer::MatchToGen(double eta, double phi, double radius, int pdgid) {
+panda::GenParticle const *PandaAnalyzer::MatchToGen(double eta, double phi, double radius, int pdgid) 
+{
   panda::GenParticle const* found=NULL;
   double r2 = radius*radius;
   pdgid = abs(pdgid);
@@ -197,7 +203,8 @@ panda::GenParticle const *PandaAnalyzer::MatchToGen(double eta, double phi, doub
 }
 
 
-void PandaAnalyzer::Terminate() {
+void PandaAnalyzer::Terminate() 
+{
   fOut->WriteTObject(tOut);
   fOut->Close();
 
@@ -236,7 +243,8 @@ void PandaAnalyzer::Terminate() {
   if (DEBUG) PDebug("PandaAnalyzer::Terminate","Finished with output");
 }
 
-void PandaAnalyzer::OpenCorrection(CorrectionType ct, TString fpath, TString hname, int dim) {
+void PandaAnalyzer::OpenCorrection(CorrectionType ct, TString fpath, TString hname, int dim) 
+{
   fCorrs[ct] = TFile::Open(fpath);
   if (dim==1) 
     h1Corrs[ct] = new THCorr1((TH1D*)fCorrs[ct]->Get(hname));
@@ -246,7 +254,8 @@ void PandaAnalyzer::OpenCorrection(CorrectionType ct, TString fpath, TString hna
     f1Corrs[ct] = new TF1Corr((TF1*)fCorrs[ct]->Get(hname));
 }
 
-double PandaAnalyzer::GetCorr(CorrectionType ct, double x, double y) {
+double PandaAnalyzer::GetCorr(CorrectionType ct, double x, double y) 
+{
   if (h1Corrs[ct]!=0) {
     return h1Corrs[ct]->Eval(x); 
   } else if (h2Corrs[ct]!=0) {
@@ -260,7 +269,8 @@ double PandaAnalyzer::GetCorr(CorrectionType ct, double x, double y) {
   }
 }
 
-void PandaAnalyzer::SetDataDir(const char *s) {
+void PandaAnalyzer::SetDataDir(const char *s) 
+{
   TString dirPath(s);
   dirPath += "/";
 
@@ -338,79 +348,86 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 
   if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded k factors");
 
-  OpenCorrection(cVBF_ZNLO,dirPath+"vbf16/kqcd/mjj/merged_zvv.root","h_kfactors_shape",2);
-  OpenCorrection(cVBF_WNLO,dirPath+"vbf16/kqcd/mjj/merged_wlv.root","h_kfactors_shape",2);
-  OpenCorrection(cVBF_ZllNLO,dirPath+"vbf16/kqcd/mjj/merged_zll.root","h_kfactors_shape",2);
+  if (analysis->vbf) {
 
-  OpenCorrection(cVBFTight_ZNLO,dirPath+"vbf16/kqcd/mjj/merged_zvv.root","h_kfactors_cc",1);
-  OpenCorrection(cVBFTight_WNLO,dirPath+"vbf16/kqcd/mjj/merged_wlv.root","h_kfactors_cc",1);
-  OpenCorrection(cVBFTight_ZllNLO,dirPath+"vbf16/kqcd/mjj/merged_zll.root","h_kfactors_cc",1);
+    OpenCorrection(cVBF_ZNLO,dirPath+"vbf16/kqcd/mjj/merged_zvv.root","h_kfactors_shape",2);
+    OpenCorrection(cVBF_WNLO,dirPath+"vbf16/kqcd/mjj/merged_wlv.root","h_kfactors_shape",2);
+    OpenCorrection(cVBF_ZllNLO,dirPath+"vbf16/kqcd/mjj/merged_zll.root","h_kfactors_shape",2);
 
-  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded VBF k factors");
-  /*
-  TFile *fKFactor_VBFZ = new TFile(dirPath+"vbf16/kqcd/kfactor_VBF_zjets_v2.root");
-  h1Corrs[cVBF_ZNLO] = new THCorr1((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_vbf_relaxed"));
-  h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_vbf_relaxed"));
-  h1Corrs[cVBF_ZNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_monojet"));
-  h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_monojet"));
-  h1Corrs[cVBFTight_ZNLO] = new THCorr1((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_vbf"));
-  h1Corrs[cVBFTight_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_vbf"));
-  h1Corrs[cVBFTight_ZNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_monojet"));
-  h1Corrs[cVBFTight_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_monojet"));
+    OpenCorrection(cVBFTight_ZNLO,dirPath+"vbf16/kqcd/mjj/merged_zvv.root","h_kfactors_cc",1);
+    OpenCorrection(cVBFTight_WNLO,dirPath+"vbf16/kqcd/mjj/merged_wlv.root","h_kfactors_cc",1);
+    OpenCorrection(cVBFTight_ZllNLO,dirPath+"vbf16/kqcd/mjj/merged_zll.root","h_kfactors_cc",1);
 
-  TFile *fKFactor_VBFW = new TFile(dirPath+"vbf16/kqcd/kfactor_VBF_wjets_v2.root");
-  h1Corrs[cVBF_WNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf_relaxed"));
-  h1Corrs[cVBF_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf_relaxed"));
-  h1Corrs[cVBF_WNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_monojet"));
-  h1Corrs[cVBF_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_monojet"));
-  h1Corrs[cVBFTight_WNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf"));
-  h1Corrs[cVBFTight_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf"));
-  h1Corrs[cVBFTight_WNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_monojet"));
-  h1Corrs[cVBFTight_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_monojet"));
-  */
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded VBF k factors");
+    /*
+    TFile *fKFactor_VBFZ = new TFile(dirPath+"vbf16/kqcd/kfactor_VBF_zjets_v2.root");
+    h1Corrs[cVBF_ZNLO] = new THCorr1((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_vbf_relaxed"));
+    h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_vbf_relaxed"));
+    h1Corrs[cVBF_ZNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_monojet"));
+    h1Corrs[cVBF_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_monojet"));
+    h1Corrs[cVBFTight_ZNLO] = new THCorr1((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_vbf"));
+    h1Corrs[cVBFTight_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_vbf"));
+    h1Corrs[cVBFTight_ZNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFZ->Get("bosonPt_LO_monojet"));
+    h1Corrs[cVBFTight_ZNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFZ->Get("bosonPt_NLO_monojet"));
 
-  OpenCorrection(cVBF_EWKZ,dirPath+"vbf16/kewk/kFactor_ZToNuNu_pT_Mjj.root",
-                 "TH2F_kFactor",2);
-  OpenCorrection(cVBF_EWKW,dirPath+"vbf16/kewk/kFactor_WToLNu_pT_Mjj.root",
-                 "TH2F_kFactor",2);
+    TFile *fKFactor_VBFW = new TFile(dirPath+"vbf16/kqcd/kfactor_VBF_wjets_v2.root");
+    h1Corrs[cVBF_WNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf_relaxed"));
+    h1Corrs[cVBF_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf_relaxed"));
+    h1Corrs[cVBF_WNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_monojet"));
+    h1Corrs[cVBF_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_monojet"));
+    h1Corrs[cVBFTight_WNLO] = new THCorr1((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_vbf"));
+    h1Corrs[cVBFTight_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_vbf"));
+    h1Corrs[cVBFTight_WNLO]->GetHist()->Multiply((TH1D*)fKFactor_VBFW->Get("bosonPt_LO_monojet"));
+    h1Corrs[cVBFTight_WNLO]->GetHist()->Divide((TH1D*)fKFactor_VBFW->Get("bosonPt_NLO_monojet"));
+    */
 
-  OpenCorrection(cVBF_TrigMET,dirPath+"vbf16/trig/fit_nmu1.root",
-                 "f_eff",3);
-  OpenCorrection(cVBF_TrigMETZmm,dirPath+"vbf16/trig/fit_nmu2.root",
-                 "f_eff",3);
+    OpenCorrection(cVBF_EWKZ,dirPath+"vbf16/kewk/kFactor_ZToNuNu_pT_Mjj.root",
+                   "TH2F_kFactor",2);
+    OpenCorrection(cVBF_EWKW,dirPath+"vbf16/kewk/kFactor_WToLNu_pT_Mjj.root",
+                   "TH2F_kFactor",2);
 
-  OpenCorrection(cBadECALJets,dirPath+"vbf16/hotjets-runBCDEFGH.root",
-                 "h2jet",2);
+    OpenCorrection(cVBF_TrigMET,dirPath+"vbf16/trig/fit_nmu1.root",
+                   "f_eff",3);
+    OpenCorrection(cVBF_TrigMETZmm,dirPath+"vbf16/trig/fit_nmu2.root",
+                   "f_eff",3);
 
-  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded VBF k factors");
+    OpenCorrection(cBadECALJets,dirPath+"vbf16/hotjets-runBCDEFGH.root",
+                   "h2jet",2);
 
-  // btag SFs
-  btagCalib = new BTagCalibration("csvv2",(dirPath+"moriond17/CSVv2_Moriond17_B_H.csv").Data());
-  btagReaders[bJetL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
-  btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
-  btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
-  btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded VBF k factors");
+  }
 
-  sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"moriond17/subjet_CSVv2_Moriond17_B_H.csv").Data());
-  btagReaders[bSubJetL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
-  btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_B,"lt");
-  btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_C,"lt");
-  btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_UDSG,"incl");
+  if (analysis->btagSFs) {
+    // btag SFs
+    btagCalib = new BTagCalibration("csvv2",(dirPath+"moriond17/CSVv2_Moriond17_B_H.csv").Data());
+    btagReaders[bJetL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
+    btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
+    btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
+    btagReaders[bJetL]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
-  btagReaders[bJetM] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM,"central",{"up","down"});
-  btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
-  btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
-  btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
+    sj_btagCalib = new BTagCalibration("csvv2",(dirPath+"moriond17/subjet_CSVv2_Moriond17_B_H.csv").Data());
+    btagReaders[bSubJetL] = new BTagCalibrationReader(BTagEntry::OP_LOOSE,"central",{"up","down"});
+    btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_B,"lt");
+    btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_C,"lt");
+    btagReaders[bSubJetL]->load(*sj_btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
-  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded btag SFs");
+    btagReaders[bJetM] = new BTagCalibrationReader(BTagEntry::OP_MEDIUM,"central",{"up","down"});
+    btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_B,"comb");
+    btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_C,"comb");
+    btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
-  // mSD corr
-  MSDcorr = new TFile(dirPath+"/puppiCorr.root");
-  puppisd_corrGEN = (TF1*)MSDcorr->Get("puppiJECcorr_gen");;
-  puppisd_corrRECO_cen = (TF1*)MSDcorr->Get("puppiJECcorr_reco_0eta1v3");
-  puppisd_corrRECO_for = (TF1*)MSDcorr->Get("puppiJECcorr_reco_1v3eta2v5");
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded btag SFs");
+  }
 
-  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded mSD correction");
+  if (analysis->monoh) {
+    // mSD corr
+    MSDcorr = new TFile(dirPath+"/puppiCorr.root");
+    puppisd_corrGEN = (TF1*)MSDcorr->Get("puppiJECcorr_gen");;
+    puppisd_corrRECO_cen = (TF1*)MSDcorr->Get("puppiJECcorr_reco_0eta1v3");
+    puppisd_corrRECO_for = (TF1*)MSDcorr->Get("puppiJECcorr_reco_1v3eta2v5");
+
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded mSD correction");
+  }
 
   if (analysis->rerunJES) {
     TString jecV = "V4", jecReco = "23Sep2016"; 
@@ -474,7 +491,8 @@ void PandaAnalyzer::SetDataDir(const char *s) {
 }
 
 
-void PandaAnalyzer::AddGoodLumiRange(int run, int l0, int l1) {
+void PandaAnalyzer::AddGoodLumiRange(int run, int l0, int l1) 
+{
   auto run_ = goodLumis.find(run);
   if (run_==goodLumis.end()) { // don't know about this run yet
     std::vector<LumiRange> newLumiList;
@@ -486,7 +504,8 @@ void PandaAnalyzer::AddGoodLumiRange(int run, int l0, int l1) {
 }
 
 
-bool PandaAnalyzer::PassGoodLumis(int run, int lumi) {
+bool PandaAnalyzer::PassGoodLumis(int run, int lumi) 
+{
   auto run_ = goodLumis.find(run);
   if (run_==goodLumis.end()) {
     // matched no run
@@ -511,7 +530,8 @@ bool PandaAnalyzer::PassGoodLumis(int run, int lumi) {
 }
 
 
-bool PandaAnalyzer::PassPreselection() {
+bool PandaAnalyzer::PassPreselection() 
+{
   // TODO: refactor this function
   // was originally written this way to handle more complex conditions
   // like triggers, but could probably clean it up with a Condition class
@@ -703,6 +723,9 @@ void PandaAnalyzer::Run()
 
     RegisterTriggers();
   }
+
+  if (analysis->ak8)
+    FATJETMATCHDR2 = 0.64;
 
   // set up reporters
   unsigned int iE=0;
