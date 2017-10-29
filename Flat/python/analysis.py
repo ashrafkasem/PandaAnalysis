@@ -24,29 +24,29 @@ def analysis(name, **kwargs):
 
 
 # predefined!
-monotop = _analysis(
+monotop = lambda v=False : _analysis(
         name = 'monotop',
-        verbose = False,
+        verbose = v,
     )
 
-vbf = _analysis(
+vbf = lambda v=False : _analysis(
         name = 'vbf',
-        verbose = False,
+        verbose = v,
         vbf = True,
         fatjet = False,
         btagSFs = False,
         puppi_jets = False
     )
 
-monoh = _analysis(
+monoh = lambda v=False : _analysis(
         name = 'monoh',
-        verbose = False,
+        verbose = v,
         monoh = True,
     )
 
-gghbb = _analysis(
+gghbb = lambda v=False : _analysis(
         name = 'gghbb',
-        verbose = False,
+        verbose = v,
         monoh = True,
         recoil = False,
         ak8 = True,
