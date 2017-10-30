@@ -60,6 +60,7 @@ void PandaAnalyzer::ResetBranches()
 void PandaAnalyzer::SetOutputFile(TString fOutName) 
 {
   fOut = new TFile(fOutName,"RECREATE");
+  fOut->cd();
   tOut = new TTree("events","events");
 
   fOut->WriteTObject(hDTotalMCWeight);    
@@ -583,7 +584,7 @@ bool PandaAnalyzer::PassPreselection()
     }
   }
   if (preselBits & kRecoil50) {
-    if ( gt->pfmet>50 ) {
+    if ( gt->pfmet>100 ) { // this will never cause any confusion, I'm sure
       isGood = true;
     }
   }
@@ -611,7 +612,7 @@ bool PandaAnalyzer::PassPreselection()
 
   // anded with the rest
   if (preselBits & kPassTrig) {
-    isGood = (gt->trigger != 0);
+    isGood = (!isData) || (gt->trigger != 0);
   }
 
   tr->TriggerEvent("presel");
@@ -624,6 +625,8 @@ bool PandaAnalyzer::PassPreselection()
 // run
 void PandaAnalyzer::Run() 
 {
+
+  fOut->cd(); // to be absolutely sure
 
   // INITIALIZE --------------------------------------------------------------------------
 
@@ -748,6 +751,8 @@ void PandaAnalyzer::Run()
 
   if (analysis->ak8)
     FATJETMATCHDR2 = 0.64;
+
+  fOut->cd(); // to be absolutely sure
 
   // set up reporters
   unsigned int iE=0;

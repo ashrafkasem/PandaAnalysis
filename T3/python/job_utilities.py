@@ -23,6 +23,12 @@ def print_time(label):
            '%.1f s elapsed performing "%s"'%((now_-_stopwatch),label))
     _stopwatch = now_
 
+def input_to_output(name):
+    if 'input' in name:
+        return name.replace('input','output')
+    else:
+        return 'output_' + name.split('/')[-1]
+
 def copy_local(long_name):
     replacements = {
                 r'\${EOS}':'root://eoscms.cern.ch//store/user/snarayan',
@@ -40,6 +46,7 @@ def copy_local(long_name):
 
     # if the file is cached locally, why not use it?
     local_path = full_path.replace('root://xrootd.cmsaf.mit.edu/','/mnt/hadoop/cms')
+    PInfo(sname+'.copy_local','Local access is configured to be %s'%('on' if bool(getenv('SUBMIT_LOCALACCESS')) else 'off'))
     if local_copy and path.isfile(local_path): 
         # apparently SmartCached files can be corrupted...
         ftest = root.TFile(local_path)
@@ -73,7 +80,7 @@ def cleanup(fname):
 
 
 def hadd(good_inputs):
-    good_outputs = ' '.join([x.replace('input','output') for x in good_inputs])
+    good_outputs = ' '.join([input_to_output(x) for x in good_inputs])
     cmd = 'hadd -f output.root ' + good_outputs
     ret = system(cmd)    
     if not ret:
@@ -200,7 +207,7 @@ def run_PandaAnalyzer(skimmer, isData, input_name):
     if not weight_table:
         weight_table = None
 
-    output_name = input_name.replace('input','output')
+    output_name = input_to_output(input_name)
     skimmer.SetDataDir(data_dir)
     if isData:
         add_json(skimmer, data_dir+'/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt')
