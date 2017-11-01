@@ -921,6 +921,11 @@ void PandaAnalyzer::Run()
 
       QCDUncs();
       SignalReweights();
+
+      if (analysis->reclusterGen && analysis->monoh) {
+        GenJetsNu();
+        MatchGenJets(genJetsNu);
+      }
     }
 
     

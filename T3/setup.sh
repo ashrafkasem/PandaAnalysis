@@ -3,7 +3,7 @@
 export PATH=${PATH}:${CMSSW_BASE}/src/PandaCore/bin/
 
 export PANDA="${CMSSW_BASE}/src/PandaAnalysis"
-export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20171029_hbb.cfg" 
+export PANDA_CFG="http://t3serv001.mit.edu/~snarayan/histcatalog/20171030_gghbb.cfg" 
 export PANDA_FLATDIR="${HOME}/home000/store/panda/v_005_ggh0/"
 mkdir -p $PANDA_FLATDIR
 
