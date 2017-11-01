@@ -188,6 +188,8 @@ void PandaAnalyzer::JetHbbBasics(panda::Jet& jet)
 void PandaAnalyzer::JetBRegressionInfo(panda::Jet& jet)
 {
   unsigned N = cleanedJets.size()-1;
+  gt->jetEMFrac[N] = jet.cef + jet.nef;
+  gt->jetHadFrac[N] = jet.chf + jet.nhf;
   gt->jetLeadingLepPt[N] = 0;
   gt->jetLeadingTrkPt[N] = 0;
   gt->jetNLep[N] = 0;
