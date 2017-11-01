@@ -51,6 +51,7 @@ GeneralTree::GeneralTree() {
     jetCSV[iJ] = -1;
     jetIso[iJ] = -1;
     jetQGL[iJ] = -1;
+    jetGenFlavor[iJ] = -1;
   }
 
 //ENDCUSTOMCONST
@@ -91,6 +92,8 @@ void GeneralTree::Reset() {
     jetCSV[iJ] = -99;
     jetIso[iJ] = -99;
     jetQGL[iJ] = -99;
+    jetGenPt[iJ] = -99;
+    jetGenFlavor[iJ] = -99;
   }
 
   for (auto iter=signal_weights.begin(); iter!=signal_weights.end(); ++iter) {
@@ -395,6 +398,8 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("jetCSV",jetCSV,"jetCSV[nJot]/F");
     Book("jetIso",jetIso,"jetIso[nJot]/F");
     Book("jetQGL",jetQGL,"jetQGL[nJot]/F");
+    Book("jetGenPt",jetGenPt,"jetGenPt[nJot]/F");
+    Book("jetGenFlavor",jetGenFlavor,"jetGenFlavor[nJot]/I");
     Book("fj1sjPt",fj1sjPt,"fj1sjPt[2]/F");
     Book("fj1sjPhi",fj1sjPhi,"fj1sjPhi[2]/F");
     Book("fj1sjEta",fj1sjEta,"fj1sjEta[2]/F");

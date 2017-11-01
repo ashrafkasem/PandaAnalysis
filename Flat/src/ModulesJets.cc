@@ -177,6 +177,7 @@ void PandaAnalyzer::JetHbbBasics(panda::Jet& jet)
   gt->jetE[cleanedJets.size()-1]=jet.m();
   gt->jetCSV[cleanedJets.size()-1]=csv;
   gt->jetQGL[cleanedJets.size()-1]=jet.qgl;
+
   tr->TriggerSubEvent("H->bb jet");
 }
 
@@ -352,6 +353,7 @@ void PandaAnalyzer::JetHbbReco()
 
 void PandaAnalyzer::GenJetsNu()
 {
+
   std::vector<fastjet::PseudoJet> finalStates;
   std::vector<panda::GenParticle*> bcs;
   for (auto &p : event.genParticles) {
@@ -383,3 +385,4 @@ void PandaAnalyzer::GenJetsNu()
   }
 
 }
+

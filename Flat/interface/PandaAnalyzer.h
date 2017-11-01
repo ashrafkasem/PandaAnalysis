@@ -204,6 +204,20 @@ private:
     void QCDUncs();
     void SignalReweights();
     void GenJetsNu();
+    // templated function needs to be defined here, ugh
+    template <typename T> void MatchGenJets(T& genJets) {
+      unsigned N = cleanedJets.size();
+      for (unsigned i = 0; i != N; ++i) {
+        panda::Jet *reco = cleanedJets.at(i);
+        for (auto &gen : genJets) {
+          if (DeltaR2(gen.eta(), gen.phi(), reco->eta(), reco->phi()) < 0.09) {
+            gt->jetGenPt[i] = gen.pt();
+            gt->jetGenFlavor[i] = gen.pdgid;
+            break;
+          }
+        }
+      }
+    }
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -303,8 +317,6 @@ private:
     std::vector<panda::GenJet> genJetsNu;
     float genBosonPtMin, genBosonPtMax;
     std::vector<TString> wIDs;
-
-
 
 };
 
