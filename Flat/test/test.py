@@ -24,11 +24,12 @@ Load('PandaAnalyzer')
 skimmer = root.PandaAnalyzer(debug_level)
 gghbb = gghbb()
 gghbb.reclusterGen = True
+gghbb.bjetRegression = True
 gghbb.dump()
 skimmer.SetAnalysis(gghbb)
 
 skimmer.firstEvent=0
-skimmer.lastEvent=100
+skimmer.lastEvent=10
 skimmer.isData=False
 if skimmer.isData:
     with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt') as jsonFile:
