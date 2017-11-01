@@ -85,6 +85,7 @@ public:
   bool puppi_jets = true;
   bool ak8 = false;
   bool reclusterGen = false;
+  bool bjetRegression = false;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////

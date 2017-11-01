@@ -102,8 +102,11 @@ void PandaAnalyzer::JetBasics()
       if (analysis->vbf)
         JetVBFBasics(jet);
 
-      if (analysis->monoh) 
+      if (analysis->monoh) {
         JetHbbBasics(jet);
+        if (analysis->bjetRegression)
+          JetBRegressionInfo(jet);
+      }
 
       // compute dphi wrt mets
       if (cleanedJets.size() <= nJetDPhi) {
@@ -171,14 +174,37 @@ void PandaAnalyzer::JetBasics()
 void PandaAnalyzer::JetHbbBasics(panda::Jet& jet)
 {
   float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
-  gt->jetPt[cleanedJets.size()-1]=jet.pt();
-  gt->jetEta[cleanedJets.size()-1]=jet.eta();
-  gt->jetPhi[cleanedJets.size()-1]=jet.phi();
-  gt->jetE[cleanedJets.size()-1]=jet.m();
-  gt->jetCSV[cleanedJets.size()-1]=csv;
-  gt->jetQGL[cleanedJets.size()-1]=jet.qgl;
+  unsigned N = cleanedJets.size()-1;
+  gt->jetPt[N]=jet.pt();
+  gt->jetEta[N]=jet.eta();
+  gt->jetPhi[N]=jet.phi();
+  gt->jetE[N]=jet.m();
+  gt->jetCSV[N]=csv;
+  gt->jetQGL[N]=jet.qgl;
 
   tr->TriggerSubEvent("H->bb jet");
+}
+
+void PandaAnalyzer::JetBRegressionInfo(panda::Jet& jet)
+{
+  unsigned N = cleanedJets.size()-1;
+  gt->jetLeadingLepPt[N] = 0;
+  gt->jetLeadingTrkPt[N] = 0;
+  gt->jetNLep[N] = 0;
+  for (const panda::Ref<panda::PFCand> &c_iter : jet.constituents) {
+    auto *pf = c_iter.get();
+    if (pf->q() != 0) {
+      float pt = pf->pt();
+      gt->jetLeadingTrkPt[N] = max(pt, gt->jetLeadingTrkPt[N]);
+      unsigned pdgid = abs(pf->pdgId());
+      if (pdgid == 11 || pdgid == 13) {
+        gt->jetNLep[N]++;
+        gt->jetLeadingLepPt[N] = max(pt, gt->jetLeadingLepPt[N]);
+      }
+    }
+  }
+
+  tr->TriggerSubEvent("b-jet regression info");
 }
 
 void PandaAnalyzer::JetVBFBasics(panda::Jet& jet)
