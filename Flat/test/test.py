@@ -22,7 +22,10 @@ from PandaAnalysis.Flat.analysis import gghbb
 Load('PandaAnalyzer')
 
 skimmer = root.PandaAnalyzer(debug_level)
-skimmer.SetAnalysis(gghbb(True))
+gghbb = gghbb()
+gghbb.reclusterGen = True
+gghbb.dump()
+skimmer.SetAnalysis(gghbb)
 
 skimmer.firstEvent=0
 skimmer.lastEvent=100

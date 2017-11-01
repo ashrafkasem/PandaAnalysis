@@ -6,17 +6,25 @@ import ROOT as root
 
 Load('PandaAnalyzer')
 
+def _dump(a):
+    PInfo('PandaAnalysis.Flat.analysis','Summary of analysis %s:'%(a.name))
+    for k in dir(a):
+        if k[0] == '_':
+            continue
+        PInfo('PandaAnalysis.Flat.analysis','    %20s = %s'%(k, 'True' if bool(getattr(a, k)) else 'False'))
+
+
+
 def _analysis(name, verbose, **kwargs):
-    if verbose:
-        PInfo('PandaAnalysis.Flat.analysis','Summary of analysis %s:'%(name))
     a = root.Analysis(name)
     for k,v in kwargs.iteritems():
         if not hasattr(a, k):
             PError('PandaAnalysis.Flat.analysis','Could not set property %s'%k)
             return None 
-        if verbose:
-            PInfo('PandaAnalysis.Flat.analysis','    %20s : %s'%(k, 'True' if bool(v) else 'False'))
         setattr(a, k, bool(v))
+    setattr(a, 'dump', lambda : _dump(a))
+    if verbose:
+        a.dump()
     return a
 
 def analysis(name, **kwargs):
