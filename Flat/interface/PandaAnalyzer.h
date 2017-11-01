@@ -186,6 +186,7 @@ private:
     void FatjetRecluster();
     void JetBasics();
     void JetHbbBasics(panda::Jet&);
+    void JetBRegressionInfo(panda::Jet&);
     void JetVBFBasics(panda::Jet&);
     void JetVBFSystem();
     void JetVaryJES(panda::Jet&);
