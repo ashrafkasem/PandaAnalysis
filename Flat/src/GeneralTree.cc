@@ -54,6 +54,8 @@ GeneralTree::GeneralTree() {
     jetLeadingLepPt[iJ] = -1;
     jetLeadingTrkPt[iJ] = -1;
     jetNLep[iJ] = -1;
+    jetEMFrac[iJ] = -1;
+    jetHadFrac[iJ] = -1;
     jetGenFlavor[iJ] = -1;
   }
 
@@ -97,6 +99,8 @@ void GeneralTree::Reset() {
     jetQGL[iJ] = -99;
     jetLeadingLepPt[iJ] = -99;
     jetLeadingTrkPt[iJ] = -99;
+    jetEMFrac[iJ] = -1;
+    jetHadFrac[iJ] = -1;
     jetNLep[iJ] = -99;
     jetGenPt[iJ] = -99;
     jetGenFlavor[iJ] = -99;
@@ -406,6 +410,8 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("jetQGL",jetQGL,"jetQGL[nJot]/F");
     Book("jetLeadingLepPt",jetLeadingLepPt,"jetLeadingLepPt[nJot]/F");
     Book("jetLeadingTrkPt",jetLeadingTrkPt,"jetLeadingTrkPt[nJot]/F");
+    Book("jetEMFrac",jetEMFrac,"jetEMFrac[nJot]/F");
+    Book("jetHadFrac",jetHadFrac,"jetHadFrac[nJot]/F");
     Book("jetNLep",jetNLep,"jetNLep[nJot]/I");
     Book("jetGenPt",jetGenPt,"jetGenPt[nJot]/F");
     Book("jetGenFlavor",jetGenFlavor,"jetGenFlavor[nJot]/I");
