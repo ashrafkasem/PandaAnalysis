@@ -155,6 +155,8 @@ class GeneralTree : public genericTree {
       float jetQGL[NJET];
       float jetLeadingLepPt[NJET];
       float jetLeadingTrkPt[NJET];
+      float jetEMFrac[NJET];
+      float jetHadFrac[NJET];
       int jetNLep[NJET];
       float jetGenPt[NJET];
       int jetGenFlavor[NJET];
