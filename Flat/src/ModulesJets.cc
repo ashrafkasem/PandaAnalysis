@@ -192,6 +192,8 @@ void PandaAnalyzer::JetBRegressionInfo(panda::Jet& jet)
   gt->jetLeadingTrkPt[N] = 0;
   gt->jetNLep[N] = 0;
   for (const panda::Ref<panda::PFCand> &c_iter : jet.constituents) {
+    if (!c_iter.isValid())
+      continue;
     auto *pf = c_iter.get();
     if (pf->q() != 0) {
       float pt = pf->pt();
