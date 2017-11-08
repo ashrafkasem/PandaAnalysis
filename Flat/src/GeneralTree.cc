@@ -183,7 +183,6 @@ void GeneralTree::Reset() {
     looseLep4DPhiIn = -1;
     looseLep4Eseed = -1;
     looseLep4HOverE = -1;
-    looseLep4EcalE = -1;
     looseLep4TrackP = -1;
     looseLep4NMissingHits = 0;
     looseLep4TripleCharge = 0;
@@ -664,7 +663,7 @@ void GeneralTree::WriteTree(TTree *t) {
     TString btagn(makeBTagSFString(p));
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
-//ENDCUSTOMWRITE
+  if(leptonic) {
     Book("looseLep1D0",&looseLep1D0,"looseLep1D0/F");
     Book("looseLep1Dz",&looseLep1Dz,"looseLep1Dz/F");
     Book("looseLep2D0",&looseLep2D0,"looseLep2D0/F");
@@ -829,6 +828,8 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("looseLep4ValidFraction",&looseLep4ValidFraction,"looseLep4ValidFraction/F");
     Book("looseLep4NormChi2",&looseLep4NormChi2,"looseLep4NormChi2/F");
     Book("looseLep4SegmentCompatibility",&looseLep4SegmentCompatibility,"looseLep4SegmentCompatibility/F");
+  }
+//ENDCUSTOMWRITE
     Book("whichRecoil",&whichRecoil,"whichRecoil/I");
     Book("genJet1Pt",&genJet1Pt,"genJet1Pt/F");
     Book("genJet2Pt",&genJet2Pt,"genJet2Pt/F");
