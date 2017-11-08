@@ -14,221 +14,222 @@ using namespace std;
 
 void PandaAnalyzer::SimpleLeptons() 
 {
-    //electrons
-    for (auto& ele : event.electrons) {
-     float pt = ele.pt()*EGMSCALE; float eta = ele.eta(); float aeta = fabs(eta);
-      if (pt<10 || aeta>2.5 /* || (aeta>1.4442 && aeta<1.566) */)
-        continue;
-      if (!ele.veto)
-        continue;
-      if (!ElectronIP(ele.eta(),ele.dxy,ele.dz))
-        continue;
-      looseLeps.push_back(&ele);
-      if (analysis->vbf) {
-        matchLeps.push_back(&ele);
-        matchEles.push_back(&ele);
-      }
-      gt->nLooseElectron++;
+  //electrons
+  for (auto& ele : event.electrons) {
+   float pt = ele.pt()*EGMSCALE; float eta = ele.eta(); float aeta = fabs(eta);
+    if (pt<10 || aeta>2.5 /* || (aeta>1.4442 && aeta<1.566) */)
+      continue;
+    if (!ele.veto)
+      continue;
+    if (!ElectronIP(ele.eta(),ele.dxy,ele.dz))
+      continue;
+    looseLeps.push_back(&ele);
+    if (analysis->vbf) {
+      matchLeps.push_back(&ele);
+      matchEles.push_back(&ele);
     }
+    gt->nLooseElectron++;
+  }
 
-    // muons
-    for (auto& mu : event.muons) {
-     float pt = mu.pt(); float eta = mu.eta(); float aeta = fabs(eta);
-      if (pt<10 || aeta>2.4)
-        continue;
-      if (!mu.loose)
-        continue;
-      if (!MuonIsolation(pt,eta,mu.combIso(),panda::kLoose))
-        continue;
-      looseLeps.push_back(&mu);
-      if (analysis->vbf)
-        matchLeps.push_back(&mu);
-      gt->nLooseMuon++;
-      TVector2 vMu; vMu.SetMagPhi(pt,mu.phi());
-      vMETNoMu += vMu;
-    }
-    gt->pfmetnomu = vMETNoMu.Mod();
+  // muons
+  for (auto& mu : event.muons) {
+   float pt = mu.pt(); float eta = mu.eta(); float aeta = fabs(eta);
+    if (pt<10 || aeta>2.4)
+      continue;
+    if (!mu.loose)
+      continue;
+    if (!MuonIsolation(pt,eta,mu.combIso(),panda::kLoose))
+      continue;
+    looseLeps.push_back(&mu);
+    if (analysis->vbf)
+      matchLeps.push_back(&mu);
+    gt->nLooseMuon++;
+    TVector2 vMu; vMu.SetMagPhi(pt,mu.phi());
+    vMETNoMu += vMu;
+  }
+  gt->pfmetnomu = vMETNoMu.Mod();
 
-    // now consider all leptons
-    gt->nLooseLep = looseLeps.size();
-    if (gt->nLooseLep>0) {
-     auto ptsort([](panda::Lepton const* l1, panda::Lepton const* l2)->bool {
-       return l1->pt() > l2->pt();
-      });
-     int nToSort = TMath::Min(3,gt->nLooseLep);
-     std::partial_sort(looseLeps.begin(),looseLeps.begin()+nToSort,looseLeps.end(),ptsort);
+  // now consider all leptons
+  gt->nLooseLep = looseLeps.size();
+  if (gt->nLooseLep>0) {
+   auto ptsort([](panda::Lepton const* l1, panda::Lepton const* l2)->bool {
+     return l1->pt() > l2->pt();
+    });
+   int nToSort = TMath::Min(3,gt->nLooseLep);
+   std::partial_sort(looseLeps.begin(),looseLeps.begin()+nToSort,looseLeps.end(),ptsort);
+  }
+  int lep_counter=1;
+  for (auto* lep : looseLeps) {
+    if (lep_counter==1) {
+     gt->looseLep1Pt = lep->pt();
+     gt->looseLep1Eta = lep->eta();
+     gt->looseLep1Phi = lep->phi();
+    } else if (lep_counter==2) {
+     gt->looseLep2Pt = lep->pt();
+     gt->looseLep2Eta = lep->eta();
+     gt->looseLep2Phi = lep->phi();
+    } else {
+      break;
     }
-    int lep_counter=1;
-    for (auto* lep : looseLeps) {
+    // now specialize lepton types
+    panda::Muon *mu = dynamic_cast<panda::Muon*>(lep);
+    if (mu!=NULL) {
+      bool isTight = ( mu->tight &&
+              MuonIsolation(mu->pt(),mu->eta(),mu->combIso(),panda::kTight) &&
+              mu->pt()>20 && fabs(mu->eta())<2.4 );
       if (lep_counter==1) {
-       gt->looseLep1Pt = lep->pt();
-       gt->looseLep1Eta = lep->eta();
-       gt->looseLep1Phi = lep->phi();
-      } else if (lep_counter==2) {
-       gt->looseLep2Pt = lep->pt();
-       gt->looseLep2Eta = lep->eta();
-       gt->looseLep2Phi = lep->phi();
-      } else {
-        break;
-      }
-      // now specialize lepton types
-      panda::Muon *mu = dynamic_cast<panda::Muon*>(lep);
-      if (mu!=NULL) {
-        bool isTight = ( mu->tight &&
-                MuonIsolation(mu->pt(),mu->eta(),mu->combIso(),panda::kTight) &&
-                mu->pt()>20 && fabs(mu->eta())<2.4 );
-        if (lep_counter==1) {
-          gt->looseLep1PdgId = mu->charge*-13;
-          gt->looseLep1IsHLTSafe = 1;
-          if (isTight) {
-            gt->nTightMuon++;
-            gt->looseLep1IsTight = 1;
-            if (!analysis->vbf)
-              matchLeps.push_back(lep);
-          }
-        } else if (lep_counter==2) {
-          gt->looseLep2PdgId = mu->charge*-13;
-          gt->looseLep2IsHLTSafe = 1;
-          if (isTight) {
-            gt->nTightMuon++;
-            gt->looseLep2IsTight = 1;
-          }
-          if (!analysis->vbf && (isTight || gt->looseLep1IsTight))
+        gt->looseLep1PdgId = mu->charge*-13;
+        gt->looseLep1IsHLTSafe = 1;
+        if (isTight) {
+          gt->nTightMuon++;
+          gt->looseLep1IsTight = 1;
+          if (!analysis->vbf)
             matchLeps.push_back(lep);
         }
-      } else {
-        panda::Electron *ele = dynamic_cast<panda::Electron*>(lep);
-        bool isTight = ( ele->tight &&
-                ele->pt()>40 && fabs(ele->eta())<2.5 );
-        if (lep_counter==1) {
-          gt->looseLep1Pt *= EGMSCALE;
-          gt->looseLep1PdgId = ele->charge*-11;
-          gt->looseLep1IsHLTSafe = ele->hltsafe ? 1 : 0;
-          if (isTight) {
-            gt->nTightElectron++;
-            gt->looseLep1IsTight = 1;
-            if (!analysis->vbf) {
-              matchLeps.push_back(lep);
-              matchEles.push_back(lep);
-            }
-          }
-        } else if (lep_counter==2) {
-          gt->looseLep2Pt *= EGMSCALE;
-          gt->looseLep2PdgId = ele->charge*-11;
-          gt->looseLep2IsHLTSafe = ele->hltsafe ? 1 : 0;
-          if (isTight) {
-            gt->nTightElectron++;
-            gt->looseLep2IsTight = 1;
-          }
-          if (!analysis->vbf && (isTight || gt->looseLep1IsTight)) {
+      } else if (lep_counter==2) {
+        gt->looseLep2PdgId = mu->charge*-13;
+        gt->looseLep2IsHLTSafe = 1;
+        if (isTight) {
+          gt->nTightMuon++;
+          gt->looseLep2IsTight = 1;
+        }
+        if (!analysis->vbf && (isTight || gt->looseLep1IsTight))
+          matchLeps.push_back(lep);
+      }
+    } else {
+      panda::Electron *ele = dynamic_cast<panda::Electron*>(lep);
+      bool isTight = ( ele->tight &&
+              ele->pt()>40 && fabs(ele->eta())<2.5 );
+      if (lep_counter==1) {
+        gt->looseLep1Pt *= EGMSCALE;
+        gt->looseLep1PdgId = ele->charge*-11;
+        gt->looseLep1IsHLTSafe = ele->hltsafe ? 1 : 0;
+        if (isTight) {
+          gt->nTightElectron++;
+          gt->looseLep1IsTight = 1;
+          if (!analysis->vbf) {
             matchLeps.push_back(lep);
             matchEles.push_back(lep);
           }
         }
+      } else if (lep_counter==2) {
+        gt->looseLep2Pt *= EGMSCALE;
+        gt->looseLep2PdgId = ele->charge*-11;
+        gt->looseLep2IsHLTSafe = ele->hltsafe ? 1 : 0;
+        if (isTight) {
+          gt->nTightElectron++;
+          gt->looseLep2IsTight = 1;
+        }
+        if (!analysis->vbf && (isTight || gt->looseLep1IsTight)) {
+          matchLeps.push_back(lep);
+          matchEles.push_back(lep);
+        }
       }
-      ++lep_counter;
     }
-    gt->nTightLep = gt->nTightElectron + gt->nTightMuon;
-    if (gt->nLooseLep>0) {
-      panda::Lepton* lep1 = looseLeps[0];
-      gt->mT = MT(lep1->pt(),lep1->phi(),gt->pfmet,gt->pfmetphi);
-    }
-    if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
-      TLorentzVector v1,v2;
-      panda::Lepton *lep1=looseLeps[0], *lep2=looseLeps[1];
-      v1.SetPtEtaPhiM(lep1->pt(),lep1->eta(),lep1->phi(),lep1->m());
-      v2.SetPtEtaPhiM(lep2->pt(),lep2->eta(),lep2->phi(),lep2->m());
-      gt->diLepMass = (v1+v2).M();
-    } else {
-      gt->diLepMass = -1;
-    }
+    ++lep_counter;
+  }
+  gt->nTightLep = gt->nTightElectron + gt->nTightMuon;
+  if (gt->nLooseLep>0) {
+    panda::Lepton* lep1 = looseLeps[0];
+    gt->mT = MT(lep1->pt(),lep1->phi(),gt->pfmet,gt->pfmetphi);
+  }
+  if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
+    TLorentzVector v1,v2;
+    panda::Lepton *lep1=looseLeps[0], *lep2=looseLeps[1];
+    v1.SetPtEtaPhiM(lep1->pt(),lep1->eta(),lep1->phi(),lep1->m());
+    v2.SetPtEtaPhiM(lep2->pt(),lep2->eta(),lep2->phi(),lep2->m());
+    gt->diLepMass = (v1+v2).M();
+  } else {
+    gt->diLepMass = -1;
+  }
 
-    tr->TriggerEvent("leptons");
+  tr->TriggerEvent("leptons");
 }
 void PandaAnalyzer::ComplicatedLeptons() {
-    // TO DO: Hard coded to 2016 rochester corrections for now, need to do this in a better way later
-    RoccoR rochesterCorrection("PandaAnalysis/data/rcdata.2016.v3");
-    
-    TRandom3 rng(3393); //Dylan's b-day
+  // TO DO: Hard coded to 2016 rochester corrections for now, need to do this in a better way later
+  RoccoR rochesterCorrection("PandaAnalysis/data/rcdata.2016.v3");
+  
+  TRandom3 rng(3393); //Dylan's b-day
 
-    //electrons
-    for (auto& ele : event.electrons) {
-     float pt = ele.smearedPt; float eta = ele.eta(); float aeta = fabs(eta);
-      if (pt<10 || aeta>2.5 /* || (aeta>1.4442 && aeta<1.566) */) continue;
-      if (!ele.veto) continue;
-      if (!ElectronIP(ele.eta(),ele.dxy,ele.dz)) continue;
-      ele.setPtEtaPhiM(pt,eta,ele.phi(),511e-6);
-      looseLeps.push_back(&ele);
-      if (analysis->vbf) {
-        matchLeps.push_back(&ele);
-        matchEles.push_back(&ele);
-      }
-      gt->nLooseElectron++;
+  //electrons
+  for (auto& ele : event.electrons) {
+    float pt = ele.smearedPt; float eta = ele.eta(); float aeta = fabs(eta);
+    if (pt<10 || aeta>2.5 /* || (aeta>1.4442 && aeta<1.566) */) continue;
+    if (!ele.veto) continue;
+    if (!ElectronIP(ele.eta(),ele.dxy,ele.dz)) continue;
+    ele.setPtEtaPhiM(pt,eta,ele.phi(),511e-6);
+    looseLeps.push_back(&ele);
+    if (analysis->vbf) {
+      matchLeps.push_back(&ele);
+      matchEles.push_back(&ele);
     }
+    gt->nLooseElectron++;
+  }
 
-    // muons
-    for (auto& mu : event.muons) {
-     float pt = mu.pt(); float eta = mu.eta(); float aeta = fabs(eta);
-     double ptCorrection=1;
-     if(isData) { // perform the rochester correction on the actual particle
+  // muons
+  for (auto& mu : event.muons) {
+    float pt = mu.pt(); float eta = mu.eta(); float aeta = fabs(eta);
+    double ptCorrection=1;
+    if (isData) { // perform the rochester correction on the actual particle
       ptCorrection=rochesterCorrection.kScaleDT((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), 0, 0);
-     } else { // perform the rochester correction to the simulated particle
+    } else { // perform the rochester correction to the simulated particle
       // attempt gen-matching to a final state muon
       bool muonIsTruthMatched=false; TLorentzVector genP4; panda::GenParticle genParticle;
       for (unsigned iG = 0; iG != event.genParticles.size() && !muonIsTruthMatched; ++iG) {
-       genParticle = event.genParticles[iG];
-       if (genParticle.finalState != 1) continue;
-       if (genParticle.pdgid != ((int)mu.charge) * -13) continue;
-       genP4.SetPtEtaPhiM(genParticle.pt(), genParticle.eta(), genParticle.phi(), 0.106);
-       double dR = genP4.DeltaR(mu.p4());
-       if (dR < 0.3) muonIsTruthMatched=true;
-      } if(muonIsTruthMatched) { // correct using the gen-particle pt
-       double random1=rng.Rndm();
-       ptCorrection=rochesterCorrection.kScaleFromGenMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, genParticle.pt(), random1, 0, 0);
+        genParticle = event.genParticles[iG];
+        if (genParticle.finalState != 1) continue;
+        if (genParticle.pdgid != ((int)mu.charge) * -13) continue;
+        genP4.SetPtEtaPhiM(genParticle.pt(), genParticle.eta(), genParticle.phi(), 0.106);
+        double dR = genP4.DeltaR(mu.p4());
+        if (dR < 0.3) muonIsTruthMatched=true;
+      } if (muonIsTruthMatched) { // correct using the gen-particle pt
+        double random1=rng.Rndm();
+        ptCorrection=rochesterCorrection.kScaleFromGenMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, genParticle.pt(), random1, 0, 0);
       } else { // if gen match not found, correct the other way
-       double random1=rng.Rndm(); double random2=rng.Rndm();
-       ptCorrection=rochesterCorrection.kScaleAndSmearMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, random1, random2, 0, 0);
+        double random1=rng.Rndm(); double random2=rng.Rndm();
+        ptCorrection=rochesterCorrection.kScaleAndSmearMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, random1, random2, 0, 0);
       }
       pt *= ptCorrection;
-     } 
-     if (pt<10 || aeta>2.4) continue;
-     if(!mu.loose) continue;
-     mu.setPtEtaPhiM(pt,eta,mu.phi(),0.106);
-     looseLeps.push_back(&mu);
-     matchLeps.push_back(&mu);
-     gt->nLooseMuon++;
-     TVector2 vMu; vMu.SetMagPhi(pt,mu.phi());
-     vMETNoMu += vMu;
-    }
-    gt->pfmetnomu = vMETNoMu.Mod();
+    } 
+    if (pt<10 || aeta>2.4) continue;
+    if (!mu.loose) continue;
+    mu.setPtEtaPhiM(pt,eta,mu.phi(),0.106);
+    looseLeps.push_back(&mu);
+    matchLeps.push_back(&mu);
+    gt->nLooseMuon++;
+    TVector2 vMu; vMu.SetMagPhi(pt,mu.phi());
+    vMETNoMu += vMu;
+  }
+  gt->pfmetnomu = vMETNoMu.Mod();
 
-    // now consider all leptons
-    gt->nLooseLep = looseLeps.size();
-    if (gt->nLooseLep>0) {
-     auto ptsort([](panda::Lepton const* l1, panda::Lepton const* l2)->bool {
-       return l1->pt() > l2->pt();
-      });
-     int nToSort = TMath::Min(3,gt->nLooseLep);
-     std::partial_sort(looseLeps.begin(),looseLeps.begin()+nToSort,looseLeps.end(),ptsort);
-    }
-    unsigned lep_counter=1;
-    for (auto* lep : looseLeps) {
-      // assign general lepton properties
-      if(lep_counter>4) break; 
-      if      (lep_counter==1){ gt->looseLep1Pt=lep->pt(); gt->looseLep1Eta=lep->eta(); gt->looseLep1Phi=lep->phi();}
-      else if (lep_counter==2){ gt->looseLep2Pt=lep->pt(); gt->looseLep2Eta=lep->eta(); gt->looseLep2Phi=lep->phi();}
-      else if (lep_counter==3){ gt->looseLep3Pt=lep->pt(); gt->looseLep3Eta=lep->eta(); gt->looseLep3Phi=lep->phi();}
-      else if (lep_counter==4){ gt->looseLep4Pt=lep->pt(); gt->looseLep4Eta=lep->eta(); gt->looseLep4Phi=lep->phi();}
-      else break;
-      // now specialize lepton types
-      panda::Muon *mu = dynamic_cast<panda::Muon*>(lep); if (mu!=NULL) {
-       // assign muon specific properties
-       int *lepPdgId, *isHLTSafe, *lepSelBit; 
-       float *lepPt, *lepEta, *lepPhi, *lepSfTrk, *lepSfLoose, *lepSfMedium, *lepSfTight, *lepSfUnc, *lepD0, *lepDz;
-       int *soft, *global, *tracker;
-       int *nValidMuon, *nValidPixel, *trkLayersWithMmt, *pixLayersWithMmt, *nMatched, *chi2LocalPosition, *trkKink;
-       float *validFraction, *normChi2, *segmentCompatibility;
-       if (lep_counter==1) {
+  // now consider all leptons
+  gt->nLooseLep = looseLeps.size();
+  if (gt->nLooseLep>0) {
+    auto ptsort([](panda::Lepton const* l1, panda::Lepton const* l2)->bool {
+      return l1->pt() > l2->pt();
+    });
+    int nToSort = TMath::Min(3,gt->nLooseLep);
+    std::partial_sort(looseLeps.begin(),looseLeps.begin()+nToSort,looseLeps.end(),ptsort);
+  }
+  unsigned lep_counter=1;
+  for (auto* lep : looseLeps) {
+    // assign general lepton properties
+    if (lep_counter>4) break; 
+    if      (lep_counter==1) { gt->looseLep1Pt=lep->pt(); gt->looseLep1Eta=lep->eta(); gt->looseLep1Phi=lep->phi(); }
+    else if (lep_counter==2) { gt->looseLep2Pt=lep->pt(); gt->looseLep2Eta=lep->eta(); gt->looseLep2Phi=lep->phi(); }
+    else if (lep_counter==3) { gt->looseLep3Pt=lep->pt(); gt->looseLep3Eta=lep->eta(); gt->looseLep3Phi=lep->phi(); }
+    else if (lep_counter==4) { gt->looseLep4Pt=lep->pt(); gt->looseLep4Eta=lep->eta(); gt->looseLep4Phi=lep->phi(); }
+    else break;
+    // now specialize lepton types
+    panda::Muon *mu = dynamic_cast<panda::Muon*>(lep);
+    if (mu!=NULL) {
+      // assign muon specific properties
+      int *lepPdgId, *isHLTSafe, *lepSelBit; 
+      float *lepPt, *lepEta, *lepPhi, *lepSfTrk, *lepSfLoose, *lepSfMedium, *lepSfTight, *lepSfUnc, *lepD0, *lepDz;
+      int *soft, *global, *tracker;
+      int *nValidMuon, *nValidPixel, *trkLayersWithMmt, *pixLayersWithMmt, *nMatched, *chi2LocalPosition, *trkKink;
+      float *validFraction, *normChi2, *segmentCompatibility;
+      if (lep_counter==1) {
         lepPdgId             = &(gt->looseLep1PdgId                ); 
         isHLTSafe            = &(gt->looseLep1IsHLTSafe            ); 
         lepSelBit            = &(gt->looseLep1SelBit               ); 
@@ -250,7 +251,7 @@ void PandaAnalyzer::ComplicatedLeptons() {
         validFraction        = &(gt->looseLep1ValidFraction        ); 
         normChi2             = &(gt->looseLep1NormChi2             ); 
         segmentCompatibility = &(gt->looseLep1SegmentCompatibility ); 
-       } else if(lep_counter==2) { 
+      } else if (lep_counter==2) { 
         lepPdgId             = &(gt->looseLep2PdgId                ); 
         isHLTSafe            = &(gt->looseLep2IsHLTSafe            ); 
         lepSelBit            = &(gt->looseLep2SelBit               ); 
@@ -272,7 +273,7 @@ void PandaAnalyzer::ComplicatedLeptons() {
         validFraction        = &(gt->looseLep2ValidFraction        ); 
         normChi2             = &(gt->looseLep2NormChi2             ); 
         segmentCompatibility = &(gt->looseLep2SegmentCompatibility ); 
-       } else if(lep_counter==3) { 
+      } else if (lep_counter==3) { 
         lepPdgId             = &(gt->looseLep3PdgId                ); 
         isHLTSafe            = &(gt->looseLep3IsHLTSafe            ); 
         lepSelBit            = &(gt->looseLep3SelBit               ); 
@@ -294,7 +295,7 @@ void PandaAnalyzer::ComplicatedLeptons() {
         validFraction        = &(gt->looseLep3ValidFraction        ); 
         normChi2             = &(gt->looseLep3NormChi2             ); 
         segmentCompatibility = &(gt->looseLep3SegmentCompatibility ); 
-       } else if(lep_counter==4) { 
+      } else if (lep_counter==4) { 
         lepPdgId             = &(gt->looseLep4PdgId                ); 
         isHLTSafe            = &(gt->looseLep4IsHLTSafe            ); 
         lepSelBit            = &(gt->looseLep4SelBit               ); 
@@ -316,42 +317,43 @@ void PandaAnalyzer::ComplicatedLeptons() {
         validFraction        = &(gt->looseLep4ValidFraction        ); 
         normChi2             = &(gt->looseLep4NormChi2             ); 
         segmentCompatibility = &(gt->looseLep4SegmentCompatibility ); 
-       }
-       *lepPdgId = mu->charge*-13;
-       *isHLTSafe=1;
-       bool isFake   = mu->tight  && mu->combIso()/mu->pt() < 0.4 && mu->chIso/mu->pt() < 0.4;
-       bool isMedium = mu->medium && mu->combIso()/mu->pt() < 0.15;
-       bool isTight  = mu->tight  && mu->combIso()/mu->pt() < 0.15;
-       *lepSelBit              = kLoose; 
-       if(isFake)   *lepSelBit |= kFake; 
-       if(isMedium) *lepSelBit |= kMedium; 
-       if(isTight)  *lepSelBit |= kTight;
-       *lepSfTrk = GetCorr(cMuReco,mu->eta());
-       *lepSfLoose = GetCorr(cMuLooseID,TMath::Abs(mu->eta()),mu->pt()) * GetCorr(cMuLooseIso,TMath::Abs(mu->eta()),mu->pt());
-       *lepSfMedium = GetCorr(cMuMediumID,TMath::Abs(mu->eta()),mu->pt());
-       *lepSfTight = GetCorr(cMuTightID,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cMuTightIso,TMath::Abs(mu->eta()),mu->pt());
-       *lepSfUnc = GetError(cMuMediumID ,TMath::Abs(mu->eta()),mu->pt());
-       *soft                 = mu->soft                ; 
-       *global               = mu->global              ; 
-       *tracker              = mu->tracker             ; 
-       *nValidMuon           = mu->nValidMuon          ; 
-       *nValidPixel          = mu->nValidPixel         ; 
-       *trkLayersWithMmt     = mu->trkLayersWithMmt    ; 
-       *pixLayersWithMmt     = mu->pixLayersWithMmt    ; 
-       *nMatched             = mu->nMatched            ; 
-       *chi2LocalPosition    = mu->chi2LocalPosition   ; 
-       *trkKink              = mu->trkKink             ; 
-       *validFraction        = mu->validFraction       ; 
-       *normChi2             = mu->normChi2            ; 
-       *segmentCompatibility = mu->segmentCompatibility; 
-       gt->nTightMuon+=isTight;
-      } else {
-       panda::Electron *ele = dynamic_cast<panda::Electron*>(lep); assert(ele!=NULL);
-       int *lepPdgId, *isHLTSafe, *lepSelBit; 
-       float *lepPt, *lepEta, *lepPhi, *lepSfTrk, *lepSfLoose, *lepSfMedium, *lepSfTight, *lepSfUnc, *lepD0, *lepDz;
-       float *chIsoPh, *nhIsoPh, *phIsoPh, *ecalIso, *hcalIso, *trackIso, *isoPUOffset, *sieie, *sipip, *dEtaInSeed, *dPhiIn, *eseed, *hOverE, *ecalE, *trackP;
-       int *nMissingHits, *tripleCharge;
-       if(lep_counter==1) {
+      }
+      *lepPdgId = mu->charge*-13;
+      *isHLTSafe=1;
+      bool isFake   = mu->tight  && mu->combIso()/mu->pt() < 0.4 && mu->chIso/mu->pt() < 0.4;
+      bool isMedium = mu->medium && mu->combIso()/mu->pt() < 0.15;
+      bool isTight  = mu->tight  && mu->combIso()/mu->pt() < 0.15;
+      *lepSelBit              = kLoose; 
+      if (isFake)   *lepSelBit |= kFake; 
+      if (isMedium) *lepSelBit |= kMedium; 
+      if (isTight)  *lepSelBit |= kTight;
+      *lepSfTrk = GetCorr(cMuReco,mu->eta());
+      *lepSfLoose = GetCorr(cMuLooseID,TMath::Abs(mu->eta()),mu->pt()) * GetCorr(cMuLooseIso,TMath::Abs(mu->eta()),mu->pt());
+      *lepSfMedium = GetCorr(cMuMediumID,TMath::Abs(mu->eta()),mu->pt());
+      *lepSfTight = GetCorr(cMuTightID,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cMuTightIso,TMath::Abs(mu->eta()),mu->pt());
+      *lepSfUnc = GetError(cMuMediumID ,TMath::Abs(mu->eta()),mu->pt());
+      *soft                 = mu->soft                ; 
+      *global               = mu->global              ; 
+      *tracker              = mu->tracker             ; 
+      *nValidMuon           = mu->nValidMuon          ; 
+      *nValidPixel          = mu->nValidPixel         ; 
+      *trkLayersWithMmt     = mu->trkLayersWithMmt    ; 
+      *pixLayersWithMmt     = mu->pixLayersWithMmt    ; 
+      *nMatched             = mu->nMatched            ; 
+      *chi2LocalPosition    = mu->chi2LocalPosition   ; 
+      *trkKink              = mu->trkKink             ; 
+      *validFraction        = mu->validFraction       ; 
+      *normChi2             = mu->normChi2            ; 
+      *segmentCompatibility = mu->segmentCompatibility; 
+      gt->nTightMuon+=isTight;
+    } else {
+      panda::Electron *ele = dynamic_cast<panda::Electron*>(lep);
+      assert(ele!=NULL);
+      int *lepPdgId, *isHLTSafe, *lepSelBit; 
+      float *lepPt, *lepEta, *lepPhi, *lepSfTrk, *lepSfLoose, *lepSfMedium, *lepSfTight, *lepSfUnc, *lepD0, *lepDz;
+      float *chIsoPh, *nhIsoPh, *phIsoPh, *ecalIso, *hcalIso, *trackIso, *isoPUOffset, *sieie, *sipip, *dEtaInSeed, *dPhiIn, *eseed, *hOverE, *ecalE, *trackP;
+      int *nMissingHits, *tripleCharge;
+      if (lep_counter==1) {
         lepPdgId      = &(gt->looseLep1PdgId        );
         isHLTSafe     = &(gt->looseLep1IsHLTSafe    );
         lepSelBit     = &(gt->looseLep1SelBit       );
@@ -377,7 +379,7 @@ void PandaAnalyzer::ComplicatedLeptons() {
         trackP        = &(gt->looseLep1TrackP       );
         nMissingHits  = &(gt->looseLep1NMissingHits );
         tripleCharge  = &(gt->looseLep1TripleCharge );
-       } else if(lep_counter==2) {
+      } else if (lep_counter==2) {
         lepPdgId      = &(gt->looseLep2PdgId        );
         isHLTSafe     = &(gt->looseLep2IsHLTSafe    );
         lepSelBit     = &(gt->looseLep2SelBit       );
@@ -403,7 +405,7 @@ void PandaAnalyzer::ComplicatedLeptons() {
         trackP        = &(gt->looseLep2TrackP       );
         nMissingHits  = &(gt->looseLep2NMissingHits );
         tripleCharge  = &(gt->looseLep2TripleCharge );
-       } else if(lep_counter==3) {
+      } else if (lep_counter==3) {
         lepPdgId      = &(gt->looseLep3PdgId        );
         isHLTSafe     = &(gt->looseLep3IsHLTSafe    );
         lepSelBit     = &(gt->looseLep3SelBit       );
@@ -429,7 +431,7 @@ void PandaAnalyzer::ComplicatedLeptons() {
         trackP        = &(gt->looseLep3TrackP       );
         nMissingHits  = &(gt->looseLep3NMissingHits );
         tripleCharge  = &(gt->looseLep3TripleCharge );
-       } else if(lep_counter==4) {
+      } else if (lep_counter==4) {
         lepPdgId      = &(gt->looseLep4PdgId        );
         isHLTSafe     = &(gt->looseLep4IsHLTSafe    );
         lepSelBit     = &(gt->looseLep4SelBit       );
@@ -455,60 +457,60 @@ void PandaAnalyzer::ComplicatedLeptons() {
         trackP        = &(gt->looseLep4TrackP       );
         nMissingHits  = &(gt->looseLep4NMissingHits );
         tripleCharge  = &(gt->looseLep4TripleCharge );
-       }
-       *chIsoPh       = ele->chIsoPh;
-       *nhIsoPh       = ele->nhIsoPh;
-       *phIsoPh       = ele->phIsoPh;
-       *ecalIso       = ele->ecalIso;
-       *hcalIso       = ele->hcalIso;
-       *trackIso      = ele->trackIso;
-       *isoPUOffset   = ele->isoPUOffset;
-       *sieie         = ele->sieie;
-       *sipip         = ele->sipip;
-       *dEtaInSeed    = ele->dEtaInSeed;
-       *dPhiIn        = ele->dPhiIn;
-       *eseed         = ele->eseed;
-       *hOverE        = ele->hOverE;
-       *ecalE         = ele->ecalE;
-       *trackP        = ele->trackP;
-       *nMissingHits  = ele->nMissingHits;
-       *tripleCharge  = ele->tripleCharge;
-       bool isFake   = ele->hltsafe;
-       bool isMedium = ele->medium;
-       bool isTight  = ele->tight;
-       *lepPdgId = ele->charge*-11;
-       *lepSelBit              = kLoose; 
-       if(isFake)   *lepSelBit |= kFake; 
-       if(isMedium) *lepSelBit |= kMedium; 
-       if(isTight)  *lepSelBit |= kTight;
-	   *lepSfTrk    = GetCorr(cEleReco,ele->eta(),ele->pt());
-	   *lepSfLoose  = GetCorr(cEleLoose,ele->eta(),ele->pt());
-	   *lepSfMedium = GetCorr(cEleMedium,ele->eta(),ele->pt());
-	   *lepSfTight  = GetCorr(cEleTight,ele->eta(),ele->pt());
-	   *lepSfUnc = GetError(cEleMedium,ele->eta(),ele->pt());
-       if (!analysis->vbf && ((lep_counter==1 && isTight)|| (lep_counter==2 && isTight && ((gt->looseLep1SelBit & kTight) != 0)))) {
+      }
+      *chIsoPh       = ele->chIsoPh;
+      *nhIsoPh       = ele->nhIsoPh;
+      *phIsoPh       = ele->phIsoPh;
+      *ecalIso       = ele->ecalIso;
+      *hcalIso       = ele->hcalIso;
+      *trackIso      = ele->trackIso;
+      *isoPUOffset   = ele->isoPUOffset;
+      *sieie         = ele->sieie;
+      *sipip         = ele->sipip;
+      *dEtaInSeed    = ele->dEtaInSeed;
+      *dPhiIn        = ele->dPhiIn;
+      *eseed         = ele->eseed;
+      *hOverE        = ele->hOverE;
+      *ecalE         = ele->ecalE;
+      *trackP        = ele->trackP;
+      *nMissingHits  = ele->nMissingHits;
+      *tripleCharge  = ele->tripleCharge;
+      bool isFake   = ele->hltsafe;
+      bool isMedium = ele->medium;
+      bool isTight  = ele->tight;
+      *lepPdgId = ele->charge*-11;
+      *lepSelBit                = kLoose; 
+      if (isFake  ) *lepSelBit |= kFake; 
+      if (isMedium) *lepSelBit |= kMedium; 
+      if (isTight ) *lepSelBit |= kTight;
+      *lepSfTrk    = GetCorr(cEleReco,ele->eta(),ele->pt());
+      *lepSfLoose  = GetCorr(cEleLoose,ele->eta(),ele->pt());
+      *lepSfMedium = GetCorr(cEleMedium,ele->eta(),ele->pt());
+      *lepSfTight  = GetCorr(cEleTight,ele->eta(),ele->pt());
+      *lepSfUnc = GetError(cEleMedium,ele->eta(),ele->pt());
+      if (!analysis->vbf && ((lep_counter==1 && isTight)|| (lep_counter==2 && isTight && ((gt->looseLep1SelBit & kTight) != 0)))) {
         matchLeps.push_back(lep);
         matchEles.push_back(lep);
-       }
       }
-      ++lep_counter;
     }
-    gt->nTightLep = gt->nTightElectron + gt->nTightMuon;
-    if (gt->nLooseLep>0) {
-      panda::Lepton* lep1 = looseLeps[0];
-      gt->mT = MT(lep1->pt(),lep1->phi(),gt->pfmet,gt->pfmetphi);
-    }
-    if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
-      TLorentzVector v1,v2;
-      panda::Lepton *lep1=looseLeps[0], *lep2=looseLeps[1];
-      v1.SetPtEtaPhiM(lep1->pt(),lep1->eta(),lep1->phi(),lep1->m());
-      v2.SetPtEtaPhiM(lep2->pt(),lep2->eta(),lep2->phi(),lep2->m());
-      gt->diLepMass = (v1+v2).M();
-    } else {
-      gt->diLepMass = -1;
-    }
+    ++lep_counter;
+  }
+  gt->nTightLep = gt->nTightElectron + gt->nTightMuon;
+  if (gt->nLooseLep>0) {
+    panda::Lepton* lep1 = looseLeps[0];
+    gt->mT = MT(lep1->pt(),lep1->phi(),gt->pfmet,gt->pfmetphi);
+  }
+  if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
+    TLorentzVector v1,v2;
+    panda::Lepton *lep1=looseLeps[0], *lep2=looseLeps[1];
+    v1.SetPtEtaPhiM(lep1->pt(),lep1->eta(),lep1->phi(),lep1->m());
+    v2.SetPtEtaPhiM(lep2->pt(),lep2->eta(),lep2->phi(),lep2->m());
+    gt->diLepMass = (v1+v2).M();
+  } else {
+    gt->diLepMass = -1;
+  }
 
-    tr->TriggerEvent("leptons");
+  tr->TriggerEvent("leptons");
 }
 
 void PandaAnalyzer::Photons()
