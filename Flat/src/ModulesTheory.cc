@@ -192,7 +192,7 @@ void PandaAnalyzer::VJetsReweight()
       } // gen particle loop ends
 
       //now for the cases where we did not find a gen boson
-      if (gt->genBosonPt < 0){
+      if (gt->genBosonPt < 0) {
 
         TLorentzVector vpt(0,0,0,0);
 
@@ -205,15 +205,15 @@ void PandaAnalyzer::VJetsReweight()
                part.statusFlags == GenParticle::kIsTauDecayProduct || 
                part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
                part.statusFlags == GenParticle::kIsDirectTauDecayProduct || 
-               part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct )){
+               part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct )) {
 
             //ideally you want to have dressed leptons (lepton + photon), 
             //but we have in any ways have a photon veto in the analysis
-            if(IsMatched(&matchLeps,0.01,part.eta(),part.phi()))
+            if (IsMatched(&matchLeps,0.01,part.eta(),part.phi()))
               vpt += part.p4();
           }
           
-          if ((abspdgid == 12 || abspdgid == 14 || abspdgid == 16) && part.finalState==1){
+          if ((abspdgid == 12 || abspdgid == 14 || abspdgid == 16) && part.finalState==1) {
             vpt += part.p4();
           }
         }
@@ -326,28 +326,28 @@ void PandaAnalyzer::SignalReweights()
         }
       }
 }
-double PandaAnalyzer::weightEWKCorr(float pt, int type){
+double PandaAnalyzer::weightEWKCorr(float pt, int type) {
   double parWZ08[2] = { 2.85714,-0.05714};
   double parZZ08[2] = {-4.57143,-0.06857};
   double parWZ14[3] = {3.69800,-0.0726117,0.0000318044};
   double parZZ14[3] = {-0.586985000,-0.099845900,0.0000445083};
   double corrA = 0.0;
   double corrB = 0.0;
-  if     (type == 0){ // WZ13
+  if     (type == 0) { // WZ13
     corrA = (parWZ08[0]+parWZ08[1]*pt)/100.;
     corrB = (parWZ14[0]+parWZ14[1]*pt+parWZ14[2]*pt*pt)/100.;
   }
-  else if(type == 1){ // ZZ13
+  else if (type == 1) { // ZZ13
     corrA = (parZZ08[0]+parZZ08[1]*pt)/100.;
     corrB = (parZZ14[0]+parZZ14[1]*pt+parZZ14[2]*pt*pt)/100.;
   }
   double corr = corrB - (corrB-corrA)/6.;
 
-  if(corr >= 0.0) return 1.0;
+  if (corr >= 0.0) return 1.0;
   return (1.0+corr);
 }
 
-double PandaAnalyzer::weightZHEWKCorr(float baseCorr){
+double PandaAnalyzer::weightZHEWKCorr(float baseCorr) {
   return (baseCorr+0.31+0.11)/((1-0.053)+0.31+0.11);
 }
 void PandaAnalyzer::GenStudyEWK() {
@@ -364,7 +364,7 @@ void PandaAnalyzer::GenStudyEWK() {
   gt->looseGenLep2PdgId = 0;
   gt->looseGenLep3PdgId = 0;
   gt->looseGenLep4PdgId = 0;
-  if(isData) return;
+  if (isData) return;
   TLorentzVector v1,v2,v3,v4;
   if (gt->nLooseLep>=1) {
     panda::Lepton *lep1=looseLeps[0];
@@ -445,14 +445,14 @@ void PandaAnalyzer::GenStudyEWK() {
       }
       if (!isLastCopy)
         continue;
-      if(abs(partj.pdgid) == 22 && DeltaR2(part.eta(),part.phi(),partj.eta(),partj.phi()) < 0.1*0.1) {
+      if (abs(partj.pdgid) == 22 && DeltaR2(part.eta(),part.phi(),partj.eta(),partj.phi()) < 0.1*0.1) {
         TLorentzVector photonV;
         photonV.SetPtEtaPhiM(partj.pt(),partj.eta(),partj.phi(),partj.m());
         dressedLepton += photonV;
       }
     }
 
-    if(dressedLepton.Pt() > gt->genLep1Pt){
+    if (dressedLepton.Pt() > gt->genLep1Pt) {
       gt->genLep2Pt    = gt->genLep1Pt; 
       gt->genLep2Eta   = gt->genLep1Eta;
       gt->genLep2Phi   = gt->genLep1Phi;
@@ -461,37 +461,37 @@ void PandaAnalyzer::GenStudyEWK() {
       gt->genLep1Eta   = dressedLepton.Eta();
       gt->genLep1Phi   = dressedLepton.Phi();
       gt->genLep1PdgId = part.pdgid;
-    } else if(dressedLepton.Pt() > gt->genLep2Pt) {
+    } else if (dressedLepton.Pt() > gt->genLep2Pt) {
       gt->genLep2Pt    = dressedLepton.Pt();
       gt->genLep2Eta   = dressedLepton.Eta();
       gt->genLep2Phi   = dressedLepton.Phi();
       gt->genLep2PdgId = part.pdgid; 
     }
  
-    if(v1.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v1.Eta(),v1.Phi()) < 0.1*0.1) {
-      if(part.statusFlags == GenParticle::kIsTauDecayProduct || part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
+    if (v1.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v1.Eta(),v1.Phi()) < 0.1*0.1) {
+      if (part.statusFlags == GenParticle::kIsTauDecayProduct || part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
          part.statusFlags == GenParticle::kIsDirectTauDecayProduct || part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct) gt->looseGenLep1PdgId = 2;
-      else if(part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep1PdgId = 1;
-      if(part.pdgid != gt->looseLep1PdgId) gt->looseGenLep1PdgId = -1 * gt->looseGenLep1PdgId;
+      else if (part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep1PdgId = 1;
+      if (part.pdgid != gt->looseLep1PdgId) gt->looseGenLep1PdgId = -1 * gt->looseGenLep1PdgId;
     }
 
-    if(v2.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v2.Eta(),v2.Phi()) < 0.1*0.1) {
+    if (v2.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v2.Eta(),v2.Phi()) < 0.1*0.1) {
       if     (part.statusFlags == GenParticle::kIsTauDecayProduct || part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
               part.statusFlags == GenParticle::kIsDirectTauDecayProduct || part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct) gt->looseGenLep2PdgId = 2;
-      else if(part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep2PdgId = 1;
-      if(part.pdgid != gt->looseLep2PdgId) gt->looseGenLep2PdgId = -1 * gt->looseGenLep2PdgId;
+      else if (part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep2PdgId = 1;
+      if (part.pdgid != gt->looseLep2PdgId) gt->looseGenLep2PdgId = -1 * gt->looseGenLep2PdgId;
     }
-    if(v3.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v3.Eta(),v3.Phi()) < 0.1*0.1) {
+    if (v3.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v3.Eta(),v3.Phi()) < 0.1*0.1) {
       if     (part.statusFlags == GenParticle::kIsTauDecayProduct || part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
               part.statusFlags == GenParticle::kIsDirectTauDecayProduct || part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct) gt->looseGenLep3PdgId = 2;
-      else if(part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep3PdgId = 1;
-      if(part.pdgid != gt->looseLep3PdgId) gt->looseGenLep3PdgId = -1 * gt->looseGenLep3PdgId;
+      else if (part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep3PdgId = 1;
+      if (part.pdgid != gt->looseLep3PdgId) gt->looseGenLep3PdgId = -1 * gt->looseGenLep3PdgId;
     }
-    if(v4.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v4.Eta(),v4.Phi()) < 0.1*0.1) {
+    if (v4.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v4.Eta(),v4.Phi()) < 0.1*0.1) {
       if     (part.statusFlags == GenParticle::kIsTauDecayProduct || part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
               part.statusFlags == GenParticle::kIsDirectTauDecayProduct || part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct) gt->looseGenLep4PdgId = 2;
-      else if(part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep4PdgId = 1;
-      if(part.pdgid != gt->looseLep4PdgId) gt->looseGenLep4PdgId = -1 * gt->looseGenLep4PdgId;
+      else if (part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep4PdgId = 1;
+      if (part.pdgid != gt->looseLep4PdgId) gt->looseGenLep4PdgId = -1 * gt->looseGenLep4PdgId;
     }
   }
   
@@ -531,34 +531,34 @@ void PandaAnalyzer::GenStudyEWK() {
     }
     if (!isLastCopy) continue;
   
-    if(boson.Pt() < bosonPtMin) bosonPtMin = boson.Pt();
-    if(abs(part.pdgid) == 23) {theZBosons = theZBosons + boson; nZBosons++;}
-    if(abs(part.pdgid) == 24) {theWBosons = theWBosons + boson; nWBosons++;}
+    if (boson.Pt() < bosonPtMin) bosonPtMin = boson.Pt();
+    if (abs(part.pdgid) == 23) {theZBosons = theZBosons + boson; nZBosons++;}
+    if (abs(part.pdgid) == 24) {theWBosons = theWBosons + boson; nWBosons++;}
   }
-  if(nZBosons+nWBosons == 0) bosonPtMin = 0;
+  if (nZBosons+nWBosons == 0) bosonPtMin = 0;
 
-  if(nZBosons >= 2) {
-    double the_rho = 0.0; if(the_rhoP4.P() > 0) the_rho = the_rhoP4.Pt()/the_rhoP4.P();
+  if (nZBosons >= 2) {
+    double the_rho = 0.0; if (the_rhoP4.P() > 0) the_rho = the_rhoP4.Pt()/the_rhoP4.P();
     double theZZCorr[2] {1,1};
     theZZCorr[0] = weightEWKCorr(bosonPtMin,1);
     float GENmZZ = theZBosons.M();
     theZZCorr[1] = GetCorr(cqqZZQcdCorr,2,GENmZZ); // final state = 2 is fixed
     gt->sf_zz = theZZCorr[0]*theZZCorr[1];
-    if(the_rho <= 0.3) gt->sf_zzUnc = (1.0+TMath::Abs((theZZCorr[0]-1)*(15.99/9.89-1)));
+    if (the_rho <= 0.3) gt->sf_zzUnc = (1.0+TMath::Abs((theZZCorr[0]-1)*(15.99/9.89-1)));
     else               gt->sf_zzUnc = (1.0+TMath::Abs((theZZCorr[0]-1)               ));
   } else {
     gt->sf_zz    = 1.0;
     gt->sf_zzUnc = 1.0;
   }
 
-  if(nWBosons == 1 && nZBosons == 1) {
+  if (nWBosons == 1 && nZBosons == 1) {
     TLorentzVector theWZBoson = theWBosons + theZBosons;
     gt->sf_wz = GetCorr(cWZEwkCorr,theWZBoson.M());
   } else {
     gt->sf_wz = 1.0;
   }
   
-  if(nZBosons == 1) {
+  if (nZBosons == 1) {
     gt->sf_zh     = weightZHEWKCorr(GetCorr(cZHEwkCorr,bound(theZBosons.Pt(),0,499.999)));
     gt->sf_zhUp   = weightZHEWKCorr(GetCorr(cZHEwkCorrUp,bound(theZBosons.Pt(),0,499.999)));
     gt->sf_zhDown = weightZHEWKCorr(GetCorr(cZHEwkCorrDown,bound(theZBosons.Pt(),0,499.999)));

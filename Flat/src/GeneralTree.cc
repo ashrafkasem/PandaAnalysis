@@ -682,7 +682,7 @@ void GeneralTree::WriteTree(TTree *t) {
     TString btagn(makeBTagSFString(p));
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
-  if(leptonic) {
+  if (leptonic) {
     Book("looseLep1D0",&looseLep1D0,"looseLep1D0/F");
     Book("looseLep1Dz",&looseLep1Dz,"looseLep1Dz/F");
     Book("looseLep2D0",&looseLep2D0,"looseLep2D0/F");
