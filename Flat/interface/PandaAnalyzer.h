@@ -49,7 +49,13 @@ public :
      kRecoil50   =(1<<8),
      kGenBosonPt =(1<<9),
     };
-
+    
+    enum LepSelectionBit {
+     kLoose   =(1<<0),
+     kFake    =(1<<1),
+     kMedium  =(1<<2),
+     kTight   =(1<<3)
+    };
     enum ProcessType { 
         kNone,
         kZ,
@@ -105,11 +111,20 @@ private:
         cPUUp,        //!< true pu weight
         cPUDown,      //!< true pu weight
         cEleVeto,     //!< monojet SF, Veto ID for e
+        cEleLoose,    //!< monojet SF, Tight ID for e
+        cEleMedium,   //!< monojet SF, Tight ID for e
         cEleTight,    //!< monojet SF, Tight ID for e
         cEleReco,     //!< monojet SF, tracking for e
+	    cZHEwkCorr,     //!< ZH Ewk Corr weight  
+	    cZHEwkCorrUp,   //!< ZH Ewk Corr weight Up  
+	    cZHEwkCorrDown, //!< ZH Ewk Corr weight Down  
+        cWZEwkCorr,
+        cqqZZQcdCorr,
         cMuLooseID,   //!< MUO POG SF, Loose ID for mu 
+        cMuMediumID,  //!< MUO POG SF, Tight ID for mu 
         cMuTightID,   //!< MUO POG SF, Tight ID for mu 
         cMuLooseIso,  //!< MUO POG SF, Loose Iso for mu 
+        cMuMediumIso, //!< MUO POG SF, Loose Iso for mu 
         cMuTightIso,  //!< MUO POG SF, Tight Iso for mu 
         cMuReco,      //!< MUO POG SF, tracking for mu
         cPho,         //!< EGM POG SF, contains ID for gamma
@@ -167,6 +182,7 @@ private:
     bool PassPreselection();
     void OpenCorrection(CorrectionType,TString,TString,int);
     double GetCorr(CorrectionType ct,double x, double y=0);
+    double GetError(CorrectionType ct,double x, double y=0);
     void RegisterTriggers(); 
 
     // these are functions used for analysis-specific tasks inside Run.
