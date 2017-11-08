@@ -351,7 +351,7 @@ double PandaAnalyzer::weightZHEWKCorr(float baseCorr){
   return (baseCorr+0.31+0.11)/((1-0.053)+0.31+0.11);
 }
 void PandaAnalyzer::GenStudyEWK() {
-  gt->sf_tt = 1;
+  //gt->sf_tt = 1; // handled already by TopPTReweight
   gt->genLep1Pt = 0;
   gt->genLep1Eta = -1;
   gt->genLep1Phi = -1;
@@ -569,7 +569,8 @@ void PandaAnalyzer::GenStudyEWK() {
     gt->sf_zhDown = 1.0;
   }
 
-  // ttbar pT weight
+  // ttbar pT weight - already handled in TopPTReweight
+  /*
   TLorentzVector vT,vTbar;
   float pt_t=0, pt_tbar=0;
   for (int iG : targetsTop) {
@@ -596,7 +597,7 @@ void PandaAnalyzer::GenStudyEWK() {
   if (pt_t>0 && pt_tbar>0) {
     gt->sf_tt = TMath::Sqrt(TMath::Exp(0.0615-0.0005*TMath::Min((float)400.,pt_t)) *
                               TMath::Exp(0.0615-0.0005*TMath::Min((float)400.,pt_tbar)));
-  }
-
+  }*/
+  
   // end gen study
 }
