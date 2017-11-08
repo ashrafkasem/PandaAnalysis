@@ -871,11 +871,11 @@ void PandaAnalyzer::Run()
     tr->TriggerEvent("met");
 
     // electrons and muons
-    if (!analysis->complicatedLeptons)
-      SimpleLeptons();
-    else
+    if(analysis->complicatedLeptons) {
       ComplicatedLeptons();
-
+      GenStudyEWK();
+    } else SimpleLeptons();
+    
     // photons
     Photons();
 
@@ -947,7 +947,6 @@ void PandaAnalyzer::Run()
         GenJetsNu();
         MatchGenJets(genJetsNu);
       }
-      if(analysis->complicatedLeptons) GenStudyEWK(); // GenStudyEWK overwrites sf_tt
     }
 
     
