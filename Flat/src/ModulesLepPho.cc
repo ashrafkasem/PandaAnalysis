@@ -3,6 +3,8 @@
 #include "TMath.h"
 #include <algorithm>
 #include <vector>
+#include "TRandom3.h"
+#include "PandaAnalysis/Utilities/src/RoccoR.cc"
 
 #define EGMSCALE 1
 
@@ -44,6 +46,163 @@ void PandaAnalyzer::SimpleLeptons()
       gt->nLooseMuon++;
       TVector2 vMu; vMu.SetMagPhi(pt,mu.phi());
       vMETNoMu += vMu;
+    }
+    gt->pfmetnomu = vMETNoMu.Mod();
+
+    // now consider all leptons
+    gt->nLooseLep = looseLeps.size();
+    if (gt->nLooseLep>0) {
+     auto ptsort([](panda::Lepton const* l1, panda::Lepton const* l2)->bool {
+       return l1->pt() > l2->pt();
+      });
+     int nToSort = TMath::Min(3,gt->nLooseLep);
+     std::partial_sort(looseLeps.begin(),looseLeps.begin()+nToSort,looseLeps.end(),ptsort);
+    }
+    int lep_counter=1;
+    for (auto* lep : looseLeps) {
+      if (lep_counter==1) {
+       gt->looseLep1Pt = lep->pt();
+       gt->looseLep1Eta = lep->eta();
+       gt->looseLep1Phi = lep->phi();
+      } else if (lep_counter==2) {
+       gt->looseLep2Pt = lep->pt();
+       gt->looseLep2Eta = lep->eta();
+       gt->looseLep2Phi = lep->phi();
+      } else {
+        break;
+      }
+      // now specialize lepton types
+      panda::Muon *mu = dynamic_cast<panda::Muon*>(lep);
+      if (mu!=NULL) {
+        bool isTight = ( mu->tight &&
+                MuonIsolation(mu->pt(),mu->eta(),mu->combIso(),panda::kTight) &&
+                mu->pt()>20 && fabs(mu->eta())<2.4 );
+        if (lep_counter==1) {
+          gt->looseLep1PdgId = mu->charge*-13;
+          gt->looseLep1IsHLTSafe = 1;
+          if (isTight) {
+            gt->nTightMuon++;
+            gt->looseLep1IsTight = 1;
+            if (!analysis->vbf)
+              matchLeps.push_back(lep);
+          }
+        } else if (lep_counter==2) {
+          gt->looseLep2PdgId = mu->charge*-13;
+          gt->looseLep2IsHLTSafe = 1;
+          if (isTight) {
+            gt->nTightMuon++;
+            gt->looseLep2IsTight = 1;
+          }
+          if (!analysis->vbf && (isTight || gt->looseLep1IsTight))
+            matchLeps.push_back(lep);
+        }
+      } else {
+        panda::Electron *ele = dynamic_cast<panda::Electron*>(lep);
+        bool isTight = ( ele->tight &&
+                ele->pt()>40 && fabs(ele->eta())<2.5 );
+        if (lep_counter==1) {
+          gt->looseLep1Pt *= EGMSCALE;
+          gt->looseLep1PdgId = ele->charge*-11;
+          gt->looseLep1IsHLTSafe = ele->hltsafe ? 1 : 0;
+          if (isTight) {
+            gt->nTightElectron++;
+            gt->looseLep1IsTight = 1;
+            if (!analysis->vbf) {
+              matchLeps.push_back(lep);
+              matchEles.push_back(lep);
+            }
+          }
+        } else if (lep_counter==2) {
+          gt->looseLep2Pt *= EGMSCALE;
+          gt->looseLep2PdgId = ele->charge*-11;
+          gt->looseLep2IsHLTSafe = ele->hltsafe ? 1 : 0;
+          if (isTight) {
+            gt->nTightElectron++;
+            gt->looseLep2IsTight = 1;
+          }
+          if (!analysis->vbf && (isTight || gt->looseLep1IsTight)) {
+            matchLeps.push_back(lep);
+            matchEles.push_back(lep);
+          }
+        }
+      }
+      ++lep_counter;
+    }
+    gt->nTightLep = gt->nTightElectron + gt->nTightMuon;
+    if (gt->nLooseLep>0) {
+      panda::Lepton* lep1 = looseLeps[0];
+      gt->mT = MT(lep1->pt(),lep1->phi(),gt->pfmet,gt->pfmetphi);
+    }
+    if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
+      TLorentzVector v1,v2;
+      panda::Lepton *lep1=looseLeps[0], *lep2=looseLeps[1];
+      v1.SetPtEtaPhiM(lep1->pt(),lep1->eta(),lep1->phi(),lep1->m());
+      v2.SetPtEtaPhiM(lep2->pt(),lep2->eta(),lep2->phi(),lep2->m());
+      gt->diLepMass = (v1+v2).M();
+    } else {
+      gt->diLepMass = -1;
+    }
+
+    tr->TriggerEvent("leptons");
+}
+void PandaAnalyzer::ComplicatedLeptons() 
+{
+    // TO DO: Hard coded to 2016 rochester corrections for now, need to do this in a better way later
+    // Initialize the random seed based on Dylan's age in seconds
+    TRandom3 rng; {
+     std::time_t t = std::time(0);
+     unsigned long int time_now = static_cast<unsigned long int>(time(NULL));
+     rng.SetSeed(time_now-731178000);
+    } RoccoR rochesterCorrection("PandaAnalysis/data/rcdata.2016.v3");
+
+    //electrons
+    for (auto& ele : event.electrons) {
+     float pt = ele.smearedPt; float eta = ele.eta(); float aeta = fabs(eta);
+      if (pt<10 || aeta>2.5 /* || (aeta>1.4442 && aeta<1.566) */)
+        continue;
+      if (!ele.veto)
+        continue;
+      if (!ElectronIP(ele.eta(),ele.dxy,ele.dz))
+        continue;
+      looseLeps.push_back(&ele);
+      if (analysis->vbf) {
+        matchLeps.push_back(&ele);
+        matchEles.push_back(&ele);
+      }
+      gt->nLooseElectron++;
+    }
+
+    // muons
+    for (auto& mu : event.muons) {
+     float pt = mu.pt(); float eta = mu.eta(); float aeta = fabs(eta);
+     double ptCorrection=1;
+     if(isData) { // perform the rochester correction on the actual particle
+      ptCorrection=rochesterCorrection.kScaleDT((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), 0, 0);
+     } else { // perform the rochester correction to the simulated particle
+      // attempt gen-matching to a final state muon
+      bool muonIsTruthMatched=false; TLorentzVector genP4; panda::GenParticle genParticle;
+      for (unsigned iG = 0; iG != event.genParticles.size() && !muonIsTruthMatched; ++iG) {
+       genParticle = event.genParticles[iG];
+       if (genParticle.finalState != 1) continue;
+       if (genParticle.pdgid != ((int)mu.charge) * -13) continue;
+       genP4.SetPtEtaPhiM(genParticle.pt(), genParticle.eta(), genParticle.phi(), 0.106);
+       double dR = genP4.DeltaR(mu.p4());
+       if (dR < 0.3) muonIsTruthMatched=true;
+      } if(muonIsTruthMatched) { // correct using the gen-particle pt
+       double random1=rng.Rndm();
+       ptCorrection=rochesterCorrection.kScaleFromGenMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, genParticle.pt(), random1, 0, 0);
+      } else { // if gen match not found, correct the other way
+       double random1=rng.Rndm(); double random2=rng.Rndm();
+       ptCorrection=rochesterCorrection.kScaleAndSmearMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, random1, random2, 0, 0);
+      }
+      pt *= ptCorrection;
+     } 
+     if (pt<10 || aeta>2.4) continue; if(!mu.loose) continue;
+     looseLeps.push_back(&mu);
+     matchLeps.push_back(&mu);
+     gt->nLooseMuon++;
+     TVector2 vMu; vMu.SetMagPhi(pt,mu.phi());
+     vMETNoMu += vMu;
     }
     gt->pfmetnomu = vMETNoMu.Mod();
 
@@ -186,7 +345,6 @@ void PandaAnalyzer::Photons()
 
     tr->TriggerEvent("photons");
 }
-
 
 void PandaAnalyzer::Taus()
 {

@@ -854,6 +854,8 @@ void PandaAnalyzer::Run()
     // electrons and muons
     if (!analysis->complicatedLeptons)
       SimpleLeptons();
+    else
+      ComplicatedLeptons();
 
     // photons
     Photons();
