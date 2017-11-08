@@ -111,6 +111,24 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    sf_zzUnc = 1;
+    sf_zz = 1;
+    sf_wz = 1;
+    sf_zh = 1;
+    sf_zhUp = 1;
+    sf_zhDown = 1;
+    genLep1Pt = -1;
+    genLep1Eta = -1;
+    genLep1Phi = -1;
+    genLep1PdgId = 0;
+    genLep2Pt = -1;
+    genLep2Eta = -1;
+    genLep2Phi = -1;
+    genLep2PdgId = 0;
+    looseGenLep1PdgId = 0;
+    looseGenLep2PdgId = 0;
+    looseGenLep3PdgId = 0;
+    looseGenLep4PdgId = 0;
     looseLep1D0 = -1;
     looseLep1Dz = -1;
     looseLep2D0 = -1;
@@ -829,6 +847,25 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("looseLep4ValidFraction",&looseLep4ValidFraction,"looseLep4ValidFraction/F");
     Book("looseLep4NormChi2",&looseLep4NormChi2,"looseLep4NormChi2/F");
     Book("looseLep4SegmentCompatibility",&looseLep4SegmentCompatibility,"looseLep4SegmentCompatibility/F");
+    //gen study
+    Book("sf_zz",&sf_zz,"sf_zz/F");
+    Book("sf_zzUnc",&sf_zzUnc,"sf_zzUnc/F");
+    Book("sf_wz",&sf_wz,"sf_wz/F");
+    Book("sf_zh",&sf_zh,"sf_zh/F");
+    Book("sf_zhUp",&sf_zhUp,"sf_zhUp/F");
+    Book("sf_zhDown",&sf_zhDown,"sf_zhDown/F");
+    Book("genLep1Pt",&genLep1Pt,"genLep1Pt/F");
+    Book("genLep1Eta",&genLep1Eta,"genLep1Eta/F");
+    Book("genLep1Phi",&genLep1Phi,"genLep1Phi/F");
+    Book("genLep1PdgId",&genLep1PdgId,"genLep1PdgId/I");
+    Book("genLep2Pt",&genLep2Pt,"genLep2Pt/F");
+    Book("genLep2Eta",&genLep2Eta,"genLep2Eta/F");
+    Book("genLep2Phi",&genLep2Phi,"genLep2Phi/F");
+    Book("genLep2PdgId",&genLep2PdgId,"genLep2PdgId/I");
+    Book("looseGenLep1PdgId",&looseGenLep1PdgId,"looseGenLep1PdgId/I");
+    Book("looseGenLep2PdgId",&looseGenLep2PdgId,"looseGenLep2PdgId/I");
+    Book("looseGenLep3PdgId",&looseGenLep3PdgId,"looseGenLep3PdgId/I");
+    Book("looseGenLep4PdgId",&looseGenLep4PdgId,"looseGenLep4PdgId/I");
   }
 //ENDCUSTOMWRITE
     Book("whichRecoil",&whichRecoil,"whichRecoil/I");
