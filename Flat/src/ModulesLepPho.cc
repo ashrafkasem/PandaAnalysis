@@ -228,7 +228,7 @@ void PandaAnalyzer::ComplicatedLeptons()
       panda::Muon *mu = dynamic_cast<panda::Muon*>(lep); if (mu!=NULL) {
        // assign muon specific properties
        int *lepPdgId, *isHLTSafe, *lepSelBit; 
-       float *lepPt, *lepEta, *lepPhi, *lepSfTrk, *lepSfLoose, *lepSfMedium, *lepSfTight, *lepSfUnc;
+       float *lepPt, *lepEta, *lepPhi, *lepSfTrk, *lepSfLoose, *lepSfMedium, *lepSfTight, *lepSfUnc, *lepD0, *lepDz;
        int *soft, *global, *tracker;
        int *nValidMuon, *nValidPixel, *trkLayersWithMmt, *pixLayersWithMmt, *nMatched, *chi2LocalPosition, *trkKink;
        float *validFraction, *normChi2, *segmentCompatibility;
@@ -334,7 +334,7 @@ void PandaAnalyzer::ComplicatedLeptons()
        *lepSfLoose = GetCorr(cMuLooseID,TMath::Abs(mu->eta()),mu->pt()) * GetCorr(cMuLooseIso,TMath::Abs(mu->eta()),mu->pt());
        *lepSfMedium = GetCorr(cMuMediumID,TMath::Abs(mu->eta()),mu->pt());
        *lepSfTight = GetCorr(cMuTightID,TMath::Abs(mu->eta()),mu->pt())  * GetCorr(cMuTightIso,TMath::Abs(mu->eta()),mu->pt());
-	   *lepSfUnc = GetError(cMuMediumID ,TMath::Abs(mu->eta()),mu->pt());
+       *lepSfUnc = GetError(cMuMediumID ,TMath::Abs(mu->eta()),mu->pt());
        *soft                 = mu->soft                ; 
        *global               = mu->global              ; 
        *tracker              = mu->tracker             ; 
@@ -350,33 +350,150 @@ void PandaAnalyzer::ComplicatedLeptons()
        *segmentCompatibility = mu->segmentCompatibility; 
        gt->nTightMuon+=isTight;
       } else {
-        panda::Electron *ele = dynamic_cast<panda::Electron*>(lep); assert(ele!=NULL);
-        bool isTight = (ele->tight && ele->pt()>10 && fabs(ele->eta())<2.5);
-        if (lep_counter==1) {
-          gt->looseLep1Pt *= EGMSCALE;
-          gt->looseLep1PdgId = ele->charge*-11;
-          gt->looseLep1IsHLTSafe = ele->hltsafe ? 1 : 0;
-          if (isTight) {
-            gt->nTightElectron++;
-            gt->looseLep1IsTight = 1;
-            if (!analysis->vbf) {
-              matchLeps.push_back(lep);
-              matchEles.push_back(lep);
-            }
-          }
-        } else if (lep_counter==2) {
-          gt->looseLep2Pt *= EGMSCALE;
-          gt->looseLep2PdgId = ele->charge*-11;
-          gt->looseLep2IsHLTSafe = ele->hltsafe ? 1 : 0;
-          if (isTight) {
-            gt->nTightElectron++;
-            gt->looseLep2IsTight = 1;
-          }
-          if (!analysis->vbf && (isTight || gt->looseLep1IsTight)) {
-            matchLeps.push_back(lep);
-            matchEles.push_back(lep);
-          }
-        }
+       panda::Electron *ele = dynamic_cast<panda::Electron*>(lep); assert(ele!=NULL);
+       int *lepPdgId, *isHLTSafe, *lepSelBit; 
+       float *lepPt, *lepEta, *lepPhi, *lepSfTrk, *lepSfLoose, *lepSfMedium, *lepSfTight, *lepSfUnc, *lepD0, *lepDz;
+       float *chIsoPh, *nhIsoPh, *phIsoPh, *ecalIso, *hcalIso, *trackIso, *isoPUOffset, *sieie, *sipip, *dEtaInSeed, *dPhiIn, *eseed, *hOverE, *ecalE, *trackP;
+       int *nMissingHits, *tripleCharge;
+       if(lep_counter==1) {
+        lepPdgId      = &(gt->looseLep1PdgId        );
+        isHLTSafe     = &(gt->looseLep1IsHLTSafe    );
+        lepSelBit     = &(gt->looseLep1SelBit       );
+        lepSfTrk      = &(gt->sf_trk1               ); 
+        lepSfLoose    = &(gt->sf_loose1             ); 
+        lepSfMedium   = &(gt->sf_medium1            ); 
+        lepSfTight    = &(gt->sf_tight1             ); 
+        lepSfUnc      = &(gt->sf_unc1               ); 
+        chIsoPh       = &(gt->looseLep1ChIsoPh      );
+        nhIsoPh       = &(gt->looseLep1NhIsoPh      );
+        phIsoPh       = &(gt->looseLep1PhIsoPh      );
+        ecalIso       = &(gt->looseLep1EcalIso      );
+        hcalIso       = &(gt->looseLep1HcalIso      );
+        trackIso      = &(gt->looseLep1TrackIso     );
+        isoPUOffset   = &(gt->looseLep1IsoPUOffset  );
+        sieie         = &(gt->looseLep1Sieie        );
+        sipip         = &(gt->looseLep1Sipip        );
+        dEtaInSeed    = &(gt->looseLep1DEtaInSeed   );
+        dPhiIn        = &(gt->looseLep1DPhiIn       );
+        eseed         = &(gt->looseLep1Eseed        );
+        hOverE        = &(gt->looseLep1HOverE       );
+        ecalE         = &(gt->looseLep1EcalE        );
+        trackP        = &(gt->looseLep1TrackP       );
+        nMissingHits  = &(gt->looseLep1NMissingHits );
+        tripleCharge  = &(gt->looseLep1TripleCharge );
+       } else if(lep_counter==2) {
+        lepPdgId      = &(gt->looseLep2PdgId        );
+        isHLTSafe     = &(gt->looseLep2IsHLTSafe    );
+        lepSelBit     = &(gt->looseLep2SelBit       );
+        lepSfTrk      = &(gt->sf_trk2               ); 
+        lepSfLoose    = &(gt->sf_loose2             ); 
+        lepSfMedium   = &(gt->sf_medium2            ); 
+        lepSfTight    = &(gt->sf_tight2             ); 
+        lepSfUnc      = &(gt->sf_unc2               ); 
+        chIsoPh       = &(gt->looseLep2ChIsoPh      );
+        nhIsoPh       = &(gt->looseLep2NhIsoPh      );
+        phIsoPh       = &(gt->looseLep2PhIsoPh      );
+        ecalIso       = &(gt->looseLep2EcalIso      );
+        hcalIso       = &(gt->looseLep2HcalIso      );
+        trackIso      = &(gt->looseLep2TrackIso     );
+        isoPUOffset   = &(gt->looseLep2IsoPUOffset  );
+        sieie         = &(gt->looseLep2Sieie        );
+        sipip         = &(gt->looseLep2Sipip        );
+        dEtaInSeed    = &(gt->looseLep2DEtaInSeed   );
+        dPhiIn        = &(gt->looseLep2DPhiIn       );
+        eseed         = &(gt->looseLep2Eseed        );
+        hOverE        = &(gt->looseLep2HOverE       );
+        ecalE         = &(gt->looseLep2EcalE        );
+        trackP        = &(gt->looseLep2TrackP       );
+        nMissingHits  = &(gt->looseLep2NMissingHits );
+        tripleCharge  = &(gt->looseLep2TripleCharge );
+       } else if(lep_counter==3) {
+        lepPdgId      = &(gt->looseLep3PdgId        );
+        isHLTSafe     = &(gt->looseLep3IsHLTSafe    );
+        lepSelBit     = &(gt->looseLep3SelBit       );
+        lepSfTrk      = &(gt->sf_trk3               ); 
+        lepSfLoose    = &(gt->sf_loose3             ); 
+        lepSfMedium   = &(gt->sf_medium3            ); 
+        lepSfTight    = &(gt->sf_tight3             ); 
+        lepSfUnc      = &(gt->sf_unc3               ); 
+        chIsoPh       = &(gt->looseLep3ChIsoPh      );
+        nhIsoPh       = &(gt->looseLep3NhIsoPh      );
+        phIsoPh       = &(gt->looseLep3PhIsoPh      );
+        ecalIso       = &(gt->looseLep3EcalIso      );
+        hcalIso       = &(gt->looseLep3HcalIso      );
+        trackIso      = &(gt->looseLep3TrackIso     );
+        isoPUOffset   = &(gt->looseLep3IsoPUOffset  );
+        sieie         = &(gt->looseLep3Sieie        );
+        sipip         = &(gt->looseLep3Sipip        );
+        dEtaInSeed    = &(gt->looseLep3DEtaInSeed   );
+        dPhiIn        = &(gt->looseLep3DPhiIn       );
+        eseed         = &(gt->looseLep3Eseed        );
+        hOverE        = &(gt->looseLep3HOverE       );
+        ecalE         = &(gt->looseLep3EcalE        );
+        trackP        = &(gt->looseLep3TrackP       );
+        nMissingHits  = &(gt->looseLep3NMissingHits );
+        tripleCharge  = &(gt->looseLep3TripleCharge );
+       } else if(lep_counter==4) {
+        lepPdgId      = &(gt->looseLep4PdgId        );
+        isHLTSafe     = &(gt->looseLep4IsHLTSafe    );
+        lepSelBit     = &(gt->looseLep4SelBit       );
+        lepSfTrk      = &(gt->sf_trk4               ); 
+        lepSfLoose    = &(gt->sf_loose4             ); 
+        lepSfMedium   = &(gt->sf_medium4            ); 
+        lepSfTight    = &(gt->sf_tight4             ); 
+        lepSfUnc      = &(gt->sf_unc4               ); 
+        chIsoPh       = &(gt->looseLep4ChIsoPh      );
+        nhIsoPh       = &(gt->looseLep4NhIsoPh      );
+        phIsoPh       = &(gt->looseLep4PhIsoPh      );
+        ecalIso       = &(gt->looseLep4EcalIso      );
+        hcalIso       = &(gt->looseLep4HcalIso      );
+        trackIso      = &(gt->looseLep4TrackIso     );
+        isoPUOffset   = &(gt->looseLep4IsoPUOffset  );
+        sieie         = &(gt->looseLep4Sieie        );
+        sipip         = &(gt->looseLep4Sipip        );
+        dEtaInSeed    = &(gt->looseLep4DEtaInSeed   );
+        dPhiIn        = &(gt->looseLep4DPhiIn       );
+        eseed         = &(gt->looseLep4Eseed        );
+        hOverE        = &(gt->looseLep4HOverE       );
+        ecalE         = &(gt->looseLep4EcalE        );
+        trackP        = &(gt->looseLep4TrackP       );
+        nMissingHits  = &(gt->looseLep4NMissingHits );
+        tripleCharge  = &(gt->looseLep4TripleCharge );
+       }
+       *chIsoPh       = ele->chIsoPh;
+       *nhIsoPh       = ele->nhIsoPh;
+       *phIsoPh       = ele->phIsoPh;
+       *ecalIso       = ele->ecalIso;
+       *hcalIso       = ele->hcalIso;
+       *trackIso      = ele->trackIso;
+       *isoPUOffset   = ele->isoPUOffset;
+       *sieie         = ele->sieie;
+       *sipip         = ele->sipip;
+       *dEtaInSeed    = ele->dEtaInSeed;
+       *dPhiIn        = ele->dPhiIn;
+       *eseed         = ele->eseed;
+       *hOverE        = ele->hOverE;
+       *ecalE         = ele->ecalE;
+       *trackP        = ele->trackP;
+       *nMissingHits  = ele->nMissingHits;
+       *tripleCharge  = ele->tripleCharge;
+       bool isFake   = ele->hltsafe;
+       bool isMedium = ele->medium;
+       bool isTight  = ele->tight;
+       *lepPdgId = ele->charge*-11;
+       *lepSelBit              = kLoose; 
+       if(isFake)   *lepSelBit |= kFake; 
+       if(isMedium) *lepSelBit |= kMedium; 
+       if(isTight)  *lepSelBit |= kTight;
+	   *lepSfTrk    = GetCorr(cEleReco,ele->eta(),ele->pt());
+	   *lepSfLoose  = GetCorr(cEleLoose,ele->eta(),ele->pt());
+	   *lepSfMedium = GetCorr(cEleMedium,ele->eta(),ele->pt());
+	   *lepSfTight  = GetCorr(cEleTight,ele->eta(),ele->pt());
+	   *lepSfUnc = GetError(cEleMedium,ele->eta(),ele->pt());
+       if (!analysis->vbf && ((lep_counter==1 && isTight)|| (lep_counter==2 && isTight && ((gt->looseLep1SelBit & kTight) != 0)))) {
+        matchLeps.push_back(lep);
+        matchEles.push_back(lep);
+       }
       }
       ++lep_counter;
     }
