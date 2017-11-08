@@ -183,6 +183,7 @@ void GeneralTree::Reset() {
     looseLep4DPhiIn = -1;
     looseLep4Eseed = -1;
     looseLep4HOverE = -1;
+    looseLep4EcalE = -1;
     looseLep4TrackP = -1;
     looseLep4NMissingHits = 0;
     looseLep4TripleCharge = 0;
