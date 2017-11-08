@@ -2,6 +2,7 @@
 <use   name="roottmva"/>
 <use   name="roofit"/>
 <use   root=""/>
+<use   name="PandaAnalysis/Utilities"/>
 <use   name="PandaTree/Objects"/>
 <use   name="PandaCore/Tools"/>
 <use   name="CondFormats/BTauObjects"/>
