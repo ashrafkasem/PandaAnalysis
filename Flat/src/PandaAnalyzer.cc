@@ -947,6 +947,7 @@ void PandaAnalyzer::Run()
         GenJetsNu();
         MatchGenJets(genJetsNu);
       }
+      if(analysis->complicatedLeptons) GenStudyEWK(); // GenStudyEWK overwrites sf_tt
     }
 
     

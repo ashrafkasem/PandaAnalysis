@@ -145,15 +145,11 @@ void PandaAnalyzer::SimpleLeptons()
 
     tr->TriggerEvent("leptons");
 }
-void PandaAnalyzer::ComplicatedLeptons() 
-{
+void PandaAnalyzer::ComplicatedLeptons() {
     // TO DO: Hard coded to 2016 rochester corrections for now, need to do this in a better way later
-    // Initialize the random seed based on Dylan's age in seconds
-    TRandom3 rng; {
-     std::time_t t = std::time(0);
-     unsigned long int time_now = static_cast<unsigned long int>(time(NULL));
-     rng.SetSeed(time_now-731178000);
-    } RoccoR rochesterCorrection("PandaAnalysis/data/rcdata.2016.v3");
+    RoccoR rochesterCorrection("PandaAnalysis/data/rcdata.2016.v3");
+    
+    TRandom3 rng(3393); //Dylan's b-day
 
     //electrons
     for (auto& ele : event.electrons) {

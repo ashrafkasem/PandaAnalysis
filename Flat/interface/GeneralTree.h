@@ -165,6 +165,24 @@ class GeneralTree : public genericTree {
 
       float scale[6];
 //ENDCUSTOMDEF
+    float sf_zzUnc = -1;
+    float sf_zz = -1;
+    float sf_wz = -1;
+    float sf_zh = -1;
+    float sf_zhUp = -1;
+    float sf_zhDown = -1;
+    float genLep1Pt = -1;
+    float genLep1Eta = -1;
+    float genLep1Phi = -1;
+    int genLep1PdgId = -1;
+    float genLep2Pt = -1;
+    float genLep2Eta = -1;
+    float genLep2Phi = -1;
+    int genLep2PdgId = -1;
+    int looseGenLep1PdgId = -1;
+    int looseGenLep2PdgId = -1;
+    int looseGenLep3PdgId = -1;
+    int looseGenLep4PdgId = -1;
     float looseLep1D0 = -1;
     float looseLep1Dz = -1;
     float looseLep2D0 = -1;

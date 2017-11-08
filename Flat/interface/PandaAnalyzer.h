@@ -221,6 +221,9 @@ private:
     void PhotonSFs();
     void QCDUncs();
     void SignalReweights();
+    double weightEWKCorr(float pt, int type);
+    double weightZHEWKCorr(float baseCorr);
+    void GenStudyEWK();
     void GenJetsNu();
     // templated function needs to be defined here, ugh
     template <typename T> void MatchGenJets(T& genJets) {
