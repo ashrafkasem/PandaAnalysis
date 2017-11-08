@@ -871,7 +871,7 @@ void PandaAnalyzer::Run()
     tr->TriggerEvent("met");
 
     // electrons and muons
-    if(analysis->complicatedLeptons) {
+    if (analysis->complicatedLeptons) {
       ComplicatedLeptons();
       GenStudyEWK();
     } else SimpleLeptons();
