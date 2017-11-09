@@ -39,14 +39,17 @@ void PandaAnalyzer::TriggerEffs()
     gt->sf_metTrig = GetCorr(cTrigMET,gt->pfmetnomu);
     gt->sf_metTrigZmm = GetCorr(cTrigMETZmm,gt->pfmetnomu);
 
-    if (gt->nLooseElectron>0 && abs(gt->looseLep1PdgId)==11
-        && gt->looseLep1IsTight==1) {
+    if (gt->nLooseElectron>0) {
+      panda::Electron *ele1=0, *ele2=0;
+      if (gt->nLooseLep>0) ele1 = dynamic_cast<panda::Electron*>(looseLeps[0]);
+      if (gt->nLooseLep>1) ele2 = dynamic_cast<panda::Electron*>(looseLeps[1]);
       float eff1=0, eff2=0;
-      eff1 = GetCorr(cTrigEle,gt->looseLep1Eta,gt->looseLep1Pt);
-      if (gt->nLooseElectron>1 && abs(gt->looseLep2PdgId)==11) {
-        eff2 = GetCorr(cTrigEle,gt->looseLep2Eta,gt->looseLep2Pt);
+      if (ele1 && ele1->tight) {
+        eff1 = GetCorr(cTrigEle, ele1->eta(), ele1->pt());
+        if (ele2 && ele2->tight)
+          eff2 = GetCorr(cTrigEle, ele2->eta(), ele2->pt());
+        gt->sf_eleTrig = 1 - (1-eff1)*(1-eff2);
       }
-      gt->sf_eleTrig = 1 - (1-eff1)*(1-eff2);
     } // done with ele trig SF
 
     if (gt->nLoosePhoton>0 && gt->loosePho1IsTight)
@@ -79,7 +82,7 @@ void PandaAnalyzer::Recoil()
         vpfUWDown = vpfDown+vObj1; gt->pfUWmagDown = vpfUWDown.Pt();
       }
 
-      if (gt->nLooseLep>1 && gt->looseLep1PdgId+gt->looseLep2PdgId==0) {
+      if (gt->nLooseLep>1 && looseLep1PdgId+looseLep2PdgId==0) {
         // two OS lep => Z
         panda::Lepton *lep2 = looseLeps.at(1);
         vObj2.SetPtEtaPhiM(lep2->pt(),lep2->eta(),lep2->phi(),lep2->m());
