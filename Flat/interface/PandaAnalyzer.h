@@ -13,6 +13,7 @@
 #include <TMath.h>
 #include <TH1D.h>
 #include <TH2F.h>
+#include <TRandom3.h>
 #include <TLorentzVector.h>
 
 #include "AnalyzerUtilities.h"
@@ -28,6 +29,7 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "PandaAnalysis/Utilities/interface/RoccoR.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // some misc definitions
@@ -296,6 +298,8 @@ private:
     TF1* puppisd_corrGEN=0;
     TF1* puppisd_corrRECO_cen=0;
     TF1* puppisd_corrRECO_for=0;
+    RoccoR rochesterCorrection;
+    TRandom3 rng;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
