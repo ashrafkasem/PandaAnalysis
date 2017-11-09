@@ -631,6 +631,10 @@ bool PandaAnalyzer::PassPreselection()
     }
   }
 
+  if(preselBits & kVHBB) {
+    if ((gt->nTightElectron + gt->nTightMuon)>0 || gt->hbbpt>0 || (gt->nFatjet>=1 && gt->fj1Pt>200))
+      isGood=true;
+  }
   // anded with the rest
   if (preselBits & kPassTrig) {
     isGood = (!isData) || (gt->trigger != 0);
