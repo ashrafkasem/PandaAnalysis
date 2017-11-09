@@ -50,6 +50,7 @@ public :
      kFatjet     =(1<<7),
      kRecoil50   =(1<<8),
      kGenBosonPt =(1<<9),
+     kVHBB       =(1<<10),
     };
     
     enum LepSelectionBit {
