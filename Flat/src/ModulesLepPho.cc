@@ -3,8 +3,6 @@
 #include "TMath.h"
 #include <algorithm>
 #include <vector>
-#include "TRandom3.h"
-#include "PandaAnalysis/Utilities/src/RoccoR.cc"
 
 #define EGMSCALE 1
 
@@ -146,11 +144,6 @@ void PandaAnalyzer::SimpleLeptons()
   tr->TriggerEvent("leptons");
 }
 void PandaAnalyzer::ComplicatedLeptons() {
-  // TO DO: Hard coded to 2016 rochester corrections for now, need to do this in a better way later
-  RoccoR rochesterCorrection("PandaAnalysis/data/rcdata.2016.v3");
-  
-  TRandom3 rng(3393); //Dylan's b-day
-
   //electrons
   for (auto& ele : event.electrons) {
     float pt = ele.smearedPt; float eta = ele.eta(); float aeta = fabs(eta);
@@ -169,11 +162,13 @@ void PandaAnalyzer::ComplicatedLeptons() {
   // muons
   for (auto& mu : event.muons) {
     float pt = mu.pt(); float eta = mu.eta(); float aeta = fabs(eta);
+    if (pt<5 || aeta>2.4) continue;
     double ptCorrection=1;
     if (isData) { // perform the rochester correction on the actual particle
-      ptCorrection=rochesterCorrection.kScaleDT((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), 0, 0);
+      //ptCorrection=rochesterCorrection.kScaleDT((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), 0, 0);
     } else { // perform the rochester correction to the simulated particle
       // attempt gen-matching to a final state muon
+      //printf("applying roccor to MC\n");
       bool muonIsTruthMatched=false; TLorentzVector genP4; panda::GenParticle genParticle;
       for (unsigned iG = 0; iG != event.genParticles.size() && !muonIsTruthMatched; ++iG) {
         genParticle = event.genParticles[iG];
@@ -184,10 +179,10 @@ void PandaAnalyzer::ComplicatedLeptons() {
         if (dR < 0.3) muonIsTruthMatched=true;
       } if (muonIsTruthMatched) { // correct using the gen-particle pt
         double random1=rng.Rndm();
-        ptCorrection=rochesterCorrection.kScaleFromGenMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, genParticle.pt(), random1, 0, 0);
+        //ptCorrection=rochesterCorrection.kScaleFromGenMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, genParticle.pt(), random1, 0, 0);
       } else { // if gen match not found, correct the other way
         double random1=rng.Rndm(); double random2=rng.Rndm();
-        ptCorrection=rochesterCorrection.kScaleAndSmearMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, random1, random2, 0, 0);
+        //ptCorrection=rochesterCorrection.kScaleAndSmearMC((int)mu.charge, mu.pt(), mu.eta(), mu.phi(), mu.trkLayersWithMmt, random1, random2, 0, 0);
       }
       pt *= ptCorrection;
     } 
