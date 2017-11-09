@@ -1,5 +1,3 @@
-#ifndef ElectroWeakAnalysis_RoccoR
-#define ElectroWeakAnalysis_RoccoR
 
 #include <iostream>
 #include <fstream>
@@ -7,8 +5,11 @@
 #include "TSystem.h"
 #include "TMath.h"
 #include "../interface/RoccoR.h"
+#include <assert.h>  
 
-
+const double CrystalBall::pi    = TMath::Pi();
+const double CrystalBall::SPiO2 = sqrt(TMath::Pi()/2.0);
+const double CrystalBall::S2    = sqrt(2.0);
 int RocRes::getBin(double x, const int NN, const double *b) const{
     for(int i=0; i<NN; ++i) if(x<b[i+1]) return i;
     return NN-1;
@@ -85,9 +86,11 @@ void RocRes::dumpParams(){
 	
 void RocRes::init(std::string filename){
     std::ifstream in(filename.c_str());
-    char tag[4];
+    assert(in.is_open());
+    std::string tag;
     int type, sys, mem, isdt, var, bin;	
     std::string s;
+    assert(in.is_open());
     while(std::getline(in, s)){
 	std::stringstream ss(s); 
 	if(s.substr(0,4)=="RMIN")       ss >> tag >> NMIN;
@@ -128,6 +131,7 @@ void RocRes::init(std::string filename){
 	}
     }
     in.close();
+    return;
 }
 
 double RocRes::Sigma(double pt, int H, int F) const{
@@ -249,14 +253,14 @@ void RocOne::init(std::string filename, int iTYPE, int iSYS, int iMEM){
     RR.init(filename);
 
     std::ifstream in(filename.c_str());
-    char tag[4];
+    std::string tag;
     int type, sys, mem, isdt, var, bin;	
 
     bool initialized=false;
 
     std::string s;
     while(std::getline(in, s)){
-	std::stringstream ss(s); 
+    std::stringstream ss(s); 
 	if(s.substr(0,4)=="CPHI")       {
 	    ss >> tag >> NPHI;
 	    DPHI=2*TMath::Pi()/NPHI;
@@ -347,15 +351,17 @@ RoccoR::init(std::string dirname){
     std::string tag;
     int si;
     int sn;
+
+    assert(in.is_open());
     while(std::getline(in, s)){
 	std::stringstream ss(s); 
 	ss >> tag >> si >> sn; 
 	std::vector<RocOne> v;
 	for(int m=0; m<sn; ++m){
 	    std::string inputfile=Form("%s/%d.%d.txt", dirname.c_str(), si, m);
-	    if(gSystem->AccessPathName(inputfile.c_str())) {
-		std::cout << Form("Missing %8d %3d, using default instead...", si, m) << std::endl;  
-		v.push_back(RocOne(Form("%s/%d.%d.txt", dirname.c_str(),0,0),0,0,0));
+	    if(true) {//if(gSystem->AccessPathName(inputfile.c_str())) {
+		//std::cout << Form("Missing %8d %3d, using default instead...", si, m) << std::endl;  
+        v.push_back(RocOne(Form("%s/%d.%d.txt", dirname.c_str(),0,0),0,0,0));
 	    }
 	    else{
 		v.push_back(RocOne(inputfile, 0, si, m));
@@ -388,7 +394,6 @@ double RoccoR::kScaleFromGenMC(int Q, double pt, double eta, double phi, int n, 
 }
 
 
-#endif
 
 
 

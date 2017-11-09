@@ -4,6 +4,7 @@
 #include "TMath.h"
 #include <algorithm>
 #include <vector>
+#include "PandaAnalysis/Utilities/src/RoccoR.cc"
 
 #define EGMSCALE 1
 
@@ -69,6 +70,7 @@ void PandaAnalyzer::SetOutputFile(TString fOutName)
   gt->monohiggs = analysis->monoh;
   gt->vbf       = analysis->vbf;
   gt->fatjet    = analysis->fatjet;
+  gt->leptonic  = analysis->complicatedLeptons;
 
   // fill the signal weights
   for (auto& id : wIDs) 
@@ -697,6 +699,14 @@ void PandaAnalyzer::Run()
           {0.739,0.767,0.780,0.789,0.776,0.771,0.779,0.787,0.806}};
   btagpt = Binner(vbtagpt);
   btageta = Binner(vbtageta);
+  if (!isData && analysis->complicatedLeptons) {
+    if (DEBUG) PDebug("PandaAnalyzer::Run","Loading the Rochester corrections with random seed 3393");
+    // TO DO: Hard coded to 2016 rochester corrections for now, need to do this in a better way later
+    TString dirPath1 = TString(gSystem->Getenv("CMSSW_BASE")) + "/src/";
+    rochesterCorrection = RoccoR(Form("%sPandaAnalysis/data/rcdata.2016.v3",dirPath1.Data()));
+    rng=TRandom3(3393); //Dylan's b-day
+  }
+
 
   std::vector<unsigned int> metTriggers;
   std::vector<unsigned int> eleTriggers;

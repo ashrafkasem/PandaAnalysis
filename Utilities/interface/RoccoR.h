@@ -1,3 +1,5 @@
+#ifndef ElectroWeakAnalysis_RoccoR
+#define ElectroWeakAnalysis_RoccoR
 #include "TRandom3.h"
 #include "TMath.h"
 
@@ -89,15 +91,17 @@ struct CrystalBall{
 	return m - S2*s*TMath::ErfInverse((D - u/Ns ) / SPiO2);
     }
 };
-const double CrystalBall::pi    = TMath::Pi();
-const double CrystalBall::SPiO2 = sqrt(TMath::Pi()/2.0);
-const double CrystalBall::S2    = sqrt(2.0);
+//const double CrystalBall::pi    = TMath::Pi();
+//const double CrystalBall::SPiO2 = sqrt(TMath::Pi()/2.0);
+//const double CrystalBall::S2    = sqrt(2.0);
 
 
 class RocRes{
     private:
 	static const int NMAXETA=12;
 	static const int NMAXTRK=12;
+	//static const int NMAXETA=12;
+	//static const int NMAXTRK=12;
 
 	int NETA;
 	int NTRK;
@@ -219,3 +223,5 @@ class RoccoR{
     private:
 	std::vector<std::vector<RocOne> > RC;
 };
+
+#endif
