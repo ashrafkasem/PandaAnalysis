@@ -162,6 +162,7 @@ class GeneralTree : public genericTree {
       int jetGenFlavor[NJET];
 
       int hbbjtidx[2];
+      float jetRegFac[2];
 
       float scale[6];
 //ENDCUSTOMDEF
@@ -439,6 +440,8 @@ class GeneralTree : public genericTree {
     float hbbeta = -1;
     float hbbphi = -1;
     float hbbm = -1;
+    float hbbm_reg = -1;
+    float hbbpt_reg = -1;
     float scaleUp = -1;
     float scaleDown = -1;
     float pdfUp = -1;

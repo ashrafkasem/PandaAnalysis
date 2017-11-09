@@ -29,6 +29,12 @@
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 
+// TMVA
+#include "TMVA/Factory.h"
+#include "TMVA/Tools.h"
+#include "TMVA/Reader.h"
+#include "TMVA/MethodCuts.h"
+
 /////////////////////////////////////////////////////////////////////////////
 // some misc definitions
 
@@ -263,7 +269,7 @@ private:
     Binner btagpt = Binner({});
     Binner btageta = Binner({});
     std::vector<std::vector<double>> lfeff, ceff, beff;
-
+    TMVA::Reader *bjetreg_reader = new TMVA::Reader("!Color:!Silent");
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -318,7 +324,8 @@ private:
     std::vector<panda::GenJet> genJetsNu;
     float genBosonPtMin, genBosonPtMax;
     std::vector<TString> wIDs;
-
+    float *bjetreg_vars = 0;
+    
 };
 
 

@@ -385,6 +385,8 @@ void GeneralTree::Reset() {
     hbbeta = -1;
     hbbphi = -1;
     hbbm = -1;
+    hbbm_reg = -1;
+    hbbpt_reg = -1;
     scaleUp = -1;
     scaleDown = -1;
     pdfUp = -1;
@@ -427,7 +429,10 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("hbbeta",&hbbeta,"hbbeta/F");
     Book("hbbphi",&hbbphi,"hbbphi/F");
     Book("hbbm",&hbbm,"hbbm/F");
+    Book("hbbm_reg",&hbbm_reg,"hbbm_reg/F");
+    Book("hbbpt_reg",&hbbpt_reg,"hbbpt_reg/F");
     Book("hbbjtidx",hbbjtidx,"hbbjtidx[2]/I");
+    Book("jetRegFac",jetRegFac,"jetRegFac[2]/F");
   }
 
   if (vbf) { 

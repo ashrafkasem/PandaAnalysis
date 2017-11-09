@@ -442,6 +442,27 @@ void PandaAnalyzer::SetDataDir(const char *s)
     if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded btag SFs");
   }
 
+  // bjet regression
+  if (analysis->bjetRegression){
+    bjetreg_vars = new float[10];
+
+    bjetreg_reader->AddVariable("jetPt[hbbjtidx[0]]",&bjetreg_vars[0]);
+    bjetreg_reader->AddVariable("nJot",&bjetreg_vars[1]);
+    bjetreg_reader->AddVariable("jetEta[hbbjtidx[0]]",&bjetreg_vars[2]);
+    bjetreg_reader->AddVariable("jetE[hbbjtidx[0]]",&bjetreg_vars[3]);
+    bjetreg_reader->AddVariable("npv",&bjetreg_vars[4]);
+    bjetreg_reader->AddVariable("jetLeadingTrkPt[hbbjtidx[0]]",&bjetreg_vars[5]);
+    bjetreg_reader->AddVariable("jetLeadingLepPt[hbbjtidx[0]]",&bjetreg_vars[6]);
+    bjetreg_reader->AddVariable("jetNLep[hbbjtidx[0]]",&bjetreg_vars[7]);
+    bjetreg_reader->AddVariable("jetEMFrac[hbbjtidx[0]]",&bjetreg_vars[8]);
+    bjetreg_reader->AddVariable("jetHadFrac[hbbjtidx[0]]",&bjetreg_vars[9]);
+
+    bjetreg_reader->BookMVA( "BDT method", dirPath+"trainings/bjet_regression_v0.weights.xml" );    
+
+    if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded bjet regression weights");
+  }
+
+
   if (analysis->monoh) {
     // mSD corr
     MSDcorr = new TFile(dirPath+"/puppiCorr.root");

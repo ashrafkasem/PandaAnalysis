@@ -178,7 +178,7 @@ void PandaAnalyzer::JetHbbBasics(panda::Jet& jet)
   gt->jetPt[N]=jet.pt();
   gt->jetEta[N]=jet.eta();
   gt->jetPhi[N]=jet.phi();
-  gt->jetE[N]=jet.m();
+  gt->jetE[N]=jet.e();
   gt->jetCSV[N]=csv;
   gt->jetQGL[N]=jet.qgl;
 
@@ -370,6 +370,7 @@ void PandaAnalyzer::JetHbbReco()
     tmp_hbbm = hbbsystem.M();
     tmp_hbbjtidx1 = order[jet_1];
     tmp_hbbjtidx2 = order[jet_2];
+    
   }
   gt->hbbpt = tmp_hbbpt;
   gt->hbbeta = tmp_hbbeta;
@@ -378,6 +379,31 @@ void PandaAnalyzer::JetHbbReco()
   gt->hbbjtidx[0] = tmp_hbbjtidx1;
   gt->hbbjtidx[1] = tmp_hbbjtidx2;
 
+  
+  if (analysis->bjetRegression && gt->hbbm>0.){
+    TLorentzVector hbbdaughters_corr[2];
+    
+    for (unsigned i = 0; i<2; i++){
+      bjetreg_vars[0] = gt->jetPt[gt->hbbjtidx[i]];
+      bjetreg_vars[1] = gt->nJot;
+      bjetreg_vars[2] = gt->jetEta[gt->hbbjtidx[i]];
+      bjetreg_vars[3] = gt->jetE[gt->hbbjtidx[i]];
+      bjetreg_vars[4] = gt->npv;
+      bjetreg_vars[5] = gt->jetLeadingTrkPt[gt->hbbjtidx[i]];
+      bjetreg_vars[6] = gt->jetLeadingLepPt[gt->hbbjtidx[i]];
+      bjetreg_vars[7] = gt->jetNLep[gt->hbbjtidx[i]];
+      bjetreg_vars[8] = gt->jetEMFrac[gt->hbbjtidx[i]];
+      bjetreg_vars[9] = gt->jetHadFrac[gt->hbbjtidx[i]];
+      
+      gt->jetRegFac[i] = (bjetreg_reader->EvaluateRegression("BDT method"))[0];
+      hbbdaughters_corr[i].SetPtEtaPhiE(gt->jetRegFac[i]*gt->jetPt[gt->hbbjtidx[i]],gt->jetEta[gt->hbbjtidx[i]],gt->jetPhi[gt->hbbjtidx[i]],gt->jetRegFac[i]*gt->jetE[gt->hbbjtidx[i]]);
+    }
+
+    TLorentzVector hbbsystem_corr = hbbdaughters_corr[0] + hbbdaughters_corr[1];
+    gt->hbbm_reg = hbbsystem_corr.M();
+    gt->hbbpt_reg = hbbsystem_corr.Pt();
+  }
+  
   tr->TriggerEvent("monohiggs");
 }
 
