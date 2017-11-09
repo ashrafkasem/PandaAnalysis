@@ -341,6 +341,7 @@ private:
     panda::Jet *jotDown1 = 0, *jotDown2 = 0;
     std::vector<panda::GenJet> genJetsNu;
     float genBosonPtMin, genBosonPtMax;
+    int looseLep1PdgId, looseLep2PdgId;
     std::vector<TString> wIDs;
 
 };

@@ -59,3 +59,13 @@ gghbb = lambda v=False : _analysis(
         recoil = False,
         ak8 = True,
     )
+wlnhbb = lambda v=False : _analysis(
+        name = 'wlnhbb',
+        verbose = v,
+        monoh = True,
+        recoil = False,
+        ak8 = True,
+        complicatedLeptons = True
+
+
+    )

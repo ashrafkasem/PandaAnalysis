@@ -947,7 +947,6 @@ void PandaAnalyzer::Run()
 
       SignalInfo();
 
-      LeptonSFs();
       PhotonSFs();
 
       QCDUncs();

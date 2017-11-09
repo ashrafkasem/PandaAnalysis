@@ -467,31 +467,37 @@ void PandaAnalyzer::GenStudyEWK() {
       gt->genLep2Phi   = dressedLepton.Phi();
       gt->genLep2PdgId = part.pdgid; 
     }
- 
+    panda::Muon *mu; panda::Electron *ele;
     if (v1.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v1.Eta(),v1.Phi()) < 0.1*0.1) {
       if (part.statusFlags == GenParticle::kIsTauDecayProduct || part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
          part.statusFlags == GenParticle::kIsDirectTauDecayProduct || part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct) gt->looseGenLep1PdgId = 2;
       else if (part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep1PdgId = 1;
-      if (part.pdgid != gt->looseLep1PdgId) gt->looseGenLep1PdgId = -1 * gt->looseGenLep1PdgId;
+      if (part.pdgid != looseLep1PdgId) gt->looseGenLep1PdgId = -1 * gt->looseGenLep1PdgId;
     }
 
     if (v2.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v2.Eta(),v2.Phi()) < 0.1*0.1) {
       if     (part.statusFlags == GenParticle::kIsTauDecayProduct || part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
               part.statusFlags == GenParticle::kIsDirectTauDecayProduct || part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct) gt->looseGenLep2PdgId = 2;
       else if (part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep2PdgId = 1;
-      if (part.pdgid != gt->looseLep2PdgId) gt->looseGenLep2PdgId = -1 * gt->looseGenLep2PdgId;
+      if (part.pdgid != looseLep2PdgId) gt->looseGenLep2PdgId = -1 * gt->looseGenLep2PdgId;
     }
     if (v3.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v3.Eta(),v3.Phi()) < 0.1*0.1) {
+      mu = dynamic_cast<panda::Muon*>(looseLeps[2]);
+      ele = dynamic_cast<panda::Electron*>(looseLeps[2]);
+      int looseLep3PdgId = mu? mu->charge*-13 : (ele? ele->charge*-13 : 0);
       if     (part.statusFlags == GenParticle::kIsTauDecayProduct || part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
               part.statusFlags == GenParticle::kIsDirectTauDecayProduct || part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct) gt->looseGenLep3PdgId = 2;
       else if (part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep3PdgId = 1;
-      if (part.pdgid != gt->looseLep3PdgId) gt->looseGenLep3PdgId = -1 * gt->looseGenLep3PdgId;
+      if (part.pdgid != looseLep3PdgId) gt->looseGenLep3PdgId = -1 * gt->looseGenLep3PdgId;
     }
     if (v4.Pt() > 0 && DeltaR2(part.eta(),part.phi(),v4.Eta(),v4.Phi()) < 0.1*0.1) {
+      mu = dynamic_cast<panda::Muon*>(looseLeps[3]);
+      ele = dynamic_cast<panda::Electron*>(looseLeps[3]);
+      int looseLep4PdgId = mu? mu->charge*-13 : (ele? ele->charge*-13 : 0);
       if     (part.statusFlags == GenParticle::kIsTauDecayProduct || part.statusFlags == GenParticle::kIsPromptTauDecayProduct || 
               part.statusFlags == GenParticle::kIsDirectTauDecayProduct || part.statusFlags == GenParticle::kIsDirectPromptTauDecayProduct) gt->looseGenLep4PdgId = 2;
       else if (part.statusFlags == GenParticle::kIsPrompt) gt->looseGenLep4PdgId = 1;
-      if (part.pdgid != gt->looseLep4PdgId) gt->looseGenLep4PdgId = -1 * gt->looseGenLep4PdgId;
+      if (part.pdgid != looseLep4PdgId) gt->looseGenLep4PdgId = -1 * gt->looseGenLep4PdgId;
     }
   }
   
