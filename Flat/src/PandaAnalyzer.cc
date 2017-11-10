@@ -735,11 +735,11 @@ void PandaAnalyzer::Run()
           {0.739,0.767,0.780,0.789,0.776,0.771,0.779,0.787,0.806}};
   btagpt = Binner(vbtagpt);
   btageta = Binner(vbtageta);
-  if (!isData && analysis->complicatedLeptons) {
+  if (analysis->complicatedLeptons) {
     if (DEBUG) PDebug("PandaAnalyzer::Run","Loading the Rochester corrections with random seed 3393");
     // TO DO: Hard coded to 2016 rochester corrections for now, need to do this in a better way later
     TString dirPath1 = TString(gSystem->Getenv("CMSSW_BASE")) + "/src/";
-    rochesterCorrection = RoccoR(Form("%sPandaAnalysis/data/rcdata.2016.v3",dirPath1.Data()));
+    rochesterCorrection = new RoccoR(Form("%sPandaAnalysis/data/rcdata.2016.v3",dirPath1.Data()));
     rng=TRandom3(3393); //Dylan's b-day
   }
 
@@ -751,6 +751,7 @@ void PandaAnalyzer::Run()
   std::vector<unsigned int> jetTriggers;
 
   if (isData) {
+    if (DEBUG) PDebug("PandaAnalyzer::Run","Loading the trigger paths");
     std::vector<TString> paths;
     paths = {
           "HLT_PFMET170_NoiseCleaned",
@@ -810,7 +811,7 @@ void PandaAnalyzer::Run()
           "HLT_IsoMu24",
     };
     triggerHandlers[kSingleMuTrig].addTriggers(paths);
-
+    
     RegisterTriggers();
   }
 
