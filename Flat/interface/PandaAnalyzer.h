@@ -299,7 +299,7 @@ private:
     TF1* puppisd_corrGEN=0;
     TF1* puppisd_corrRECO_cen=0;
     TF1* puppisd_corrRECO_for=0;
-    RoccoR rochesterCorrection;
+    RoccoR *rochesterCorrection=0;
     TRandom3 rng;
 
     //////////////////////////////////////////////////////////////////////////////////////
