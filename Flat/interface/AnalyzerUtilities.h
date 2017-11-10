@@ -109,8 +109,8 @@ class TriggerHandler {
 public:
   TriggerHandler() {};
   ~TriggerHandler() {};
-  void addTriggers(std::vector<TString> paths) { 
-    for (auto &path : paths) {
+  void addTriggers(std::vector<TString> paths_) { 
+    for (auto &path : paths_) {
       paths.push_back(path); 
       indices.push_back(-1); 
     }
