@@ -11,7 +11,7 @@
 #include <map>
 
 #define NJET 20
-#define NLEP 6
+#define NLEP 4
 #define NSUBJET 2
 
 class GeneralTree : public genericTree {

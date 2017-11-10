@@ -632,8 +632,40 @@ bool PandaAnalyzer::PassPreselection()
   }
 
   if(preselBits & kVHBB) {
-    if ((gt->nTightElectron + gt->nTightMuon)>0 || gt->hbbpt>0 || (gt->nFatjet>=1 && gt->fj1Pt>200))
-      isGood=true;
+    // ZnnHbb
+    if (
+      gt->pfmet>150 && 
+      gt->nJet>=2 && gt->jetPt[0]>50 && gt->jetPt[1]>50 &&
+      (gt->hbbpt>50 || (gt->nFatjet>0 && gt->fj1Pt>200))
+    ) isGood=true;
+    // WlnHbb
+    else if (
+      gt->pfmet>30 &&
+      gt->nJet>=2 && gt->jetPt[0]>25 && gt->jetPt[1]>25 &&
+      (
+       (gt->nTightElectron >0 && gt->electronPt[0]>25) ||
+       (gt->nTightMuon > 0 && gt->muonPt[0]>25)
+      ) &&
+      (gt->hbbpt>50 || (gt->nFatjet>0 && gt->fj1Pt>200))
+    ) isGood=true;
+    // ZllHbb
+    else if (
+      gt->nJet>=2 && gt->jetPt[0]>25 && gt->jetPt[1]>25 &&
+      (
+       (
+        gt->nTightElectron>0 && 
+        gt->nLooseElectron>1 &&
+        gt->electronPt[0]>25 && 
+        gt->electronPt[1]>20
+       ) || (
+        gt->nTightMuon > 0 && 
+        gt->nLooseMuon>1 &&
+        gt->muonPt[0]>25 &&
+        gt->muonPt[1]>20 
+       )
+      ) &&
+      (gt->hbbpt>50 || (gt->nFatjet>0 && gt->fj1Pt>200))
+    ) isGood=true;
   }
   // anded with the rest
   if (preselBits & kPassTrig) {
