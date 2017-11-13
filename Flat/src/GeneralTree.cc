@@ -471,20 +471,13 @@ void GeneralTree::WriteTree(TTree *t) {
   Book("muonPt",muonPt,"muonPt[nLooseMuon]/F");
   Book("muonEta",muonEta,"muonEta[nLooseMuon]/F");
   Book("muonPhi",muonPhi,"muonPhi[nLooseMuon]/F");
-  Book("muonSfLoose",muonSfLoose,"muonSfLoose[nLooseMuon]/F");
-  Book("muonSfTight",muonSfTight,"muonSfTight[nLooseMuon]/F");
-  Book("muonSfUnc",muonSfUnc,"muonSfUnc[nLooseMuon]/F");
-  Book("muonSfReco",muonSfReco,"muonSfReco[nLooseMuon]/F");
   Book("muonSelBit",muonSelBit,"muonSelBit[nLooseMuon]/I");
   Book("muonPdgId",muonPdgId,"muonPdgId[nLooseMuon]/I");
   Book("electronPt",electronPt,"electronPt[nLooseElectron]/F");
   Book("electronEta",electronEta,"electronEta[nLooseElectron]/F");
   Book("electronPhi",electronPhi,"electronPhi[nLooseElectron]/F");
-  Book("electronSfLoose",electronSfLoose,"electronSfLoose[nLooseElectron]/F");
-  Book("electronSfTight",electronSfTight,"electronSfTight[nLooseElectron]/F");
-  Book("electronSfUnc",electronSfUnc,"electronSfUnc[nLooseElectron]/F");
-  Book("electronSfReco",electronSfReco,"electronSfReco[nLooseElectron]/F");
   Book("electronSelBit",electronSelBit,"electronSelBit[nLooseElectron]/I");
+  Book("electronPdgId",electronPdgId,"electronPdgId[nLooseElectron]/I");
   if (monohiggs) {
     Book("jetPt",jetPt,"jetPt[nJot]/F");
     Book("jetEta",jetEta,"jetEta[nJot]/F");
@@ -586,9 +579,20 @@ void GeneralTree::WriteTree(TTree *t) {
     Book(btagn,&(sf_btags[p]),btagn+"/F");
   }
   if (leptonic) {
+    // Per-leg lepton scale factors, only needed for the nice analyses :-)
+    Book("muonSfLoose",muonSfLoose,"muonSfLoose[nLooseMuon]/F");
+    Book("muonSfMedium",muonSfMedium,"muonSfMedium[nLooseMuon]/F");
+    Book("muonSfTight",muonSfTight,"muonSfTight[nLooseMuon]/F");
+    Book("muonSfUnc",muonSfUnc,"muonSfUnc[nLooseMuon]/F");
+    Book("muonSfReco",muonSfReco,"muonSfReco[nLooseMuon]/F");
+    Book("electronSfLoose",electronSfLoose,"electronSfLoose[nLooseElectron]/F");
+    Book("electronSfMedium",electronSfMedium,"electronSfMedium[nLooseElectron]/F");
+    Book("electronSfTight",electronSfTight,"electronSfTight[nLooseElectron]/F");
+    Book("electronSfUnc",electronSfUnc,"electronSfUnc[nLooseElectron]/F");
+    Book("electronSfReco",electronSfReco,"electronSfReco[nLooseElectron]/F");
+    // Advanced muon properties for nerds
     Book("muonD0",muonD0,"muonD0[nLooseMuon]/F");
     Book("muonDZ",muonDZ,"muonDZ[nLooseMuon]/F");
-    Book("muonSfMedium",muonSfMedium,"muonSfMedium[nLooseMuon]/F");
     Book("muonIsSoftMuon",muonIsSoftMuon,"muonIsSoftMuon[nLooseMuon]/I");
     Book("muonIsGlobalMuon",muonIsGlobalMuon,"muonIsGlobalMuon[nLooseMuon]/I");
     Book("muonIsTrackerMuon",muonIsTrackerMuon,"muonIsTrackerMuon[nLooseMuon]/I");
@@ -602,10 +606,9 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("muonValidFraction",muonValidFraction,"muonValidFraction[nLooseMuon]/F");
     Book("muonNormChi2",muonNormChi2,"muonNormChi2[nLooseMuon]/F");
     Book("muonSegmentCompatibility",muonSegmentCompatibility,"muonSegmentCompatibility[nLooseMuon]/F");
-    Book("electronPdgId",electronPdgId,"electronPdgId[nLooseElectron]/I");
+    // Advanced electron properties for nerds
     Book("electronD0",electronD0,"electronD0[nLooseElectron]/F");
     Book("electronDZ",electronDZ,"electronDZ[nLooseElectron]/F");
-    Book("electronSfMedium",electronSfMedium,"electronSfMedium[nLooseElectron]/F");
     Book("electronChIsoPh",electronChIsoPh,"electronChIsoPh[nLooseElectron]/F");
     Book("electronNhIsoPh",electronNhIsoPh,"electronNhIsoPh[nLooseElectron]/F");
     Book("electronPhIsoPh",electronPhIsoPh,"electronPhIsoPh[nLooseElectron]/F");
@@ -623,8 +626,7 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("electronTrackP",electronTrackP,"electronTrackP[nLooseElectron]/F");
     Book("electronNMissingHits",electronNMissingHits,"electronNMissingHits[nLooseElectron]/I");
     Book("electronTripleCharge",electronTripleCharge,"electronTripleCharge[nLooseElectron]/I");
-  
-    //gen study
+    // Gen study
     Book("sf_zz",&sf_zz,"sf_zz/F");
     Book("sf_zzUnc",&sf_zzUnc,"sf_zzUnc/F");
     Book("sf_wz",&sf_wz,"sf_wz/F");
@@ -643,6 +645,10 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("looseGenLep2PdgId",&looseGenLep2PdgId,"looseGenLep2PdgId/I");
     Book("looseGenLep3PdgId",&looseGenLep3PdgId,"looseGenLep3PdgId/I");
     Book("looseGenLep4PdgId",&looseGenLep4PdgId,"looseGenLep4PdgId/I");
+  } else {
+    Book("sf_lepID",&sf_lepID,"sf_lepID/F");
+    Book("sf_lepIso",&sf_lepIso,"sf_lepIso/F");
+    Book("sf_lepTrack",&sf_lepTrack,"sf_lepTrack/F");
   }
 //ENDCUSTOMWRITE
     Book("whichRecoil",&whichRecoil,"whichRecoil/I");
@@ -688,9 +694,6 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("sf_ewkV2j",&sf_ewkV2j,"sf_ewkV2j/F");
     Book("sf_qcdV2j",&sf_qcdV2j,"sf_qcdV2j/F");
     Book("sf_qcdTT",&sf_qcdTT,"sf_qcdTT/F");
-    Book("sf_lepID",&sf_lepID,"sf_lepID/F");
-    Book("sf_lepIso",&sf_lepIso,"sf_lepIso/F");
-    Book("sf_lepTrack",&sf_lepTrack,"sf_lepTrack/F");
     Book("sf_pho",&sf_pho,"sf_pho/F");
     Book("sf_eleTrig",&sf_eleTrig,"sf_eleTrig/F");
     Book("sf_phoTrig",&sf_phoTrig,"sf_phoTrig/F");
