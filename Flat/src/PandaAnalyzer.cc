@@ -988,6 +988,8 @@ void PandaAnalyzer::Run()
 
       SignalInfo();
 
+      if(!analysis->complicatedLeptons) LeptonSFs();
+
       PhotonSFs();
 
       QCDUncs();
