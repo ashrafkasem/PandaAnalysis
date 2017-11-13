@@ -66,6 +66,4 @@ wlnhbb = lambda v=False : _analysis(
         recoil = False,
         ak8 = True,
         complicatedLeptons = True
-
-
     )

@@ -10,7 +10,7 @@
 #include "TRegexp.h"
 #include <vector>
 
-//#define NMAX 8
+#define NMAX 8
 #define NGENMAX 100
 
 class genericTree {
