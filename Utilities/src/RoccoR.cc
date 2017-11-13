@@ -1,3 +1,6 @@
+// Checked out with brief modifications from:
+// https://twiki.cern.ch/twiki/bin/viewauth/CMS/RochcorMuon
+// by DGH, November 2017
 
 #include <iostream>
 #include <fstream>
