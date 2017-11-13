@@ -17,6 +17,9 @@ void PandaAnalyzer::RegisterTriggers()
     for (unsigned i = 0; i != N; i++) {
       unsigned panda_idx = event.registerTrigger(th.paths.at(i));
       th.indices[i] = panda_idx;
+      if (DEBUG) PDebug("PandaAnalyzer::RegisterTriggers",
+        Form("Got index %d for trigger path %s", panda_idx, th.paths.at(i).Data())
+      );
     }
   }
 }
