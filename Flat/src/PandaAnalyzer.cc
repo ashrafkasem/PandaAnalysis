@@ -299,7 +299,7 @@ double PandaAnalyzer::GetError(CorrectionType ct, double x, double y) {
   } else if (h2Corrs[ct]!=0) {
     return h2Corrs[ct]->Error(x,y);
   } else {
-    PError("PandaAnalyzer::GetCorr",
+    PError("PandaAnalyzer::GetError",
        TString::Format("No correction is defined for CorrectionType=%u",ct));
     return 1;
   }
@@ -318,31 +318,34 @@ void PandaAnalyzer::SetDataDir(const char *s)
   OpenCorrection(cPUDown,dirPath+"moriond17/puWeights_80x_37ifb.root","puWeightsDown",1);
 
   if (analysis->complicatedLeptons) {
-   TString dirPath1 = TString(gSystem->Getenv("CMSSW_BASE")) + "/src/";
-   OpenCorrection(cZHEwkCorr,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root","SignalWeight_nloEWK_rebin",1);
-   OpenCorrection(cZHEwkCorrUp  ,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root","SignalWeight_nloEWK_up_rebin",1);
-   OpenCorrection(cZHEwkCorrDown,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root","SignalWeight_nloEWK_down_rebin",1);
-   OpenCorrection(cMuLooseID,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_MuonLooseId_Muon",2);
-   OpenCorrection(cMuMediumID,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_dylan_37ifb.root","scalefactors_Medium_Muon",2);
-   OpenCorrection(cMuTightID,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_TightId_Muon",2);
-   OpenCorrection(cMuLooseIso,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonLooseId",2);
-   OpenCorrection(cMuMediumIso,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonMediumId",2);
-   OpenCorrection(cMuTightIso,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonTightId",2);
-   OpenCorrection(cMuReco,dirPath1+"MitAnalysisRunII/data/80x/Tracking_EfficienciesAndSF_BCDEFGH.root","ratio_eff_eta3_dr030e030_corr",1);
-   OpenCorrection(cEleVeto,dirPath+"moriond17/scaleFactor_electron_summer16.root","scaleFactor_electron_vetoid_RooCMSShape_pu_0_100",2);
-   OpenCorrection(cEleLoose,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Loose_Electron",2);
-   OpenCorrection(cEleMedium,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_dylan_37ifb.root","scalefactors_Medium_Electron",2);
-   OpenCorrection(cEleTight,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Tight_Electron",2);
-   OpenCorrection(cEleReco,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Reco_Electron",2);
+    TString dirPath1 = TString(gSystem->Getenv("CMSSW_BASE")) + "/src/";
+    OpenCorrection(cZHEwkCorr,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root","SignalWeight_nloEWK_rebin",1);
+    OpenCorrection(cZHEwkCorrUp  ,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root","SignalWeight_nloEWK_up_rebin",1);
+    OpenCorrection(cZHEwkCorrDown,dirPath1+"MitAnalysisRunII/data/80x/Zll_nloEWK_weight_unnormalized.root","SignalWeight_nloEWK_down_rebin",1);
+    OpenCorrection(cMuLooseID,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_MuonLooseId_Muon",2);
+    OpenCorrection(cMuMediumID,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_dylan_37ifb.root","scalefactors_Medium_Muon",2);
+    OpenCorrection(cMuTightID,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_TightId_Muon",2);
+    OpenCorrection(cMuLooseIso,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonLooseId",2);
+    OpenCorrection(cMuMediumIso,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonMediumId",2);
+    OpenCorrection(cMuTightIso,dirPath1+"MitAnalysisRunII/data/80x/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonTightId",2);
+    OpenCorrection(cMuReco,dirPath1+"MitAnalysisRunII/data/80x/Tracking_EfficienciesAndSF_BCDEFGH.root","ratio_eff_eta3_dr030e030_corr",1);
+    OpenCorrection(cEleVeto,dirPath+"moriond17/scaleFactor_electron_summer16.root","scaleFactor_electron_vetoid_RooCMSShape_pu_0_100",2);
+    OpenCorrection(cEleLoose,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Loose_Electron",2);
+    OpenCorrection(cEleMedium,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_dylan_37ifb.root","scalefactors_Medium_Electron",2);
+    OpenCorrection(cEleTight,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Tight_Electron",2);
+    OpenCorrection(cEleReco,dirPath1+"MitAnalysisRunII/data/80x/scalefactors_80x_egpog_37ifb.root","scalefactors_Reco_Electron",2);
+  // EWK corrections 
+    OpenCorrection(cWZEwkCorr,dirPath+"leptonic/data.root","hEWKWZCorr",1);
+    OpenCorrection(cqqZZQcdCorr,dirPath+"leptonic/data.root","hqqZZKfactor",2);
   } else {
-   OpenCorrection(cEleVeto,dirPath+"moriond17/scaleFactor_electron_summer16.root","scaleFactor_electron_vetoid_RooCMSShape_pu_0_100",2);
-   OpenCorrection(cEleTight,dirPath+"moriond17/scaleFactor_electron_summer16.root","scaleFactor_electron_tightid_RooCMSShape_pu_0_100",2);
-   OpenCorrection(cEleReco,dirPath+"moriond17/scaleFactor_electron_reco_summer16.root","scaleFactor_electron_reco_RooCMSShape_pu_0_100",2);
-   OpenCorrection(cMuLooseID,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_MuonLooseId_Muon",2);
-   OpenCorrection(cMuLooseIso,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonLooseId",2);
-   OpenCorrection(cMuTightID,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_TightId_Muon",2);
-   OpenCorrection(cMuTightIso,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonTightId",2);
-   OpenCorrection(cMuReco,dirPath+"moriond17/Tracking_12p9.root","htrack2",1);
+    OpenCorrection(cEleVeto,dirPath+"moriond17/scaleFactor_electron_summer16.root","scaleFactor_electron_vetoid_RooCMSShape_pu_0_100",2);
+    OpenCorrection(cEleTight,dirPath+"moriond17/scaleFactor_electron_summer16.root","scaleFactor_electron_tightid_RooCMSShape_pu_0_100",2);
+    OpenCorrection(cEleReco,dirPath+"moriond17/scaleFactor_electron_reco_summer16.root","scaleFactor_electron_reco_RooCMSShape_pu_0_100",2);
+    OpenCorrection(cMuLooseID,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_MuonLooseId_Muon",2);
+    OpenCorrection(cMuLooseIso,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonLooseId",2);
+    OpenCorrection(cMuTightID,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_TightId_Muon",2);
+    OpenCorrection(cMuTightIso,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonTightId",2);
+    OpenCorrection(cMuReco,dirPath+"moriond17/Tracking_12p9.root","htrack2",1);
   }
   // photons
   OpenCorrection(cPho,dirPath+"moriond17/scalefactors_80x_medium_photon_37ifb.root",
