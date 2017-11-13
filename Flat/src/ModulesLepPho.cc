@@ -167,7 +167,6 @@ void PandaAnalyzer::ComplicatedLeptons() {
     if (pt<5 || aeta>2.4) continue;
     double ptCorrection=1;
     if (isData) { // perform the rochester correction on the actual particle
-      printf("pt = %lf\n",pt);
       ptCorrection=rochesterCorrection->kScaleDT((int)mu.charge, pt, eta, mu.phi(), 0, 0);
     } else if(pt>0) { // perform the rochester correction to the simulated particle
       // attempt gen-matching to a final state muon
