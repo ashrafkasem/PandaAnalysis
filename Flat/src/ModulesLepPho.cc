@@ -388,6 +388,40 @@ void PandaAnalyzer::SaveGenLeptons()
     tr->TriggerEvent("gen leptons");
 
 }
+void PandaAnalyzer::LeptonSFs()
+{
+  // For the hadronic analyses, store a single branch for lepton ID,
+  // isolation, and tracking, computed based on the 2 leading loose
+  // leptons in the event. Cool guyz get per-leg scalefactors
+  // computed in ModulesLepPho.cc
+  for (unsigned int iL=0; iL!=TMath::Min(gt->nLooseLep,2); ++iL) {
+    auto* lep = looseLeps.at(iL);
+    float pt = lep->pt(), eta = lep->eta(), aeta = TMath::Abs(eta);
+    panda::Muon* mu = dynamic_cast<panda::Muon*>(lep);
+    if (mu!=NULL) {
+      bool isTight = mu->tight;
+      if (isTight) {
+        gt->sf_lepID *= GetCorr(cMuTightID,aeta,pt);
+        gt->sf_lepIso *= GetCorr(cMuTightIso,aeta,pt);
+      } else {
+        gt->sf_lepID *= GetCorr(cMuLooseID,aeta,pt);
+        gt->sf_lepIso *= GetCorr(cMuLooseIso,aeta,pt);
+      }
+      gt->sf_lepTrack *= GetCorr(cMuReco,gt->npv);
+    } else {
+      panda::Electron* ele = dynamic_cast<panda::Electron*>(lep);
+      bool isTight = ele->tight;
+      if (isTight) {
+        gt->sf_lepID *= GetCorr(cEleTight,eta,pt);
+      } else {
+        gt->sf_lepID *= GetCorr(cEleVeto,eta,pt);
+      }
+      gt->sf_lepTrack *= GetCorr(cEleReco,eta,pt);
+    }
+  }
+
+    tr->TriggerEvent("lepton SFs");
+}
 
 void PandaAnalyzer::PhotonSFs()
 {
