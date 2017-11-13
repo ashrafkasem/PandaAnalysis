@@ -118,9 +118,9 @@ private:
         cEleMedium,   //!< monojet SF, Tight ID for e
         cEleTight,    //!< monojet SF, Tight ID for e
         cEleReco,     //!< monojet SF, tracking for e
-	    cZHEwkCorr,     //!< ZH Ewk Corr weight  
-	    cZHEwkCorrUp,   //!< ZH Ewk Corr weight Up  
-	    cZHEwkCorrDown, //!< ZH Ewk Corr weight Down  
+        cZHEwkCorr,     //!< ZH Ewk Corr weight  
+        cZHEwkCorrUp,   //!< ZH Ewk Corr weight Up  
+        cZHEwkCorrDown, //!< ZH Ewk Corr weight Down  
         cWZEwkCorr,
         cqqZZQcdCorr,
         cMuLooseID,   //!< MUO POG SF, Loose ID for mu 
@@ -224,8 +224,8 @@ private:
     void PhotonSFs();
     void QCDUncs();
     void SignalReweights();
-    double weightEWKCorr(float pt, int type);
-    double weightZHEWKCorr(float baseCorr);
+    double WeightEWKCorr(float pt, int type);
+    double WeightZHEWKCorr(float baseCorr);
     void GenStudyEWK();
     void GenJetsNu();
     // templated function needs to be defined here, ugh
