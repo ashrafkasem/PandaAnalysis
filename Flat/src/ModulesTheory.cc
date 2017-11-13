@@ -326,7 +326,7 @@ void PandaAnalyzer::SignalReweights()
         }
       }
 }
-double PandaAnalyzer::weightEWKCorr(float pt, int type) {
+double PandaAnalyzer::WeightEWKCorr(float pt, int type) {
   double parWZ08[2] = { 2.85714,-0.05714};
   double parZZ08[2] = {-4.57143,-0.06857};
   double parWZ14[3] = {3.69800,-0.0726117,0.0000318044};
@@ -347,7 +347,7 @@ double PandaAnalyzer::weightEWKCorr(float pt, int type) {
   return (1.0+corr);
 }
 
-double PandaAnalyzer::weightZHEWKCorr(float baseCorr) {
+double PandaAnalyzer::WeightZHEWKCorr(float baseCorr) {
   return (baseCorr+0.31+0.11)/((1-0.053)+0.31+0.11);
 }
 void PandaAnalyzer::GenStudyEWK() {
@@ -546,7 +546,7 @@ void PandaAnalyzer::GenStudyEWK() {
   if (nZBosons >= 2) {
     double the_rho = 0.0; if (the_rhoP4.P() > 0) the_rho = the_rhoP4.Pt()/the_rhoP4.P();
     double theZZCorr[2] {1,1};
-    theZZCorr[0] = weightEWKCorr(bosonPtMin,1);
+    theZZCorr[0] = WeightEWKCorr(bosonPtMin,1);
     float GENmZZ = theZBosons.M();
     theZZCorr[1] = GetCorr(cqqZZQcdCorr,2,GENmZZ); // final state = 2 is fixed
     gt->sf_zz = theZZCorr[0]*theZZCorr[1];
@@ -565,9 +565,9 @@ void PandaAnalyzer::GenStudyEWK() {
   }
   
   if (nZBosons == 1) {
-    gt->sf_zh     = weightZHEWKCorr(GetCorr(cZHEwkCorr,bound(theZBosons.Pt(),0,499.999)));
-    gt->sf_zhUp   = weightZHEWKCorr(GetCorr(cZHEwkCorrUp,bound(theZBosons.Pt(),0,499.999)));
-    gt->sf_zhDown = weightZHEWKCorr(GetCorr(cZHEwkCorrDown,bound(theZBosons.Pt(),0,499.999)));
+    gt->sf_zh     = WeightZHEWKCorr(GetCorr(cZHEwkCorr,bound(theZBosons.Pt(),0,499.999)));
+    gt->sf_zhUp   = WeightZHEWKCorr(GetCorr(cZHEwkCorrUp,bound(theZBosons.Pt(),0,499.999)));
+    gt->sf_zhDown = WeightZHEWKCorr(GetCorr(cZHEwkCorrDown,bound(theZBosons.Pt(),0,499.999)));
   }
   else {
     gt->sf_zh     = 1.0;
