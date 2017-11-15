@@ -65,5 +65,7 @@ wlnhbb = lambda v=False : _analysis(
         monoh = True,
         recoil = False,
         ak8 = True,
-        complicatedLeptons = True
+        btagSFs = True,
+        complicatedLeptons = True,
+        genPartonStudy = True
     )
