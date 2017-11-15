@@ -1,0 +1,6 @@
+<use   name="root"/>
+<use   root=""/>
+<export>
+  <lib   name="1"/>
+</export>
+<flags CXXFLAGS="-g -Wno-sign-compare -Wno-unused-variable -Wno-unused-but-set-variable  -Os"/>
