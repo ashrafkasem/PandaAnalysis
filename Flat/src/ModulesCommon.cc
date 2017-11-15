@@ -134,4 +134,22 @@ void PandaAnalyzer::Recoil()
 
     tr->TriggerEvent("recoils");
 }
-
+void PandaAnalyzer::GenPartonStudy() 
+{
+  // For now, simple B and C counting
+  for (auto& gen : event.genParticles) {
+    float pt = gen.pt();
+    int pdgid = gen.pdgid;
+    if (gen.parent.isValid() && gen.parent->pdgid==gen.pdgid)
+      continue;
+    //count bs and cs
+    int apdgid = abs(pdgid);
+    if (apdgid!=5 && apdgid!=4) 
+      continue;
+    if (gen.pt()>5) {
+      gt->nHF++;
+      if (apdgid==5)
+        gt->nB++;
+    }
+  }
+}

@@ -67,10 +67,11 @@ void PandaAnalyzer::SetOutputFile(TString fOutName)
 
   fOut->WriteTObject(hDTotalMCWeight);    
 
-  gt->monohiggs = analysis->monoh;
-  gt->vbf       = analysis->vbf;
-  gt->fatjet    = analysis->fatjet;
-  gt->leptonic  = analysis->complicatedLeptons;
+  gt->monohiggs      = analysis->monoh;
+  gt->vbf            = analysis->vbf;
+  gt->fatjet         = analysis->fatjet;
+  gt->leptonic       = analysis->complicatedLeptons;
+  gt->genPartonStudy = analysis->genPartonStudy;
 
   // fill the signal weights
   for (auto& id : wIDs) 
@@ -974,6 +975,8 @@ void PandaAnalyzer::Run()
     if (!isData) {
       if (analysis->fatjet)
         FatjetMatching();
+      else if(analysis->genPartonStudy)
+        GenPartonStudy();
 
       if (analysis->btagSFs)
         JetBtagSFs();
@@ -998,6 +1001,8 @@ void PandaAnalyzer::Run()
       if (analysis->reclusterGen && analysis->monoh) {
         GenJetsNu();
         MatchGenJets(genJetsNu);
+      } else if(analysis->complicatedLeptons) {
+        MatchGenJets(event.ak4GenJets);
       }
     }
 

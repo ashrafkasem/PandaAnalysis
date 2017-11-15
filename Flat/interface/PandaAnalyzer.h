@@ -191,43 +191,44 @@ private:
     // these are functions used for analysis-specific tasks inside Run.
     // ideally the return type is void (e.g. they are stateful functions),
     // but that is not always possible (e.g. RecoilPresel)
-    bool RecoilPresel();
-    float GetMSDCorr(Float_t puppipt, Float_t puppieta); // @bmaier: please refactor this
     void CalcBJetSFs(BTagType bt, int flavor, double eta, double pt, 
                      double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
+    void ComplicatedLeptons();
     void EvalBTagSF(std::vector<btagcand> &cands, std::vector<double> &sfs,
                     GeneralTree::BTagShift shift,GeneralTree::BTagJet jettype, bool do2=false);
-    void SetupJES();
-    void SimpleLeptons();
-    void ComplicatedLeptons();
-    void Photons();
-    void Recoil();
     void FatjetBasics();
+    void FatjetMatching();
     void FatjetRecluster();
-    void JetBasics();
-    void JetHbbBasics(panda::Jet&);
+    void GenJetsNu();
+    void GenPartonStudy();
+    void GenStudyEWK();
+    float GetMSDCorr(Float_t puppipt, Float_t puppieta); // @bmaier: please refactor this
+    void IsoJet(panda::Jet&);
     void JetBRegressionInfo(panda::Jet&);
+    void JetBasics();
+    void JetBtagSFs();
+    void JetHbbBasics(panda::Jet&);
+    void JetHbbReco();
     void JetVBFBasics(panda::Jet&);
     void JetVBFSystem();
     void JetVaryJES(panda::Jet&);
-    void IsoJet(panda::Jet&);
-    void JetHbbReco();
-    void Taus();
-    void FatjetMatching();
-    void JetBtagSFs();
-    void TopPTReweight();
-    void VJetsReweight();
-    void SaveGenLeptons();
-    void TriggerEffs();
-    void SignalInfo();
     void LeptonSFs();
     void PhotonSFs();
+    void Photons();
     void QCDUncs();
+    void Recoil();
+    bool RecoilPresel();
+    void SaveGenLeptons();
+    void SetupJES();
+    void SignalInfo();
     void SignalReweights();
+    void SimpleLeptons();
+    void Taus();
+    void TopPTReweight();
+    void TriggerEffs();
+    void VJetsReweight();
     double WeightEWKCorr(float pt, int type);
     double WeightZHEWKCorr(float baseCorr);
-    void GenStudyEWK();
-    void GenJetsNu();
     // templated function needs to be defined here, ugh
     template <typename T> void MatchGenJets(T& genJets) {
       unsigned N = cleanedJets.size();

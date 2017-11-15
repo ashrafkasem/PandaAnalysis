@@ -74,6 +74,7 @@ public:
   bool rerunJES = false;
   bool varyJES = false;
   bool complicatedLeptons = false;
+  bool genPartonStudy = false;
   bool vbf = false;
   bool recoil = true;
   bool fatjet = true;
