@@ -29,13 +29,8 @@ void PandaAnalyzer::SimpleLeptons() {
     gt->electronPt[iL]           = pt;
     gt->electronEta[iL]          = eta;
     gt->electronPhi[iL]          = ele.phi();
-    gt->electronSfLoose[iL]      = GetCorr(cEleLoose, eta, pt);
-    gt->electronSfTight[iL]      = GetCorr(cEleTight, eta, pt);
-    gt->electronSfUnc[iL]        = GetError(cEleMedium, eta, pt);
-    gt->electronSfReco[iL]       = GetCorr(cEleReco, eta, pt);
     gt->electronSelBit[iL]       = eleSelBit;
     gt->electronPdgId[iL]        = ele.charge*-11;
-    gt->electronTripleCharge[iL] = ele.tripleCharge;
     looseLeps.push_back(&ele);
     matchLeps.push_back(&ele);
     matchEles.push_back(&ele);
@@ -59,10 +54,6 @@ void PandaAnalyzer::SimpleLeptons() {
     gt->muonPt[iL]                   = pt;
     gt->muonEta[iL]                  = eta;
     gt->muonPhi[iL]                  = mu.phi();
-    gt->muonSfLoose[iL]              = GetCorr(cMuLooseID, TMath::Abs(mu.eta()), mu.pt()) * GetCorr(cMuLooseIso, TMath::Abs(mu.eta()), mu.pt());
-    gt->muonSfTight[iL]              = GetCorr(cMuTightID, TMath::Abs(mu.eta()), mu.pt())  * GetCorr(cMuTightIso, TMath::Abs(mu.eta()), mu.pt());
-    gt->muonSfUnc[iL]                = GetError(cMuMediumID , TMath::Abs(mu.eta()), mu.pt());
-    gt->muonSfReco[iL]               = GetCorr(cMuReco, mu.eta());
     gt->muonSelBit[iL]               = muSelBit;
     gt->muonPdgId[iL]                = mu.charge*-13;
     looseLeps.push_back(&mu);
