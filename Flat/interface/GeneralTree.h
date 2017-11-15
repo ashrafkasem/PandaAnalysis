@@ -132,7 +132,7 @@ class GeneralTree : public genericTree {
       std::vector<int> get_orders() const { return orders; }
         
       // public config
-      bool monohiggs=false, vbf=false, fatjet=true, leptonic=false;
+      bool monohiggs=false, vbf=false, fatjet=true, leptonic=false, genPartonStudy=false;
 
 //STARTCUSTOMDEF
       std::map<ECFParams,float> fj1ECFNs;
