@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <vector>
 #include "PandaAnalysis/Utilities/src/RoccoR.cc"
+#include "PandaAnalysis/Utilities/src/CSVHelper.cc"
 
 #define EGMSCALE 1
 
@@ -72,6 +73,8 @@ void PandaAnalyzer::SetOutputFile(TString fOutName)
   gt->fatjet         = analysis->fatjet;
   gt->leptonic       = analysis->complicatedLeptons;
   gt->genPartonStudy = analysis->genPartonStudy;
+  gt->btagWeights    = !analysis->btagSFs && analysis->btagWeights;
+  gt->useCMVA        = analysis->useCMVA;
 
   // fill the signal weights
   for (auto& id : wIDs) 
@@ -466,6 +469,11 @@ void PandaAnalyzer::SetDataDir(const char *s)
     btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
     if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded btag SFs");
+  } else if(analysis->btagWeights) {
+    if (analysis->useCMVA) 
+      cmvaReweighter = new CSVHelper("PandaAnalysis/data/csvweights/cmva_rwt_fit_hf_v0_final_2017_3_29.root"   , "PandaAnalysis/data/csvweights/cmva_rwt_fit_lf_v0_final_2017_3_29.root"   , 5);
+    else
+      csvReweighter  = new CSVHelper("PandaAnalysis/data/csvweights/csv_rwt_fit_hf_v2_final_2017_3_29test.root", "PandaAnalysis/data/csvweights/csv_rwt_fit_lf_v2_final_2017_3_29test.root", 5);
   }
 
   if (analysis->monoh) {
@@ -749,6 +757,7 @@ void PandaAnalyzer::Run()
   }
 
 
+
   std::vector<unsigned int> metTriggers;
   std::vector<unsigned int> eleTriggers;
   std::vector<unsigned int> phoTriggers;
@@ -1017,6 +1026,9 @@ void PandaAnalyzer::Run()
 
       if (analysis->btagSFs)
         JetBtagSFs();
+      else if(analysis->btagWeights) {
+        JetCMVAWeights();
+      }
 
       TopPTReweight();
       VJetsReweight();
@@ -1038,8 +1050,6 @@ void PandaAnalyzer::Run()
       if (analysis->reclusterGen && analysis->monoh) {
         GenJetsNu();
         MatchGenJets(genJetsNu);
-      } else if(analysis->complicatedLeptons) {
-        MatchGenJets(event.ak4GenJets);
       }
     }
 
