@@ -78,6 +78,9 @@ public :
         kSingleEleTrig,
         kSinglePhoTrig,
         kSingleMuTrig,
+        kDoubleMuTrig,
+        kDoubleEleTrig,
+        kEMuTrig,
         kJetHTTrig,
         kNTrig,
     };
