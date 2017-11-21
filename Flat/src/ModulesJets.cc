@@ -354,7 +354,7 @@ void PandaAnalyzer::JetHbbReco()
   if (centralJets.size() > 1) {
     vector<Jet*> csvSortedJets = centralJets;
     sort(csvSortedJets.begin(), csvSortedJets.end(),
-        [](panda::Jet *x, panda::Jet *y) -> bool { return x->csv > y->csv; });
+        [](panda::Jet *x, panda::Jet *y) -> bool { return x->cmva > y->cmva; });
     map<Jet*, unsigned> order;
     for (unsigned i = 0; i != cleanedJets.size(); ++i) 
       order[cleanedJets[i]] = i;
