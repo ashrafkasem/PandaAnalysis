@@ -153,6 +153,7 @@ class GeneralTree : public genericTree {
       float jetPhi[NJET];
       float jetE[NJET];
       float jetCSV[NJET];
+      float jetCMVA[NJET];
       float jetIso[NJET];
       float jetQGL[NJET];
       float jetLeadingLepPt[NJET];
@@ -456,6 +457,7 @@ class GeneralTree : public genericTree {
     float jet1GenPt = -1;
     float jet1Eta = -1;
     float jet1CSV = -1;
+    float jet1CMVA = -1;
     int jet1IsTight = -1;
     int jet2Flav = -1;
     float jet2Phi = -1;
@@ -463,6 +465,7 @@ class GeneralTree : public genericTree {
     float jet2GenPt = -1;
     float jet2Eta = -1;
     float jet2CSV = -1;
+    float jet2CMVA = -1;
     float isojet1Pt = -1;
     float isojet1CSV = -1;
     int isojet1Flav = -1;
