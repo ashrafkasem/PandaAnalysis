@@ -82,6 +82,8 @@ public:
   bool recluster = false;
   bool genOnly = false;
   bool btagSFs = true;
+  bool btagWeights = false;
+  bool useCMVA = false;
   bool firstGen = true;
   bool puppi_jets = true;
   bool ak8 = false;

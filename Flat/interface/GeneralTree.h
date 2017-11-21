@@ -133,6 +133,7 @@ class GeneralTree : public genericTree {
         
       // public config
       bool monohiggs=false, vbf=false, fatjet=true, leptonic=false, genPartonStudy=false;
+      bool btagWeights=false, useCMVA=false;
 
 //STARTCUSTOMDEF
       std::map<ECFParams,float> fj1ECFNs;
@@ -223,6 +224,40 @@ class GeneralTree : public genericTree {
       int electronTripleCharge[NLEP];
 
 //ENDCUSTOMDEF
+    float sf_cmvaweight = -1;
+    float sf_cmva_LFup = -1;
+    float sf_cmva_LFdown = -1;
+    float sf_cmva_HFup = -1;
+    float sf_cmva_HFdown = -1;
+    float sf_cmva_HFStats1up = -1;
+    float sf_cmva_HFStats1down = -1;
+    float sf_cmva_LFStats1up = -1;
+    float sf_cmva_LFStats1down = -1;
+    float sf_cmva_HFStats2up = -1;
+    float sf_cmva_HFStats2down = -1;
+    float sf_cmva_LFStats2up = -1;
+    float sf_cmva_LFStats2down = -1;
+    float sf_cmva_CErr1up = -1;
+    float sf_cmva_CErr1down = -1;
+    float sf_cmva_CErr2up = -1;
+    float sf_cmva_CErr2down = -1;
+    float sf_csvweight = -1;
+    float sf_csv_LFup = -1;
+    float sf_csv_LFdown = -1;
+    float sf_csv_HFup = -1;
+    float sf_csv_HFdown = -1;
+    float sf_csv_HFStats1up = -1;
+    float sf_csv_HFStats1down = -1;
+    float sf_csv_LFStats1up = -1;
+    float sf_csv_LFStats1down = -1;
+    float sf_csv_HFStats2up = -1;
+    float sf_csv_HFStats2down = -1;
+    float sf_csv_LFStats2up = -1;
+    float sf_csv_LFStats2down = -1;
+    float sf_csv_CErr1up = -1;
+    float sf_csv_CErr1down = -1;
+    float sf_csv_CErr2up = -1;
+    float sf_csv_CErr2down = -1;
     float sf_zzUnc = -1;
     float sf_zz = -1;
     float sf_wz = -1;
