@@ -79,6 +79,7 @@ void PandaAnalyzer::JetBasics()
       }
 
       float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
+      float cmva = (fabs(jet.eta())<2.5) ? jet.cmva : -1;
       if (fabs(jet.eta())<2.4) {
         centralJets.push_back(&jet);
         if (centralJets.size()==1) {
@@ -87,6 +88,7 @@ void PandaAnalyzer::JetBasics()
           gt->jet1Eta = jet.eta();
           gt->jet1Phi = jet.phi();
           gt->jet1CSV = csv;
+          gt->jet1CMVA = cmva;
           gt->jet1IsTight = jet.monojet ? 1 : 0;
         } else if (centralJets.size()==2) {
           jet2 = &jet;
@@ -94,6 +96,7 @@ void PandaAnalyzer::JetBasics()
           gt->jet2Eta = jet.eta();
           gt->jet2Phi = jet.phi();
           gt->jet2CSV = csv;
+          gt->jet2CMVA = cmva;
         }
       }
 
@@ -174,12 +177,14 @@ void PandaAnalyzer::JetBasics()
 void PandaAnalyzer::JetHbbBasics(panda::Jet& jet)
 {
   float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
+  float cmva = (fabs(jet.eta())<2.5) ? jet.cmva : -1;
   unsigned N = cleanedJets.size()-1;
   gt->jetPt[N]=jet.pt();
   gt->jetEta[N]=jet.eta();
   gt->jetPhi[N]=jet.phi();
   gt->jetE[N]=jet.m();
   gt->jetCSV[N]=csv;
+  gt->jetCMVA[N]=cmva;
   gt->jetQGL[N]=jet.qgl;
 
   tr->TriggerSubEvent("H->bb jet");
