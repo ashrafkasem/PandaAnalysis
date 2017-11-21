@@ -4,8 +4,8 @@
 
 CSVHelper::CSVHelper(std::string hf, std::string lf, int nHFptBins_):nHFptBins(nHFptBins_)
 {
-    std::string inputFileHF = hf.size() > 0 ? hf : "data/csv_rwt_hf_IT_FlatSF.root";
-    std::string inputFileLF = lf.size() > 0 ? lf :"data/csv_rwt_lf_IT_FlatSF.root";
+    std::string inputFileHF = hf.size() > 0 ? hf : "PandaAnalysis/data/csvweights/csv_rwt_fit_hf_v2_final_2017_3_29test.root"; //cmva_rwt_fit_hf_v0_final_2017_3_29.root
+    std::string inputFileLF = lf.size() > 0 ? lf : "PandaAnalysis/data/csvweights/csv_rwt_fit_lf_v2_final_2017_3_29test.root"; //cmva_rwt_fit_lf_v0_final_2017_3_29.root
 
     TFile *f_CSVwgt_HF = new TFile((std::string(getenv("CMSSW_BASE")) + "/src/" + inputFileHF).c_str());
     TFile *f_CSVwgt_LF = new TFile((std::string(getenv("CMSSW_BASE")) + "/src/" + inputFileLF).c_str());

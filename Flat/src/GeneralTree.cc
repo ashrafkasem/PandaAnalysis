@@ -167,6 +167,40 @@ void GeneralTree::Reset() {
   }
 
 //ENDCUSTOMRESET
+    sf_cmvaweight = -1;
+    sf_cmva_LFup = -1;
+    sf_cmva_LFdown = -1;
+    sf_cmva_HFup = -1;
+    sf_cmva_HFdown = -1;
+    sf_cmva_HFStats1up = -1;
+    sf_cmva_HFStats1down = -1;
+    sf_cmva_LFStats1up = -1;
+    sf_cmva_LFStats1down = -1;
+    sf_cmva_HFStats2up = -1;
+    sf_cmva_HFStats2down = -1;
+    sf_cmva_LFStats2up = -1;
+    sf_cmva_LFStats2down = -1;
+    sf_cmva_CErr1up = -1;
+    sf_cmva_CErr1down = -1;
+    sf_cmva_CErr2up = -1;
+    sf_cmva_CErr2down = -1;
+    sf_csvweight = -1;
+    sf_csv_LFup = -1;
+    sf_csv_LFdown = -1;
+    sf_csv_HFup = -1;
+    sf_csv_HFdown = -1;
+    sf_csv_HFStats1up = -1;
+    sf_csv_HFStats1down = -1;
+    sf_csv_LFStats1up = -1;
+    sf_csv_LFStats1down = -1;
+    sf_csv_HFStats2up = -1;
+    sf_csv_HFStats2down = -1;
+    sf_csv_LFStats2up = -1;
+    sf_csv_LFStats2down = -1;
+    sf_csv_CErr1up = -1;
+    sf_csv_CErr1down = -1;
+    sf_csv_CErr2up = -1;
+    sf_csv_CErr2down = -1;    
     sf_zzUnc = 1;
     sf_zz = 1;
     sf_wz = 1;
@@ -717,6 +751,43 @@ void GeneralTree::WriteTree(TTree *t) {
   if(fatjet || genPartonStudy) {
     Book("nHF",&nHF,"nHF/I");
     Book("nB",&nB,"nB/I");
+  }
+  if (btagWeights && !useCMVA) {
+    Book("sf_csvweight",&sf_csvweight,"sf_csvweight/F");
+    Book("sf_csv_LFup",&sf_csv_LFup,"sf_csv_LFup/F");
+    Book("sf_csv_LFdown",&sf_csv_LFdown,"sf_csv_LFdown/F");
+    Book("sf_csv_HFup",&sf_csv_HFup,"sf_csv_HFup/F");
+    Book("sf_csv_HFdown",&sf_csv_HFdown,"sf_csv_HFdown/F");
+    Book("sf_csv_HFStats1up",&sf_csv_HFStats1up,"sf_csv_HFStats1up/F");
+    Book("sf_csv_HFStats1down",&sf_csv_HFStats1down,"sf_csv_HFStats1down/F");
+    Book("sf_csv_LFStats1up",&sf_csv_LFStats1up,"sf_csv_LFStats1up/F");
+    Book("sf_csv_LFStats1down",&sf_csv_LFStats1down,"sf_csv_LFStats1down/F");
+    Book("sf_csv_HFStats2up",&sf_csv_HFStats2up,"sf_csv_HFStats2up/F");
+    Book("sf_csv_HFStats2down",&sf_csv_HFStats2down,"sf_csv_HFStats2down/F");
+    Book("sf_csv_LFStats2up",&sf_csv_LFStats2up,"sf_csv_LFStats2up/F");
+    Book("sf_csv_LFStats2down",&sf_csv_LFStats2down,"sf_csv_LFStats2down/F");
+    Book("sf_csv_CErr1up",&sf_csv_CErr1up,"sf_csv_CErr1up/F");
+    Book("sf_csv_CErr1down",&sf_csv_CErr1down,"sf_csv_CErr1down/F");
+    Book("sf_csv_CErr2up",&sf_csv_CErr2up,"sf_csv_CErr2up/F");
+    Book("sf_csv_CErr2down",&sf_csv_CErr2down,"sf_csv_CErr2down/F");
+  } else if (btagWeights && useCMVA) {
+    Book("sf_cmvaweight",&sf_cmvaweight,"sf_cmvaweight/F");
+    Book("sf_cmva_LFup",&sf_cmva_LFup,"sf_cmva_LFup/F");
+    Book("sf_cmva_LFdown",&sf_cmva_LFdown,"sf_cmva_LFdown/F");
+    Book("sf_cmva_HFup",&sf_cmva_HFup,"sf_cmva_HFup/F");
+    Book("sf_cmva_HFdown",&sf_cmva_HFdown,"sf_cmva_HFdown/F");
+    Book("sf_cmva_HFStats1up",&sf_cmva_HFStats1up,"sf_cmva_HFStats1up/F");
+    Book("sf_cmva_HFStats1down",&sf_cmva_HFStats1down,"sf_cmva_HFStats1down/F");
+    Book("sf_cmva_LFStats1up",&sf_cmva_LFStats1up,"sf_cmva_LFStats1up/F");
+    Book("sf_cmva_LFStats1down",&sf_cmva_LFStats1down,"sf_cmva_LFStats1down/F");
+    Book("sf_cmva_HFStats2up",&sf_cmva_HFStats2up,"sf_cmva_HFStats2up/F");
+    Book("sf_cmva_HFStats2down",&sf_cmva_HFStats2down,"sf_cmva_HFStats2down/F");
+    Book("sf_cmva_LFStats2up",&sf_cmva_LFStats2up,"sf_cmva_LFStats2up/F");
+    Book("sf_cmva_LFStats2down",&sf_cmva_LFStats2down,"sf_cmva_LFStats2down/F");
+    Book("sf_cmva_CErr1up",&sf_cmva_CErr1up,"sf_cmva_CErr1up/F");
+    Book("sf_cmva_CErr1down",&sf_cmva_CErr1down,"sf_cmva_CErr1down/F");
+    Book("sf_cmva_CErr2up",&sf_cmva_CErr2up,"sf_cmva_CErr2up/F");
+    Book("sf_cmva_CErr2down",&sf_cmva_CErr2down,"sf_cmva_CErr2down/F");
   }
 //ENDCUSTOMWRITE
     Book("whichRecoil",&whichRecoil,"whichRecoil/I");

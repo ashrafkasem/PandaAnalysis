@@ -70,7 +70,7 @@ void PandaAnalyzer::JetBasics()
     }
 
 
-    if (jet.pt()>30) { // nominal jets
+    if (jet.pt()>20) { // nominal jets
       cleanedJets.push_back(&jet);
       if (cleanedJets.size()<3) {
         bool isBad = GetCorr(cBadECALJets,jet.eta(),jet.phi()) > 0;

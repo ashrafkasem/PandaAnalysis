@@ -30,6 +30,7 @@
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
 #include "PandaAnalysis/Utilities/interface/RoccoR.h"
+#include "PandaAnalysis/Utilities/interface/CSVHelper.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // some misc definitions
@@ -210,6 +211,7 @@ private:
     void JetBRegressionInfo(panda::Jet&);
     void JetBasics();
     void JetBtagSFs();
+    void JetCMVAWeights();
     void JetHbbBasics(panda::Jet&);
     void JetHbbReco();
     void JetVBFBasics(panda::Jet&);
@@ -305,6 +307,7 @@ private:
     TF1* puppisd_corrRECO_for=0;
     RoccoR *rochesterCorrection=0;
     TRandom3 rng;
+    CSVHelper *csvReweighter=0, *cmvaReweighter=0;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
