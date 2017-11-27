@@ -104,7 +104,7 @@ void PandaAnalyzer::JetBasics()
       if (analysis->vbf)
         JetVBFBasics(jet);
 
-      if (analysis->monoh) {
+      if (analysis->monoh | analysis->hbb) {
         JetHbbBasics(jet);
         if (analysis->bjetRegression)
           JetBRegressionInfo(jet);
@@ -126,7 +126,7 @@ void PandaAnalyzer::JetBasics()
       // btags
       if (csv>0.5426) {
         ++(gt->jetNBtags);
-        if (analysis->monoh) {
+        if (analysis->monoh || analysis->hbb) {
           btaggedJets.push_back(&jet);
           btagindices.push_back(cleanedJets.size()-1);
         }
