@@ -104,7 +104,7 @@ void PandaAnalyzer::JetBasics()
       if (analysis->vbf)
         JetVBFBasics(jet);
 
-      if (analysis->monoh | analysis->hbb) {
+      if (analysis->monoh || analysis->hbb) {
         JetHbbBasics(jet);
         if (analysis->bjetRegression)
           JetBRegressionInfo(jet);
