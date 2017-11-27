@@ -35,7 +35,7 @@ GeneralTree::GeneralTree() {
     }
   }
   
-  for (unsigned iShift=0; iShift<17; iShift++) {
+  for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
     csvShift theShift = csvShifts[iShift];
     sf_csvWeights[theShift] = 1;
   }
@@ -86,7 +86,7 @@ void GeneralTree::Reset() {
   for (auto p : btagParams) { 
     sf_btags[p] = 1;
   }
-  for (unsigned iShift=0; iShift<17; iShift++) {
+  for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
     csvShift theShift = csvShifts[iShift];
     sf_csvWeights[theShift] = -1;
   }
@@ -731,7 +731,7 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("nHF",&nHF,"nHF/I");
     Book("nB",&nB,"nB/I");
   }
-  if (btagWeights) for (unsigned iShift=0; iShift<17; iShift++) {
+  if (btagWeights) for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
     csvShift theShift = csvShifts[iShift];
     TString theCsvWeightString = makeCsvWeightString(theShift, useCMVA);
     Book(theCsvWeightString, &(sf_csvWeights[theShift]), theCsvWeightString+"/F");
