@@ -190,20 +190,24 @@ void PandaAnalyzer::JetCMVAWeights()
   //get vectors of jet properties
   std::vector<double> jetPts, jetEtas, jetCSVs, jetCMVAs;
   std::vector<int> jetFlavors;
+  jetPts.reserve(centralJets.size());
+  jetEtas.reserve(centralJets.size());
+  jetCSVs.reserve(centralJets.size());
+  jetCMVAs.reserve(centralJets.size());
+  jetFlavors.reserve(centralJets.size());
   for (unsigned i = 0; i != centralJets.size(); ++i) {
     panda::Jet* jet=centralJets[i];
-    jetPts.push_back(jet->pt());
-    jetEtas.push_back(jet->eta());
-    jetCSVs.push_back(jet->csv); 
-    jetCMVAs.push_back(jet->cmva);
-    int flavor=0; // Will be considered a LF jet if we can't match to a gen particle
+    jetPts[i] = jet->pt();
+    jetEtas[i] = jet->eta();
+    jetCSVs[i] = jet->csv; 
+    jetCMVAs[i] = jet->cmva;
+    jetFlavors[i]=0; // Will be considered a LF jet if we can't match to a gen particle
     for (auto &gen : event.ak4GenJets) {
       if (DeltaR2(gen.eta(), gen.phi(), jet->eta(), jet->phi()) < 0.09) {
-        flavor=gen.pdgid;
+        jetFlavors[i]=gen.pdgid;
         break;
       }
     }
-    jetFlavors.push_back(flavor);
   }
   // throwaway addresses
   double csvWgtHF, csvWgtLF, csvWgtCF, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF;
