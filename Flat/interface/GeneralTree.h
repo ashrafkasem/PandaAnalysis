@@ -90,7 +90,8 @@ class GeneralTree : public genericTree {
         csvCErr2down=24
       };
       // Array of the CSV/CMVA weight enums that can be looped over
-      csvShift csvShifts[17] = {
+      static const unsigned char nCsvShifts=17;
+      csvShift csvShifts[nCsvShifts] = {
         csvCent,
         csvLFup,
         csvLFdown,

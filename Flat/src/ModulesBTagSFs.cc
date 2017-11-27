@@ -181,7 +181,7 @@ void PandaAnalyzer::JetBtagSFs()
 
 void PandaAnalyzer::JetCMVAWeights() 
 {
-  for (unsigned iShift=0; iShift<17; iShift++) {
+  for (unsigned iShift=0; iShift<GeneralTree::nCsvShifts; iShift++) {
     GeneralTree::csvShift theShift = gt->csvShifts[iShift];
     gt->sf_csvWeights[theShift] = 1;
   }
@@ -207,7 +207,7 @@ void PandaAnalyzer::JetCMVAWeights()
   }
   // throwaway addresses
   double csvWgtHF, csvWgtLF, csvWgtCF, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF;
-  for (unsigned iShift=0; iShift<17; iShift++) {
+  for (unsigned iShift=0; iShift<GeneralTree::nCsvShifts; iShift++) {
     GeneralTree::csvShift theShift = gt->csvShifts[iShift];
     if (analysis->useCMVA) 
       gt->sf_csvWeights[theShift] = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors, theShift, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF);
