@@ -352,8 +352,13 @@ void PandaAnalyzer::JetHbbReco()
   int tmp_hbbjtidx2=-1;
   if (centralJets.size() > 1) {
     vector<Jet*> btagSortedJets = centralJets;
-    sort(btagSortedJets.begin(), btagSortedJets.end(),
-        [](panda::Jet *x, panda::Jet *y) -> bool { return useCMVA? x->cmva > y->cmva : x->csv > y->csv; });
+    sort(
+      btagSortedJets.begin(),
+      btagSortedJets.end(),
+      analysis->useCMVA?
+        [](panda::Jet *x, panda::Jet *y) -> bool { return x->cmva > y->cmva; } :
+        [](panda::Jet *x, panda::Jet *y) -> bool { return x->csv  > y->csv ; }
+    );
     map<Jet*, unsigned> order;
     for (unsigned i = 0; i != cleanedJets.size(); ++i) 
       order[cleanedJets[i]] = i;
