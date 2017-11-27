@@ -351,18 +351,18 @@ void PandaAnalyzer::JetHbbReco()
   int tmp_hbbjtidx1=-1;
   int tmp_hbbjtidx2=-1;
   if (centralJets.size() > 1) {
-    vector<Jet*> csvSortedJets = centralJets;
-    sort(csvSortedJets.begin(), csvSortedJets.end(),
-        [](panda::Jet *x, panda::Jet *y) -> bool { return x->cmva > y->cmva; });
+    vector<Jet*> btagSortedJets = centralJets;
+    sort(btagSortedJets.begin(), btagSortedJets.end(),
+        [](panda::Jet *x, panda::Jet *y) -> bool { return useCMVA? x->cmva > y->cmva : x->csv > y->csv; });
     map<Jet*, unsigned> order;
     for (unsigned i = 0; i != cleanedJets.size(); ++i) 
       order[cleanedJets[i]] = i;
 
-    panda::Jet *jet_1 = csvSortedJets.at(0);
+    panda::Jet *jet_1 = btagSortedJets.at(0);
     TLorentzVector hbbdaughter1;
     hbbdaughter1.SetPtEtaPhiM(jet_1->pt(),jet_1->eta(),jet_1->phi(),jet_1->m());
 
-    panda::Jet *jet_2 = csvSortedJets.at(1);
+    panda::Jet *jet_2 = btagSortedJets.at(1);
     TLorentzVector hbbdaughter2;
     hbbdaughter2.SetPtEtaPhiM(jet_2->pt(),jet_2->eta(),jet_2->phi(),jet_2->m());
 
