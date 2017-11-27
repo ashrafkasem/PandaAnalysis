@@ -1,2 +1,4 @@
-*.txt filter=lfs diff=lfs merge=lfs -text
 *.root filter=lfs diff=lfs merge=lfs -text
+rcdata.2016.v3/*txt filter=lfs diff=lfs merge=lfs -text
+data/trainings/top_ecfbdt_v8_BDT.weights.xml filter=lfs diff=lfs merge=lfs -text
+*.txt filter=lfs diff=lfs merge=lfs -text
