@@ -181,42 +181,9 @@ void PandaAnalyzer::JetBtagSFs()
 
 void PandaAnalyzer::JetCMVAWeights() 
 {
-   if (analysis->useCMVA) {
-    gt->sf_cmvaweight = 1;
-    gt->sf_cmva_LFup = 1;
-    gt->sf_cmva_LFdown = 1;
-    gt->sf_cmva_HFup = 1;
-    gt->sf_cmva_HFdown = 1;
-    gt->sf_cmva_HFStats1up = 1;
-    gt->sf_cmva_HFStats1down = 1;
-    gt->sf_cmva_LFStats1up = 1;
-    gt->sf_cmva_LFStats1down = 1;
-    gt->sf_cmva_HFStats2up = 1;
-    gt->sf_cmva_HFStats2down = 1;
-    gt->sf_cmva_LFStats2up = 1;
-    gt->sf_cmva_LFStats2down = 1;
-    gt->sf_cmva_CErr1up = 1;
-    gt->sf_cmva_CErr1down = 1;
-    gt->sf_cmva_CErr2up = 1;
-    gt->sf_cmva_CErr2down = 1;
-  } else {
-    gt->sf_csvweight = 1;
-    gt->sf_csv_LFup = 1;
-    gt->sf_csv_LFdown = 1;
-    gt->sf_csv_HFup = 1;
-    gt->sf_csv_HFdown = 1;
-    gt->sf_csv_HFStats1up = 1;
-    gt->sf_csv_HFStats1down = 1;
-    gt->sf_csv_LFStats1up = 1;
-    gt->sf_csv_LFStats1down = 1;
-    gt->sf_csv_HFStats2up = 1;
-    gt->sf_csv_HFStats2down = 1;
-    gt->sf_csv_LFStats2up = 1;
-    gt->sf_csv_LFStats2down = 1;
-    gt->sf_csv_CErr1up = 1;
-    gt->sf_csv_CErr1down = 1;
-    gt->sf_csv_CErr2up = 1;
-    gt->sf_csv_CErr2down = 1;
+  for (unsigned iShift=0; iShift<17; iShift++) {
+    GeneralTree::csvShift theShift = gt->csvShifts[iShift];
+    gt->sf_csvWeights[theShift] = 1;
   }
   if (centralJets.size() < 1) return;
 
@@ -240,41 +207,12 @@ void PandaAnalyzer::JetCMVAWeights()
   }
   // throwaway addresses
   double csvWgtHF, csvWgtLF, csvWgtCF, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF;
-  if (analysis->useCMVA) {
-    gt->sf_cmvaweight = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,0, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF);
-    gt->sf_cmva_LFup = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,9, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_LFdown = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,10, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_HFup = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,11, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_HFdown = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,12, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_HFStats1up = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,13, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_HFStats1down = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,14, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_LFStats1up = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,17, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_LFStats1down = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,18, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_HFStats2up = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,15, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_HFStats2down = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,16, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_LFStats2up = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,19, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_LFStats2down = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,20, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_CErr1up = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,21, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_CErr1down = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,22, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_CErr2up = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,23, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-    gt->sf_cmva_CErr2down = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors,24, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF)/gt->sf_cmvaweight;
-  } else {
-    gt->sf_csvweight = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,0, csvWgtHF, csvWgtLF, csvWgtCF);
-    gt->sf_csv_LFup = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,9, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_LFdown = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,10, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_HFup = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,11, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_HFdown = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,12, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_HFStats1up = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,13, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_HFStats1down = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,14, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_LFStats1up = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,17, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_LFStats1down = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,18, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_HFStats2up = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,15, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_HFStats2down = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,16, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_LFStats2up = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,19, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_LFStats2down = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,20, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_CErr1up = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,21, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_CErr1down = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,22, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_CErr2up = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,23, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
-    gt->sf_csv_CErr2down = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors,24, csvWgtHF, csvWgtLF, csvWgtCF)/gt->sf_csvweight;
+  for (unsigned iShift=0; iShift<17; iShift++) {
+    GeneralTree::csvShift theShift = gt->csvShifts[iShift];
+    if (analysis->useCMVA) 
+      gt->sf_csvWeights[theShift] = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors, theShift, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF);
+    else 
+      gt->sf_csvWeights[theShift] = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors, theShift, csvWgtHF, csvWgtLF, csvWgtCF);
   }
+
 }
