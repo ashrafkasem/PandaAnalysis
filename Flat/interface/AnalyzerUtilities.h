@@ -71,22 +71,25 @@ public:
   Analysis(TString name_ = "") { name = name_; }
   ~Analysis() {}
   TString name;
-  bool rerunJES = false;
-  bool varyJES = false;
-  bool complicatedLeptons = false;
-  bool genPartonStudy = false;
-  bool vbf = false;
-  bool recoil = true;
-  bool fatjet = true;
-  bool monoh = false;
-  bool recluster = false;
-  bool genOnly = false;
-  bool btagSFs = true;
-  bool firstGen = true;
-  bool puppi_jets = true;
   bool ak8 = false;
-  bool reclusterGen = false;
   bool bjetRegression = false;
+  bool btagSFs = true;
+  bool btagWeights = false;
+  bool complicatedLeptons = false;
+  bool fatjet = true;
+  bool firstGen = true;
+  bool genPartonStudy = false;
+  bool genOnly = false;
+  bool hbb = false;
+  bool monoh = false;
+  bool puppi_jets = true;
+  bool recluster = false;
+  bool reclusterGen = false;
+  bool recoil = true;
+  bool rerunJES = false;
+  bool useCMVA = false;
+  bool varyJES = false;
+  bool vbf = false;
 };
 
 ////////////////////////////////////////////////////////////////////////////////////

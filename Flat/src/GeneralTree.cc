@@ -34,6 +34,11 @@ GeneralTree::GeneralTree() {
       }
     }
   }
+  
+  for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
+    csvShift theShift = csvShifts[iShift];
+    sf_csvWeights[theShift] = 1;
+  }
 
   for (unsigned int iSJ=0; iSJ!=NSUBJET; ++iSJ) {
     fj1sjPt[iSJ] = -1;
@@ -49,6 +54,7 @@ GeneralTree::GeneralTree() {
     jetPhi[iJ] = -1;
     jetE[iJ] = -1;
     jetCSV[iJ] = -1;
+    jetCMVA[iJ] = -1;
     jetIso[iJ] = -1;
     jetQGL[iJ] = -1;
     jetLeadingLepPt[iJ] = -1;
@@ -80,7 +86,10 @@ void GeneralTree::Reset() {
   for (auto p : btagParams) { 
     sf_btags[p] = 1;
   }
-
+  for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
+    csvShift theShift = csvShifts[iShift];
+    sf_csvWeights[theShift] = -1;
+  }
   for (unsigned int iSJ=0; iSJ!=NSUBJET; ++iSJ) {
     fj1sjPt[iSJ] = -99;
     fj1sjEta[iSJ] = -99;
@@ -95,6 +104,7 @@ void GeneralTree::Reset() {
     jetPhi[iJ] = -99;
     jetE[iJ] = -99;
     jetCSV[iJ] = -99;
+    jetCMVA[iJ] = -99;
     jetIso[iJ] = -99;
     jetQGL[iJ] = -99;
     jetLeadingLepPt[iJ] = -99;
@@ -365,6 +375,7 @@ void GeneralTree::Reset() {
     jet1GenPt = -1;
     jet1Eta = -1;
     jet1CSV = -1;
+    jet1CMVA = -1;
     jet1IsTight = 0;
     jet2Flav = 0;
     jet2Phi = -1;
@@ -372,6 +383,7 @@ void GeneralTree::Reset() {
     jet2GenPt = -1;
     jet2Eta = -1;
     jet2CSV = -1;
+    jet2CMVA = -1;
     isojet1Pt = -1;
     isojet1CSV = -1;
     isojet1Flav = 0;
@@ -484,6 +496,7 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("jetPhi",jetPhi,"jetPhi[nJot]/F");
     Book("jetE",jetE,"jetE[nJot]/F");
     Book("jetCSV",jetCSV,"jetCSV[nJot]/F");
+    Book("jetCMVA",jetCMVA,"jetCMVA[nJot]/F");
     Book("jetIso",jetIso,"jetIso[nJot]/F");
     Book("jetQGL",jetQGL,"jetQGL[nJot]/F");
     Book("jetLeadingLepPt",jetLeadingLepPt,"jetLeadingLepPt[nJot]/F");
@@ -718,6 +731,11 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("nHF",&nHF,"nHF/I");
     Book("nB",&nB,"nB/I");
   }
+  if (btagWeights) for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
+    csvShift theShift = csvShifts[iShift];
+    TString theCsvWeightString = makeCsvWeightString(theShift, useCMVA);
+    Book(theCsvWeightString, &(sf_csvWeights[theShift]), theCsvWeightString+"/F");
+  }
 //ENDCUSTOMWRITE
     Book("whichRecoil",&whichRecoil,"whichRecoil/I");
     Book("genJet1Pt",&genJet1Pt,"genJet1Pt/F");
@@ -826,6 +844,7 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("jet1GenPt",&jet1GenPt,"jet1GenPt/F");
     Book("jet1Eta",&jet1Eta,"jet1Eta/F");
     Book("jet1CSV",&jet1CSV,"jet1CSV/F");
+    Book("jet1CMVA",&jet1CMVA,"jet1CMVA/F");
     Book("jet1IsTight",&jet1IsTight,"jet1IsTight/I");
     Book("jet2Flav",&jet2Flav,"jet2Flav/I");
     Book("jet2Phi",&jet2Phi,"jet2Phi/F");
@@ -833,6 +852,7 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("jet2GenPt",&jet2GenPt,"jet2GenPt/F");
     Book("jet2Eta",&jet2Eta,"jet2Eta/F");
     Book("jet2CSV",&jet2CSV,"jet2CSV/F");
+    Book("jet2CMVA",&jet2CMVA,"jet2CMVA/F");
     Book("jetNBtags",&jetNBtags,"jetNBtags/I");
     Book("nLoosePhoton",&nLoosePhoton,"nLoosePhoton/I");
     Book("nTightPhoton",&nTightPhoton,"nTightPhoton/I");

@@ -69,8 +69,7 @@ void PandaAnalyzer::JetBasics()
       ++(gt->jetNMBtags);
     }
 
-
-    if (jet.pt()>30) { // nominal jets
+    if ((analysis->hbb && jet.pt()>20) || jet.pt()>30) { // nominal jets
       cleanedJets.push_back(&jet);
       if (cleanedJets.size()<3) {
         bool isBad = GetCorr(cBadECALJets,jet.eta(),jet.phi()) > 0;
@@ -79,6 +78,7 @@ void PandaAnalyzer::JetBasics()
       }
 
       float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
+      float cmva = (fabs(jet.eta())<2.5) ? jet.cmva : -1;
       if (fabs(jet.eta())<2.4) {
         centralJets.push_back(&jet);
         if (centralJets.size()==1) {
@@ -87,6 +87,7 @@ void PandaAnalyzer::JetBasics()
           gt->jet1Eta = jet.eta();
           gt->jet1Phi = jet.phi();
           gt->jet1CSV = csv;
+          gt->jet1CMVA = cmva;
           gt->jet1IsTight = jet.monojet ? 1 : 0;
         } else if (centralJets.size()==2) {
           jet2 = &jet;
@@ -94,6 +95,7 @@ void PandaAnalyzer::JetBasics()
           gt->jet2Eta = jet.eta();
           gt->jet2Phi = jet.phi();
           gt->jet2CSV = csv;
+          gt->jet2CMVA = cmva;
         }
       }
 
@@ -102,7 +104,7 @@ void PandaAnalyzer::JetBasics()
       if (analysis->vbf)
         JetVBFBasics(jet);
 
-      if (analysis->monoh) {
+      if (analysis->monoh || analysis->hbb) {
         JetHbbBasics(jet);
         if (analysis->bjetRegression)
           JetBRegressionInfo(jet);
@@ -124,7 +126,7 @@ void PandaAnalyzer::JetBasics()
       // btags
       if (csv>0.5426) {
         ++(gt->jetNBtags);
-        if (analysis->monoh) {
+        if (analysis->monoh || analysis->hbb) {
           btaggedJets.push_back(&jet);
           btagindices.push_back(cleanedJets.size()-1);
         }
@@ -174,12 +176,14 @@ void PandaAnalyzer::JetBasics()
 void PandaAnalyzer::JetHbbBasics(panda::Jet& jet)
 {
   float csv = (fabs(jet.eta())<2.5) ? jet.csv : -1;
+  float cmva = (fabs(jet.eta())<2.5) ? jet.cmva : -1;
   unsigned N = cleanedJets.size()-1;
   gt->jetPt[N]=jet.pt();
   gt->jetEta[N]=jet.eta();
   gt->jetPhi[N]=jet.phi();
   gt->jetE[N]=jet.m();
   gt->jetCSV[N]=csv;
+  gt->jetCMVA[N]=cmva;
   gt->jetQGL[N]=jet.qgl;
 
   tr->TriggerSubEvent("H->bb jet");
@@ -347,18 +351,23 @@ void PandaAnalyzer::JetHbbReco()
   int tmp_hbbjtidx1=-1;
   int tmp_hbbjtidx2=-1;
   if (centralJets.size() > 1) {
-    vector<Jet*> csvSortedJets = centralJets;
-    sort(csvSortedJets.begin(), csvSortedJets.end(),
-        [](panda::Jet *x, panda::Jet *y) -> bool { return x->csv > y->csv; });
+    vector<Jet*> btagSortedJets = centralJets;
+    sort(
+      btagSortedJets.begin(),
+      btagSortedJets.end(),
+      analysis->useCMVA?
+        [](panda::Jet *x, panda::Jet *y) -> bool { return x->cmva > y->cmva; } :
+        [](panda::Jet *x, panda::Jet *y) -> bool { return x->csv  > y->csv ; }
+    );
     map<Jet*, unsigned> order;
     for (unsigned i = 0; i != cleanedJets.size(); ++i) 
       order[cleanedJets[i]] = i;
 
-    panda::Jet *jet_1 = csvSortedJets.at(0);
+    panda::Jet *jet_1 = btagSortedJets.at(0);
     TLorentzVector hbbdaughter1;
     hbbdaughter1.SetPtEtaPhiM(jet_1->pt(),jet_1->eta(),jet_1->phi(),jet_1->m());
 
-    panda::Jet *jet_2 = csvSortedJets.at(1);
+    panda::Jet *jet_2 = btagSortedJets.at(1);
     TLorentzVector hbbdaughter2;
     hbbdaughter2.SetPtEtaPhiM(jet_2->pt(),jet_2->eta(),jet_2->phi(),jet_2->m());
 
