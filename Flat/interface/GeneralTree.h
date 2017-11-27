@@ -54,7 +54,6 @@ class GeneralTree : public genericTree {
         bGT0,
         bNTags
       };
-        
       struct BTagParams {
         BTagJet jet;
         BTagTags tag;
@@ -70,6 +69,45 @@ class GeneralTree : public genericTree {
         bool operator>(const BTagParams &o) const {
           return ! operator<(o);
         }
+      };
+      enum csvShift {
+        csvCent=0,
+        csvLFup=9,
+        csvLFdown=10,
+        csvHFup=11,
+        csvHFdown=12,
+        csvHFStats1up=13,
+        csvHFStats1down=14,
+        csvHFStats2up=15,
+        csvHFStats2down=16,
+        csvLFStats1up=17,
+        csvLFStats1down=18,
+        csvLFStats2up=19,
+        csvLFStats2down=20,
+        csvCErr1up=21,
+        csvCErr1down=22,
+        csvCErr2up=23,
+        csvCErr2down=24
+      };
+      // Array of the CSV/CMVA weight enums that can be looped over
+      csvShift csvShifts[17] = {
+        csvCent,
+        csvLFup,
+        csvLFdown,
+        csvHFup,
+        csvHFdown,
+        csvHFStats1up,
+        csvHFStats1down,
+        csvHFStats2up,
+        csvHFStats2down,
+        csvLFStats1up,
+        csvLFStats1down,
+        csvLFStats2up,
+        csvLFStats2down,
+        csvCErr1up,
+        csvCErr1down,
+        csvCErr2up,
+        csvCErr2down
       };
         
     private:
@@ -115,6 +153,30 @@ class GeneralTree : public genericTree {
           }
           return s;
         }
+        TString makeCsvWeightString(csvShift theShift, bool isCMVA=false) { 
+          TString s = isCMVA? "sf_cmvaWeight_" : "sf_csvWeight_";
+          switch (theShift) {
+            case csvCent         :  s += "Cent"         ; break;
+            case csvLFup         :  s += "LFup"         ; break;
+            case csvLFdown       :  s += "LFdown"       ; break;
+            case csvHFup         :  s += "HFup"         ; break;
+            case csvHFdown       :  s += "HFdown"       ; break;
+            case csvHFStats1up   :  s += "HFStats1up"   ; break;
+            case csvHFStats1down :  s += "HFStats1down" ; break;
+            case csvHFStats2up   :  s += "HFStats2up"   ; break;
+            case csvHFStats2down :  s += "HFStats2down" ; break;
+            case csvLFStats1up   :  s += "LFStats1up"   ; break;
+            case csvLFStats1down :  s += "LFStats1down" ; break;
+            case csvLFStats2up   :  s += "LFStats2up"   ; break;
+            case csvLFStats2down :  s += "LFStats2down" ; break;
+            case csvCErr1up      :  s += "CErr1up"      ; break;
+            case csvCErr1down    :  s += "CErr1down"    ; break;
+            case csvCErr2up      :  s += "CErr2up"      ; break;
+            case csvCErr2down    :  s += "CErr2down"    ; break;
+            default              :  s += "Unknown"      ; break;
+          }
+          return s;
+        }
     public:
       GeneralTree();
       ~GeneralTree();
@@ -140,6 +202,7 @@ class GeneralTree : public genericTree {
       std::map<BTagParams,float> sf_btags;
       std::map<BTagParams,float> sf_alt_btags;
       std::map<TString,float> signal_weights;
+      std::map<csvShift,float> sf_csvWeights; // this is called csvWeights, but may actually include CMVA weights instead
 
       float fj1sjPt[NSUBJET];
       float fj1sjEta[NSUBJET];
@@ -225,40 +288,6 @@ class GeneralTree : public genericTree {
       int electronTripleCharge[NLEP];
 
 //ENDCUSTOMDEF
-    float sf_cmvaweight = -1;
-    float sf_cmva_LFup = -1;
-    float sf_cmva_LFdown = -1;
-    float sf_cmva_HFup = -1;
-    float sf_cmva_HFdown = -1;
-    float sf_cmva_HFStats1up = -1;
-    float sf_cmva_HFStats1down = -1;
-    float sf_cmva_LFStats1up = -1;
-    float sf_cmva_LFStats1down = -1;
-    float sf_cmva_HFStats2up = -1;
-    float sf_cmva_HFStats2down = -1;
-    float sf_cmva_LFStats2up = -1;
-    float sf_cmva_LFStats2down = -1;
-    float sf_cmva_CErr1up = -1;
-    float sf_cmva_CErr1down = -1;
-    float sf_cmva_CErr2up = -1;
-    float sf_cmva_CErr2down = -1;
-    float sf_csvweight = -1;
-    float sf_csv_LFup = -1;
-    float sf_csv_LFdown = -1;
-    float sf_csv_HFup = -1;
-    float sf_csv_HFdown = -1;
-    float sf_csv_HFStats1up = -1;
-    float sf_csv_HFStats1down = -1;
-    float sf_csv_LFStats1up = -1;
-    float sf_csv_LFStats1down = -1;
-    float sf_csv_HFStats2up = -1;
-    float sf_csv_HFStats2down = -1;
-    float sf_csv_LFStats2up = -1;
-    float sf_csv_LFStats2down = -1;
-    float sf_csv_CErr1up = -1;
-    float sf_csv_CErr1down = -1;
-    float sf_csv_CErr2up = -1;
-    float sf_csv_CErr2down = -1;
     float sf_zzUnc = -1;
     float sf_zz = -1;
     float sf_wz = -1;
