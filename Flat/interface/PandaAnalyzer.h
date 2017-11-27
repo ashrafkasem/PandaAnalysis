@@ -13,6 +13,7 @@
 #include <TMath.h>
 #include <TH1D.h>
 #include <TH2F.h>
+#include <TRandom3.h>
 #include <TLorentzVector.h>
 
 #include "AnalyzerUtilities.h"
@@ -28,6 +29,8 @@
 #include "CondFormats/JetMETObjects/interface/JetCorrectorParameters.h"
 #include "CondFormats/JetMETObjects/interface/FactorizedJetCorrector.h"
 #include "CondFormats/JetMETObjects/interface/JetCorrectionUncertainty.h"
+#include "PandaAnalysis/Utilities/interface/RoccoR.h"
+#include "PandaAnalysis/Utilities/interface/CSVHelper.h"
 
 // TMVA
 #include "TMVA/Factory.h"
@@ -54,8 +57,15 @@ public :
      kFatjet     =(1<<7),
      kRecoil50   =(1<<8),
      kGenBosonPt =(1<<9),
+     kVHBB       =(1<<10)
     };
-
+    
+    enum LepSelectionBit {
+     kLoose   =(1<<0),
+     kFake    =(1<<1),
+     kMedium  =(1<<2),
+     kTight   =(1<<3)
+    };
     enum ProcessType { 
         kNone,
         kZ,
@@ -75,6 +85,9 @@ public :
         kSingleEleTrig,
         kSinglePhoTrig,
         kSingleMuTrig,
+        kDoubleMuTrig,
+        kDoubleEleTrig,
+        kEMuTrig,
         kJetHTTrig,
         kNTrig,
     };
@@ -111,11 +124,20 @@ private:
         cPUUp,        //!< true pu weight
         cPUDown,      //!< true pu weight
         cEleVeto,     //!< monojet SF, Veto ID for e
+        cEleLoose,    //!< monojet SF, Tight ID for e
+        cEleMedium,   //!< monojet SF, Tight ID for e
         cEleTight,    //!< monojet SF, Tight ID for e
         cEleReco,     //!< monojet SF, tracking for e
+        cZHEwkCorr,     //!< ZH Ewk Corr weight  
+        cZHEwkCorrUp,   //!< ZH Ewk Corr weight Up  
+        cZHEwkCorrDown, //!< ZH Ewk Corr weight Down  
+        cWZEwkCorr,
+        cqqZZQcdCorr,
         cMuLooseID,   //!< MUO POG SF, Loose ID for mu 
+        cMuMediumID,  //!< MUO POG SF, Tight ID for mu 
         cMuTightID,   //!< MUO POG SF, Tight ID for mu 
         cMuLooseIso,  //!< MUO POG SF, Loose Iso for mu 
+        cMuMediumIso, //!< MUO POG SF, Loose Iso for mu 
         cMuTightIso,  //!< MUO POG SF, Tight Iso for mu 
         cMuReco,      //!< MUO POG SF, tracking for mu
         cPho,         //!< EGM POG SF, contains ID for gamma
@@ -173,44 +195,51 @@ private:
     bool PassPreselection();
     void OpenCorrection(CorrectionType,TString,TString,int);
     double GetCorr(CorrectionType ct,double x, double y=0);
+    double GetError(CorrectionType ct,double x, double y=0);
     void RegisterTriggers(); 
 
     // these are functions used for analysis-specific tasks inside Run.
     // ideally the return type is void (e.g. they are stateful functions),
     // but that is not always possible (e.g. RecoilPresel)
-    bool RecoilPresel();
-    float GetMSDCorr(Float_t puppipt, Float_t puppieta); // @bmaier: please refactor this
     void CalcBJetSFs(BTagType bt, int flavor, double eta, double pt, 
                      double eff, double uncFactor, double &sf, double &sfUp, double &sfDown);
+    void ComplicatedLeptons();
     void EvalBTagSF(std::vector<btagcand> &cands, std::vector<double> &sfs,
                     GeneralTree::BTagShift shift,GeneralTree::BTagJet jettype, bool do2=false);
-    void SetupJES();
-    void SimpleLeptons();
-    void Photons();
-    void Recoil();
     void FatjetBasics();
+    void FatjetMatching();
     void FatjetRecluster();
-    void JetBasics();
-    void JetHbbBasics(panda::Jet&);
+    void GenJetsNu();
+    void GenPartonStudy();
+    void GenStudyEWK();
+    float GetMSDCorr(Float_t puppipt, Float_t puppieta); // @bmaier: please refactor this
+    void IsoJet(panda::Jet&);
     void JetBRegressionInfo(panda::Jet&);
+    void JetBasics();
+    void JetBtagSFs();
+    void JetCMVAWeights();
+    void JetHbbBasics(panda::Jet&);
+    void JetHbbReco();
     void JetVBFBasics(panda::Jet&);
     void JetVBFSystem();
     void JetVaryJES(panda::Jet&);
-    void IsoJet(panda::Jet&);
-    void JetHbbReco();
-    void Taus();
-    void FatjetMatching();
-    void JetBtagSFs();
-    void TopPTReweight();
-    void VJetsReweight();
-    void SaveGenLeptons();
-    void TriggerEffs();
-    void SignalInfo();
     void LeptonSFs();
     void PhotonSFs();
+    void Photons();
     void QCDUncs();
+    void Recoil();
+    bool RecoilPresel();
+    void SaveGenLeptons();
+    void SetupJES();
+    void SignalInfo();
     void SignalReweights();
-    void GenJetsNu();
+    void SimpleLeptons();
+    void Taus();
+    void TopPTReweight();
+    void TriggerEffs();
+    void VJetsReweight();
+    double WeightEWKCorr(float pt, int type);
+    double WeightZHEWKCorr(float baseCorr);
     // templated function needs to be defined here, ugh
     template <typename T> void MatchGenJets(T& genJets) {
       unsigned N = cleanedJets.size();
@@ -282,6 +311,9 @@ private:
     TF1* puppisd_corrGEN=0;
     TF1* puppisd_corrRECO_cen=0;
     TF1* puppisd_corrRECO_for=0;
+    RoccoR *rochesterCorrection=0;
+    TRandom3 rng;
+    CSVHelper *csvReweighter=0, *cmvaReweighter=0;
 
     //////////////////////////////////////////////////////////////////////////////////////
 
@@ -323,6 +355,7 @@ private:
     panda::Jet *jotDown1 = 0, *jotDown2 = 0;
     std::vector<panda::GenJet> genJetsNu;
     float genBosonPtMin, genBosonPtMax;
+    int looseLep1PdgId, looseLep2PdgId;
     std::vector<TString> wIDs;
     float *bjetreg_vars = 0;
     
