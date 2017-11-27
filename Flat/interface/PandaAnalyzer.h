@@ -33,10 +33,7 @@
 #include "PandaAnalysis/Utilities/interface/CSVHelper.h"
 
 // TMVA
-//#include "TMVA/Factory.h"
-#include "TMVA/Tools.h"
 #include "TMVA/Reader.h"
-#include "TMVA/MethodCuts.h"
 
 /////////////////////////////////////////////////////////////////////////////
 // some misc definitions
