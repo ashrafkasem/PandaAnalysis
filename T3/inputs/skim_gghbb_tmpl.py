@@ -27,10 +27,11 @@ def fn(input_name, isData, full_path):
     PInfo(sname+'.fn','Starting to process '+input_name)
     # now we instantiate and configure the analyzer
     skimmer = root.PandaAnalyzer()
-    skimmer.SetAnalysis(gghbb(True))
-    skimmer.isData=isData
     processType = utils.classify_sample(full_path, isData)
-    skimmer.processType=processType 
+    analysis = gghbb(True)
+    analysis.processType=processType 
+    skimmer.SetAnalysis(analysis)
+    skimmer.isData=isData
 
     return utils.run_PandaAnalyzer(skimmer, isData, input_name)
 

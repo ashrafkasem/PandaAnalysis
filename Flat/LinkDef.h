@@ -2,7 +2,6 @@
 #include "PandaAnalysis/Flat/interface/GeneralTree.h"
 #include "PandaAnalysis/Flat/interface/TagTree.h"
 #include "PandaAnalysis/Flat/interface/GeneralLeptonicTree.h"
-#include "PandaAnalysis/Flat/interface/JetCorrector.h"
 #include "PandaAnalysis/Flat/interface/LimitTreeBuilder.h"
 #include "PandaAnalysis/Flat/interface/PandaAnalyzer.h"
 #include "PandaAnalysis/Flat/interface/TagAnalyzer.h"
@@ -32,7 +31,6 @@
 #pragma link C++ class THCorr;
 #pragma link C++ class TF1Corr;
 #pragma link C++ class btagcand;
-#pragma link C++ class JetCorrector;
 #pragma link C++ class PandaAnalyzer;
 #pragma link C++ class TagAnalyzer;
 #pragma link C++ class PandaLeptonicAnalyzer;

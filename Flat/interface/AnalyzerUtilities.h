@@ -66,11 +66,26 @@ inline double TTNLOToNNLO(double pt) {
 
 ////////////////////////////////////////////////////////////////////////////////////
 
+enum ProcessType { 
+    kNoProcess,
+    kZ,
+    kW,
+    kA,
+    kZEWK,
+    kWEWK,
+    kTT,
+    kTop, // used for non-ttbar top
+    kV, // used for non V+jets W or Z
+    kH,
+    kSignal,
+};
+
 class Analysis {
 public:
   Analysis(TString name_ = "") { name = name_; }
   ~Analysis() {}
   TString name;
+  ProcessType processType=kNoProcess;
   bool ak8 = false;
   bool bjetRegression = false;
   bool btagSFs = true;

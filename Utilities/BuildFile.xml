@@ -1,5 +1,8 @@
 <use   name="root"/>
 <use   root=""/>
+<use   name="PandaTree/Objects"/>
+<use   name="PandaCore/Tools"/>
+<use   name="CondFormats/JetMETObjects"/>
 <export>
   <lib   name="1"/>
 </export>
