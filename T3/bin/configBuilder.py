@@ -28,6 +28,6 @@ for k in keys:
 		fout.write(c%(counter,counter))
 		counter += 1
 
-PInfo('buildConfig.py','Submission will have %i jobs'%(counter))
+PInfo('configBuilder.py','Submission will have %i jobs'%(counter))
 
 fout.close()

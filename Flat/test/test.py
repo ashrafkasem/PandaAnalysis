@@ -29,7 +29,7 @@ gghbb.dump()
 skimmer.SetAnalysis(gghbb)
 
 skimmer.firstEvent=0
-skimmer.lastEvent=10
+skimmer.lastEvent=1000
 skimmer.isData=False
 if skimmer.isData:
     with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt') as jsonFile:
