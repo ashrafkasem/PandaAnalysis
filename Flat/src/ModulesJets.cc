@@ -212,7 +212,7 @@ void PandaAnalyzer::JetBRegressionInfo(panda::Jet& jet)
     }
   }
 
-  tr->TriggerSubEvent("b-jet regression info");
+  tr->TriggerSubEvent("b-jet reg info");
 }
 
 void PandaAnalyzer::JetVBFBasics(panda::Jet& jet)

@@ -56,7 +56,7 @@ void PandaAnalyzer::ResetBranches()
   }
   vMETNoMu.SetMagPhi(0,0);
   gt->Reset();
-  if (DEBUG) PDebug("PandaAnalyzer::ResetBranches","Reset");
+  if (DEBUG>1) PDebug("PandaAnalyzer::ResetBranches","Reset");
 }
 
 
@@ -1062,6 +1062,8 @@ void PandaAnalyzer::Run()
   } // entry loop
 
   if (DEBUG) { PDebug("PandaAnalyzer::Run","Done with entry loop"); }
+
+  tr->Summary();
 
 } // Run()
 
