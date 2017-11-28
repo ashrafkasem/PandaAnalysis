@@ -144,7 +144,7 @@ int PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
       weightNames->GetEntry(iW);
       wIDs.push_back(*id);
     }
-  } else if (processType==kSignal) {
+  } else if (analysis->processType==kSignal) {
     PError("PandaAnalyzer::Init","This is a signal file, but the weights are missing!");
     return 2;
   }
@@ -352,9 +352,14 @@ void PandaAnalyzer::SetDataDir(const char *s)
     OpenCorrection(cMuTightIso,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonTightId",2);
     OpenCorrection(cMuReco,dirPath+"moriond17/Tracking_12p9.root","htrack2",1);
   }
+
+  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded lepton scale factors");
+
   // photons
   OpenCorrection(cPho,dirPath+"moriond17/scalefactors_80x_medium_photon_37ifb.root",
                  "EGamma_SF2D",2);
+
+  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded photon scale factors");
 
   // triggers
   OpenCorrection(cTrigMET,dirPath+"moriond17/metTriggerEfficiency_recoil_monojet_TH1F.root",
@@ -365,7 +370,7 @@ void PandaAnalyzer::SetDataDir(const char *s)
   OpenCorrection(cTrigMETZmm,dirPath+"moriond17/metTriggerEfficiency_zmm_recoil_monojet_TH1F.root",
                  "hden_monojet_recoil_clone_passed",1);
 
-  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded scale factors");
+  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded trigger scale factors");
 
   // kfactors
   TFile *fKFactor = 0;

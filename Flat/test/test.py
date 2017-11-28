@@ -25,6 +25,7 @@ skimmer = root.PandaAnalyzer(debug_level)
 gghbb = gghbb()
 gghbb.reclusterGen = True
 gghbb.bjetRegression = True
+gghbb.processType = root.kTop
 gghbb.dump()
 skimmer.SetAnalysis(gghbb)
 
@@ -37,7 +38,6 @@ if skimmer.isData:
         for run,lumis in payload.iteritems():
             for l in lumis:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
-skimmer.processType = root.PandaAnalyzer.kTT
 fin = root.TFile.Open(torun)
 
 tree = fin.FindObjectAny("events")

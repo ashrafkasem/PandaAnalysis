@@ -247,8 +247,8 @@ void PandaAnalyzer::FatjetMatching()
 {
   // identify interesting gen particles for fatjet matching
   unsigned int pdgidTarget=0;
-  if (!isData && processType>=kTT) {
-    switch(processType) {
+  if (!isData && analysis->processType>=kTT) {
+    switch(analysis->processType) {
       case kTop:
       case kTT:
       case kSignal:
@@ -261,7 +261,7 @@ void PandaAnalyzer::FatjetMatching()
         pdgidTarget=25;
         break;
       default:
-        // processType>=kTT means we should never get here
+        // analysis->processType>=kTT means we should never get here
         PError("PandaAnalyzer::Run","Reached an unknown process type");
     }
 
@@ -291,7 +291,7 @@ void PandaAnalyzer::FatjetMatching()
         continue;
 
       // (a) check it is a hadronic decay and if so, (b) calculate the size
-      if (processType==kTop||processType==kTT) {
+      if (analysis->processType==kTop||analysis->processType==kTT) {
 
         // first look for a W whose parent is the top at iG, or a W further down the chain
         panda::GenParticle const* lastW(0);
