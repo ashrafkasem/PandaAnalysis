@@ -979,6 +979,7 @@ void PandaAnalyzer::Run()
     gt->sumETRaw = event.pfMet.sumETRaw;
     gt->puppimet = event.puppiMet.pt;
     gt->puppimetphi = event.puppiMet.phi;
+    GetMETSignificance();
     vPFMET.SetPtEtaPhiM(gt->pfmet,0,gt->pfmetphi,0);
     vPuppiMET.SetPtEtaPhiM(gt->puppimet,0,gt->puppimetphi,0);
     vMETNoMu.SetMagPhi(gt->pfmet,gt->pfmetphi); //       for trigger eff

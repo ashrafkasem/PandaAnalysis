@@ -313,8 +313,10 @@ void GeneralTree::Reset() {
     pfmet = -1;
     pfmetphi = -1;
     pfmetnomu = -1;
+    pfmetsig = -1;
     puppimet = -1;
     puppimetphi = -1;
+    puppimetsig = -1;
     calomet = -1;
     calometphi = -1;
     pfcalobalance = -1;
@@ -789,8 +791,10 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("pfmet",&pfmet,"pfmet/F");
     Book("pfmetphi",&pfmetphi,"pfmetphi/F");
     Book("pfmetnomu",&pfmetnomu,"pfmetnomu/F");
+    Book("pfmetsig",&pfmetsig,"pfmetsig/F");
     Book("puppimet",&puppimet,"puppimet/F");
     Book("puppimetphi",&puppimetphi,"puppimetphi/F");
+    Book("puppimetsig",&puppimetsig,"puppimetsig/F");
     Book("calomet",&calomet,"calomet/F");
     Book("calometphi",&calometphi,"calometphi/F");
     Book("pfcalobalance",&pfcalobalance,"pfcalobalance/F");

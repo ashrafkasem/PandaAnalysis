@@ -194,6 +194,7 @@ private:
     double GetCorr(CorrectionType ct,double x, double y=0);
     double GetError(CorrectionType ct,double x, double y=0);
     void RegisterTriggers(); 
+    void GetMETSignificance(); 
 
     // these are functions used for analysis-specific tasks inside Run.
     // ideally the return type is void (e.g. they are stateful functions),
