@@ -64,12 +64,14 @@ wlnhbb = lambda v=False : _analysis(
         verbose = v,
         monoh = True,
         hbb = True,
-        recoil = False,
-        ak8 = False,
-        fatjet = False,
-        btagSFs = False,
+        recoil = True,
+        ak8 = True,
+        fatjet = True,
+        btagSFs = True,
         btagWeights = True,
         useCMVA = True,
         complicatedLeptons = True,
-        genPartonStudy = True
+        genPartonStudy = True,
+        reclusterGen = True,
+        bjetRegression = True
     )

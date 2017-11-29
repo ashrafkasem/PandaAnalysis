@@ -167,7 +167,7 @@ void PandaAnalyzer::GetMETSignificance()
     pfEt += pfcand.Et();
   }
 
-  gt->pfmetsig = event.pfMet.pt/pfEt;
-  gt->puppimetsig = event.puppiMet.pt/puppiEt;
+  gt->pfmetsig = event.pfMet.pt/sqrt(pfEt);
+  gt->puppimetsig = event.puppiMet.pt/sqrt(puppiEt);
 }
 

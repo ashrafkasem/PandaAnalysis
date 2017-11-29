@@ -1,4 +1,5 @@
 #include "../interface/GeneralTree.h"
+#include <iostream>
 
 #define NJET 20
 #define NSUBJET 2
@@ -738,10 +739,11 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("nHF",&nHF,"nHF/I");
     Book("nB",&nB,"nB/I");
   }
-  if (btagWeights) for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
-    csvShift theShift = csvShifts[iShift];
-    TString theCsvWeightString = makeCsvWeightString(theShift, useCMVA);
-    Book(theCsvWeightString, &(sf_csvWeights[theShift]), theCsvWeightString+"/F");
+  if (btagWeights) { for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
+      csvShift theShift = csvShifts[iShift];
+      TString theCsvWeightString = makeCsvWeightString(theShift, useCMVA);
+      Book(theCsvWeightString, &(sf_csvWeights[theShift]), theCsvWeightString+"/F");
+    }
   }
 //ENDCUSTOMWRITE
     Book("whichRecoil",&whichRecoil,"whichRecoil/I");

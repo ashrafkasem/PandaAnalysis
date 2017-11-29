@@ -5,7 +5,7 @@ from sys import argv,exit
 from os import system,getenv
 import json
 
-debug_level = 2
+debug_level = 0
 torun = argv[1]
 output = 'testskim.root'
 if len(argv)>2:
@@ -25,11 +25,15 @@ skimmer = root.PandaAnalyzer(debug_level)
 gghbb = gghbb()
 gghbb.reclusterGen = True
 gghbb.bjetRegression = True
+gghbb.hbb = True
+gghbb.btagWeights = True
+gghbb.btagSFs = True
+gghbb.useCMVA = True
 gghbb.dump()
 skimmer.SetAnalysis(gghbb)
 
 skimmer.firstEvent=0
-skimmer.lastEvent=10
+skimmer.lastEvent=200
 skimmer.isData=False
 if skimmer.isData:
     with open(getenv('CMSSW_BASE')+'/src/PandaAnalysis/data/certs/Cert_271036-284044_13TeV_23Sep2016ReReco_Collisions16_JSON.txt') as jsonFile:

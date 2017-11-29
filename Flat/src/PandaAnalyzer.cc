@@ -73,7 +73,7 @@ void PandaAnalyzer::SetOutputFile(TString fOutName)
   gt->fatjet         = analysis->fatjet;
   gt->leptonic       = analysis->complicatedLeptons;
   gt->genPartonStudy = analysis->genPartonStudy;
-  gt->btagWeights    = !analysis->btagSFs && analysis->btagWeights;
+  gt->btagWeights    = analysis->btagWeights;
   gt->useCMVA        = analysis->useCMVA;
 
   // fill the signal weights
@@ -469,7 +469,8 @@ void PandaAnalyzer::SetDataDir(const char *s)
     btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
     if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded btag SFs");
-  } else if(analysis->btagWeights) {
+  } 
+  if(analysis->btagWeights) {
     if (analysis->useCMVA) 
       cmvaReweighter = new CSVHelper("PandaAnalysis/data/csvweights/cmva_rwt_fit_hf_v0_final_2017_3_29.root"   , "PandaAnalysis/data/csvweights/cmva_rwt_fit_lf_v0_final_2017_3_29.root"   , 5);
     else
@@ -1048,10 +1049,9 @@ void PandaAnalyzer::Run()
 
       if (analysis->btagSFs)
         JetBtagSFs();
-      else if(analysis->btagWeights) {
+      if(analysis->btagWeights)
         JetCMVAWeights();
-      }
-
+      
       TopPTReweight();
       VJetsReweight();
 
