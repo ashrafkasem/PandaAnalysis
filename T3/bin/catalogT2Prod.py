@@ -5,18 +5,26 @@ from os import stat,getenv,system,path
 from multiprocessing import Pool
 from PandaCore.Tools.process import *
 from PandaCore.Tools.Misc import *
-from re import sub
+from re import sub, match
 from sys import argv
 import argparse
 
 parser = argparse.ArgumentParser(description='make config file')
 parser.add_argument('--catalog',type=str,default='/home/cmsprod/catalog/t2mit/pandaf/008')
+parser.add_argument('--mc_catalog',type=str,default=None)
+parser.add_argument('--data_catalog',type=str,default=None)
 parser.add_argument('--outfile',type=str)
 parser.add_argument('--include',nargs='+',type=str,default=None)
 parser.add_argument('--exclude',nargs='+',type=str,default=None)
 parser.add_argument('--smartcache',action='store_true')
 parser.add_argument('--force',action='store_true')
 args = parser.parse_args()
+
+if not args.mc_catalog:
+    args.mc_catalog = args.catalog
+if not args.data_catalog:
+    args.data_catalog = args.catalog
+
 
 class CatalogSample:
     def __init__(self,name,dtype,xsec):
@@ -65,35 +73,40 @@ samples = {}
 
 could_not_find = []
 
-for d in sorted(glob(args.catalog+'/*')):
-    dirname = d.split('/')[-1]
-    if 'AOD' not in dirname:
-        continue
-    shortname = dirname.split('+')[0]
-    try:
-        properties = processes[shortname]
-        found = True
-    except KeyError:
-        if args.force:
-          found = False
-          properties = (shortname,'MC',1)
-        else:
-          continue
-    dtype = 'MC' if 'MINIAODSIM' in dirname else 'Data'
-    if not checkDS(properties[0],args.include,args.exclude):
-        continue
-    if not found:
-      could_not_find.append(shortname)
-    if properties[0] not in samples:
-        samples[properties[0]] = CatalogSample(*properties)
-    sample = samples[properties[0]]
-    for rfpath in glob(d+'/RawFiles.*'):
-        rawfile = open(rfpath)
-        for line in rawfile:
-            sample.add_file(line.split()[0])
+def cat(catalog, condition): 
+    global samples, could_not_find
+    for d in sorted(glob(catalog+'/*')):
+        dirname = d.split('/')[-1]
+        if 'AOD' not in dirname or not condition(dirname):
+            continue
+        shortname = dirname.split('+')[0]
+        try:
+            properties = processes[shortname]
+            found = True
+        except KeyError:
+            if args.force:
+              found = False
+              properties = (shortname,'MC',1)
+            else:
+              continue
+        dtype = 'MC' if 'MINIAODSIM' in dirname else 'Data'
+        if not checkDS(properties[0],args.include,args.exclude):
+            continue
+        if not found:
+          could_not_find.append(shortname)
+        if properties[0] not in samples:
+            samples[properties[0]] = CatalogSample(*properties)
+        sample = samples[properties[0]]
+        for rfpath in glob(d+'/RawFiles.*'):
+            rawfile = open(rfpath)
+            for line in rawfile:
+                sample.add_file(line.split()[0])
+
+cat(args.mc_catalog, lambda x : bool(match('.*SIM$', x)))
+cat(args.data_catalog, lambda x : bool(match('.*AOD$', x)))
 
 if len(could_not_find)>0:
-    PWarning(argv[0],"Could not properly catalog following files (force=%s)"%('True' if args.force else 'False'))
+    PWarning(argv[0],"Could not properly catalog following datasets (force=%s)"%('True' if args.force else 'False'))
     for c in could_not_find:
         PWarning(argv[0],'\t'+c)
 

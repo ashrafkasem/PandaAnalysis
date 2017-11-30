@@ -212,7 +212,7 @@ void PandaAnalyzer::JetBRegressionInfo(panda::Jet& jet)
     }
   }
 
-  tr->TriggerSubEvent("b-jet regression info");
+  tr->TriggerSubEvent("b-jet reg info");
 }
 
 void PandaAnalyzer::JetVBFBasics(panda::Jet& jet)
@@ -379,7 +379,6 @@ void PandaAnalyzer::JetHbbReco()
     tmp_hbbm = hbbsystem.M();
     tmp_hbbjtidx1 = order[jet_1];
     tmp_hbbjtidx2 = order[jet_2];
-    
   }
   gt->hbbpt = tmp_hbbpt;
   gt->hbbeta = tmp_hbbeta;
@@ -388,7 +387,6 @@ void PandaAnalyzer::JetHbbReco()
   gt->hbbjtidx[0] = tmp_hbbjtidx1;
   gt->hbbjtidx[1] = tmp_hbbjtidx2;
 
-  
   if (analysis->bjetRegression && gt->hbbm>0.){
     TLorentzVector hbbdaughters_corr[2];
     

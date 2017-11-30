@@ -5,7 +5,7 @@ from sys import argv,exit
 from os import system,getenv
 import json
 
-debug_level = 0
+debug_level = 2
 torun = argv[1]
 output = 'testskim.root'
 if len(argv)>2:
@@ -29,6 +29,7 @@ gghbb.hbb = True
 gghbb.btagWeights = True
 gghbb.btagSFs = True
 gghbb.useCMVA = True
+gghbb.processType = root.kTop
 gghbb.dump()
 skimmer.SetAnalysis(gghbb)
 
@@ -41,7 +42,6 @@ if skimmer.isData:
         for run,lumis in payload.iteritems():
             for l in lumis:
                 skimmer.AddGoodLumiRange(int(run),l[0],l[1])
-skimmer.processType = root.PandaAnalyzer.kTT
 fin = root.TFile.Open(torun)
 
 tree = fin.FindObjectAny("events")

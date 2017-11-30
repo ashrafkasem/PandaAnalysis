@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Default  0	    1  
 Stat     1          100
 Zpt      2          1  
@@ -7,3 +8,8 @@ FitDm    5          5
 LHEw     6          0  
 Run      7          7  
 AMCNLO   8          1  
+=======
+version https://git-lfs.github.com/spec/v1
+oid sha256:f4218bbe64c88889ba9d45848214e89c94565fb4078b80bf484d2575f042cb94
+size 211
+>>>>>>> tweak

@@ -63,19 +63,6 @@ public :
      kMedium  =(1<<2),
      kTight   =(1<<3)
     };
-    enum ProcessType { 
-        kNone,
-        kZ,
-        kW,
-        kA,
-        kZEWK,
-        kWEWK,
-        kTT,
-        kTop, // used for non-ttbar top
-        kV, // used for non V+jets W or Z
-        kH,
-        kSignal,
-    };
 
     enum TriggerBits {
         kMETTrig       = 0,
@@ -112,7 +99,6 @@ public :
     bool isData=false;              // to do gen matching, etc
     int firstEvent=-1;
     int lastEvent=-1;               // max events to process; -1=>all
-    ProcessType processType=kNone;  // determine what to do the jet matching to
 
 private:
     enum CorrectionType { //!< enum listing relevant corrections applied to MC
@@ -194,7 +180,6 @@ private:
     double GetCorr(CorrectionType ct,double x, double y=0);
     double GetError(CorrectionType ct,double x, double y=0);
     void RegisterTriggers(); 
-    void GetMETSignificance(); 
 
     // these are functions used for analysis-specific tasks inside Run.
     // ideally the return type is void (e.g. they are stateful functions),
@@ -210,6 +195,7 @@ private:
     void GenJetsNu();
     void GenPartonStudy();
     void GenStudyEWK();
+    void GetMETSignificance(); 
     float GetMSDCorr(Float_t puppipt, Float_t puppieta); // @bmaier: please refactor this
     void IsoJet(panda::Jet&);
     void JetBRegressionInfo(panda::Jet&);

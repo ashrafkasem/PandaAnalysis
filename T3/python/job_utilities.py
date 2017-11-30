@@ -161,22 +161,22 @@ def write_lock(outdir,outfilename,processed):
 def classify_sample(full_path, isData):
     if not isData:
         if any([x in full_path for x in ['Vector_','Scalar_']]):
-            return root.PandaAnalyzer.kSignal
+            return root.kSignal
         elif any([x in full_path for x in ['ST_','ZprimeToTT']]):
-            return root.PandaAnalyzer.kTop
+            return root.kTop
         elif 'EWKZ2Jets' in full_path:
-            return root.PandaAnalyzer.kZEWK
+            return root.kZEWK
         elif 'EWKW' in full_path:
-            return root.PandaAnalyzer.kWEWK
+            return root.kWEWK
         elif 'ZJets' in full_path or 'DY' in full_path:
-            return root.PandaAnalyzer.kZ
+            return root.kZ
         elif 'WJets' in full_path:
-            return root.PandaAnalyzer.kW
+            return root.kW
         elif 'GJets' in full_path:
-            return root.PandaAnalyzer.kA
+            return root.kA
         elif 'TTJets' in full_path or 'TT_' in full_path:
-            return root.PandaAnalyzer.kTT
-    return root.PandaAnalyzer.kNone
+            return root.kTT
+    return root.kNoProcess
 
 
 def add_json(skimmer, json_path):

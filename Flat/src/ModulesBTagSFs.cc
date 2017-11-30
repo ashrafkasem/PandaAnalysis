@@ -3,7 +3,6 @@
 #include "TMath.h"
 #include <algorithm>
 #include <vector>
-#include <iostream>
 
 #define EGMSCALE 1
 
@@ -196,6 +195,7 @@ void PandaAnalyzer::JetCMVAWeights()
   jetCSVs.reserve(centralJets.size());
   jetCMVAs.reserve(centralJets.size());
   jetFlavors.reserve(centralJets.size());
+<<<<<<< HEAD
   for (auto *jet : centralJets) {
     jetPts.push_back(jet->pt());
     jetEtas.push_back(jet->eta());
@@ -209,14 +209,34 @@ void PandaAnalyzer::JetCMVAWeights()
       }
     }
     jetFlavors.push_back(flavor);
+=======
+  for (unsigned i = 0; i != centralJets.size(); ++i) {
+    panda::Jet* jet=centralJets[i];
+    jetPts[i] = jet->pt();
+    jetEtas[i] = jet->eta();
+    jetCSVs[i] = jet->csv; 
+    jetCMVAs[i] = jet->cmva;
+    jetFlavors[i]=0; // Will be considered a LF jet if we can't match to a gen particle
+    for (auto &gen : event.ak4GenJets) {
+      if (DeltaR2(gen.eta(), gen.phi(), jet->eta(), jet->phi()) < 0.09) {
+        jetFlavors[i]=gen.pdgid;
+        break;
+      }
+    }
+>>>>>>> tweak
   }
   // throwaway addresses
   double csvWgtHF, csvWgtLF, csvWgtCF, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF;
   for (unsigned iShift=0; iShift<GeneralTree::nCsvShifts; iShift++) {
     GeneralTree::csvShift theShift = gt->csvShifts[iShift];
+<<<<<<< HEAD
     if (analysis->useCMVA) {
       gt->sf_csvWeights[theShift] = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors, theShift, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF);
     }
+=======
+    if (analysis->useCMVA) 
+      gt->sf_csvWeights[theShift] = cmvaReweighter->getCSVWeight(jetPts,jetEtas,jetCMVAs,jetFlavors, theShift, cmvaWgtHF, cmvaWgtLF, cmvaWgtCF);
+>>>>>>> tweak
     else 
       gt->sf_csvWeights[theShift] = csvReweighter->getCSVWeight(jetPts,jetEtas,jetCSVs,jetFlavors, theShift, csvWgtHF, csvWgtLF, csvWgtCF);
   }

@@ -59,8 +59,24 @@ gghbb = lambda v=False : _analysis(
         recoil = False,
         ak8 = True,
     )
+
 wlnhbb = lambda v=False : _analysis(
         name = 'wlnhbb',
+        verbose = v,
+        monoh = True,
+        hbb = True,
+        recoil = False,
+        ak8 = False,
+        fatjet = False,
+        btagSFs = False,
+        btagWeights = True,
+        useCMVA = True,
+        complicatedLeptons = True,
+        genPartonStudy = True
+    )
+
+vhbb = lambda v=False : _analysis(
+        name = 'vhbb',
         verbose = v,
         monoh = True,
         hbb = True,
@@ -75,3 +91,4 @@ wlnhbb = lambda v=False : _analysis(
         reclusterGen = True,
         bjetRegression = True
     )
+

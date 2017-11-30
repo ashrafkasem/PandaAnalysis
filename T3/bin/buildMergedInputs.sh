@@ -28,7 +28,7 @@ done
 
 PInfo -n "$0" "Acquiring configuration..."
 wget -O ${WD}/list.cfg $PANDA_CFG
-${CMSSW_BASE}/src/PandaAnalysis/T3/bin/buildConfig.py --infile ${WD}/list.cfg --outfile ${WD}/local.cfg --nfiles $filesetSize
+python ${CMSSW_BASE}/src/PandaAnalysis/T3/bin/configBuilder.py --infile ${WD}/list.cfg --outfile ${WD}/local.cfg --nfiles $filesetSize
 cp -v ${WD}/list.cfg ${WD}/list_all.cfg 
 cp -v ${WD}/local.cfg ${WD}/local_all.cfg 
 

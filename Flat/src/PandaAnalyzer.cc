@@ -56,7 +56,7 @@ void PandaAnalyzer::ResetBranches()
   }
   vMETNoMu.SetMagPhi(0,0);
   gt->Reset();
-  if (DEBUG) PDebug("PandaAnalyzer::ResetBranches","Reset");
+  if (DEBUG>1) PDebug("PandaAnalyzer::ResetBranches","Reset");
 }
 
 
@@ -73,7 +73,7 @@ void PandaAnalyzer::SetOutputFile(TString fOutName)
   gt->fatjet         = analysis->fatjet;
   gt->leptonic       = analysis->complicatedLeptons;
   gt->genPartonStudy = analysis->genPartonStudy;
-  gt->btagWeights    = analysis->btagWeights;
+  gt->btagWeights    = !analysis->btagSFs && analysis->btagWeights;
   gt->useCMVA        = analysis->useCMVA;
 
   // fill the signal weights
@@ -144,7 +144,7 @@ int PandaAnalyzer::Init(TTree *t, TH1D *hweights, TTree *weightNames)
       weightNames->GetEntry(iW);
       wIDs.push_back(*id);
     }
-  } else if (processType==kSignal) {
+  } else if (analysis->processType==kSignal) {
     PError("PandaAnalyzer::Init","This is a signal file, but the weights are missing!");
     return 2;
   }
@@ -352,9 +352,14 @@ void PandaAnalyzer::SetDataDir(const char *s)
     OpenCorrection(cMuTightIso,dirPath+"moriond17/muon_scalefactors_37ifb.root","scalefactors_Iso_MuonTightId",2);
     OpenCorrection(cMuReco,dirPath+"moriond17/Tracking_12p9.root","htrack2",1);
   }
+
+  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded lepton scale factors");
+
   // photons
   OpenCorrection(cPho,dirPath+"moriond17/scalefactors_80x_medium_photon_37ifb.root",
                  "EGamma_SF2D",2);
+
+  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded photon scale factors");
 
   // triggers
   OpenCorrection(cTrigMET,dirPath+"moriond17/metTriggerEfficiency_recoil_monojet_TH1F.root",
@@ -365,7 +370,7 @@ void PandaAnalyzer::SetDataDir(const char *s)
   OpenCorrection(cTrigMETZmm,dirPath+"moriond17/metTriggerEfficiency_zmm_recoil_monojet_TH1F.root",
                  "hden_monojet_recoil_clone_passed",1);
 
-  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded scale factors");
+  if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded trigger scale factors");
 
   // kfactors
   TFile *fKFactor = 0;
@@ -469,8 +474,7 @@ void PandaAnalyzer::SetDataDir(const char *s)
     btagReaders[bJetM]->load(*btagCalib,BTagEntry::FLAV_UDSG,"incl");
 
     if (DEBUG) PDebug("PandaAnalyzer::SetDataDir","Loaded btag SFs");
-  } 
-  if(analysis->btagWeights) {
+  } else if(analysis->btagWeights) {
     if (analysis->useCMVA) 
       cmvaReweighter = new CSVHelper("PandaAnalysis/data/csvweights/cmva_rwt_fit_hf_v0_final_2017_3_29.root"   , "PandaAnalysis/data/csvweights/cmva_rwt_fit_lf_v0_final_2017_3_29.root"   , 5);
     else
@@ -1084,6 +1088,8 @@ void PandaAnalyzer::Run()
   } // entry loop
 
   if (DEBUG) { PDebug("PandaAnalyzer::Run","Done with entry loop"); }
+
+  tr->Summary();
 
 } // Run()
 

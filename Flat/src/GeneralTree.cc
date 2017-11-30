@@ -1,5 +1,4 @@
 #include "../interface/GeneralTree.h"
-#include <iostream>
 
 #define NJET 20
 #define NSUBJET 2
@@ -314,10 +313,15 @@ void GeneralTree::Reset() {
     pfmet = -1;
     pfmetphi = -1;
     pfmetnomu = -1;
+<<<<<<< HEAD
     pfmetsig = -1;
     puppimet = -1;
     puppimetphi = -1;
     puppimetsig = -1;
+=======
+    puppimet = -1;
+    puppimetphi = -1;
+>>>>>>> tweak
     calomet = -1;
     calometphi = -1;
     pfcalobalance = -1;
@@ -462,8 +466,11 @@ void GeneralTree::Reset() {
     hbbeta = -1;
     hbbphi = -1;
     hbbm = -1;
+<<<<<<< HEAD
     hbbm_reg = -1;
     hbbpt_reg = -1;
+=======
+>>>>>>> tweak
     scaleUp = -1;
     scaleDown = -1;
     pdfUp = -1;
@@ -523,10 +530,14 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("hbbeta",&hbbeta,"hbbeta/F");
     Book("hbbphi",&hbbphi,"hbbphi/F");
     Book("hbbm",&hbbm,"hbbm/F");
+<<<<<<< HEAD
     Book("hbbm_reg",&hbbm_reg,"hbbm_reg/F");
     Book("hbbpt_reg",&hbbpt_reg,"hbbpt_reg/F");
     Book("hbbjtidx",hbbjtidx,"hbbjtidx[2]/I");
     Book("jetRegFac",jetRegFac,"jetRegFac[2]/F");
+=======
+    Book("hbbjtidx",hbbjtidx,"hbbjtidx[2]/I");
+>>>>>>> tweak
   }
 
   if (vbf) { 
@@ -739,11 +750,18 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("nHF",&nHF,"nHF/I");
     Book("nB",&nB,"nB/I");
   }
+<<<<<<< HEAD
   if (btagWeights) { for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
       csvShift theShift = csvShifts[iShift];
       TString theCsvWeightString = makeCsvWeightString(theShift, useCMVA);
       Book(theCsvWeightString, &(sf_csvWeights[theShift]), theCsvWeightString+"/F");
     }
+=======
+  if (btagWeights) for (unsigned iShift=0; iShift<nCsvShifts; iShift++) {
+    csvShift theShift = csvShifts[iShift];
+    TString theCsvWeightString = makeCsvWeightString(theShift, useCMVA);
+    Book(theCsvWeightString, &(sf_csvWeights[theShift]), theCsvWeightString+"/F");
+>>>>>>> tweak
   }
 //ENDCUSTOMWRITE
     Book("whichRecoil",&whichRecoil,"whichRecoil/I");
@@ -793,10 +811,15 @@ void GeneralTree::WriteTree(TTree *t) {
     Book("pfmet",&pfmet,"pfmet/F");
     Book("pfmetphi",&pfmetphi,"pfmetphi/F");
     Book("pfmetnomu",&pfmetnomu,"pfmetnomu/F");
+<<<<<<< HEAD
     Book("pfmetsig",&pfmetsig,"pfmetsig/F");
     Book("puppimet",&puppimet,"puppimet/F");
     Book("puppimetphi",&puppimetphi,"puppimetphi/F");
     Book("puppimetsig",&puppimetsig,"puppimetsig/F");
+=======
+    Book("puppimet",&puppimet,"puppimet/F");
+    Book("puppimetphi",&puppimetphi,"puppimetphi/F");
+>>>>>>> tweak
     Book("calomet",&calomet,"calomet/F");
     Book("calometphi",&calometphi,"calometphi/F");
     Book("pfcalobalance",&pfcalobalance,"pfcalobalance/F");

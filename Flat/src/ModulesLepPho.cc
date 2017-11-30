@@ -416,11 +416,11 @@ void PandaAnalyzer::LeptonSFs()
 
 void PandaAnalyzer::PhotonSFs()
 {
-      if (gt->nLoosePhoton < 1)
-        return;
+    if (gt->nLoosePhoton > 0) {
       float pt = gt->loosePho1Pt, eta = gt->loosePho1Eta;
       if (gt->loosePho1IsTight)
         gt->sf_pho = GetCorr(cPho,eta,pt);
+    }
     tr->TriggerEvent("photon SFs");
 }
 

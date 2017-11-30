@@ -12,7 +12,7 @@ using namespace std;
 
 void PandaAnalyzer::TopPTReweight()
 {
-      if (processType != kTT)
+      if (analysis->processType != kTT)
         return;
 
       gt->genWPlusPt = -1; gt->genWMinusPt = -1;
@@ -105,17 +105,17 @@ void PandaAnalyzer::VJetsReweight()
       }
       gt->genMjj = vGenJet.M();
 
-      bool found = processType!=kA 
-                   && processType!=kZ 
-                   && processType!=kW
-                   && processType!=kZEWK 
-                   && processType!=kWEWK;
+      bool found = analysis->processType!=kA 
+                   && analysis->processType!=kZ 
+                   && analysis->processType!=kW
+                   && analysis->processType!=kZEWK 
+                   && analysis->processType!=kWEWK;
       if (found)
         return;
 
       int target=24;
-      if (processType==kZ || processType==kZEWK) target=23;
-      if (processType==kA) target=22;
+      if (analysis->processType==kZ || analysis->processType==kZEWK) target=23;
+      if (analysis->processType==kA) target=22;
 
       for (auto& gen : event.genParticles) {
         if (found) break;
@@ -132,7 +132,7 @@ void PandaAnalyzer::VJetsReweight()
           }    
           if (foundChild)
             continue;
-          if (processType==kZ) {
+          if (analysis->processType==kZ) {
             gt->trueGenBosonPt = gen.pt();
             gt->genBosonMass = gen.m();
             gt->genBosonEta = gen.eta();
@@ -146,7 +146,7 @@ void PandaAnalyzer::VJetsReweight()
               gt->sf_qcdV_VBF2lTight = GetCorr(cVBFTight_ZllNLO,gt->genBosonPt);
             }
             found=true;
-          } else if (processType==kW) {
+          } else if (analysis->processType==kW) {
             gt->trueGenBosonPt = gen.pt();
             gt->genBosonMass = gen.m();
             gt->genBosonEta = gen.eta();
@@ -158,7 +158,7 @@ void PandaAnalyzer::VJetsReweight()
               gt->sf_qcdV_VBFTight = GetCorr(cVBFTight_WNLO,gt->genBosonPt);
             }
             found=true;
-          } else if (processType==kZEWK) {
+          } else if (analysis->processType==kZEWK) {
             gt->trueGenBosonPt = gen.pt();
             gt->genBosonMass = gen.m();
             gt->genBosonEta = gen.eta();
@@ -167,7 +167,7 @@ void PandaAnalyzer::VJetsReweight()
               gt->sf_qcdV_VBF = GetCorr(cVBF_EWKZ,gt->genBosonPt,gt->genMjj);
               gt->sf_qcdV_VBFTight = gt->sf_qcdV_VBF; // for consistency
             }
-          } else if (processType==kWEWK) {
+          } else if (analysis->processType==kWEWK) {
             gt->trueGenBosonPt = gen.pt();
             gt->genBosonMass = gen.m();
             gt->genBosonEta = gen.eta();
@@ -176,7 +176,7 @@ void PandaAnalyzer::VJetsReweight()
               gt->sf_qcdV_VBF = GetCorr(cVBF_EWKW,gt->genBosonPt,gt->genMjj);
               gt->sf_qcdV_VBFTight = gt->sf_qcdV_VBF; // for consistency
             }
-          } else if (processType==kA) {
+          } else if (analysis->processType==kA) {
             // take the highest pT
             if (gen.pt() > gt->trueGenBosonPt) {
               gt->trueGenBosonPt = gen.pt();
@@ -223,7 +223,7 @@ void PandaAnalyzer::VJetsReweight()
         gt->genBosonMass = vpt.M();
         gt->genBosonEta = vpt.Eta();
 
-        if (processType==kZ) {
+        if (analysis->processType==kZ) {
           gt->sf_qcdV = GetCorr(cZNLO,gt->genBosonPt);
           gt->sf_ewkV = GetCorr(cZEWK,gt->genBosonPt);
           if (analysis->vbf) {
@@ -233,7 +233,7 @@ void PandaAnalyzer::VJetsReweight()
             gt->sf_qcdV_VBF2lTight = GetCorr(cVBFTight_ZllNLO,gt->genBosonPt);
           }
         } 
-        else if (processType==kW) {
+        else if (analysis->processType==kW) {
           gt->sf_qcdV = GetCorr(cWNLO,gt->genBosonPt);
           gt->sf_ewkV = GetCorr(cWEWK,gt->genBosonPt);
           if (analysis->vbf) {
@@ -241,13 +241,13 @@ void PandaAnalyzer::VJetsReweight()
             gt->sf_qcdV_VBFTight = GetCorr(cVBFTight_WNLO,gt->genBosonPt);
           }
         } 
-        else if (processType==kZEWK) {
+        else if (analysis->processType==kZEWK) {
           if (analysis->vbf) {
             gt->sf_qcdV_VBF = GetCorr(cVBF_EWKZ,gt->genBosonPt,gt->genMjj);
             gt->sf_qcdV_VBFTight = gt->sf_qcdV_VBF; // for consistency
           }
         } 
-        else if (processType==kWEWK) {
+        else if (analysis->processType==kWEWK) {
           if (analysis->vbf) {
             gt->sf_qcdV_VBF = GetCorr(cVBF_EWKW,gt->genBosonPt,gt->genMjj);
             gt->sf_qcdV_VBFTight = gt->sf_qcdV_VBF; // for consistency
@@ -261,7 +261,7 @@ void PandaAnalyzer::VJetsReweight()
 
 void PandaAnalyzer::SignalInfo()
 {
-      if (processType != kSignal)
+      if (analysis->processType != kSignal)
         return;
 
       bool found=false, foundbar=false;
