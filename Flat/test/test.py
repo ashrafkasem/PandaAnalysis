@@ -25,10 +25,6 @@ skimmer = root.PandaAnalyzer(debug_level)
 gghbb = gghbb()
 gghbb.reclusterGen = True
 gghbb.bjetRegression = True
-gghbb.hbb = True
-gghbb.btagWeights = True
-gghbb.btagSFs = True
-gghbb.useCMVA = True
 gghbb.processType = root.kTop
 gghbb.dump()
 skimmer.SetAnalysis(gghbb)
