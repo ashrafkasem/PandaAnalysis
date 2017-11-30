@@ -1,3 +1,19 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:6e38ac0fd922156e2cc099d12f8c41699527e23e6c88d6818ee48255f8622b97
-size 364
+metFilter==1 && egmFilter==1 : MET filters
+nLooseMuon==1
+nTightMuon==1 : muon tag
+nLooseElectron==0
+nLoosePhoton==0
+nTau==0
+jetNMBtags==0
+mT<160
+jot1Pt>80 && jot2Pt>40 : 2 jets
+jot1VBFID==1
+pfUWmag>200
+fabs(calomet-pfmet)/pfUWmag<0.5 : Calo-PF
+dphipfUW>0.5
+jot1Eta*jot2Eta<0 : opposite etas
+jot12DEta>1
+jot12Mass>300
+fabs(jot12DPhi)<1.5
+jot12DEta>4
+jot12Mass>1400
